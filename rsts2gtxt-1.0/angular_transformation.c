@@ -67,7 +67,7 @@ int main()
 if((fp=fopen("para_fit2d.dat","r"))== NULL )
      {fprintf(stderr,"Error opening file(para_fit2d.txt)."); exit(1);}
  //////////////////////INICIA LA LECTURA DEL ARCHIVO para_fit2d.dat/////////////////////////////////////////////
- //path hacia los archivos, probablemente los de salida, pero no estoy seguro (C:\Users\Bolmaro\Experim\Sabo\dat\) 
+ //path hacia los archivos de salida 
  fgets(buf_temp,22,fp);
  fscanf(fp,"%s",&path_out);   fgets(buf_temp,2,fp);
  //numero de muestras a trabajar (1)
@@ -96,7 +96,7 @@ if((fp=fopen("para_fit2d.dat","r"))== NULL )
     //pasa los contenidos de path e inform hacia path1 e inform1 (why?)
     strcpy(path1,path); strcpy(inform1,inform);
     
-    //numero asociado al primer spr (relacionado con omega)
+    //numero asociado al primer spr 
     fgets(buf_temp,22,fp);
     fscanf(fp,"%d",&star_d); fgets(buf_temp,2,fp);
     
@@ -404,7 +404,7 @@ if((fp=fopen("para_fit2d.dat","r"))== NULL )
  fclose(fp);
     
  return (0);
-} /*End of Main()*
+} /*End of Main()*/
 
 
 ///////////////////////////////////////FUNCIONES AUXILIARES/////////////////////////////////////////////
@@ -432,7 +432,7 @@ phir=phi*rad;
 
 chir=chi*rad;
 
-/***the multiplication of matrix G and s */
+/*the multiplication of matrix G and s */
 
  COSAL=(  ( (-1*cos(omr)*sin(phir)) - (sin(omr)*cos(phir)*cos(chir)) )*(-1*sin(thr)) )
        +( (-1*sin(omr)*sin(phir)) + (cos(omr)*cos(phir)*cos(chir)) ) * (cos(thr)*cos(gar));

@@ -1,0 +1,3 @@
+#aca van los archivos que no quiero que se sincronicen
+*~
+tmp/
