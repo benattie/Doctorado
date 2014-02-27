@@ -124,6 +124,7 @@ for f in aux:
 
 
 for i in range(1, numrings + 1): #itero sobre todos los picos
+    #print i
     f_theta = fid_theta[i - 1]
     f_im = fid_im[i - 1]
     f_fwhm = fid_fwhm[i - 1]
