@@ -9,18 +9,24 @@
 #include <gsl/gsl_multifit_nlin.h> //funciones de multifitting
 
 //COSAS MIAS
-#include <read_file.c>
+#include "read_file.c"
+#include "pv_f.c"
 
 //MAIN
 int main(void){
     //variables de entrada (algunas no van a ser necesarias cuando incorpore todo al programa de sangbong)
     char name[15] = "dif000.dat"; //no va a hacer falta cuando corra el programa de sangbong
-    size_t size = 1725; //sacar del programa de sangbong
+    int size = 1725; //sacar del programa de sangbong
     int numrings = 7; //sacar del programa de sangbong
 
+    //variables auxiliares del programa
+    int n_param = 6 * numrings + 2; //numero de parametros a fitear (tengo 6 parametros por pico ademas del eta y el fwhm)
+    int i, iter = 0;
+
     //variables del solver
-    const gsl_multifit_fsolver_type *T;
-    gsl_multifit_fsolver *s;
+    int status;
+    const gsl_multifit_fdfsolver_type * T;
+    gsl_multifit_fdfsolver * s;
 
     gsl_vector * param_init = gsl_vector_alloc(n_param); //vector con los valores iniciales de los parametros
     gsl_vector * param = gsl_vector_alloc(n_param); //vector con los valores finales de los parametros
@@ -28,13 +34,10 @@ int main(void){
     gsl_vector * ttheta = gsl_vector_alloc(size); //valores de 2theta
     gsl_vector * y = gsl_vector_alloc(size); //intensidades del difractograma
     gsl_vector * sigma = gsl_vector_alloc(size); //intensidades del difractograma
-    struct data d = {n, ttheta, y, sigma};
+    struct data d = {size, ttheta, y, sigma};
 
-    gsl_multifit_function_f pv; //funcion a fitear
+    gsl_multifit_function_fdf pv; //funcion a fitear
         
-    //variables auxiliares del programa
-    size_t n_param = 6 * numrings + 2; //numero de parametros a fitear (tengo 6 parametros por pico ademas del eta y el fwhm)
-    int i, iter = 0;
    
 
     //obtengo los datos
@@ -48,15 +51,18 @@ int main(void){
 
     //inicializo la funcion pseudo-voigt
     pv.f = &pv_f; //definicion de la funcion
+    pv.df = &pv_df;
+    pv.fdf = &pv_fdf;
+
     pv.n = size; //numero de puntos experimentales
-    pv.p = n_param; //variables a fitear
+    pv.p = n_param; //variables a fitear (<= pv.n)
     pv.params = &d; //datos experimentales
     
 
     //inicializo el solver
-    T = gsl_multifit_fsolver_lmsder;
-    s = gsl_multifit_fsolver_alloc (T, n, p);
-    gsl_multifit_fsolver_set (s, &pv, param_init); //x.vector es el vector con las estimaciones iniciales de los parametros de pv
+    T = gsl_multifit_fdfsolver_lmsder;
+    s = gsl_multifit_fdfsolver_alloc (T, size, n_param);
+    gsl_multifit_fdfsolver_set (s, &pv, param_init); //x.vector es el vector con las estimaciones iniciales de los parametros de pv
     
     //inicio las iteraciones
     do
@@ -71,7 +77,7 @@ int main(void){
         if (status)
             break;
 
-        status = gsl_multifit_test_delta (s->dx, s->x, 1e-4, 1e-4);
+        status = gsl_multifit_test_delta (s -> dx, s -> x, 1e-4, 1e-4);
     }
     while (status == GSL_CONTINUE && iter < 500);
 
@@ -82,7 +88,7 @@ int main(void){
     gsl_vector_free (ttheta);
     gsl_vector_free (y);
     gsl_vector_free (sigma);
-    gsl_multifit_fsolver_free (s);
+    gsl_multifit_fdfsolver_free (s);
 
     printf("God's in his heaven\nAll fine with the world\n");
     return 0;
