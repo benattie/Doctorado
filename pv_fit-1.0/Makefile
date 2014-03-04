@@ -1,5 +1,6 @@
 # Makefile for building C stuff with GSL
 
+FILES = pseudo_voigt.c
 #CFLAGS = -Wall -O3 -I/usr/include
 CFLAGS = -Wall -I.
 #LIBS = -L/usr/lib -lgsl -lgslcblas -lm
@@ -8,7 +9,7 @@ CC = gcc
 
 %: %.c
 #	$(CC) $(CFLAGS) $(LDFLAGS) $< -o $@
-	$(CC) $(CFLAGS) -c $@.c
+	$(CC) $(CFLAGS) -c $(FILES) $@.c
 	$(CC) $@.o -o $@.exe $(LIBS)
 
 # eg. do "make gsl_test" to make gsl_test from gsl_test.c
