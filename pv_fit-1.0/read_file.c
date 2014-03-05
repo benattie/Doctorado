@@ -5,7 +5,7 @@
 */
 //la idea es hacer una funcion que lea un dif.dat y me saque el vector de las intensidades
 
-gsl_vector * data(char * name, int size){
+gsl_vector * data(char name[15], int size){
     FILE * fp;
     //FILE *  fout;
     gsl_vector * x = gsl_vector_alloc(size);

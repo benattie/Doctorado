@@ -7,7 +7,8 @@
 //f = vector diferencia
 
 //DEFINICION DE FUNCIONES
-float bin2theta(int bin, float pixel, float dist);
+double bin2theta(int bin, double pixel, double dist);
+int theta2bin(double theta, double pixel, double dist);
 
 //ESTRUCTURA CON TODOS LOS DATOS EXPERIMENTALES
 struct data {
@@ -58,9 +59,9 @@ int pv_f (const gsl_vector * x, void *data, gsl_vector * f)
     for (i = 0; i < n; i++)
     {
         double Yi = pseudo_voigt(gsl_vector_get(ttheta, i), numrings, I0, t0, H, eta, shift_H, shift_eta, bg_pos, bg_int);
-        double chi2 = (Yi - gsl_vector_get(y, i)) / gsl_vector_get(sigma, i);
+        double w_res = (Yi - gsl_vector_get(y, i)) / gsl_vector_get(sigma, i);
 
-        gsl_vector_set (f, i, chi2);
+        gsl_vector_set (f, i, w_res);
     }
     return GSL_SUCCESS;
 }
@@ -72,7 +73,7 @@ int pv_df (const gsl_vector * x, void *data, gsl_matrix * J)
     int n = ((struct data *)data) -> n;
     int numrings = ((struct data *)data) -> numrings;
     gsl_vector * ttheta = ((struct data *)data) -> ttheta;
-    gsl_vector * y = ((struct data *)data) -> y;
+    //gsl_vector * y = ((struct data *)data) -> y;
     gsl_vector * sigma = ((struct data *) data) -> sigma;
     gsl_matrix * bg_pos = ((struct data *) data) -> bg_pos;
 
@@ -85,7 +86,7 @@ int pv_df (const gsl_vector * x, void *data, gsl_matrix * J)
     double t0[numrings];
     double shift_H[numrings];
     double shift_eta[numrings];
-    double bg_int[numrings][2];
+    //double bg_int[numrings][2];
 
     double H_i[numrings];
     double eta_i[numrings];
@@ -103,9 +104,11 @@ int pv_df (const gsl_vector * x, void *data, gsl_matrix * J)
         
         H_i[i] = H + shift_H[i];
         eta_i[i] = eta + shift_eta[i]; 
-
-        bg_int[i][0] = gsl_vector_get(x, j);  j++;
-        bg_int[i][1] = gsl_vector_get(x, j);  j++;
+    
+        j++;
+        j++;
+        //bg_int[i][0] = gsl_vector_get(x, j);  j++;
+        //bg_int[i][1] = gsl_vector_get(x, j);  j++;
     }
     
     //evaluo el jacobiano
@@ -131,7 +134,7 @@ int pv_df (const gsl_vector * x, void *data, gsl_matrix * J)
         for(j = 0; j < numrings; j++)
         {
             //Derivada respecto a la Intensidad máxima
-            dI0[j] = dpv_dI0(gsl_vector_get(ttheta, i), t0, eta_i[j], H_i[j]);
+            dI0[j] = dpv_dI0(gsl_vector_get(ttheta, i), t0[j], eta_i[j], H_i[j]);
             gsl_matrix_set (J, i, k, dI0[j] / s);   k++;
             
             //Derivada respecto a la posición del centro
@@ -170,7 +173,13 @@ int pv_fdf (const gsl_vector * x, void *data, gsl_vector * f, gsl_matrix * J)
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 //FUNCIONES AUXILIARES
-float bin2theta(int bin, float pixel, float dist)
+double bin2theta(int bin, double pixel, double dist)
 {
-    return atan((float) bin * pixel / dist) * 180. / M_PI;
+    return atan((double) bin * pixel / dist) * 180. / M_PI;
+}
+
+int theta2bin(double theta, double pixel, double dist)
+{
+    double aux = dist / pixel * tan(theta * M_PI / 180.);
+    return (int) aux;
 }

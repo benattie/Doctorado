@@ -1,6 +1,7 @@
 #ifndef PSEUDO_VOIGT_H   /* Include guard */
 #define PSEUDO_VOIGT_H
 //Archivo con las definiciones de la pseudo_voigt asi como de las funciones auxiliares necesarias.
+#include <gsl/gsl_matrix.h>
 
 //FUNCION BACKGROUND (INTERPOLACION LINEAL)
 double background(int N, double x, gsl_matrix * bg_pos, double bg_int[N][2]);
