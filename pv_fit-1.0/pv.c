@@ -150,7 +150,7 @@ int main(void){
     //inicializo el solver
     T = gsl_multifit_fdfsolver_lmsder;
     s = gsl_multifit_fdfsolver_alloc (T, size, n_param);
-    gsl_multifit_fdfsolver_set (s, &pv, &x.vector);
+    gsl_multifit_fdfsolver_set (s, &pv, &x.vector); //Error acá
     
 
 /*En principio todo este loop es reemplazable por...*/
