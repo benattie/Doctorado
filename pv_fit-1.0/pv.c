@@ -5,10 +5,9 @@
 
 //GSL
 #include <gsl/gsl_vector.h> //funciones de vectores
-#include <gsl/gsl_matrix.h>
 #include <gsl/gsl_blas.h> //funciones basicas de algebra lineal
 #include <gsl/gsl_multifit_nlin.h> //funciones de multifitting
-void print_state (size_t iter, gsl_multifit_fdfsolver * s);
+void print_state (int iter, gsl_multifit_fdfsolver * s);
 
 //COSAS MIAS
 #include "read_file.c"
@@ -22,7 +21,7 @@ int main(void){
     int numrings = 7; //sacar del programa de sangbong
     int i, j;
     //estimacion inicial de los parametros del fiteo (sacar del para_fit2d.dat o de un archivo externo)
-    int ** bg_pos_data = (int **) malloc(numrings * sizeof(int));
+    int ** bg_pos_data = (int **) malloc(numrings * sizeof(int *));
     if(bg_pos_data == NULL)
     {
         printf("Out of memory\n");
@@ -52,12 +51,12 @@ int main(void){
         exit (1);
     }
     t0_data[0] = 1.739;
-    t0_data[0] = 2.011;
-    t0_data[0] = 2.847;    
-    t0_data[0] = 3.337;
-    t0_data[0] = 3.484;
-    t0_data[0] = 4.028;
-    t0_data[0] = 4.391;
+    t0_data[1] = 2.011;
+    t0_data[2] = 2.847;    
+    t0_data[3] = 3.337;
+    t0_data[4] = 3.484;
+    t0_data[5] = 4.028;
+    t0_data[6] = 4.391;
 
     double I0_data[numrings], H_data = 0.01, eta_data = 0.5, shift_H_data[numrings], shift_eta_data[numrings], bg_int_data[numrings][2];
     double pixel = 100e-6, dist = 1081e-3;
@@ -110,7 +109,6 @@ int main(void){
         gsl_matrix_set(bg_pos, i, 1, bin2theta(bg_pos_data[i][1], pixel, dist)); //bin del punto definido bg_right
     }
 
-
     //inicializo la funcion pseudo-voigt
     pv.f = &pv_f; //definicion de la funcion
     pv.df = &pv_df;//definicion del jacobiano
@@ -148,10 +146,12 @@ int main(void){
     gsl_vector_view x = gsl_vector_view_array (x_init, n_param); //inicializo el vector con los datos a fitear
 
     //inicializo el solver
+
     T = gsl_multifit_fdfsolver_lmsder;
+
     s = gsl_multifit_fdfsolver_alloc (T, size, n_param);
-    gsl_multifit_fdfsolver_set (s, &pv, &x.vector);
-    
+
+    gsl_multifit_fdfsolver_set (s, &pv, &x.vector); //error aqui
 
 /*En principio todo este loop es reemplazable por...*/
     //inicio las iteraciones
@@ -213,7 +213,7 @@ int main(void){
 }
 //FIN DEL MAIN
 
-void print_state (size_t iter, gsl_multifit_fdfsolver * s)
+void print_state (int iter, gsl_multifit_fdfsolver * s)
 {
-  printf ("iter: %3u\t|f(x)| = %g\n", iter, gsl_blas_dnrm2 (s->f));
+  printf ("iter: %3d\t|f(x)| = %g\n", iter, gsl_blas_dnrm2 (s->f));
 }
