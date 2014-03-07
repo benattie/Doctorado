@@ -150,8 +150,13 @@ int main(void){
     T = gsl_multifit_fdfsolver_lmsder;
 
     s = gsl_multifit_fdfsolver_alloc (T, size, n_param);
+<<<<<<< HEAD
 
     gsl_multifit_fdfsolver_set (s, &pv, &x.vector); //error aqui
+=======
+    gsl_multifit_fdfsolver_set (s, &pv, &x.vector); //Error acá
+    
+>>>>>>> ffdd9356f2f7c4af67ec326f38d784ac47d5a315
 
 /*En principio todo este loop es reemplazable por...*/
     //inicio las iteraciones
