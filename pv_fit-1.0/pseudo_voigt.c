@@ -31,7 +31,6 @@ double background(int N, double x, gsl_matrix * bg_pos, double bg_int[N][2])
 		return m * delta + h;
 	}
     }
-    
     return bg_int[N - 1][1];
 }
 
