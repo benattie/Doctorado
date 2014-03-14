@@ -82,7 +82,6 @@ int pv_f (const gsl_vector * x, void *data, gsl_vector * f)
         double Yi = pseudo_voigt(gsl_vector_get(ttheta, i), numrings, I0, t0, H, eta, shift_H, shift_eta, bg_pos, bg_int);
         double res = (Yi - gsl_vector_get(y, i)) / s;
         //fprintf(fp, "%lf\t%lf\n", Yi, res);
-
         gsl_vector_set (f, i, res);
     }
     //fprintf(fp, "\n");

@@ -30,25 +30,8 @@ void data(char name[15], int size, gsl_vector * x, gsl_vector * y){
         gsl_vector_set (y, i, intens[i]);
         i++;
     }
-    
-    /*
-    if((fout = fopen("intens.dat","w")) == NULL )
-    {//abro el archivo
-        fprintf(stderr,"Error opening file(intens.dat).");
-        exit(1);
-    }
-    
-    for (i = 0; i < 1725; i++)
-    {
-        fprintf (fout, "y_%d = %g\n", i, gsl_vector_get (y, i));
-    }
-
-    */
-
     //cierro archivos y libero variables
-    //fclose (fout);
-
-    //printf("God's in his heaven\nAll fine with the world\n");
+    fclose (fp);
 }
 
 
