@@ -8,32 +8,39 @@
 //FUNCION BACKGROUND (INTERPOLACION LINEAL)
 double background(int N, double x, gsl_matrix * bg_pos, double bg_int[N][2])
 {
-    int i;
+    int i, j = 0;
     double m, h, delta;
-    double xl, xr;
+    double aux[2 * N], aux_bg[2 * N];
     
-    xl = gsl_matrix_get(bg_pos, 0, 0);
-    if(x <= xl)
+    for(i = 0; i < N; i++)
+    {//paso a las posiciones de una matriz a un vector   
+        aux[j] = gsl_matrix_get(bg_pos, i, 0); 
+        aux_bg[j] = bg_int[i][0];
+        j++;
+
+        aux[j] = gsl_matrix_get(bg_pos, i, 1);
+        aux_bg[j] = bg_int[i][1];
+        j++;
+    }
+
+    if(x <= aux[0])
     {
 	return bg_int[0][0];
     }
     
-    for(i = 0; i < N; i++)
+    for(i = 0; i < 2 * N; i++)
     {
-	xl = gsl_matrix_get(bg_pos, i, 0);
-	xr = gsl_matrix_get(bg_pos, i, 1);
-	if(x >= xl && x < xr)
+	if(x >= aux[i] && x < aux[i + 1])
 	{
-	    	m = (bg_int[i][1] - bg_int[i][0]) / (xr - xl);
-		delta = x - xl;
-		h = bg_int[i][0];
+            m = (aux_bg[i + 1] - aux_bg[i]) / (aux[i + 1] - aux[i]);
+            delta = x - aux[i];
+            h = aux_bg[i];
 
-		return m * delta + h;
+	    return m * delta + h;
 	}
     }
-    return bg_int[N - 1][1];
+    return aux_bg[2 * N - 1];
 }
-
 //Derivada respecto a los puntos de Bg
 double dpv_dbg_left(int N, double x, gsl_matrix * bg_pos)
 {
@@ -102,10 +109,12 @@ double pseudo_voigt(double ttheta, int numrings, double I0[numrings], double t0[
 
         pv_n = pseudo_voigt_n(ttheta, t0[i], eta_i, H_i);
         
-        BG = background(numrings, ttheta, bg_pos, bg_int); 
-        
-        result = result + I0[i] * pv_n - BG;
+        result = result + I0[i] * pv_n;
     }
+
+    BG = background(numrings, ttheta, bg_pos, bg_int);
+    result += BG;
+
     return result;
 }
 

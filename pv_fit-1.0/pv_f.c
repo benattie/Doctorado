@@ -32,6 +32,22 @@ int pv_f (const gsl_vector * x, void *data, gsl_vector * f)
     gsl_matrix * bg_pos = ((struct data *) data) -> bg_pos;
 
     int i, j = 0;
+    /*
+    int k;
+
+    //printf("%d\t%d\t", n , numrings);
+
+    for(k = 0; k < n; k++)
+    {
+        printf("%lf\t", gsl_vector_get(ttheta, k));
+        printf("%lf\t", gsl_vector_get(y, k));
+        printf("%lf\t", gsl_vector_get(sigma, k));
+        getchar();
+        //printf("%lf\t", gsl_matrix_get(bg_pos, k, 0));
+        //printf("%lf\n", gsl_matrix_get(bg_pos, k, 1));
+    }
+    printf("\n");
+    */
 
     //FILE * fp;
     //fp = fopen("res.txt", "a");
@@ -65,7 +81,7 @@ int pv_f (const gsl_vector * x, void *data, gsl_vector * f)
         //double s = S;
         double Yi = pseudo_voigt(gsl_vector_get(ttheta, i), numrings, I0, t0, H, eta, shift_H, shift_eta, bg_pos, bg_int);
         double res = (Yi - gsl_vector_get(y, i)) / s;
-        //fprintf(fp, "%lf\t", res);
+        //fprintf(fp, "%lf\t%lf\n", Yi, res);
 
         gsl_vector_set (f, i, res);
     }

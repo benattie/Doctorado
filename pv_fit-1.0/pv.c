@@ -96,16 +96,17 @@ int main(void){
         
    
     //obtengo los datos
-    y = data(name, size);
+    data(name, size, ttheta, y);
     for(i = 0; i < size; i++)
     {
-        gsl_vector_set(ttheta, i, 2. * bin2theta(i, pixel, dist)); //los valores del pixel y de dist deberia sacarlos del para_fit2d.dat
+        //gsl_vector_set(ttheta, i, bin2theta(i, pixel, dist)); //los valores del pixel y de dist deberia sacarlos del para_fit2d.dat
         gsl_vector_set(sigma, i, sqrt(gsl_vector_get(y, i))); //calculo los sigma de las intensidades
     }
     for(i = 0; i < numrings; i++)
     {//sacar los datos del para_fit2d.dat (o de otro archivo si es que pienso poner varios puntos de bg)
-        gsl_matrix_set(bg_pos, i, 0, 2. * bin2theta(bg_pos_data[i][0], pixel, dist)); //bin del punto definido bg_left
-        gsl_matrix_set(bg_pos, i, 1, 2. * bin2theta(bg_pos_data[i][1], pixel, dist)); //bin del punto definido bg_right
+        gsl_matrix_set(bg_pos, i, 0, bin2theta(bg_pos_data[i][0], pixel, dist)); //bin del punto definido bg_left
+        gsl_matrix_set(bg_pos, i, 1, bin2theta(bg_pos_data[i][1], pixel, dist)); //bin del punto definido bg_right
+        //printf("%d\t%lf\t%d\t%lf\n", bg_pos_data[i][0], gsl_matrix_get(bg_pos, i, 0), bg_pos_data[i][1], gsl_matrix_get(bg_pos, i, 1));
     }
 
     //inicializo la funcion pseudo-voigt
@@ -157,7 +158,17 @@ int main(void){
         //printf("bg_left = %.3lf\tbg_right = %.3lf\n", bg_int_data[j][0], bg_int_data[j][1]);
     }
     gsl_vector_view x = gsl_vector_view_array (x_init, n_param); //inicializo el vector con los datos a fitear
-
+    
+    /*
+    for(i = 0; i < size; i++)
+    {
+        printf("%d\t%lf\t", i, background(numrings, gsl_vector_get(ttheta, i), bg_pos, bg_int_data));
+        if((i%3)==0) printf("\n");
+        if((i%100)==0) getchar();
+        
+    }
+    getchar();
+    */
     //inicializo el solver
 
     T = gsl_multifit_fdfsolver_lmsder;
@@ -184,9 +195,10 @@ int main(void){
         printf ("H      = %.5lf +/- %.5lf\n", FIT(i), c * ERR(i)); i++;
         printf ("eta      = %.5lf +/- %.5lf\n", FIT(i), c * ERR(i)); i++;
         */
-        printf ("H        = %.5lf\n", FIT(i)); i++;
-        printf ("eta      = %.5lf\n\n", FIT(i)); i++;
-
+        
+        printf ("\nH        = %.5lf\t", FIT(i)); i++;
+        printf ("eta      = %.5lf\n", FIT(i)); i++;
+        
         for(j = 0; j < numrings; j++)
         {
             /* Imprimo los datos con los errores
@@ -197,19 +209,16 @@ int main(void){
             printf ("bg_int_data[0][%d]      = %.5lf +/- %.5lf\n", j, FIT(i), c * ERR(i)); i++;
             printf ("bg_int_data[1][%d]      = %.5lf +/- %.5lf\n", j, FIT(i), c * ERR(i)); i++;
             */
-            printf ("I[%d]               = %.5lf\n", j, FIT(i)); i++;
+            printf ("I[%d]               = %.5lf\t", j, FIT(i)); i++;
             printf ("t0[%d]              = %.5lf\n", j, FIT(i)); i++;
-            printf ("shift_H[%d]         = %.5lf\n", j, FIT(i)); i++;
+            printf ("shift_H[%d]         = %.5lf\t", j, FIT(i)); i++;
             printf ("shift_eta[%d]       = %.5lf\n", j, FIT(i)); i++;
-            printf ("bg_int_data[0][%d]  = %.5lf\n", j, FIT(i)); i++;
+            printf ("bg_int_data[0][%d]  = %.5lf\t", j, FIT(i)); i++;
             printf ("bg_int_data[1][%d]  = %.5lf\n\n", j, FIT(i)); i++;
-        }   
-        //printf ("lambda = %.5f +/- %.5f\n", FIT(1), c*ERR(1));
-        //printf ("b      = %.5f +/- %.5f\n", FIT(2), c*ERR(2));
+
+        }
     }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 /*En principio todo este loop es reemplazable por...*/
     //inicio las iteraciones
     print_state (iter, s);
@@ -232,7 +241,6 @@ int main(void){
 
 /*gsl_multifit_fdfsolver_driver (s, max_iter, err_abs, err_rel)*/
 /////////////////////////////////////////////////////////////////////////////////////
-//TODAVIA TRATANDO DE ENTENDER QUE PASA ACA
     gsl_multifit_covar (s -> J, 0.0, covar); //calculo la matriz de covarianza
 
     #define FIT(i) gsl_vector_get(s -> x, i)  
@@ -247,12 +255,13 @@ int main(void){
         
         i = 0;
         /*
-        printf ("H      = %.5lf +/- %.5lf\n", FIT(i), c * ERR(i)); i++;
+        printf ("H      = %.5lf +/- %.5lf\t", FIT(i), c * ERR(i)); i++;
         printf ("eta      = %.5lf +/- %.5lf\n", FIT(i), c * ERR(i)); i++;
         */
-        printf ("H        = %.5lf\n", FIT(i)); i++;
-        printf ("eta      = %.5lf\n\n", FIT(i)); i++;
-
+        
+        printf ("\nH        = %.5lf\t", FIT(i)); i++;
+        printf ("eta      = %.5lf\n", FIT(i)); i++;
+        
         for(j = 0; j < numrings; j++)
         {
             /* Imprimo los datos con los errores
@@ -263,15 +272,15 @@ int main(void){
             printf ("bg_int_data[0][%d]      = %.5lf +/- %.5lf\n", j, FIT(i), c * ERR(i)); i++;
             printf ("bg_int_data[1][%d]      = %.5lf +/- %.5lf\n", j, FIT(i), c * ERR(i)); i++;
             */
-            printf ("I[%d]               = %.5lf\n", j, FIT(i)); i++;
+            
+            printf ("I[%d]               = %.5lf\t", j, FIT(i)); i++;
             printf ("t0[%d]              = %.5lf\n", j, FIT(i)); i++;
-            printf ("shift_H[%d]         = %.5lf\n", j, FIT(i)); i++;
+            printf ("shift_H[%d]         = %.5lf\t", j, FIT(i)); i++;
             printf ("shift_eta[%d]       = %.5lf\n", j, FIT(i)); i++;
-            printf ("bg_int_data[0][%d]  = %.5lf\n", j, FIT(i)); i++;
+            printf ("bg_int_data[0][%d]  = %.5lf\t", j, FIT(i)); i++;
             printf ("bg_int_data[1][%d]  = %.5lf\n\n", j, FIT(i)); i++;
+            
         }   
-        //printf ("lambda = %.5f +/- %.5f\n", FIT(1), c*ERR(1));
-        //printf ("b      = %.5f +/- %.5f\n", FIT(2), c*ERR(2));
     }
 
     printf ("status = %s\n", gsl_strerror (status));

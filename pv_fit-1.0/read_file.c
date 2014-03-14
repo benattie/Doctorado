@@ -5,14 +5,11 @@
 */
 //la idea es hacer una funcion que lea un dif.dat y me saque el vector de las intensidades
 
-gsl_vector * data(char name[15], int size){
+void data(char name[15], int size, gsl_vector * x, gsl_vector * y){
     FILE * fp;
-    //FILE *  fout;
-    gsl_vector * x = gsl_vector_alloc(size);
-    gsl_vector * y = gsl_vector_alloc(size);
     char buf[100];
     int i;
-    float ttheta[size], intens[size];
+    double ttheta[size], intens[size];
 
     if((fp = fopen(name, "r")) == NULL )
     {//abro el archivo
@@ -27,7 +24,7 @@ gsl_vector * data(char name[15], int size){
     //printf("%s\n", buf);
     
     i = 0;
-    while(fscanf(fp, "%f", &ttheta[i]) != EOF && fscanf(fp, "%f", &intens[i]) != EOF)
+    while(fscanf(fp, "%lf", &ttheta[i]) != EOF && fscanf(fp, "%lf", &intens[i]) != EOF)
     {//lectura del archivo
         gsl_vector_set (x, i, ttheta[i]);
         gsl_vector_set (y, i, intens[i]);
@@ -49,16 +46,9 @@ gsl_vector * data(char name[15], int size){
     */
 
     //cierro archivos y libero variables
-    gsl_vector_free (x);
-    //gsl_vector_free (y);
-    
-    fclose (fp);
     //fclose (fout);
 
     //printf("God's in his heaven\nAll fine with the world\n");
-    return y;
-
-
 }
 
 
