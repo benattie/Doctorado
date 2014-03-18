@@ -19,9 +19,9 @@ double bin2theta(int bin, double pixel, double dist);
 int theta2bin(double theta, double pixel, double dist);
 
 //MAIN
-int pv_fitting(int exists, double pixel, double dist, int size, int numrings, int y_sang[size],
-        double t0_sang[numrings], double ** I0_sang, int bg_pos_left[numrings], int bg_pos_right[numrings],
-        double * fwhm, double * eta)
+int pv_fitting(int exists, double pixel, double dist, int size, int numrings, int y_sang[2500],
+        float t0_sang[20], float I0_sang[500][10], int bg_pos_left[15], int bg_pos_right[15],
+        double ** fwhm, double ** eta)
 {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //estimacion inicial de los parametros del fiteo

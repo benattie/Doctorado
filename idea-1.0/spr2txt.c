@@ -32,7 +32,9 @@ main()
  int data[2500], intensity;
  int stepnum, maxpos, minpos;
 
- float data1[2500], BG_m, intens[500][10];
+ double pixel, dist;
+ double fwhm[500][10], eta[500][10];
+ float data1[2500], BG_m, intens[500][10]
 
  char buf_temp[100], buf[100], buf1[100];
  char path_out[150], path [150], filename[60], filename1[100], inform[10], path1[150], inform1[10];
@@ -43,13 +45,14 @@ main()
  char logfile_yn, logfile_yn_temp;
  
  FILE *fp, *fp1, *fp2, *fp3, *fp4; 
+ FILE *fp_fwhm, *fp_eta, *fp_fwhm_pf, *fp_eta_pf; 
 
  struct DAT intensss;
 
- int   j,l,m,step,anf_gam,ende_gam,del_gam,num;
- float step_ome,anf_ome,ende_ome,del_ome,weg;
- float m_intens,n_intens,nn_intens;
- float theta[20],neu_ome,neu_ome1,neu_gam1,neu_gam,alpha,beta;
+ int   j, l, m, step, anf_gam, ende_gam, del_gam, num;
+ float step_ome, anf_ome, ende_ome, del_ome, weg;
+ float m_intens, n_intens, nn_intens;
+ float theta[20], neu_ome, neu_ome1, neu_gam1, neu_gam, alpha, beta;
  float alpha90;
  float diode[200], max_diode, min_diode, max_diode_temp, min_diode_temp, ratio, inten, new_int;
 
@@ -66,7 +69,7 @@ main()
  puts("\n****************************************************************************");
 
 
- if((fp=fopen("para_fit2d.dat","r"))== NULL )
+ if((fp = fopen("para_fit2d.dat","r")) == NULL )
      {fprintf(stderr,"Error opening file(para_fit2d.txt)."); exit(1);}
  //////////////////////INICIA LA LECTURA DEL ARCHIVO para_fit2d.dat/////////////////////////////////////////////
  //path hacia los archivos, probablemente los de salida, pero no estoy seguro (C:\Users\Bolmaro\Experim\Sabo\dat\) 
@@ -77,7 +80,7 @@ main()
  fscanf(fp,"%d",&NrSample);   fgets(buf_temp,2,fp);
  
 
- for(Z=1;Z<=NrSample;Z++) // FOR-routine: whole routines
+ for(Z = 1; Z <= NrSample; Z++) // FOR-routine: whole routines
  {
     //skip lines
     fgets(buf_temp,2,fp);
@@ -131,10 +134,18 @@ main()
     fgets(buf_temp,22,fp);
     fscanf(fp,"%d",&end_g); fgets(buf_temp,2,fp);
     
+    //Distancia de la muestra al detector
+    fgets(buf_temp,22,fp);
+    fscanf(fp,"%lf",&dist); fgets(buf_temp,2,fp);
+    
+    //Distancia que cubre un pixel en el difractograma
+    fgets(buf_temp,22,fp);
+    fscanf(fp,"%lf",&pixel); fgets(buf_temp,2,fp);
+
     //flag que determina si las cuentas negativas se pasan a 0
     fgets(buf_temp,22,fp);
-    fscanf(fp,"%s",&minus_zero); fgets(buf_temp,2,fp);
-    
+    fscanf(fp,"%s",&minus_zero); fgets(buf_temp,2,fp);    
+
     //flag que determina si se genera el archivo .log?
     fgets(buf_temp,22,fp);
     fscanf(fp,"%s",&logfile_yn_temp); fgets(buf_temp,2,fp);
@@ -162,10 +173,7 @@ main()
     //no se para que esta esto
     printf("\n log_file minus_zero = %s  \n",&logfile_yn);
 
-
-    ////FINALIZA LA LECTURA DEL ARCHIVO para_fit2d.dat (SALVO LA POSICION DE LOS PICOS, QUE OCURRE EN EL LOOP SOBRE numrings)////
-
-    for(i=0;i<numrings;i++) //itera sobre cada pico (0 a 7) -> (1 a 8)
+    for(i = 0; i < numrings; i++) //itera sobre cada pico (0 a 7) -> (1 a 8)
     {
         fscanf(fp,"%f",&theta[i]); //posicion angular del centro del pico (\theta o $2\theta?)
         fscanf(fp,"%d",&posring_l[i]); //bin a la izquierda del pico
@@ -175,18 +183,18 @@ main()
 
         strcpy(outfile, "");
         strcat(outfile, path_out);
-	strcat(outfile, filename1);
+        strcat(outfile, filename1);
         strcat(outfile,"PF_");
 
-	sprintf(buf,"%d",i+1);
+        sprintf(buf,"%d",i+1);
         strcat(outfile,buf);
         strcat(outfile,".dat");
 
-	//despues de todas las lineas str* genera un string de nombre C:\Users\Bolmaro\Experim\Sabo\dat\New_Al70R-tex_PF_(1 al 8).dat 
+        //despues de todas las lineas str* genera un string de nombre C:\Users\Bolmaro\Experim\Sabo\dat\New_Al70R-tex_PF_(1 al 8).dat 
         //abre un archivo para cada pico (lo voy a llamar de ahora en adelante file_peak)
-        if((fd[i]=open(outfile,O_CREAT|O_TRUNC|O_RDWR,S_IREAD|S_IWRITE))<0)
+        if((fd[i] = open(outfile,O_CREAT|O_TRUNC|O_RDWR,S_IREAD|S_IWRITE)) < 0)
         { 
-            printf("Cannot open OUTPUT file.(for %d ring)",i+1); exit(1);
+            printf("Cannot open OUTPUT file.(for %d ring)",i + 1); exit(1);
         }
     }
     
@@ -195,18 +203,18 @@ main()
     fgets(buf_temp,2,fp); //skip line
 
     //imprime en pantalla los datos relevantes de cada pico 
-    for(i=0;i<numrings;i++)
-        printf("Position of [%d]ring = Theta:%6.3f  %8d%8d%8d%8d\n",i+1,theta[i],posring_l[i],posring_r[i],ug_l[i],ug_r[i]);
+    for(i = 0; i < numrings; i++)
+        printf("Position of [%d]ring = Theta:%6.3f  %8d%8d%8d%8d\n",i + 1,theta[i],posring_l[i],posring_r[i],ug_l[i],ug_r[i]);
 
     //imprime en cada file_peak el \gamma inicial, final y el paso
     sprintf(buf_temp,"Anf., Ende, Schritt-Gamma:              %8d%8d       1\n",rot_p,end_g);
 
-    for(i=0;i<numrings;i++)
+    for(i = 0; i < numrings; i++)
         write(fd[i],buf_temp, strlen(buf_temp));
 
     //imprime en cada file_peak el \Omega inicial, final y el paso
     sprintf(buf_temp,"Anf., Ende, Schritt-Omega:              %8d%8d%8d\n\n",star_a,end_a,del_a);
-    for(i=0;i<numrings;i++)
+    for(i = 0; i < numrings; i++)
         write(fd[i],buf_temp, strlen(buf_temp));
 
     /*Begin ring data read-in and output*/
@@ -221,11 +229,11 @@ main()
         strcat(marfile,filename1);
         sprintf(buf,"%d",k);
 
-        if(k<10)
+        if(k < 10)
             sprintf(buf1,"0000");
-        if(k>=10 && k<100)
+        if(k >= 10 && k < 100)
             sprintf(buf1,"000");
-        if(k>=100)
+        if(k >= 100)
             sprintf(buf1,"00");
         strcat(marfile,buf1);
 
@@ -233,7 +241,7 @@ main()
         strcat(marfile,".");
 
         strcat(marfile,"spr");
-	//termina la seleccion del archivo spr
+        //termina la seleccion del archivo spr
 
         printf("\nReading data from <====  %s\n", marfile );
 
@@ -253,19 +261,19 @@ main()
 
         /*Data Read-In */
 
-        for(y=1; y <= gamma; y++) //itero sobre todos los difractogramas (360) (recordar que iterar sobre todos los difractogramas implica obtener un valor de intensidad para cada punto del anillo de Debye)
+        for(y = 1; y <= gamma; y++) //itero sobre todos los difractogramas (360) (recordar que iterar sobre todos los difractogramas implica obtener un valor de intensidad para cada punto del anillo de Debye)
         {
             for(x = 1; x <= pixel_number; x++) //iteracion dentro de cada uno de los difractogramas (con 1725 puntos) (cada porcion del anillo de Debye)
             {
                 //leo la intensidad de cada bin y la paso a formato de entero (why?)
                 fscanf(fp1,"%e",&data1[x]);
-                data[x]= (int)data1[x];
+                data[x] = (int)data1[x];
             }
           
-            n=0; //numero de pico del difractograma
+            n = 0; //numero de pico del difractograma
             do //itero sobre todos los picos del difractograma
             {
-                intensity=0; count=0;
+                intensity = 0; count = 0;
                 //los bin en donde se encuentra la informacion del bg para el pico n del difractograma
                 a = ug_l[n]; 
                 b = ug_r[n];
@@ -273,63 +281,63 @@ main()
                 BG_l = data[a];
                 BG_r = data[b];
                 //background promedio
-                BG_m = ((BG_l+BG_r)/2);
+                BG_m = ((BG_l + BG_r) / 2);
 
-                for(z=posring_l[n];z<=posring_r[n];z++) //integro el pico
+                for(z = posring_l[n]; z <= posring_r[n]; z++) //integro el pico
                 { 
                     count++;
                     intensss.nnew = data[z];
                     intensity += intensss.nnew;
                 }                                       
-                intens[y][n]= (intensity/count)-BG_m;  // Integral values and BG correction
+                intens[y][n] = (intensity / count) - BG_m;  // Integral values and BG correction
                 n++;
-            }while(n<numrings);
+            }while(n < numrings);
         } /*end of the double FOR-routine gamma and pixel number*/
 
         //fiteo del difractograma para la obtencion del ancho de pico y eta
         int exists = 1;
         if(k == star_d) exists = 0;
-        pv_fitting(flag, data, pixel_number, numrings, theta, intens[y], ug_l, ug_r, double * fwhm, double * eta);
-        
+        pv_fitting(exists, pixel, dist, pixel_number, numrings, data, theta, intens, ug_l, ug_r, &fwhm, &eta);
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////LA INFORMACION CRUDA DE LOS DIFRACTOGRAMAS SE ENCUENTRA EN EL VECTOR data[]////////////////
 	//////ESTE ES EL LUGAR PARA HACER LA RUTINA QUE HAGA EL FULL PROFILE FITTING DE CADA DIFRACTOGRAMA///////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
        
 
-	//A esta altura ya termine de leer y procesar los datos de UN archivo spr. Falta imprimir los resultados a el archivo de salida
-        for(d=0;d<numrings;d++)//itero sobre todos los picos
+        //A esta altura ya termine de leer y procesar los datos de UN archivo spr. Falta imprimir los resultados a el archivo de salida
+        for(d = 0; d < numrings; d++)//itero sobre todos los picos
         { 
             strcpy(outinten,"");
-            count_minus =0;
+            count_minus = 0;
             
-            for(c=1;c<=((end_g - rot_p)+1);c++) //itero sobre todo el anillo
+            for(c = 1; c <= ((end_g - rot_p) + 1); c++) //itero sobre todo el anillo
             { 
-		if(intens[c][d]<0) //corrijo las intensidades negativas
-		{ 
-		    if((minus_zero=='y')||(minus_zero=='Y'))
-		    intens[c][d]=0; 
-		    count_minus++;  
+	    	    if(intens[c][d] < 0) //corrijo las intensidades negativas
+        		{ 
+	    	        if((minus_zero == 'y') || (minus_zero == 'Y'))
+		            intens[c][d] = 0; 
+	    	        count_minus++;  
                 }
-		//escribo la intensidad integrada al archivo correspondiente en formato de diez columnas, separando por bloques los datos de cada pico
-		sprintf(buf,"%8.1f",intens[c][d]);
+	    	    //escribo la intensidad integrada al archivo correspondiente en formato de diez columnas, separando por bloques los datos de cada pico
+		        sprintf(buf,"%8.1f",intens[c][d]);
                 strcat(outinten,buf);
-                if((c%10)==0)
+                if((c % 10) == 0)
                     strcat(outinten,"\n");
                 
-		if(c==((end_g - rot_p)+1))
+    		    if(c == ((end_g - rot_p) + 1))
                     strcat(outinten,"\n");
             }//va llenando el buffer de memoria con las intensidades de cada pico y luego lo imprime todo en el archivo (muy eficiente!!)
             write(fd[d], outinten, strlen(outinten));
             
-	    //escribir el file con la figura de polos en formato maquina para los ancho de pico
+	        //escribir el file con la figura de polos en formato maquina para los ancho de pico
 	    
 	    
-	    if(count_minus>=1)//te avisa que tuviste picos con intensidades negativas
-	    {
+	        if(count_minus>=1)//te avisa que tuviste picos con intensidades negativas
+    	    {
                 printf("\n!!Number of MINUS intensity in the [%d]th pole figure=%d !!! \n",d+1,count_minus);
             } 		 
-	}
+	    }
         
         fclose(fp1);
         
@@ -341,7 +349,7 @@ main()
     
     printf("\nReduction of the Fit2D-DATA is finished.\n%d pole figure data are generated.\n\n",d);
     
-    for(d=0;d<numrings;d++)
+    for(d = 0; d < numrings; d++)
         close(fd[d]);
 
     ////////////////////////////MODULO DE TRANSFORMACION ANGULAR////////////////////////////////
@@ -367,9 +375,9 @@ main()
     printf("sec: %d\n\n", zeit->tm_sec);
     */
     
-    for(m=0;m<numrings;m++)//itero sobre todos los picos
+    for(m = 0; m < numrings; m++)//itero sobre todos los picos
     {
-        step=1;//Si step > 1 lo que hago es promediar step's intensidades de la figura de polos en formato maquina
+        step = 1;//Si step > 1 lo que hago es promediar step's intensidades de la figura de polos en formato maquina
         
         //genero string con el nombre del archivo con la figura de polos en el formato maquina
         strcpy(outfile,"");
@@ -383,7 +391,7 @@ main()
 	    else
             strcat(outfile,".dat");
         
-        if((fp2=fopen(outfile,"r"))== NULL )
+        if((fp2 = fopen(outfile,"r")) == NULL )
         {
           fprintf(stderr,"Error beim oeffnen der Datei(%s).",outfile); exit(1);
         }
@@ -393,17 +401,17 @@ main()
         strcat(linfile,path_out);
         strcat(linfile,filename1);
         strcat(linfile,"PF_");
-        sprintf(buf,"%d",m+1);
+        sprintf(buf,"%d",m + 1);
         strcat(linfile,buf);
         strcat(linfile,".mtex");
         
-        if((fp1=fopen(linfile,"w"))== NULL )
+        if((fp1=fopen(linfile,"w")) == NULL )
         {
             fprintf(stderr,"Error beim oeffnen der Datei(%s).",linfile); exit(1);
         }
         
         //genero archivo con el grid de la figura de polos
-        if((fp3=fopen("PF_grid.dat","w"))== NULL )
+        if((fp3=fopen("PF_grid.dat","w")) == NULL )
         {
             fprintf(stderr,"Error opening file.writing file"); exit(1);
         }
@@ -423,30 +431,30 @@ main()
         fscanf(fp2,"%f",&del_ome);
         
         printf("anf_gam=%5d , end_gam=%5d , del_gam=%5d \nanf_ome=%5.1f , end_ome=%5.1f , del_ome=%5.1f \n\n",anf_gam,ende_gam,del_gam,anf_ome,ende_ome,del_ome);
-        step_ome=abs((ende_ome-anf_ome)/del_ome);
+        step_ome=abs((ende_ome - anf_ome) / del_ome);
         
-        if(ende_ome<anf_ome)
-            del_ome=-1*del_ome;
+        if(ende_ome < anf_ome)
+            del_ome = -1 * del_ome;
         
         //Imprimo el tiempo de ejecucion del programa en el .mtex
         fprintf(fp1,"  FIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n",zeit->tm_year + 1900,zeit->tm_mon + 1,zeit->tm_mday,zeit->tm_hour,zeit->tm_min,zeit->tm_sec);
         
-        k=0;//contador del archvo grid y el de mtex
+        k = 0;//contador del archvo grid y el de mtex
         //tranformacion angular (gamma, omega)-->(alpha,beta)
-        if(ende_ome>anf_ome)
+        if(ende_ome > anf_ome)
         {
-            i=anf_ome;
-            while(i<=ende_ome)//itero sobre \omega
+            i = anf_ome;
+            while(i <= ende_ome)//itero sobre \omega
             {
-                for(j=anf_gam;j<=ende_gam;j+=del_gam)//itero sobre \gamma
+                for(j = anf_gam; j <= ende_gam; j += del_gam)//itero sobre \gamma
                 {
-                    neu_gam1=j;
-                    neu_ome1=i;
-                    //transformacion geometrica
-		    if(neu_ome1>90)
+                    neu_gam1 = j;
+                    neu_ome1 = i;
+            //transformacion geometrica
+		    if(neu_ome1 > 90)
 		    {
-                        neu_ome = neu_ome1-90;
-                        neu_gam = neu_gam1+180;
+                        neu_ome = neu_ome1 - 90;
+                        neu_gam = neu_gam1 + 180;
                     }
                     else
                     {
@@ -457,27 +465,27 @@ main()
                     alpha = winkel_al(theta[m],neu_ome,neu_gam);
                     beta  = winkel_be(theta[m],neu_ome,neu_gam,alpha);
                     
-                    if(j%step==0)
+                    if(j % step == 0)
                     {
-                        n_intens=0;
-                        for(l=1;l<=step;l++)
+                        n_intens = 0;
+                        for(l = 1; l <= step; l++)
                         {
                             fscanf(fp2,"%f",&m_intens);//leo la intensidad de la figura de polos en formato maquina
                             n_intens += m_intens;
                         }
                         
-                        nn_intens=n_intens/step;
+                        nn_intens = n_intens / step;
                         
-                        if(alpha>90)
+                        if(alpha > 90)
                         {
-                            alpha=180-alpha;
-                            beta=360-beta;
-		        }
+                            alpha = 180 - alpha;
+                            beta = 360 - beta;
+		                }
                         else
-                            alpha=alpha;
+                            alpha = alpha;
                         
-                        //imprimo las intensidades en formato figura de polos, asi como el grid
-	                if(theta>0)
+                    //imprimo las intensidades en formato figura de polos, asi como el grid
+	                if(theta > 0)
                         {
                             fprintf(fp1,"%11d%10.4f%10.4f%10.4f%10.4f%12.0f\n"
                             ,k+1,2*theta[m],theta[m],alpha,beta,nn_intens);
@@ -489,23 +497,23 @@ main()
                         }
                         
 	                fprintf(fp3,"%11d%10.1f%10.1f%10.4f%10.4f\n"
-                        ,k+1,neu_ome,neu_gam,alpha,beta); 
+                        ,k + 1,neu_ome,neu_gam,alpha,beta); 
                         
                         k++;
                     }
                 }
-                i+=del_ome;
+                i += del_ome;
             }
         }
         else
         {
-            i=anf_ome;
-            while(i>=ende_ome)
+            i = anf_ome;
+            while(i >= ende_ome)
             {
-                for(j=anf_gam;j<=ende_gam;j+=del_gam)
+                for(j = anf_gam; j <= ende_gam; j += del_gam)
                 {
-                    neu_gam=j;
-                    neu_ome=i;
+                    neu_gam = j;
+                    neu_ome = i;
                     
                     alpha = winkel_al(theta[m],neu_ome,neu_gam);
                     
@@ -513,17 +521,17 @@ main()
                     
                     fscanf(fp2,"%f",&m_intens);
                     
-                    if(j%step==0)
+                    if(j % step == 0)
                     {
-                        if(alpha>90)
+                        if(alpha > 90)
                         {
-                            alpha=180-alpha;
-                            beta=360-beta;
+                            alpha = 180 - alpha;
+                            beta = 360 - beta;
     		            }
                         else
-                            alpha=alpha;
+                            alpha = alpha;
                         
-                        if(theta>0)
+                        if(theta > 0)
                         {
                             fprintf(fp1,"%11d%10.4f%10.4f%10.4f%10.4f%12.0f\n"
                             ,k+1,2*theta[m],theta[m],alpha,beta,m_intens); 
@@ -540,7 +548,7 @@ main()
                         k++;
                     }
                 }
-                i+=del_ome;
+                i += del_ome;
             }
         }
         fflush(fp1); fflush(fp2); fflush(fp3);
@@ -566,28 +574,28 @@ double  omr, gar, thr, phir, chir;
 double  COSAL;
 
 
-rad=pi/180;
+rad = pi / 180;
 
-chi=0.0;
+chi = 0.0;
 
-phi=0.0;
+phi = 0.0;
 
-omr=om*rad;
+omr = om * rad;
 
-gar=ga*rad;
+gar = ga * rad;
 
-thr=th*rad;
+thr = th * rad;
 
-phir=phi*rad;
+phir = phi * rad;
 
-chir=chi*rad;
+chir = chi * rad;
 
 /***the multiplication of matrix G and s */
 
- COSAL=(  ( (-1*cos(omr)*sin(phir)) - (sin(omr)*cos(phir)*cos(chir)) )*(-1*sin(thr)) )
-       +( (-1*sin(omr)*sin(phir)) + (cos(omr)*cos(phir)*cos(chir)) ) * (cos(thr)*cos(gar));
+ COSAL=(  ( (-1 * cos(omr) * sin(phir)) - (sin(omr) * cos(phir) * cos(chir)) ) * (-1 * sin(thr)) )
+       + ( (-1 * sin(omr) * sin(phir)) + (cos(omr) * cos(phir) * cos(chir)) ) * (cos(thr) * cos(gar));
 
- al = (float)(acos(COSAL))/rad;
+ al = (float)(acos(COSAL)) / rad;
 
  return (al);
  }
@@ -600,51 +608,51 @@ double  thbr, ombr, gabr, albr, phibr, chibr;
 double  SINALCOSBE,COSBE,SINALSINBE,SINBE;
 
 
-rad_be = pi/180;
+rad_be = pi / 180;
 
 chi_be = 0.0;
 
 phi_be = 0.0;
 
-thbr = thb*rad_be;
+thbr = thb * rad_be;
 
-ombr = omb*rad_be;
+ombr = omb * rad_be;
 
-gabr = gab*rad_be;
+gabr = gab * rad_be;
 
-albr = alb*rad_be;
+albr = alb * rad_be;
 
-chibr = chi_be*rad_be;
+chibr = chi_be * rad_be;
 
-phibr = phi_be*rad_be;
+phibr = phi_be * rad_be;
 
 /*** the multiplication of matrix G and s */
 
  SINALCOSBE
-  = ( cos(ombr)*(-1*sin(thbr)) )+( ( (sin(ombr)*cos(phibr)) + (cos(ombr)*sin(phibr)*cos(chibr)) )*(cos(thbr)*cos(gabr)) );
+  = ( cos(ombr)*(-1 * sin(thbr)) ) + ( ( (sin(ombr) * cos(phibr)) + (cos(ombr) * sin(phibr) * cos(chibr)) ) * (cos(thbr) * cos(gabr)) );
 
- COSBE = SINALCOSBE/sin(albr);
+ COSBE = SINALCOSBE / sin(albr);
 
- SINALSINBE = cos(thbr)*sin(gabr);
+ SINALSINBE = cos(thbr) * sin(gabr);
 
- SINBE = SINALSINBE/sin(albr);
+ SINBE = SINALSINBE / sin(albr);
 
- if(COSBE>1.0)
+ if(COSBE > 1.0)
     {be = 0.0;
-     COSBE=1;}
- if(COSBE<-1)
+     COSBE = 1;}
+ if(COSBE < -1)
     {be = 180.0;
-    COSBE=-1;}
+    COSBE = -1;}
 
- if(SINBE<0)
-      be = (float) 360 - ( acos(COSBE)/rad_be );
+ if(SINBE < 0)
+      be = (float) 360 - ( acos(COSBE) / rad_be );
    else
-      be = (float) acos(COSBE)/rad_be;
+      be = (float) acos(COSBE) / rad_be;
 
- if((omb==0) && (be > 270.0))
-   be = 360-be;
- if((omb==0) && (be <= 80.0))
-   be = 360-be;
+ if((omb == 0) && (be > 270.0))
+   be = 360 - be;
+ if((omb == 0) && (be <= 80.0))
+   be = 360 - be;
 
  return (be);
  }
