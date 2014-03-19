@@ -1,21 +1,100 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include "array_alloc.c"
 
-void read_file(FILE * fit_fp, double * H_ini, double * eta_ini,
-                double * I0_ini, double * t0_ini, double * shift_H_ini, double * shift_eta_ini, double * bg_int_ini)
+void read_file(int flag, FILE * fit_fp, double * seed)
 {
-    char buf[500];
-    while(fgets(buf, 500, fit_fp) != NULL)
+    char buf[250];
+    char *token;
+    char *search = "\t ";
+    int i = 0;
+    if(flag == 1){
+        fgets(buf, 250, fit_fp);//leo el chi
+        fgets(buf, 250, fit_fp);//global H
+        fgets(buf, 250, fit_fp);//valor de H (con error)
+        //leo el valor de H y su error
+        token = strtok(buf, search);
+        while(token != NULL)
+        {
+            seed[i] = atof(token);
+            i++;
+            token = strtok(NULL, search);
+        }
+        fgets(buf, 250, fit_fp);//golbal eta
+        fgets(buf, 250, fit_fp);//valor de eta(con error)
+        //leo el valor de eta y su error
+        token = strtok(buf, search);
+        while(token != NULL)
+        {
+            seed[i] = atof(token);
+            i++;
+            token = strtok(NULL, search);
+        }
+        fgets(buf, 250, fit_fp);//encabezado
+        //leo los valores del ajuste con sus errores
+        while(fgets(buf, 250, fit_fp) != NULL)
+        {
+            token = strtok(buf, search);
+            while(token != NULL)
+            {
+                seed[i] = atof(token);
+                i++;
+                token = strtok(NULL, search);
+            }
+        }
+    }
+    else
     {
-        printf("%s\n", buf);
+        fgets(buf, 250, fit_fp);//leo el titulo
+        fgets(buf, 250, fit_fp);//global H
+        fgets(buf, 250, fit_fp);//valor de H
+        //leo el valor de H
+        token = strtok(buf, search);
+        while(token != NULL)
+        {
+            seed[i] = atof(token);
+            i++;
+            token = strtok(NULL, search);
+        }
+        fgets(buf, 250, fit_fp);//golbal eta
+        fgets(buf, 250, fit_fp);//valor de eta
+        //leo el valor de eta
+        token = strtok(buf, search);
+        while(token != NULL)
+        {
+            seed[i] = atof(token);
+            i++;
+            token = strtok(NULL, search);
+        }
+        fgets(buf, 250, fit_fp);//encabezado
+        //leo los valores del ajuste con sus errores
+        while(fgets(buf, 250, fit_fp) != NULL)
+        {
+            token = strtok(buf, search);
+            while(token != NULL)
+            {
+                seed[i] = atof(token);
+                i++;
+                token = strtok(NULL, search);
+            }
+        }
     }
 }
-
+/*
 int main()
 {
     FILE * fit_fp;
-    double a, b, c, d, e, f, g;
+    int i;
+    //int size = 2 * (2 + 6 * 5);
+    int size = 2 + 6 * 5;
+    double * seed = vector_double_alloc(size);
     fit_fp = fopen("fit_data.tmp", "r");
-    read_file(fit_fp, &a, &b, &c, &d, &e, &f, &g);
+    read_file(1, fit_fp, seed);
+    for(i = 0; i < size; i++)
+    {
+        printf("%lf\n", seed[i]);
+    }
     return 0;
 }
+*/

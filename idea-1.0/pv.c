@@ -18,19 +18,27 @@ void print_state (int iter, gsl_multifit_fdfsolver * s);
 double bin2theta(int bin, double pixel, double dist);
 int theta2bin(double theta, double pixel, double dist);
 
-//MAIN
+//INICIO DEL MAIN
 int pv_fitting(int exists, double dist, double pixel, int size, int numrings, int y_sang[2500],
         float t0_sang[20], float I0_sang[500][10], int bg_pos_left[15], int bg_pos_right[15],
         double ** fwhm, double ** eta)
 {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //declaracion de variables y allocacion de memoria
-    double t0_ini[numrings], I0_ini[numrings], H_ini, eta_ini, shift_H_ini[numrings], shift_eta_ini[numrings], bg_int_ini[numrings][2];
     int n_param = 6 * numrings + 2; //numero de parametros a fitear (tengo 6 parametros por pico ademas del eta y el fwhm)
+    double * seed;
+    if(exists == 1)
+    {
+        seed = vector_double_alloc(n_param * 2);
+    }
+    else
+    {
+        seed = vector_double_alloc(2 + 2 * numrings);
+    }
 
     //variables auxiliares del programa
     int i = 0, j = 0;
-    FILE * fit_fp;
+    FILE *fit_fp;
 
     //variables del solver
     int status, iter = 0, max_iter = 500;
@@ -70,38 +78,41 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
     {
         char name[20] = "fit_data.tmp";
         fit_fp = fopen(name, "r");
-        read_file(fit_fp, &H_ini, &eta_ini, &I0_ini, &t0_ini, &shift_H_ini, &shift_eta_ini, &bg_int_ini);
+        read_file(exists, fit_fp, seed);
 
         i = 0;
-        x_init[i] = H_ini; i++;
-        x_init[i] = eta_ini; i++;
+        x_init[i] = seed[i]; i++;//H global
+        x_init[i] = seed[2 * i]; i++;//eta global
     
         for(j = 0; j < numrings; j++)
         {
-            x_init[i] = I0_ini[j]; i++;
-            x_init[i] = t0_ini[j]; i++;
-            x_init[i] = shift_H_ini[j];    i++;
-            x_init[i] = shift_eta_ini[j];  i++;
-            x_init[i] = bg_int_ini[j][0];  i++;
-            x_init[i] = bg_int_ini[j][1];  i++;
+            x_init[i] = seed[2 * i]; i++;//theta0
+            x_init[i] = seed[2 * i]; i++;//I0
+            
+            x_init[i] = seed[2 * i] - seed[0]; i++;//shift_H
+            x_init[i] = seed[2 * i] - seed[1]; i++;//shift_eta
+            x_init[i] = seed[2 * i]; i++;//bg_left
+            x_init[i] = seed[2 * i]; i++;//bg_right
         }
         gsl_vector_view x = gsl_vector_view_array (x_init, n_param); //inicializo el vector con los datos a fitear
+        fclose(fit_fp);
     }
     else
-    {//si no hay datos del fiteo anterior uso una plantilla creada a tal fin
+    {//si no hay datos del fiteo anterior uso una plantilla creada a tal fin y los datos del programa de sang bon yi
         char name = "fit_ini.dat";
-        read_file(fit_fp, name, exists, &H_ini, &eta_ini, &I0_ini, &t0_ini, &shift_H_ini, &shift_eta_ini, &bg_int_ini);
-
+        fit_fp = fopen(name, "r");
+        read_file(exists, fit_fp, seed);
+        int k = 0;
         i = 0;
-        x_init[i] = H_ini; i++; //--> del archivo
-        x_init[i] = eta_ini; i++; //--> del archivo
+        x_init[i] = seed[k]; i++; k++; //H global
+        x_init[i] = seed[k]; i++; k++;//eta global
     
         for(j = 0; j < numrings; j++)
         {
-            x_init[i] = I0_sang[j]; i++; //--> del I0_sang
             x_init[i] = 2. * t0_sang[j]; i++; //--> del t0_sang
-            x_init[i] = shift_H_ini[j];    i++; //--> del archivo
-            x_init[i] = shift_eta_ini[j];  i++; //--> del archivo
+            x_init[i] = I0_sang[j]; i++; //--> del I0_sang
+            x_init[i] = seed[k]; i++; k++;//shift_H
+            x_init[i] = seed[k]; i++; k++;//shift_eta
             
             bg_int_ini[j][0] = gsl_vector_get(y, bg_pos_left[j]);
             x_init[i] = bg_int_ini[j][0];  i++;
@@ -133,19 +144,15 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
     {
         iter++;
         status = gsl_multifit_fdfsolver_iterate (s);
-
         printf ("status = %s\n", gsl_strerror (status));
-
-        print_state (iter, s);
-
+        //print_state (iter, s);
         if (status)
             break;
-
         status = gsl_multifit_test_delta (s -> dx, s -> x, err_abs, err_rel);
     }
     while (status == GSL_CONTINUE && iter < max_iter);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//imprimo los parametros finales
+    //imprimo los resultados del fiteo
     gsl_multifit_covar (s -> J, 0.0, covar); //calculo la matriz de covarianza
 
     #define FIT(i) gsl_vector_get(s -> x, i)  
@@ -154,11 +161,11 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
         double chi = gsl_blas_dnrm2(s -> f);
         double dof = size - n_param;
         double c = GSL_MAX_DBL(1, chi / sqrt(dof)); 
-    
+        FILE * fp = fopen("fit_data.tmp", "w");
         printf("chisq/dof = %g\n",  pow(chi, 2.0) / dof);//calculo e imprimo el chi2 relativo del ajuste que convirgio
         fprintf(fp, "chisq/dof = %g\n",  pow(chi, 2.0) / dof);
-        fprintf(fp, "H   = %.5lf +- %.5lf\n",  FIT(0), ERR(0));
-        fprintf(fp, "eta = %.5lf +- %.5lf\n",  FIT(1), ERR(1));
+        fprintf(fp, "Global_H:\n%6.5lf %6.5lf\n",  FIT(0), ERR(0));
+        fprintf(fp, "Global_eta:\n%6.5lf %6.5lf\n",  FIT(1), ERR(1));
         i = 2;
         fprintf (fp, "#t0\tsigma\tI\tsigma\tH\tsigma\t\teta\tsigma\t\t\tbg_l\tsigma\tbg_r\tsigma\n");
         for(j = 0; j < numrings; j++)
@@ -169,14 +176,13 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
                             FIT(1) + FIT(i + 3), c * sqrt(pow(ERR(1), 2) +  pow(ERR(i + 3), 2)),
                             FIT(i + 4), c * ERR(i + 4), FIT(i + 5),  c * ERR(i + 5));
             i+=6;
-        }   
+        }
     }
     printf ("status = %s\n", gsl_strerror (status));
 ///////////////////////////////////////////////////////////////////////////////////////
     //liberacion de memoria allocada y cierre de archivos
     free(x_init);
-    free(t0_data);
-    free_int_matrix(bg_pos_data, numrings);
+    free(seed);
     fclose(fp);
 
     gsl_vector_free(ttheta);
@@ -185,7 +191,6 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
     gsl_matrix_free(bg_pos);
     
     gsl_matrix_free(covar);
-
     gsl_multifit_fdfsolver_free (s);
 
     printf("\nGod's in his heaven\nAll fine with the world\n");
@@ -196,7 +201,7 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
 //FUNCIONES AUXILIARES
 void print_state (int iter, gsl_multifit_fdfsolver * s)
 {
-  printf ("iter: %3d\t|f(x)| = %g\n", iter, gsl_blas_dnrm2 (s -> f));
+    printf ("iter: %3d\t|f(x)| = %g\n", iter, gsl_blas_dnrm2 (s -> f));
 }
 
 double bin2theta(int bin, double pixel, double dist)

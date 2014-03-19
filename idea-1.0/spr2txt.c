@@ -308,7 +308,8 @@ int main()
                 }                                       
                 intens[y][n] = (intensity / count) - BG_m;  // Integral values and BG correction
                 n++;
-            }while(n < numrings);
+            }
+            while(n < numrings);
             //fiteo del difractograma para la obtencion del ancho de pico y eta
             int exists = 1;
             if(k == star_d && y == 1) exists = 0; //pregunto si este es el primer archivo con el que estoy trabajando
@@ -363,7 +364,8 @@ int main()
         }
         fclose(fp1);
         k += del_d; //paso al siguiente spr
-    }while(k <= end_d);
+    }
+    while(k <= end_d);
     /*End pole figure data in Machine coordinates*/
     
     printf("\nReduction of the Fit2D-DATA is finished.\n%d pole figure data are generated.\n\n", d);
@@ -645,90 +647,74 @@ int main()
 
 float winkel_al(float th, float om, float ga)
 {
-float   al,rad,chi,phi;
-double  omr, gar, thr, phir, chir;
-double  COSAL;
+    float   al,rad,chi,phi;
+    double  omr, gar, thr, phir, chir;
+    double  COSAL;
 
+    rad = pi / 180;
+    chi = 0.0;
+    phi = 0.0;
+    omr = om * rad;
+    gar = ga * rad;
+    thr = th * rad;
+    phir = phi * rad;
+    chir = chi * rad;
 
-rad = pi / 180;
+    /***the multiplication of matrix G and s */
+     COSAL=(  ( (-1 * cos(omr) * sin(phir)) - (sin(omr) * cos(phir) * cos(chir)) ) * (-1 * sin(thr)) )
+           + ( (-1 * sin(omr) * sin(phir)) + (cos(omr) * cos(phir) * cos(chir)) ) * (cos(thr) * cos(gar));
 
-chi = 0.0;
-
-phi = 0.0;
-
-omr = om * rad;
-
-gar = ga * rad;
-
-thr = th * rad;
-
-phir = phi * rad;
-
-chir = chi * rad;
-
-/***the multiplication of matrix G and s */
-
- COSAL=(  ( (-1 * cos(omr) * sin(phir)) - (sin(omr) * cos(phir) * cos(chir)) ) * (-1 * sin(thr)) )
-       + ( (-1 * sin(omr) * sin(phir)) + (cos(omr) * cos(phir) * cos(chir)) ) * (cos(thr) * cos(gar));
-
- al = (float)(acos(COSAL)) / rad;
-
- return (al);
- }
-
+     al = (float)(acos(COSAL)) / rad;
+     return (al);
+}
 
 float winkel_be(float thb, float omb, float gab, float alb)
 {
-float   be,rad_be,chi_be,phi_be;
-double  thbr, ombr, gabr, albr, phibr, chibr;
-double  SINALCOSBE,COSBE,SINALSINBE,SINBE;
+    float   be,rad_be,chi_be,phi_be;
+    double  thbr, ombr, gabr, albr, phibr, chibr;
+    double  SINALCOSBE,COSBE,SINALSINBE,SINBE;
+    
+    rad_be = pi / 180;
+    chi_be = 0.0;
+    phi_be = 0.0;
+    thbr = thb * rad_be;
+    ombr = omb * rad_be;
+    gabr = gab * rad_be;
+    albr = alb * rad_be;
+    chibr = chi_be * rad_be;
+    phibr = phi_be * rad_be;
 
+    /*** the multiplication of matrix G and s */
 
-rad_be = pi / 180;
+    SINALCOSBE
+    = ( cos(ombr)*(-1 * sin(thbr)) ) + ( ( (sin(ombr) * cos(phibr)) + (cos(ombr) * sin(phibr) * cos(chibr)) ) * (cos(thbr) * cos(gabr)) );
 
-chi_be = 0.0;
+    COSBE = SINALCOSBE / sin(albr);
 
-phi_be = 0.0;
+    SINALSINBE = cos(thbr) * sin(gabr);
 
-thbr = thb * rad_be;
+    SINBE = SINALSINBE / sin(albr);
 
-ombr = omb * rad_be;
+    if(COSBE > 1.0)
+    {
+        be = 0.0;
+        COSBE = 1;
+    }
+    if(COSBE < -1)
+    {
+        be = 180.0;
+        COSBE = -1;
+    }
 
-gabr = gab * rad_be;
+    if(SINBE < 0)
+        be = (float) 360 - ( acos(COSBE) / rad_be );
+    else
+        be = (float) acos(COSBE) / rad_be;
 
-albr = alb * rad_be;
+    if((omb == 0) && (be > 270.0))
+        be = 360 - be;
+    if((omb == 0) && (be <= 80.0))
+        be = 360 - be;
 
-chibr = chi_be * rad_be;
-
-phibr = phi_be * rad_be;
-
-/*** the multiplication of matrix G and s */
-
- SINALCOSBE
-  = ( cos(ombr)*(-1 * sin(thbr)) ) + ( ( (sin(ombr) * cos(phibr)) + (cos(ombr) * sin(phibr) * cos(chibr)) ) * (cos(thbr) * cos(gabr)) );
-
- COSBE = SINALCOSBE / sin(albr);
-
- SINALSINBE = cos(thbr) * sin(gabr);
-
- SINBE = SINALSINBE / sin(albr);
-
- if(COSBE > 1.0)
-    {be = 0.0;
-     COSBE = 1;}
- if(COSBE < -1)
-    {be = 180.0;
-    COSBE = -1;}
-
- if(SINBE < 0)
-      be = (float) 360 - ( acos(COSBE) / rad_be );
-   else
-      be = (float) acos(COSBE) / rad_be;
-
- if((omb == 0) && (be > 270.0))
-   be = 360 - be;
- if((omb == 0) && (be <= 80.0))
-   be = 360 - be;
-
- return (be);
- }
+    return (be);
+}

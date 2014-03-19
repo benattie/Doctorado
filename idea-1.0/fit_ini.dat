@@ -1,9 +1,11 @@
-1.FWHM:  0.02
-2.ETA:   0.1
-3. Peak Param:
-sH  seta
-0.0 0.0
-.
-.numring veces
-.
-0.0 0.0
+FIT_INI: archivo con las estimaciones de los valores iniciales para el ajuste
+Global_H:
+0.02000
+Global_eta:
+0.10000
+#shift_H shift_eta	
+0.00000	0.00000
+0.00000	0.00000
+0.00000	0.00000
+0.00000	0.00000
+0.00000	0.00000
