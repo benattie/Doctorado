@@ -19,14 +19,13 @@ double bin2theta(int bin, double pixel, double dist);
 int theta2bin(double theta, double pixel, double dist);
 
 //MAIN
-int pv_fitting(int exists, double pixel, double dist, int size, int numrings, int y_sang[2500],
+int pv_fitting(int exists, double dist, double pixel, int size, int numrings, int y_sang[2500],
         float t0_sang[20], float I0_sang[500][10], int bg_pos_left[15], int bg_pos_right[15],
         double ** fwhm, double ** eta)
 {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //estimacion inicial de los parametros del fiteo
+    //declaracion de variables y allocacion de memoria
     double t0_ini[numrings], I0_ini[numrings], H_ini, eta_ini, shift_H_ini[numrings], shift_eta_ini[numrings], bg_int_ini[numrings][2];
-    double pixel = 100e-6, dist = 1081e-3;
     int n_param = 6 * numrings + 2; //numero de parametros a fitear (tengo 6 parametros por pico ademas del eta y el fwhm)
 
     //variables auxiliares del programa
@@ -38,6 +37,7 @@ int pv_fitting(int exists, double pixel, double dist, int size, int numrings, in
     double err_abs = 1e-4, err_rel = 1e-4;
     const gsl_multifit_fdfsolver_type * T;
     gsl_multifit_fdfsolver * s;
+    double * x_init = vector_double_alloc(n_param);
 
     //Parametros fijos
     gsl_vector * ttheta = gsl_vector_alloc(size); //valores de 2theta
@@ -52,7 +52,7 @@ int pv_fitting(int exists, double pixel, double dist, int size, int numrings, in
     //obtengo los datos
     for(i = 0; i < size; i++)
     {
-        gsl_vector_set(ttheta, i, bin2theta(i, pixel, dist)); //los valores del pixel y de dist deberia sacarlos del para_fit2d.dat
+        gsl_vector_set(ttheta, i, bin2theta(i, pixel, dist));
         gsl_vector_set(y, i, y_sang[i]);//tal vez haya que promediar los datos
         gsl_vector_set(sigma, i, sqrt(gsl_vector_get(y, i))); //calculo los sigma de las intensidades
     }
@@ -63,14 +63,14 @@ int pv_fitting(int exists, double pixel, double dist, int size, int numrings, in
         gsl_matrix_set(bg_pos, i, 1, bin2theta(bg_pos_right[i], pixel, dist)); //bin del punto definido bg_right
     }
     size = bg_pos_right[numrings]; //corto los datos en el ultimo punto de background
-    struct data d = {size, numrings, ttheta, y, sigma, bg_pos};
+    struct data d = {size, numrings, ttheta, y, sigma, bg_pos}; //estructura que contiene los datos experimentales
 
     //semillas de los parametros
-    double * x_init = vector_double_alloc(n_param);
     if(exists == 1)//si ya tengo los resultados de un fiteo anterior, los uso como semilla del fiteo siguiente
     {
-        char name = "fit_data.tmp";
-        read_file(fit_fp, name, exists, &H_ini, &eta_ini, &I0_ini, &t0_ini, &shift_H_ini, &shift_eta_ini, &bg_int_ini);
+        char name[20] = "fit_data.tmp";
+        fit_fp = fopen(name, "r");
+        read_file(fit_fp, &H_ini, &eta_ini, &I0_ini, &t0_ini, &shift_H_ini, &shift_eta_ini, &bg_int_ini);
 
         i = 0;
         x_init[i] = H_ini; i++;

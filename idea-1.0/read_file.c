@@ -1,37 +1,21 @@
-/*#include <stdlib.h>
+#include <stdlib.h>
 #include <stdio.h>
 
-#include <gsl/gsl_vector.h>
-*/
-//la idea es hacer una funcion que lea un dif.dat y me saque el vector de las intensidades
-
-void data(char name[15], int size, gsl_vector * x, gsl_vector * y){
-    FILE * fp;
-    char buf[100];
-    int i;
-    double ttheta[size], intens[size];
-
-    if((fp = fopen(name, "r")) == NULL )
-    {//abro el archivo
-        fprintf(stderr,"Error opening file(%s).", name);
-        exit(1);
+void read_file(FILE * fit_fp, double * H_ini, double * eta_ini,
+                double * I0_ini, double * t0_ini, double * shift_H_ini, double * shift_eta_ini, double * bg_int_ini)
+{
+    char buf[500];
+    while(fgets(buf, 500, fit_fp) != NULL)
+    {
+        printf("%s\n", buf);
     }
-    
-    //lectura del encabezado
-    fgets(buf,100,fp);
-    //printf("%s\n", buf);
-    fgets(buf,2,fp);
-    //printf("%s\n", buf);
-    
-    i = 0;
-    while(fscanf(fp, "%lf", &ttheta[i]) != EOF && fscanf(fp, "%lf", &intens[i]) != EOF)
-    {//lectura del archivo
-        gsl_vector_set (x, i, ttheta[i]);
-        gsl_vector_set (y, i, intens[i]);
-        i++;
-    }
-    //cierro archivos y libero variables
-    fclose (fp);
 }
 
-
+int main()
+{
+    FILE * fit_fp;
+    double a, b, c, d, e, f, g;
+    fit_fp = fopen("fit_data.tmp", "r");
+    read_file(fit_fp, &a, &b, &c, &d, &e, &f, &g);
+    return 0;
+}

@@ -10,7 +10,6 @@
 #include <time.h>
 #include "pv.c"
 
-
 #define pi 3.141592654
 //#define max(x, y) (((x) > (y)) ? (x) : (y))
 //#define min(x, y) (((x) < (y)) ? (x) : (y))
@@ -20,7 +19,7 @@ struct DAT {float old; float nnew;};
 float winkel_al(float, float, float);
 float winkel_be(float, float, float, float );
 
-main()
+int main()
 {
  int Z, i, k, n, x, y;
  int a, b, z, count, c, d, count_minus;
@@ -28,30 +27,35 @@ main()
  int NrSample, star_d, end_d, star_a, end_a, del_d, del_a, rot_p, end_g, numrings;
  int posring_l[15], posring_r[15], ug_l[15], ug_r[15];
  int fd[15], fi[15];
+ int ffwhm[15], feta[15];
+
  int pixel_number, gamma;
  int data[2500], intensity;
  int stepnum, maxpos, minpos;
 
  double pixel, dist;
- double fwhm[500][10], eta[500][10];
+ double fwhm = matrix_double_alloc(500, 10);
+ double eta = matrix_double_alloc(500, 10);
  float data1[2500], BG_m, intens[500][10]
 
  char buf_temp[100], buf[100], buf1[100];
  char path_out[150], path [150], filename[60], filename1[100], inform[10], path1[150], inform1[10];
- char outfile[100], linfile[100];
+ char outfile[100], linfile[100], fwhmfile[100], etafile[100];
  char marfile[150];
- char outinten[3000];
+ char outinten[3000], outfwhm[6000], outeta[6000];
  char minus_zero; 
  char logfile_yn, logfile_yn_temp;
  
- FILE *fp, *fp1, *fp2, *fp3, *fp4; 
- FILE *fp_fwhm, *fp_eta, *fp_fwhm_pf, *fp_eta_pf; 
+ FILE *fp, *fp1, *fp2, *fp3, *fp4;
+ FILE *fp_fwhm, *fp_fwhm_pf, *fp_eta, *fp_eta_pf;
 
  struct DAT intensss;
 
  int   j, l, m, step, anf_gam, ende_gam, del_gam, num;
  float step_ome, anf_ome, ende_ome, del_ome, weg;
  float m_intens, n_intens, nn_intens;
+ double m_fwhm, n_fwhm, nn_fwhm;
+ double m_eta, n_eta, nn_eta;
  float theta[20], neu_ome, neu_ome1, neu_gam1, neu_gam, alpha, beta;
  float alpha90;
  float diode[200], max_diode, min_diode, max_diode_temp, min_diode_temp, ratio, inten, new_int;
@@ -68,208 +72,221 @@ main()
  puts("Error or suggestion to sangbong.yi@hzg.de");
  puts("\n****************************************************************************");
 
-
- if((fp = fopen("para_fit2d.dat","r")) == NULL )
-     {fprintf(stderr,"Error opening file(para_fit2d.txt)."); exit(1);}
+ if((fp = fopen("para_fit2d.dat", "r")) == NULL )
+ {
+     fprintf(stderr, "Error opening file para_fit2d.txt."); exit(1);
+ }
  //////////////////////INICIA LA LECTURA DEL ARCHIVO para_fit2d.dat/////////////////////////////////////////////
- //path hacia los archivos, probablemente los de salida, pero no estoy seguro (C:\Users\Bolmaro\Experim\Sabo\dat\) 
- fgets(buf_temp,22,fp);
- fscanf(fp,"%s",&path_out);   fgets(buf_temp,2,fp);
+ //path hacia los archivos de salida
+ fgets(buf_temp, 22, fp);
+ fscanf(fp, "%s", &path_out);   fgets(buf_temp, 2, fp);
  //numero de muestras a trabajar (1)
- fgets(buf_temp,22,fp);
- fscanf(fp,"%d",&NrSample);   fgets(buf_temp,2,fp);
- 
+ fgets(buf_temp, 22, fp);
+ fscanf(fp, "%d", &NrSample);   fgets(buf_temp, 2, fp);
 
  for(Z = 1; Z <= NrSample; Z++) // FOR-routine: whole routines
  {
     //skip lines
-    fgets(buf_temp,2,fp);
-    fgets(buf_temp,60,fp);
-    fgets(buf_temp,2,fp);
+    fgets(buf_temp, 2, fp);
+    fgets(buf_temp, 60, fp);
+    fgets(buf_temp, 2, fp);
     
     //path hacia los spr (encabezado + 360 filas x 1725 columnas) (son 37) 
-    fgets(buf_temp,22,fp);
-    fscanf(fp,"%s",&path);   fgets(buf_temp,2,fp);
+    fgets(buf_temp, 22, fp);
+    fscanf(fp, "%s", &path);   fgets(buf_temp, 2, fp);
 
     //lee raiz de los archivos spr (New_Al70R-tex_)
-    fgets(buf_temp,22,fp);
-    fscanf(fp,"%s",&filename1); fgets(buf_temp,2,fp);
+    fgets(buf_temp, 22, fp);
+    fscanf(fp, "%s", &filename1); fgets(buf_temp, 2, fp);
 
     //lee la extension de los archivos (spr)
-    fgets(buf_temp,22,fp);
-    fscanf(fp,"%s",&inform); fgets(buf_temp,2,fp);
+    fgets(buf_temp, 22, fp);
+    fscanf(fp, "%s", &inform); fgets(buf_temp, 2, fp);
 
     //pasa los contenidos de path e inform hacia path1 e inform1 (why?)
-    strcpy(path1,path); strcpy(inform1,inform);
+    strcpy(path1, path); strcpy(inform1, inform);
     
     //numero asociado al primer spr (relacionado con omega)
-    fgets(buf_temp,22,fp);
-    fscanf(fp,"%d",&star_d); fgets(buf_temp,2,fp);
+    fgets(buf_temp, 22, fp);
+    fscanf(fp, "%d", &star_d); fgets(buf_temp, 2, fp);
     
-    //angulo (\Omega) inicial
-    fgets(buf_temp,22,fp);
-    fscanf(fp,"%d",&star_a); fgets(buf_temp,2,fp);
+    //angulo (\Omega) inicial 
+    fgets(buf_temp, 22, fp);
+    fscanf(fp, "%d", &star_a); fgets(buf_temp, 2, fp);
     
     //numero asociado al ultimo spr
-    fgets(buf_temp,22,fp);
-    fscanf(fp,"%d",&end_d); fgets(buf_temp,2,fp);
+    fgets(buf_temp, 22, fp);
+    fscanf(fp, "%d", &end_d); fgets(buf_temp, 2, fp);
     
     //angulo (\Omega) final
-    fgets(buf_temp,22,fp);
-    fscanf(fp,"%d",&end_a); fgets(buf_temp,2,fp);
+    fgets(buf_temp, 22, fp);
+    fscanf(fp, "%d", &end_a); fgets(buf_temp, 2, fp);
     
     //delta en los spr
-    fgets(buf_temp,22,fp);
-    fscanf(fp,"%d",&del_d); fgets(buf_temp,2,fp);
+    fgets(buf_temp, 22, fp);
+    fscanf(fp, "%d", &del_d); fgets(buf_temp, 2, fp);
     
     //delta en el angulo \omega
-    fgets(buf_temp,22,fp);
-    fscanf(fp,"%d",&del_a); fgets(buf_temp,2,fp);
+    fgets(buf_temp, 22, fp);
+    fscanf(fp, "%d", &del_a); fgets(buf_temp, 2, fp);
     
     //gamma inicial
-    fgets(buf_temp,22,fp);
-    fscanf(fp,"%d",&rot_p); fgets(buf_temp,2,fp);
+    fgets(buf_temp, 22, fp);
+    fscanf(fp, "%d", &rot_p); fgets(buf_temp, 2, fp);
     
     //gamma final
-    fgets(buf_temp,22,fp);
-    fscanf(fp,"%d",&end_g); fgets(buf_temp,2,fp);
+    fgets(buf_temp, 22, fp);
+    fscanf(fp, "%d", &end_g); fgets(buf_temp, 2, fp);
     
     //Distancia de la muestra al detector
-    fgets(buf_temp,22,fp);
-    fscanf(fp,"%lf",&dist); fgets(buf_temp,2,fp);
+    fgets(buf_temp, 22, fp);
+    fscanf(fp, "%lf", &dist); fgets(buf_temp, 2, fp);
     
     //Distancia que cubre un pixel en el difractograma
-    fgets(buf_temp,22,fp);
-    fscanf(fp,"%lf",&pixel); fgets(buf_temp,2,fp);
+    fgets(buf_temp, 22, fp);
+    fscanf(fp, "%lf", &pixel); fgets(buf_temp, 2, fp);
 
     //flag que determina si las cuentas negativas se pasan a 0
-    fgets(buf_temp,22,fp);
-    fscanf(fp,"%s",&minus_zero); fgets(buf_temp,2,fp);    
+    fgets(buf_temp, 22, fp);
+    fscanf(fp, "%s", &minus_zero); fgets(buf_temp, 2, fp);    
 
     //flag que determina si se genera el archivo .log?
-    fgets(buf_temp,22,fp);
-    fscanf(fp,"%s",&logfile_yn_temp); fgets(buf_temp,2,fp);
+    fgets(buf_temp, 22, fp);
+    fscanf(fp, "%s", &logfile_yn_temp); fgets(buf_temp, 2, fp);
     
     //skip lines
-    fgets(buf_temp,2,fp);
-    fgets(buf_temp,15,fp);
-    fgets(buf_temp,2,fp);
+    fgets(buf_temp, 2, fp);
+    fgets(buf_temp, 15, fp);
+    fgets(buf_temp, 2, fp);
 
     //numero de picos a analizar 
-    fgets(buf_temp,22,fp);
-    fscanf(fp,"%d",&numrings); fgets(buf_temp,2,fp); 
+    fgets(buf_temp, 22, fp);
+    fscanf(fp, "%d", &numrings); fgets(buf_temp, 2, fp); 
     
     //skip lines
-    fgets(buf_temp,22,fp); fgets(buf_temp,2,fp);
-    fgets(buf_temp,33,fp); fgets(buf_temp,2,fp);
+    fgets(buf_temp, 22, fp); fgets(buf_temp, 2, fp);
+    fgets(buf_temp, 33, fp); fgets(buf_temp, 2, fp);
     
     //le aviso al usuario el valor del flag que activa o desactiva la creacion del .log
-    printf("\n correction log file = %s ",&logfile_yn_temp);
+    printf("\n correction log file = %s ", &logfile_yn_temp);
     logfile_yn = logfile_yn_temp;
     
     //le aviso al usuario el valor del flag que activa o desactiva la correccion de cuentas negativas
-    printf("\n correction minus_zero = %s ",&minus_zero);
+    printf("\n correction minus_zero = %s ", &minus_zero);
     
     //no se para que esta esto
-    printf("\n log_file minus_zero = %s  \n",&logfile_yn);
+    printf("\n log_file minus_zero = %s  \n" ,&logfile_yn);
 
     for(i = 0; i < numrings; i++) //itera sobre cada pico (0 a 7) -> (1 a 8)
     {
-        fscanf(fp,"%f",&theta[i]); //posicion angular del centro del pico (\theta o $2\theta?)
-        fscanf(fp,"%d",&posring_l[i]); //bin a la izquierda del pico
-        fscanf(fp,"%d",&posring_r[i]); //bin a la derecha del pico
-        fscanf(fp,"%d",&ug_l[i]); //bin de bg a la izquierda del pico
-        fscanf(fp,"%d",&ug_r[i]); //bin de bg a la derecha del pico
+        fscanf(fp, "%f", &theta[i]); //posicion angular del centro del pico (\theta o $2\theta?)
+        fscanf(fp, "%d", &posring_l[i]); //bin a la izquierda del pico
+        fscanf(fp, "%d", &posring_r[i]); //bin a la derecha del pico
+        fscanf(fp, "%d", &ug_l[i]); //bin de bg a la izquierda del pico
+        fscanf(fp, "%d", &ug_r[i]); //bin de bg a la derecha del pico
 
         strcpy(outfile, "");
         strcat(outfile, path_out);
         strcat(outfile, filename1);
-        strcat(outfile,"PF_");
+        strcat(outfile, "PF_");
+        sprintf(buf,"%d", i + 1);
+        strcat(outfile, buf);
+        strcat(outfile, ".dat");
 
-        sprintf(buf,"%d",i+1);
-        strcat(outfile,buf);
-        strcat(outfile,".dat");
+        strcpy(fwhmfile, "");
+        strcat(fwhmfile, path_out);
+        strcat(fwhmfile, filename1);
+        strcat(fwhmfile, "FWHM_PF_");
+        sprintf(buf,"%d", i + 1);
+        strcat(fwhmfile, buf);
+        strcat(fwhmfile, ".dat");
 
-        //despues de todas las lineas str* genera un string de nombre C:\Users\Bolmaro\Experim\Sabo\dat\New_Al70R-tex_PF_(1 al 8).dat 
-        //abre un archivo para cada pico (lo voy a llamar de ahora en adelante file_peak)
-        if((fd[i] = open(outfile,O_CREAT|O_TRUNC|O_RDWR,S_IREAD|S_IWRITE)) < 0)
+        strcpy(etafile, "");
+        strcat(etafile, path_out);
+        strcat(etafile, filename1);
+        strcat(etafile, "ETA_PF_");
+        sprintf(buf,"%d", i + 1);
+        strcat(etafile, buf);
+        strcat(etafile, ".dat");
+        
+        //genero los archivos en los que se guardan los datos (intens, fwhm, eta), en formato maquina, de cada pico.
+        //En adelante seran llamados file_peak
+        if((fd[i] = open(outfile, O_CREAT|O_TRUNC|O_RDWR,S_IREAD|S_IWRITE)) < 0)
         { 
-            printf("Cannot open OUTPUT file.(for %d ring)",i + 1); exit(1);
+            printf("Cannot open INTENS OUTPUT file.(for %d ring)", i + 1); exit(1);
+        }
+
+        if((ffwhm[i] = open(fwhmfile, O_CREAT|O_TRUNC|O_RDWR,S_IREAD|S_IWRITE)) < 0)
+        { 
+            printf("Cannot open FWHM OUTPUT file.(for %d ring)", i + 1); exit(1);
+        }
+        
+        if((feta[i] = open(etafile, O_CREAT|O_TRUNC|O_RDWR,S_IREAD|S_IWRITE)) < 0)
+        { 
+            printf("Cannot open ETA OUTPUT file.(for %d ring)", i + 1); exit(1);
         }
     }
     
     /* End of reading the parameter file and End of generation of Output-files for(i=0;i<numrings;i++)*/	
-    ///////////FINALIZA LA LECTURA DEL ARCHIVO para_fit2d.dat/////////////////////////////////////////
-    fgets(buf_temp,2,fp); //skip line
+    fgets(buf_temp, 2, fp); //skip line
 
     //imprime en pantalla los datos relevantes de cada pico 
     for(i = 0; i < numrings; i++)
-        printf("Position of [%d]ring = Theta:%6.3f  %8d%8d%8d%8d\n",i + 1,theta[i],posring_l[i],posring_r[i],ug_l[i],ug_r[i]);
+        printf("Position of [%d]ring = Theta:%6.3f  %8d%8d%8d%8d\n", i + 1, theta[i], posring_l[i], posring_r[i], ug_l[i], ug_r[i]);
 
     //imprime en cada file_peak el \gamma inicial, final y el paso
-    sprintf(buf_temp,"Anf., Ende, Schritt-Gamma:              %8d%8d       1\n",rot_p,end_g);
+    sprintf(buf_temp, "Anf., Ende, Schritt-Gamma:              %8d%8d       1\n", rot_p, end_g);
 
     for(i = 0; i < numrings; i++)
-        write(fd[i],buf_temp, strlen(buf_temp));
+        write(fd[i], buf_temp, strlen(buf_temp));
 
     //imprime en cada file_peak el \Omega inicial, final y el paso
-    sprintf(buf_temp,"Anf., Ende, Schritt-Omega:              %8d%8d%8d\n\n",star_a,end_a,del_a);
+    sprintf(buf_temp, "Anf., Ende, Schritt-Omega:              %8d%8d%8d\n\n", star_a, end_a, del_a);
     for(i = 0; i < numrings; i++)
-        write(fd[i],buf_temp, strlen(buf_temp));
+        write(fd[i], buf_temp, strlen(buf_temp));
 
-    /*Begin ring data read-in and output*/
-    
+    /*Begin ring data read-in and output in machine pole figure  (\gamma, \Omega)*/
     k = star_d;  // file index number : start_d to end_d
-    //Inicio de la escritura del archivo que hace la figura de polos en el sistema de coordenadas de la maquina (\gamma, \Omega)
-    do //Interacion sobre todos los spr  
+    do //Iteracion sobre todos los spr  
     {
         //selecciono el archivo spr que voy a procesar
-        /*Input file*/
         strcpy(marfile, path1);
-        strcat(marfile,filename1);
-        sprintf(buf,"%d",k);
-
+        strcat(marfile, filename1);
+        sprintf(buf, "%d", k);
         if(k < 10)
-            sprintf(buf1,"0000");
+            sprintf(buf1, "0000");
         if(k >= 10 && k < 100)
-            sprintf(buf1,"000");
+            sprintf(buf1, "000");
         if(k >= 100)
-            sprintf(buf1,"00");
-        strcat(marfile,buf1);
+            sprintf(buf1, "00");
+        strcat(marfile, buf1);
+        strcat(marfile, buf);
+        strcat(marfile, ".");
+        strcat(marfile, "spr");
 
-        strcat(marfile,buf);
-        strcat(marfile,".");
-
-        strcat(marfile,"spr");
-        //termina la seleccion del archivo spr
-
-        printf("\nReading data from <====  %s\n", marfile );
-
+        printf("\nReading data from <====  %s\n", marfile);
         //abro el archivo spr del que voy a sacar las intensdades de los picos
-        if((fp1 = fopen(marfile, "r")) == NULL ) //fp1 = puntero al archivo spr que estoy procesando
+        if((fp1 = fopen(marfile, "r")) == NULL) //fp1 = puntero al archivo spr que estoy procesando
         {
-            fprintf(stderr,"Error opening READ_file: %s \n", marfile);
-	    exit(1);
+            fprintf(stderr, "Error opening READ_file: %s \n", marfile); exit(1);
         }
 
-        fscanf(fp1,"%d",&pixel_number); //pixel number = los bin de los difractogramas
-        fscanf(fp1,"%d",&gamma); //gamma = cantidad de difractogramas (360 en este caso)
+        fscanf(fp1, "%d", &pixel_number); //pixel number = los bin de los difractogramas
+        fscanf(fp1, "%d", &gamma); //gamma = cantidad de difractogramas (360 en este caso)
 
-        fgets(buf,100,fp1); //skip line
+        fgets(buf, 100, fp1); //skip line
 
-        printf("pixel=%d gamma=%d\n",pixel_number,gamma);
+        printf("pixel=%d gamma=%d\n", pixel_number, gamma);
 
         /*Data Read-In */
-
         for(y = 1; y <= gamma; y++) //itero sobre todos los difractogramas (360) (recordar que iterar sobre todos los difractogramas implica obtener un valor de intensidad para cada punto del anillo de Debye)
         {
             for(x = 1; x <= pixel_number; x++) //iteracion dentro de cada uno de los difractogramas (con 1725 puntos) (cada porcion del anillo de Debye)
             {
                 //leo la intensidad de cada bin y la paso a formato de entero (why?)
-                fscanf(fp1,"%e",&data1[x]);
+                fscanf(fp1, "%e", &data1[x]);
                 data[x] = (int)data1[x];
             }
-          
             n = 0; //numero de pico del difractograma
             do //itero sobre todos los picos del difractograma
             {
@@ -277,7 +294,7 @@ main()
                 //los bin en donde se encuentra la informacion del bg para el pico n del difractograma
                 a = ug_l[n]; 
                 b = ug_r[n];
-                //guarda el valor de background correspondiente a los bin del pico adecuado del difractograma correspondiente (que trabalenguas!!)
+                //valor de background correspondiente al bin del pico adecuado del difractograma correspondiente
                 BG_l = data[a];
                 BG_r = data[b];
                 //background promedio
@@ -292,152 +309,205 @@ main()
                 intens[y][n] = (intensity / count) - BG_m;  // Integral values and BG correction
                 n++;
             }while(n < numrings);
+            //fiteo del difractograma para la obtencion del ancho de pico y eta
+            int exists = 1;
+            if(k == star_d && y == 1) exists = 0; //pregunto si este es el primer archivo con el que estoy trabajando
+            pv_fitting(exists, dist, pixel, pixel_number, numrings, data, theta, intens, ug_l, ug_r, fwhm, eta);
         } /*end of the double FOR-routine gamma and pixel number*/
-
-        //fiteo del difractograma para la obtencion del ancho de pico y eta
-        int exists = 1;
-        if(k == star_d) exists = 0;
-        pv_fitting(exists, pixel, dist, pixel_number, numrings, data, theta, intens, ug_l, ug_r, &fwhm, &eta);
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////LA INFORMACION CRUDA DE LOS DIFRACTOGRAMAS SE ENCUENTRA EN EL VECTOR data[]////////////////
-	//////ESTE ES EL LUGAR PARA HACER LA RUTINA QUE HAGA EL FULL PROFILE FITTING DE CADA DIFRACTOGRAMA///////
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////
-       
 
         //A esta altura ya termine de leer y procesar los datos de UN archivo spr. Falta imprimir los resultados a el archivo de salida
         for(d = 0; d < numrings; d++)//itero sobre todos los picos
         { 
-            strcpy(outinten,"");
+            strcpy(outinten, "");
             count_minus = 0;
-            
             for(c = 1; c <= ((end_g - rot_p) + 1); c++) //itero sobre todo el anillo
             { 
-	    	    if(intens[c][d] < 0) //corrijo las intensidades negativas
-        		{ 
-	    	        if((minus_zero == 'y') || (minus_zero == 'Y'))
-		            intens[c][d] = 0; 
-	    	        count_minus++;  
+	    	if(intens[c][d] < 0) //corrijo las intensidades negativas
+                { 
+                    if((minus_zero == 'y') || (minus_zero == 'Y'))
+		        intens[c][d] = 0; 
+                    count_minus++;  
                 }
-	    	    //escribo la intensidad integrada al archivo correspondiente en formato de diez columnas, separando por bloques los datos de cada pico
-		        sprintf(buf,"%8.1f",intens[c][d]);
+                //escribo la intensidad integrada al archivo correspondiente en formato de diez columnas, separando por bloques los datos de cada pico
+                sprintf(buf, "%8.1f", intens[c][d]);
                 strcat(outinten,buf);
                 if((c % 10) == 0)
-                    strcat(outinten,"\n");
+                    strcat(outinten, "\n");
+                if(c == ((end_g - rot_p) + 1))
+                    strcat(outinten, "\n");
                 
-    		    if(c == ((end_g - rot_p) + 1))
-                    strcat(outinten,"\n");
-            }//va llenando el buffer de memoria con las intensidades de cada pico y luego lo imprime todo en el archivo (muy eficiente!!)
+                //algun criterio para corregir el ancho de pico
+                sprintf(buf, "%8.1lf", fwhm[c][d]);
+                strcat(outfwhm, buf);
+                if((c % 10) == 0)
+                    strcat(outfwhm, "\n");
+                if(c == ((end_g - rot_p) + 1))
+                    strcat(outfwhm, "\n");
+
+                //algun criterio para corregir el eta
+                sprintf(buf, "%8.1lf", eta[c][d]);
+                strcat(outeta, buf);
+                if((c % 10) == 0)
+                    strcat(outeta, "\n");
+                if(c == ((end_g - rot_p) + 1))
+                    strcat(outeta, "\n");
+            }
             write(fd[d], outinten, strlen(outinten));
-            
-	        //escribir el file con la figura de polos en formato maquina para los ancho de pico
+            write(ffwhm[d], outfwhm, strlen(outfwhm));
+            write(feta[d], outeta, strlen(outeta));            
 	    
-	    
-	        if(count_minus>=1)//te avisa que tuviste picos con intensidades negativas
+            if(count_minus >= 1)//te avisa que tuviste picos con intensidades negativas
     	    {
-                printf("\n!!Number of MINUS intensity in the [%d]th pole figure=%d !!! \n",d+1,count_minus);
+                printf("\n!!Number of MINUS intensity in the [%d]th pole figure=%d !!! \n", d + 1, count_minus);
             } 		 
-	    }
-        
+        }
         fclose(fp1);
-        
         k += del_d; //paso al siguiente spr
-    
     }while(k <= end_d);
-     
     /*End pole figure data in Machine coordinates*/
     
-    printf("\nReduction of the Fit2D-DATA is finished.\n%d pole figure data are generated.\n\n",d);
+    printf("\nReduction of the Fit2D-DATA is finished.\n%d pole figure data are generated.\n\n", d);
     
     for(d = 0; d < numrings; d++)
         close(fd[d]);
-
-    ////////////////////////////MODULO DE TRANSFORMACION ANGULAR////////////////////////////////
-    ///////////////////////////////////THIS IS THE POST/////////////////////////////////////////
-    
-    printf("\n====== Begin angular transformation ====== \n");
-    
+        close(ffwhm[d]);
+        close(feta[d]);
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
     /**** Angular Transformation to Pole figure coordinate***/
     /**** LIN2GKSS-ROUTINE **********************************/
-    
+    printf("\n====== Begin angular transformation ====== \n");
     timer = time(NULL); // present time in sec
-    
     zeit = localtime(&timer); // save "time in sec" into structure tm
-    
-    printf("Unix Time: %d sec\n\n", timer); // began at 1970-1-1 0h0min0sec
     /*
+    printf("Unix Time: %d sec\n\n", timer); // began at 1970-1-1 0h0min0sec
     printf("year: %d\n",   zeit->tm_year + 1900);
     printf("month: %d\n",   zeit->tm_mon + 1);
     printf("day: %d\n\n", zeit->tm_mday);
-    
     printf("hour: %d\n",   zeit->tm_hour);
     printf("min: %d\n",   zeit->tm_min);
     printf("sec: %d\n\n", zeit->tm_sec);
     */
-    
+
     for(m = 0; m < numrings; m++)//itero sobre todos los picos
     {
         step = 1;//Si step > 1 lo que hago es promediar step's intensidades de la figura de polos en formato maquina
         
-        //genero string con el nombre del archivo con la figura de polos en el formato maquina
-        strcpy(outfile,"");
-        strcat(outfile,path_out);
-        strcat(outfile,filename1);
-        strcat(outfile,"PF_");
-        sprintf(buf,"%d",m+1);
-        strcat(outfile,buf);
-	    if((logfile_yn == 'y')||(logfile_yn == 'Y'))
-            strcat(outfile,".log");
-	    else
-            strcat(outfile,".dat");
+        //genero string con el nombre del archivo con la figura de polos (intensidades) en el formato maquina
+        strcpy(outfile, "");
+        strcat(outfile, path_out);
+        strcat(outfile, filename1);
+        strcat(outfile, "PF_");
+        sprintf(buf, "%d", m + 1);
+        strcat(outfile, buf);
+
+        if((logfile_yn == 'y')||(logfile_yn == 'Y'))
+            strcat(outfile, ".log");
+        else
+            strcat(outfile, ".dat");
         
-        if((fp2 = fopen(outfile,"r")) == NULL )
+        if((fp2 = fopen(outfile, "r")) == NULL )
         {
-          fprintf(stderr,"Error beim oeffnen der Datei(%s).",outfile); exit(1);
+            fprintf(stderr, "Error beim oeffnen der Datei(%s).", outfile); exit(1);
         }
-        
+
         //genero el string con los datos en formato MTEX
-        strcpy(linfile,"");
-        strcat(linfile,path_out);
-        strcat(linfile,filename1);
-        strcat(linfile,"PF_");
-        sprintf(buf,"%d",m + 1);
-        strcat(linfile,buf);
-        strcat(linfile,".mtex");
-        
-        if((fp1=fopen(linfile,"w")) == NULL )
+        strcpy(linfile, "");
+        strcat(linfile, path_out);
+        strcat(linfile, filename1);
+        strcat(linfile, "PF_");
+        sprintf(buf, "%d", m + 1);
+        strcat(linfile, buf);
+        strcat(linfile, ".mtex");
+
+        if((fp1 = fopen(linfile, "w")) == NULL)
         {
-            fprintf(stderr,"Error beim oeffnen der Datei(%s).",linfile); exit(1);
+            fprintf(stderr, "Error beim oeffnen der Datei(%s).", linfile); exit(1);
+        }
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        //genero string con el nombre del archivo con la figura de polos (fwhm) en el formato maquina
+        strcpy(fwhmfile, "");
+        strcat(fwhmfile, path_out);
+        strcat(fwhmfile, filename1);
+        strcat(fwhmfile, "FWHM_PF_");
+        sprintf(buf, "%d", m + 1);
+        strcat(fwhmfile, buf);
+        strcat(fwhmfile, ".dat");
+
+        if((fp_fwhm = fopen(fwhmfile, "r")) == NULL)
+        {
+            fprintf(stderr, "Error beim oeffnen der Datei(%s).", fwhmfile); exit(1);
+        }
+
+        strcpy(fwhmfile, "");
+        strcat(fwhmfile, path_out);
+        strcat(fwhmfile, filename1);
+        strcat(fwhmfile, "FWHM_PF_");
+        sprintf(buf, "%d", m + 1);
+        strcat(fwhmfile, buf);
+        strcat(fwhmfile, ".mtex");
+
+        if((fp_fwhm_pf = fopen(fwhmfile, "w")) == NULL)
+        {
+            fprintf(stderr, "Error beim oeffnen der Datei(%s).", fwhmfile); exit(1);
+        }
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        //genero string con el nombre del archivo con la figura de polos (eta) en el formato maquina
+        strcpy(etafile, "");
+        strcat(etafile, path_out);
+        strcat(etafile, filename1);
+        strcat(etafile, "ETA_PF_");
+        sprintf(buf, "%d", m + 1);
+        strcat(etafile, buf);
+        strcat(etafile, ".dat");
+
+        if((fp_eta = fopen(etafile, "r")) == NULL)
+        {
+            fprintf(stderr, "Error beim oeffnen der Datei(%s).", etafile); exit(1);
         }
         
-        //genero archivo con el grid de la figura de polos
-        if((fp3=fopen("PF_grid.dat","w")) == NULL )
+        strcpy(etafile, "");
+        strcat(etafile, path_out);
+        strcat(etafile, filename1);
+        strcat(etafile, "ETA_PF_");
+        sprintf(buf, "%d", m + 1);
+        strcat(etafile, buf);
+        strcat(etafile, ".mtex");
+
+        if((fp_eta_pf = fopen(etafile, "w")) == NULL)
         {
-            fprintf(stderr,"Error opening file.writing file"); exit(1);
+            fprintf(stderr, "Error beim oeffnen der Datei(%s).", etafile); exit(1);
+        }
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        //genero archivo con el grid de la figura de polos
+        if((fp3 = fopen("PF_grid.dat", "w")) == NULL )
+        {
+            fprintf(stderr, "Error opening file PF_grid.dat"); exit(1);
         }
         
         //leo el \gamma inicial, el final y el salto
-        fgets(buf,42,fp2);
-        fscanf(fp2,"%d",&anf_gam);
-        fscanf(fp2,"%d",&ende_gam);
-        fscanf(fp2,"%d",&del_gam);
+        fgets(buf, 42, fp2);
+        fscanf(fp2, "%d", &anf_gam);
+        fscanf(fp2, "%d", &ende_gam);
+        fscanf(fp2, "%d", &del_gam);
         
-        fgets(buf,2,fp2);//skip line
+        fgets(buf, 2, fp2);//skip line
         
         //leo el \omega inicial, el final y el salto
-        fgets(buf,42,fp2);
-        fscanf(fp2,"%f",&anf_ome);
-        fscanf(fp2,"%f",&ende_ome);
-        fscanf(fp2,"%f",&del_ome);
+        fgets(buf, 42, fp2);
+        fscanf(fp2, "%f", &anf_ome);
+        fscanf(fp2, "%f", &ende_ome);
+        fscanf(fp2, "%f", &del_ome);
         
-        printf("anf_gam=%5d , end_gam=%5d , del_gam=%5d \nanf_ome=%5.1f , end_ome=%5.1f , del_ome=%5.1f \n\n",anf_gam,ende_gam,del_gam,anf_ome,ende_ome,del_ome);
-        step_ome=abs((ende_ome - anf_ome) / del_ome);
+        printf("anf_gam=%5d , end_gam=%5d , del_gam=%5d \nanf_ome=%5.1f , end_ome=%5.1f , del_ome=%5.1f \n\n", anf_gam, ende_gam, del_gam, anf_ome, ende_ome, del_ome);
+        step_ome = abs((ende_ome - anf_ome) / del_ome);
         
         if(ende_ome < anf_ome)
             del_ome = -1 * del_ome;
         
         //Imprimo el tiempo de ejecucion del programa en el .mtex
-        fprintf(fp1,"  FIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n",zeit->tm_year + 1900,zeit->tm_mon + 1,zeit->tm_mday,zeit->tm_hour,zeit->tm_min,zeit->tm_sec);
+        fprintf(fp1, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
+        fprintf(fp_fwhm_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
+        fprintf(fp_eta_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);        
         
         k = 0;//contador del archvo grid y el de mtex
         //tranformacion angular (gamma, omega)-->(alpha,beta)
@@ -450,7 +520,7 @@ main()
                 {
                     neu_gam1 = j;
                     neu_ome1 = i;
-            //transformacion geometrica
+                    //transformacion geometrica
 		    if(neu_ome1 > 90)
 		    {
                         neu_ome = neu_ome1 - 90;
@@ -462,43 +532,49 @@ main()
                         neu_gam = neu_gam1;
                     }
                     
-                    alpha = winkel_al(theta[m],neu_ome,neu_gam);
-                    beta  = winkel_be(theta[m],neu_ome,neu_gam,alpha);
+                    alpha = winkel_al(theta[m], neu_ome, neu_gam);
+                    beta  = winkel_be(theta[m], neu_ome, neu_gam, alpha);
                     
                     if(j % step == 0)
                     {
                         n_intens = 0;
+                        n_fwhm = 0;
+                        n_eta = 0;
                         for(l = 1; l <= step; l++)
                         {
-                            fscanf(fp2,"%f",&m_intens);//leo la intensidad de la figura de polos en formato maquina
+                            fscanf(fp2, "%f", &m_intens);//leo la intensidad de la figura de polos en formato maquina
                             n_intens += m_intens;
+                            fscanf(fp_fwhm, "%lf", &m_fwhm);//leo el ancho de pico de la figura de polos en formato maquina
+                            n_fwhm += m_fwhm;
+                            fscanf(fp_eta, "%lf", &m_eta);//leo el eta de la figura de polos en formato maquina
+                            n_eta += m_eta;
                         }
-                        
                         nn_intens = n_intens / step;
-                        
+                        nn_fwhm = n_fwhm / step;
+                        nn_eta = n_eta / step;
+
                         if(alpha > 90)
                         {
                             alpha = 180 - alpha;
                             beta = 360 - beta;
-		                }
+                        }
                         else
                             alpha = alpha;
                         
-                    //imprimo las intensidades en formato figura de polos, asi como el grid
+                        //imprimo las intensidades en formato figura de polos, asi como el grid
 	                if(theta > 0)
                         {
-                            fprintf(fp1,"%11d%10.4f%10.4f%10.4f%10.4f%12.0f\n"
-                            ,k+1,2*theta[m],theta[m],alpha,beta,nn_intens);
+                            fprintf(fp1, "%11d%10.4f%10.4f%10.4f%10.4f%12.0f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, nn_intens);
+                            fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, nn_fwhm);
+                            fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, nn_eta);
                         }
                         else
                         {
-                            fprintf(fp1,"%11d%10.4f%10.4f%10.4f%10.4f%12.0f\n"
-                            ,k+1,-2*theta[m],-1*theta[m],alpha,beta,nn_intens);
+                            fprintf(fp1, "%11d%10.4f%10.4f%10.4f%10.4f%12.0f\n", k + 1, -2 * theta[m], -1 * theta[m], alpha, beta, nn_intens);
+                            fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, -2 * theta[m], -1 * theta[m], alpha, beta, nn_fwhm);
+                            fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, -2 * theta[m], -1 * theta[m], alpha, beta, nn_eta);
                         }
-                        
-	                fprintf(fp3,"%11d%10.1f%10.1f%10.4f%10.4f\n"
-                        ,k + 1,neu_ome,neu_gam,alpha,beta); 
-                        
+	                fprintf(fp3, "%11d%10.1f%10.1f%10.4f%10.4f\n", k + 1, neu_ome, neu_gam, alpha, beta); 
                         k++;
                     }
                 }
@@ -515,36 +591,36 @@ main()
                     neu_gam = j;
                     neu_ome = i;
                     
-                    alpha = winkel_al(theta[m],neu_ome,neu_gam);
+                    alpha = winkel_al(theta[m], neu_ome, neu_gam);
+                    beta  = winkel_be(theta[m], neu_ome, neu_gam, alpha);
                     
-                    beta  = winkel_be(theta[m],neu_ome,neu_gam,alpha);
-                    
-                    fscanf(fp2,"%f",&m_intens);
-                    
+                    fscanf(fp2, "%f", &m_intens);
+                    fscanf(fp_fwhm, "%lf", &m_fwhm);
+                    fscanf(fp_eta, "%lf", &m_eta);
                     if(j % step == 0)
                     {
                         if(alpha > 90)
                         {
                             alpha = 180 - alpha;
                             beta = 360 - beta;
-    		            }
+                        }
                         else
                             alpha = alpha;
                         
                         if(theta > 0)
                         {
-                            fprintf(fp1,"%11d%10.4f%10.4f%10.4f%10.4f%12.0f\n"
-                            ,k+1,2*theta[m],theta[m],alpha,beta,m_intens); 
+                            fprintf(fp1, "%11d%10.4f%10.4f%10.4f%10.4f%12.0f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, m_intens); 
+                            fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, m_fwhm);
+                            fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, m_eta);
                         }
                         else
                         {
-                            fprintf(fp1,"%11d%10.4f%10.4f%10.4f%10.4f%12.0f\n"
-                            ,k+1,-2*theta[m],-1*theta[m],alpha,beta,m_intens);
+                            fprintf(fp1, "%11d%10.4f%10.4f%10.4f%10.4f%12.0f\n", k + 1, -2 * theta[m], -1 * theta[m], alpha, beta, m_intens);
+                            fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, -2 * theta[m], -1 * theta[m], alpha, beta, m_fwhm);
+                            fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, -2 * theta[m], -1 * theta[m], alpha, beta, m_eta);
                         }
                         
-                        fprintf(fp3,"%11d%10.1f%10.1f%10.4f%10.4f\n"
-                        ,k+1,neu_ome,neu_gam,alpha,beta);
-                        
+                        fprintf(fp3, "%11d%10.1f%10.1f%10.4f%10.4f\n", k + 1, neu_ome, neu_gam, alpha, beta);
                         k++;
                     }
                 }
@@ -552,17 +628,17 @@ main()
             }
         }
         fflush(fp1); fflush(fp2); fflush(fp3);
+        fflush(fp_fwhm); fflush(fp_fwhm_pf);
+        fflush(fp_eta); fflush(fp_eta_pf);
         fclose(fp3); fclose(fp1); fclose(fp2);
-        
-    }	/* End for(m=0;m<numrings;m++)*/
-
- }/*End of for(Z=1;Z<=NrSample;Z++) */
-
+        fclose(fp_fwhm); fclose(fp_fwhm_pf);
+        fclose(fp_eta); fclose(fp_eta_pf);
+    }/* End for(m = 0; m < numrings; m++)*/
+ }/*End of for(Z = 1; Z <= NrSample; Z++) */
  fclose(fp);
 
  return (0);
 } /*End of Main()*/
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////DEFINICION DE LAS FUNCIONES DE TRANSFORMACION ANGULAR/////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
