@@ -64,7 +64,7 @@ int main()
  struct tm *zeit;
 
  puts("\n***************************************************************************");
- puts("\nPROGRAM: FIT2D_DATA.EXE, Ver. Aug. 2013");
+ puts("\nPROGRAM: FIT2D_DATA.EXE, Ver. 03.14");
  puts("\nProgram for generating the pole figures from Fit2D data.\nCoodinate-transformation to MTEX-Format.");
  puts("Pole figure data xxx_Nr.dat Pole figure in MTEX-readable format xxx_Nr.mtex.");
  puts("\nThe angular values of Omega and Gamma, from the parameter file\n");
@@ -179,7 +179,7 @@ int main()
 
     for(i = 0; i < numrings; i++) //itera sobre cada pico (0 a 7) -> (1 a 8)
     {
-        fscanf(fp, "%f", &theta[i]); //posicion angular del centro del pico (\theta o $2\theta?)
+        fscanf(fp, "%f", &theta[i]); //posicion angular del centro del pico (\theta)
         fscanf(fp, "%d", &posring_l[i]); //bin a la izquierda del pico
         fscanf(fp, "%d", &posring_r[i]); //bin a la derecha del pico
         fscanf(fp, "%d", &ug_l[i]); //bin de bg a la izquierda del pico
@@ -226,8 +226,8 @@ int main()
             printf("Cannot open ETA OUTPUT file.(for %d ring)", i + 1); exit(1);
         }
     }
-    
     /* End of reading the parameter file and End of generation of Output-files for(i=0;i<numrings;i++)*/	
+    
     fgets(buf_temp, 2, fp); //skip line
 
     //imprime en pantalla los datos relevantes de cada pico 
@@ -266,7 +266,7 @@ int main()
 
         printf("\nReading data from <====  %s\n", marfile);
         //abro el archivo spr del que voy a sacar las intensdades de los picos
-        if((fp1 = fopen(marfile, "r")) == NULL) //fp1 = puntero al archivo spr que estoy procesando
+        if((fp1 = fopen(marfile, "r")) == NULL)
         {
             fprintf(stderr, "Error opening READ_file: %s \n", marfile); exit(1);
         }
@@ -313,8 +313,8 @@ int main()
             //fiteo del difractograma para la obtencion del ancho de pico y eta
             int exists = 1;
             if(k == star_d && y == 1) exists = 0; //pregunto si este es el primer archivo con el que estoy trabajando
-            pv_fitting(exists, dist, pixel, pixel_number, numrings, data, theta, intens, ug_l, ug_r, fwhm, eta);
-        } /*end of the double FOR-routine gamma and pixel number*/
+            pv_fitting(exists, dist, pixel, pixel_number, numrings, y, data, theta, intens, ug_l, ug_r, fwhm, eta);
+        }/*end of the double FOR-routine gamma and pixel number*/
 
         //A esta altura ya termine de leer y procesar los datos de UN archivo spr. Falta imprimir los resultados a el archivo de salida
         for(d = 0; d < numrings; d++)//itero sobre todos los picos

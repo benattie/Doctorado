@@ -1,6 +1,4 @@
-//#include <gsl/gsl_math.h>
-//#include <gsl/gsl_randist.h>
-#include "pseudo_voigt.h"
+#include "pseudo_voigt.c"
 #define S 1
 //x = vector de valores a ajustar
 //data = estructura a los parametros fijos de la funcion (datos experimentales, etc)
@@ -57,7 +55,6 @@ int pv_f (const gsl_vector * x, void *data, gsl_vector * f)
     {   
         double s = gsl_vector_get(sigma, i);
         if(s == 0) s = S; //por si me toca un punto con intensidad nula
-
         double Yi = pseudo_voigt(gsl_vector_get(ttheta, i), numrings, I0, t0, H, eta, shift_H, shift_eta, bg_pos, bg_int);
         double res = (Yi - gsl_vector_get(y, i)) / s;
         gsl_vector_set (f, i, res);
