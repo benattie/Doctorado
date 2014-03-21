@@ -20,7 +20,7 @@ double bin2theta(int bin, double pixel, double dist);
 int theta2bin(double theta, double pixel, double dist);
 
 //INICIO DEL MAIN
-int pv_fitting(int exists, double dist, double pixel, int size, int numrings, int gamma,
+int pv_fitting(int exists, double dist, double pixel, int size, int numrings, int spr, int gamma, 
                 int y_sang[2500], float t0_sang[20], float I0_sang[500][10], int bg_pos_left[15], int bg_pos_right[15],
                  double ** fwhm, double ** eta)
 {
@@ -37,7 +37,7 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
     }
     //variables auxiliares del programa
     int i = 0, j = 0;
-    FILE *fp_fit, *fp_IRF;
+    FILE *fp_fit, *fp_IRF, *fp_log;
     //variables del solver
     int status, iter = 0, max_iter = 500;
     double err_abs = 1e-4, err_rel = 1e-4;
@@ -53,11 +53,9 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
     gsl_multifit_function_fdf pv; //funcion a fitear
     gsl_matrix * covar = gsl_matrix_alloc (n_param, n_param);//matriz covariante 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-   
     //anchos instrumentales
     fp_IRF = fopen("IRF.dat", "r");
     IRF ins;
-
 
     //obtengo los datos
     for(i = 0; i < size; i++)
@@ -134,9 +132,8 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
     s = gsl_multifit_fdfsolver_alloc (T, size, n_param);
     gsl_multifit_fdfsolver_set (s, &pv, &x.vector);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//inicio las iteraciones
-    print_state (iter, s);
+    //inicio las iteraciones
+    //print_state (iter, s);
     do
     {
         iter++;
@@ -148,16 +145,20 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
         status = gsl_multifit_test_delta (s -> dx, s -> x, err_abs, err_rel);
     }
     while (status == GSL_CONTINUE && iter < max_iter);
+    fp_log = fopen("logfile.txt", "a");
+    if(status != 0)//reportar errores
+    {
+        printf ("Error #%d en spr #%d y gamma #%d: %s\n", status, k, y, gsl_strerror (status));
+        fprintf(fp_log, "#Error #%d en spr #%d y gamma #%d: %s\n", status, k, y, gsl_strerror (status));
+    }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    //ACA HABIRA QUE PONER ALGUN MANEJO DE EXCEPCION PARA EL CASO EN QUE EL FITEO NO CONVERJA
-
     //Escritura de los resultados del fiteo en los vectores fwhm y eta
     //lectura del archivo con los valores de ancho de pico instrumental
     fp_IRF = fopen("IRF.dat", "r");
     ins = read_IRF(fp);
     //correccion de los anchos obtenidos del fiteo y escritura a los punteros de salida (fwhm y eta)
     j = 0;
+    int bad_fit = 0;
     for(i = 2; i < (2 + 6 * numrings); i+=6)
     {
         double theta = gsl_vector_get(s -> x, i);
@@ -165,13 +166,28 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
         double * eta_corr = vector_double_alloc(1);
         H_corr[0] = gsl_vector_get(s -> x, 0) + gsl_vector_get(s -> x, i + 2);
         eta_corr[0] = gsl_vector_get(s -> x, 1) + gsl_vector_get(s -> x, i + 3);
-        ins_correction(H_corr, eta_corr, ins, theta);
-        fwhm[gamma][j] = H_corr[0];
-        eta[gamma][j] = eta_corr[0];
+        double I = gsl_vector_get(s -> x, i + 1);
+        double DI = sqrt(gsl_matrix_get(covar, i + 1, i + 1));
+        double err_rel = fabs(DI / I);
+        if(err_rel > 0.5 || I < 0 || H_corr[0] < 0 || H_corr[0] > 1 || eta_corr[0] < 0 || eta_corr[0] > 1)
+        {
+            fprintf(fp_log, "#Bad fits:\n#spr\tgamma\tpeak\tDI/I\tI\tH\teta\n%3d\t%5d\t%4d\t%.3lf\t%.3lf\t%.3lf\t%.3lf\n", 
+                                              k, y, (i + 4) / 6, err_rel, I, H_corr[0], eta_corr[0]);
+            fwhm[gamma][j] = -1.0;
+            eta[gamma][j] = -1.0;
+            bad_fit = 1;
+        }
+        else
+        {   
+            ins_correction(H_corr, eta_corr, ins, theta);
+            fwhm[gamma][j] = H_corr[0];
+            eta[gamma][j] = eta_corr[0];
+        }
         j++;
     }
+    fprintf(fp_log, "#-----------------------------------------------------\n");
+    fclose(fp_log);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
     //imprimo los resultados del fiteo
     gsl_multifit_covar (s -> J, 0.0, covar); //calculo la matriz de covarianza
 
@@ -184,21 +200,32 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
         FILE * fp = fopen("fit_data.tmp", "w");
         printf("chisq/dof = %g\n",  pow(chi, 2.0) / dof);
         fprintf(fp, "chisq/dof = %g\n",  pow(chi, 2.0) / dof);
-        fprintf(fp, "Global_H:\n%6.5lf %6.5lf\n",  FIT(0), ERR(0));
-        fprintf(fp, "Global_eta:\n%6.5lf %6.5lf\n",  FIT(1), ERR(1));
+        fprintf(fp, "Global_H:\n%6.5lf %6.5lf\nGlobal_eta:\n%6.5lf %6.5lf\n",  FIT(0), ERR(0), FIT(1), ERR(1));
         i = 2;
         fprintf (fp, "#t0\tsigma\tI\tsigma\tH\tsigma\t\teta\tsigma\t\t\tbg_l\tsigma\tbg_r\tsigma\n");
-        for(j = 0; j < numrings; j++)
-        {
-            fprintf (fp, "%.3lf\t%.3lf\t%.3lf\t%.3lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.3lf\t%.3lf\t%.3lf\t%.3lf\n",
-                            FIT(i), c * ERR(i), FIT(i + 1), c * ERR(i + 1),
-                            FIT(0) + FIT(i + 2), c * sqrt(pow(ERR(0), 2) +  pow(ERR(i + 2), 2)),
-                            FIT(1) + FIT(i + 3), c * sqrt(pow(ERR(1), 2) +  pow(ERR(i + 3), 2)),
-                            FIT(i + 4), c * ERR(i + 4), FIT(i + 5),  c * ERR(i + 5));
-            i+=6;
+        if(bad_fit)
+        {//si hubo un bad_fit paso como valores iniciales del siguiente fiteo los del anterior
+            for(j = 0; j < numrings; j++)
+            {
+                fprintf (fp, "%.3lf\t%.3lf\t%.3lf\t%.3lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.3lf\t%.3lf\t%.3lf\t%.3lf\n",
+                                x_init[i], 0, x_init[i + 1], 0, x_init[0] + x_init[i + 2], 0,
+                                x_init[1] + x_init[i + 3], 0, x_init[i + 4], 0, x_init[i + 5],  0);
+                i+=6;
+            }
+        }
+        else
+        {//si el fiteo fue bueno uso los resultados como semilla del fiteo siguiente
+            for(j = 0; j < numrings; j++)
+            {
+                fprintf (fp, "%.3lf\t%.3lf\t%.3lf\t%.3lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.3lf\t%.3lf\t%.3lf\t%.3lf\n",
+                                FIT(i), c * ERR(i), FIT(i + 1), c * ERR(i + 1),
+                                FIT(0) + FIT(i + 2), c * sqrt(pow(ERR(0), 2) +  pow(ERR(i + 2), 2)),
+                                FIT(1) + FIT(i + 3), c * sqrt(pow(ERR(1), 2) +  pow(ERR(i + 3), 2)),
+                                FIT(i + 4), c * ERR(i + 4), FIT(i + 5),  c * ERR(i + 5));
+                i+=6;
+            }
         }
     }
-    printf ("status = %s\n", gsl_strerror (status));
 ///////////////////////////////////////////////////////////////////////////////////////
     //liberacion de memoria allocada y cierre de archivos
     free(x_init);

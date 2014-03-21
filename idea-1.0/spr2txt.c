@@ -313,7 +313,7 @@ int main()
             //fiteo del difractograma para la obtencion del ancho de pico y eta
             int exists = 1;
             if(k == star_d && y == 1) exists = 0; //pregunto si este es el primer archivo con el que estoy trabajando
-            pv_fitting(exists, dist, pixel, pixel_number, numrings, y, data, theta, intens, ug_l, ug_r, fwhm, eta);
+            pv_fitting(exists, dist, pixel, pixel_number, numrings, k, y, data, theta, intens, ug_l, ug_r, fwhm, eta);
         }/*end of the double FOR-routine gamma and pixel number*/
 
         //A esta altura ya termine de leer y procesar los datos de UN archivo spr. Falta imprimir los resultados a el archivo de salida
