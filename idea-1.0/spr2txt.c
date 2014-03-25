@@ -26,39 +26,38 @@ int main()
  int BG_l, BG_r;
  int NrSample, star_d, end_d, star_a, end_a, del_d, del_a, rot_p, end_g, numrings;
  int posring_l[15], posring_r[15], ug_l[15], ug_r[15];
- int fd[15], fi[15];
+ int fd[15];
  int ffwhm[15], feta[15];
 
  int pixel_number, gamma;
  int data[2500], intensity;
- int stepnum, maxpos, minpos;
 
  double pixel, dist;
- double fwhm = matrix_double_alloc(500, 10);
- double eta = matrix_double_alloc(500, 10);
- float data1[2500], BG_m, intens[500][10]
+ double ** fwhm = matrix_double_alloc(500, 10);
+ double ** eta = matrix_double_alloc(500, 10);
+ float data1[2500], BG_m, intens[500][10];
 
  char buf_temp[100], buf[100], buf1[100];
- char path_out[150], path [150], filename[60], filename1[100], inform[10], path1[150], inform1[10];
+ char path_out[150], path [150], filename1[100], inform[10], path1[150], inform1[10];
  char outfile[100], linfile[100], fwhmfile[100], etafile[100];
  char marfile[150];
  char outinten[3000], outfwhm[6000], outeta[6000];
  char minus_zero; 
  char logfile_yn, logfile_yn_temp;
  
- FILE *fp, *fp1, *fp2, *fp3, *fp4;
+ FILE *fp, *fp1, *fp2, *fp3;
  FILE *fp_fwhm, *fp_fwhm_pf, *fp_eta, *fp_eta_pf;
 
  struct DAT intensss;
 
- int   j, l, m, step, anf_gam, ende_gam, del_gam, num;
- float step_ome, anf_ome, ende_ome, del_ome, weg;
+ int j, l, m, step, anf_gam, ende_gam, del_gam;
+ //float step_ome;
+ float anf_ome, ende_ome, del_ome;
  float m_intens, n_intens, nn_intens;
  double m_fwhm, n_fwhm, nn_fwhm;
  double m_eta, n_eta, nn_eta;
  float theta[20], neu_ome, neu_ome1, neu_gam1, neu_gam, alpha, beta;
- float alpha90;
- float diode[200], max_diode, min_diode, max_diode_temp, min_diode_temp, ratio, inten, new_int;
+ //float diode[200], max_diode, min_diode, max_diode_temp, min_diode_temp, ratio, inten, new_int;
 
  time_t timer;
  struct tm *zeit;
@@ -79,7 +78,7 @@ int main()
  //////////////////////INICIA LA LECTURA DEL ARCHIVO para_fit2d.dat/////////////////////////////////////////////
  //path hacia los archivos de salida
  fgets(buf_temp, 22, fp);
- fscanf(fp, "%s", &path_out);   fgets(buf_temp, 2, fp);
+ fscanf(fp, "%s", path_out);   fgets(buf_temp, 2, fp);
  //numero de muestras a trabajar (1)
  fgets(buf_temp, 22, fp);
  fscanf(fp, "%d", &NrSample);   fgets(buf_temp, 2, fp);
@@ -93,15 +92,15 @@ int main()
     
     //path hacia los spr (encabezado + 360 filas x 1725 columnas) (son 37) 
     fgets(buf_temp, 22, fp);
-    fscanf(fp, "%s", &path);   fgets(buf_temp, 2, fp);
+    fscanf(fp, "%s", path);   fgets(buf_temp, 2, fp);
 
     //lee raiz de los archivos spr (New_Al70R-tex_)
     fgets(buf_temp, 22, fp);
-    fscanf(fp, "%s", &filename1); fgets(buf_temp, 2, fp);
+    fscanf(fp, "%s", filename1); fgets(buf_temp, 2, fp);
 
     //lee la extension de los archivos (spr)
     fgets(buf_temp, 22, fp);
-    fscanf(fp, "%s", &inform); fgets(buf_temp, 2, fp);
+    fscanf(fp, "%s", inform); fgets(buf_temp, 2, fp);
 
     //pasa los contenidos de path e inform hacia path1 e inform1 (why?)
     strcpy(path1, path); strcpy(inform1, inform);
@@ -215,12 +214,10 @@ int main()
         { 
             printf("Cannot open INTENS OUTPUT file.(for %d ring)", i + 1); exit(1);
         }
-
         if((ffwhm[i] = open(fwhmfile, O_CREAT|O_TRUNC|O_RDWR,S_IREAD|S_IWRITE)) < 0)
         { 
             printf("Cannot open FWHM OUTPUT file.(for %d ring)", i + 1); exit(1);
-        }
-        
+        }    
         if((feta[i] = open(etafile, O_CREAT|O_TRUNC|O_RDWR,S_IREAD|S_IWRITE)) < 0)
         { 
             printf("Cannot open ETA OUTPUT file.(for %d ring)", i + 1); exit(1);
@@ -283,7 +280,7 @@ int main()
         {
             for(x = 1; x <= pixel_number; x++) //iteracion dentro de cada uno de los difractogramas (con 1725 puntos) (cada porcion del anillo de Debye)
             {
-                //leo la intensidad de cada bin y la paso a formato de entero (why?)
+                //leo la intensidad de cada bin y la paso a formato de entero
                 fscanf(fp1, "%e", &data1[x]);
                 data[x] = (int)data1[x];
             }
@@ -337,16 +334,16 @@ int main()
                 if(c == ((end_g - rot_p) + 1))
                     strcat(outinten, "\n");
                 
-                //algun criterio para corregir el ancho de pico
-                sprintf(buf, "%8.1lf", fwhm[c][d]);
+                //escribo el fwhm en el archivo correspondiente
+                sprintf(buf, "%8.5lf", fwhm[c][d]);
                 strcat(outfwhm, buf);
                 if((c % 10) == 0)
                     strcat(outfwhm, "\n");
                 if(c == ((end_g - rot_p) + 1))
                     strcat(outfwhm, "\n");
 
-                //algun criterio para corregir el eta
-                sprintf(buf, "%8.1lf", eta[c][d]);
+                //escribo eta en el archivo correspondiente
+                sprintf(buf, "%8.5lf", eta[c][d]);
                 strcat(outeta, buf);
                 if((c % 10) == 0)
                     strcat(outeta, "\n");
@@ -371,9 +368,11 @@ int main()
     printf("\nReduction of the Fit2D-DATA is finished.\n%d pole figure data are generated.\n\n", d);
     
     for(d = 0; d < numrings; d++)
+    {
         close(fd[d]);
         close(ffwhm[d]);
         close(feta[d]);
+    }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
     /**** Angular Transformation to Pole figure coordinate***/
     /**** LIN2GKSS-ROUTINE **********************************/
@@ -501,7 +500,7 @@ int main()
         fscanf(fp2, "%f", &del_ome);
         
         printf("anf_gam=%5d , end_gam=%5d , del_gam=%5d \nanf_ome=%5.1f , end_ome=%5.1f , del_ome=%5.1f \n\n", anf_gam, ende_gam, del_gam, anf_ome, ende_ome, del_ome);
-        step_ome = abs((ende_ome - anf_ome) / del_ome);
+        //step_ome = abs((ende_ome - anf_ome) / del_ome);
         
         if(ende_ome < anf_ome)
             del_ome = -1 * del_ome;

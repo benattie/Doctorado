@@ -11,7 +11,7 @@
 //COSAS MIAS
 #include "read_file.c"
 #include "read_IRF.c"
-#include "array_alloc.c"
+#include "array_alloc.h"
 #include "pv_f.c"
 
 //FUNCIONES
@@ -60,7 +60,7 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
     //obtengo los datos
     for(i = 0; i < size; i++)
     {
-        gsl_vector_set(ttheta, i, bin2theta(i, pixel, dist));
+        gsl_vector_set(ttheta, i, bin2theta(i, pixel, dist));//conversion de bin a coordenada angular
         gsl_vector_set(y, i, y_sang[i]);//tal vez haya que promediar los datos
         gsl_vector_set(sigma, i, sqrt(gsl_vector_get(y, i))); //calculo los sigma de las intensidades
     }
@@ -92,12 +92,10 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
             x_init[i] = seed[2 * i]; i++;//bg_left
             x_init[i] = seed[2 * i]; i++;//bg_right
         }
-        gsl_vector_view x = gsl_vector_view_array (x_init, n_param); //inicializo el vector con los datos a fitear
-        fclose(fp_fit);
     }
     else
     {//si no hay datos del fiteo anterior uso una plantilla creada a tal fin y los datos del programa de sang bon yi
-        char name = "fit_ini.dat";
+        char name[20] = "fit_ini.dat";
         fp_fit = fopen(name, "r");
         read_file(exists, fp_fit, seed);
         int k = 0;
@@ -114,9 +112,9 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
             x_init[i] = gsl_vector_get(y, bg_pos_left[j]);  i++; //intensidad del punto de background a la izquierda
             x_init[i] = gsl_vector_get(y, bg_pos_right[j]);  i++; //intensidad del punto de background a la derecha
         }
-        gsl_vector_view x = gsl_vector_view_array (x_init, n_param); //inicializo el vector con los datos a fitear
-        fclose(fp_fit);
     }
+    gsl_vector_view x = gsl_vector_view_array (x_init, n_param); //inicializo el vector con los datos a fitear
+    fclose(fp_fit);
 
     //inicializo la funcion pseudo-voigt
     pv.f = &pv_f; //definicion de la funcion
@@ -148,18 +146,19 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
     fp_log = fopen("logfile.txt", "a");
     if(status != 0)//reportar errores
     {
-        printf ("Error #%d en spr #%d y gamma #%d: %s\n", status, k, y, gsl_strerror (status));
-        fprintf(fp_log, "#Error #%d en spr #%d y gamma #%d: %s\n", status, k, y, gsl_strerror (status));
+        printf ("\nError #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
+        fprintf(fp_log, "#Error #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
     }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //Escritura de los resultados del fiteo en los vectores fwhm y eta
     //lectura del archivo con los valores de ancho de pico instrumental
     fp_IRF = fopen("IRF.dat", "r");
-    ins = read_IRF(fp);
+    ins = read_IRF(fp_IRF);
+    fclose(fp_IRF);
     //correccion de los anchos obtenidos del fiteo y escritura a los punteros de salida (fwhm y eta)
     j = 0;
     int bad_fit = 0;
-    for(i = 2; i < (2 + 6 * numrings); i+=6)
+    for(i = 2; i < n_param; i += 6)
     {
         double theta = gsl_vector_get(s -> x, i);
         double * H_corr = vector_double_alloc(1);
@@ -172,7 +171,7 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
         if(err_rel > 0.5 || I < 0 || H_corr[0] < 0 || H_corr[0] > 1 || eta_corr[0] < 0 || eta_corr[0] > 1)
         {
             fprintf(fp_log, "#Bad fits:\n#spr\tgamma\tpeak\tDI/I\tI\tH\teta\n%3d\t%5d\t%4d\t%.3lf\t%.3lf\t%.3lf\t%.3lf\n", 
-                                              k, y, (i + 4) / 6, err_rel, I, H_corr[0], eta_corr[0]);
+                                              spr, gamma, (i + 4) / 6, err_rel, I, H_corr[0], eta_corr[0]);
             fwhm[gamma][j] = -1.0;
             eta[gamma][j] = -1.0;
             bad_fit = 1;
@@ -207,9 +206,9 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
         {//si hubo un bad_fit paso como valores iniciales del siguiente fiteo los del anterior
             for(j = 0; j < numrings; j++)
             {
-                fprintf (fp, "%.3lf\t%.3lf\t%.3lf\t%.3lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.3lf\t%.3lf\t%.3lf\t%.3lf\n",
-                                x_init[i], 0, x_init[i + 1], 0, x_init[0] + x_init[i + 2], 0,
-                                x_init[1] + x_init[i + 3], 0, x_init[i + 4], 0, x_init[i + 5],  0);
+                fprintf (fp, "%.3lf\t-1\t%.3lf\t-1\t%.5lf\t-1\t%.5lf\t-1\t%.3lf\t-1\t%.3lf\t -1\n",
+                                x_init[i], x_init[i + 1], x_init[0] + x_init[i + 2],
+                                x_init[1] + x_init[i + 3], x_init[i + 4], x_init[i + 5]);
                 i+=6;
             }
         }
@@ -225,18 +224,16 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
                 i+=6;
             }
         }
+        fclose(fp);
     }
 ///////////////////////////////////////////////////////////////////////////////////////
     //liberacion de memoria allocada y cierre de archivos
     free(x_init);
     free(seed);
-    fclose(fp);
-
     gsl_vector_free(ttheta);
     gsl_vector_free(y);
     gsl_vector_free(sigma);
     gsl_matrix_free(bg_pos);
-    
     gsl_matrix_free(covar);
     gsl_multifit_fdfsolver_free (s);
 

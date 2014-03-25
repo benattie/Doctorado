@@ -1,17 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
-typedef struct IRF
-{
-    double U;
-    double V;
-    double W;
-    double IG;
-    double X;
-    double Y;
-    double Z;
-} IRF;
+#include "pseudo_voigt.h"
+#include "array_alloc.h"
 
 double search_nu(char * buf, char * search)
 {
@@ -21,7 +12,7 @@ double search_nu(char * buf, char * search)
     return atof(token);
 }
 
-IRF read_IRF(FILE *fp)
+IRF read_IRF(FILE * fp)
 { 
     char buf[20];
     char *search = " ";
@@ -61,5 +52,6 @@ IRF read_IRF(FILE *fp)
         exit(1);
     else
         ins.Z = search_nu(buf, search);
+
     return ins;
 }

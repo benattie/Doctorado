@@ -1,4 +1,4 @@
-#include "pseudo_voigt.c"
+#include "pseudo_voigt.h"
 #define S 1
 //x = vector de valores a ajustar
 //data = estructura a los parametros fijos de la funcion (datos experimentales, etc)
@@ -15,7 +15,7 @@ struct data {
 };
 
 //INICIO DE LA FUNCION
-int pv_f (const gsl_vector * x, void *data, gsl_vector * f)
+int pv_f (const gsl_vector * x, void * data, gsl_vector * f)
 {   
     //parametros fijos del fiteo (salen de los datos experimentales así como del para_fit2d.dat)
     int n = ((struct data *)data) -> n;

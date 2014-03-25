@@ -1,6 +1,4 @@
-//HEADERS BASICOS
-#include <stdlib.h>
-#include <stdio.h>
+#include "array_alloc.h"
 
 double * vector_double_alloc(int size)
 {

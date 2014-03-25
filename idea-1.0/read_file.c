@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "array_alloc.c"
+#include "array_alloc.h"
 
 void read_file(int flag, FILE * fit_fp, double * seed)
 {
@@ -15,6 +15,7 @@ void read_file(int flag, FILE * fit_fp, double * seed)
         fgets(buf, 250, fit_fp);//valor de H (con error)
         //leo el valor de H y su error
         token = strtok(buf, search);
+
         while(token != NULL)
         {
             seed[i] = atof(token);
@@ -86,8 +87,7 @@ int main()
 {
     FILE * fit_fp;
     int i;
-    //int size = 2 * (2 + 6 * 5);
-    int size = 2 + 6 * 5;
+    int size = 2 * (2 + 6 * 5);
     double * seed = vector_double_alloc(size);
     fit_fp = fopen("fit_data.tmp", "r");
     read_file(1, fit_fp, seed);
@@ -95,6 +95,7 @@ int main()
     {
         printf("%lf\n", seed[i]);
     }
+
     return 0;
 }
 */

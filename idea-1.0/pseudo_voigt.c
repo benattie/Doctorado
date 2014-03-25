@@ -1,8 +1,7 @@
-//Funciones necesarias
-#include <math.h>
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_randist.h>
+#include "pseudo_voigt.h"
+#include "array_alloc.h"
 
+/*
 typedef struct IRF
 {
     double U;
@@ -13,8 +12,7 @@ typedef struct IRF
     double Y;
     double Z;
 } IRF;
-
-
+*/
 //FUNCION BACKGROUND (INTERPOLACION LINEAL)
 double background(int N, double x, gsl_matrix * bg_pos, double bg_int[N][2])
 {
@@ -35,7 +33,7 @@ double background(int N, double x, gsl_matrix * bg_pos, double bg_int[N][2])
 
     if(x <= aux[0])
     {
-	return bg_int[0][0];
+	return aux_bg[0];
     }
     
     for(i = 0; i < 2 * N; i++)
@@ -52,6 +50,17 @@ double background(int N, double x, gsl_matrix * bg_pos, double bg_int[N][2])
     return aux_bg[2 * N - 1];
 }
 
+//PSEUDO-VOIGT NORMALIZADA (EN AREA)
+double pseudo_voigt_n(double x, double x0, double eta, double H)
+{
+    double gamma, sigma, delta;
+    gamma = H / 2.;
+    sigma = H / (2. * sqrt(2. * log(2)));
+    delta = x - x0;
+
+    return eta * gsl_ran_cauchy_pdf(delta, gamma) + (1 - eta) * gsl_ran_gaussian_pdf(delta, sigma);
+}
+
 //FUNCION PSEUDO-VOIGT
 double pseudo_voigt(double ttheta, int numrings, double I0[numrings], double t0[numrings], double H, double eta, double shift_H[numrings], double shift_eta[numrings], gsl_matrix * bg_pos, double bg_int[numrings][2])
 {
@@ -64,7 +73,7 @@ double pseudo_voigt(double ttheta, int numrings, double I0[numrings], double t0[
         eta_i = eta + shift_eta[i];
         H_i = H + shift_H[i];
         pv_n = pseudo_voigt_n(ttheta, t0[i], eta_i, H_i);
-        result = result + I0[i] * pv_n;
+        result += I0[i] * pv_n;
     }
     BG = background(numrings, ttheta, bg_pos, bg_int);
     result += BG;
@@ -72,26 +81,17 @@ double pseudo_voigt(double ttheta, int numrings, double I0[numrings], double t0[
     return result;
 }
 
-//PSEUDO-VOIGT NORMALIZADA (EN AREA)
-double pseudo_voigt_n(double x, double x0, double eta, double H)
-{
-    double gamma, sigma, delta;
-    gamma = H / 2.;
-    sigma = H / (2. * sqrt(2. * log(2)));
-    delta = x - x0;
-
-    return eta * gsl_ran_cauchy_pdf(delta, gamma) + (1 - eta) * gsl_ran_gaussian_pdf(delta, sigma);
-}
-
 //FUNCION PARA CALCULAR EL ANCHO INSTRUMENTAL GAUSSIANO(CAGLIOTI)
 double HG_ins2(IRF ins, double theta)
 {
-    return IRF.U * pow(tan(theta), 2.0) + IRF.V * tan(theta) + IRF.W + IRF.IG / cos(theta);
+    double result = ins.U * pow(tan(theta), 2.0) + ins.V * tan(theta) + ins.W + ins.IG / cos(theta);
+    return result;
 }
 //FUNCION PARA CALCULAR EL ANCHO INSTRUMENTAL LORENZIANO(CAGLIOTI)
 double HL_ins(IRF ins, double theta)
 {
-    return IRF.X * tan(theta) + IRF.Y / cos(theta) + IRF.Z;
+    double result = ins.X * tan(theta) + ins.Y / cos(theta) + ins.Z;
+    return result;
 }
 //PSEUDO-VOIGT ---> VOIGT
 void convolution(double * HG2, double * HL, double H, double eta)
