@@ -56,24 +56,32 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
     //anchos instrumentales
     fp_IRF = fopen("IRF.dat", "r");
     IRF ins;
-
+    //FILE *pp = fopen("intens.dat", "w");
     //obtengo los datos
     for(i = 0; i < size; i++)
     {
         gsl_vector_set(ttheta, i, bin2theta(i, pixel, dist));//conversion de bin a coordenada angular
         gsl_vector_set(y, i, y_sang[i]);//tal vez haya que promediar los datos
+        //fprintf(pp, "%d\n", y_sang[i]);
+        //printf("%d\n", y_sang[i]);
         gsl_vector_set(sigma, i, sqrt(gsl_vector_get(y, i))); //calculo los sigma de las intensidades
     }
+    //fflush(pp);
+    //fclose(pp);
+    //printf("done\n");
+    //getchar();
+
 
     for(i = 0; i < numrings; i++)
     {
         gsl_matrix_set(bg_pos, i, 0, bin2theta(bg_pos_left[i], pixel, dist)); //bin del punto definido bg_left
         gsl_matrix_set(bg_pos, i, 1, bin2theta(bg_pos_right[i], pixel, dist)); //bin del punto definido bg_right
     }
-    size = bg_pos_right[numrings]; //corto los datos en el ultimo punto de background
+    size = bg_pos_right[numrings - 1]; //corto los datos en el ultimo punto de background
     struct data d = {size, numrings, ttheta, y, sigma, bg_pos}; //estructura que contiene los datos experimentales
 
     //semillas de los parametros
+    //printf("Inicializando los parametros\n");
     if(exists == 1)//si ya tengo los resultados de un fiteo anterior, los uso como semilla del fiteo siguiente
     {
         char name[20] = "fit_data.tmp";
@@ -100,13 +108,13 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
         read_file(exists, fp_fit, seed);
         int k = 0;
         i = 0;
-
         x_init[i] = seed[k]; i++; k++; //H global
         x_init[i] = seed[k]; i++; k++;//eta global
         for(j = 0; j < numrings; j++)
         {
             x_init[i] = 2. * t0_sang[j]; i++; //--> del t0_sang
             x_init[i] = I0_sang[gamma][j]; i++; //--> del I0_sang
+            printf("%lf\n", I0_sang[gamma][j]);
             x_init[i] = seed[k]; i++; k++;//shift_H
             x_init[i] = seed[k]; i++; k++;//shift_eta
             x_init[i] = gsl_vector_get(y, bg_pos_left[j]);  i++; //intensidad del punto de background a la izquierda
@@ -131,7 +139,7 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
     gsl_multifit_fdfsolver_set (s, &pv, &x.vector);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //inicio las iteraciones
-    //print_state (iter, s);
+    print_state (iter, s);
     do
     {
         iter++;
@@ -149,7 +157,10 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
         printf ("\nError #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
         fprintf(fp_log, "#Error #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
     }
+    //printf ("status = %s\n", gsl_strerror (status));
+    print_state (iter, s);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //printf("Correccion de los resultados\n");
     //Escritura de los resultados del fiteo en los vectores fwhm y eta
     //lectura del archivo con los valores de ancho de pico instrumental
     fp_IRF = fopen("IRF.dat", "r");
@@ -158,6 +169,7 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
     //correccion de los anchos obtenidos del fiteo y escritura a los punteros de salida (fwhm y eta)
     j = 0;
     int bad_fit = 0;
+    fprintf(fp_log, "#Bad fits:\n#spr\tgamma\tpeak\tDI/I\tI\tH\teta\n");
     for(i = 2; i < n_param; i += 6)
     {
         double theta = gsl_vector_get(s -> x, i);
@@ -170,8 +182,7 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
         double err_rel = fabs(DI / I);
         if(err_rel > 0.5 || I < 0 || H_corr[0] < 0 || H_corr[0] > 1 || eta_corr[0] < 0 || eta_corr[0] > 1)
         {
-            fprintf(fp_log, "#Bad fits:\n#spr\tgamma\tpeak\tDI/I\tI\tH\teta\n%3d\t%5d\t%4d\t%.3lf\t%.3lf\t%.3lf\t%.3lf\n", 
-                                              spr, gamma, (i + 4) / 6, err_rel, I, H_corr[0], eta_corr[0]);
+            fprintf(fp_log, "%3d\t%5d\t%4d\t%5.3lf\t%8.3lf\t%8.5lf\t%8.5lf\n", spr, gamma, (i + 4) / 6, err_rel, I, H_corr[0], eta_corr[0]);
             fwhm[gamma][j] = -1.0;
             eta[gamma][j] = -1.0;
             bad_fit = 1;
@@ -187,6 +198,7 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
     fprintf(fp_log, "#-----------------------------------------------------\n");
     fclose(fp_log);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //printf("Impresion de los resultados\n");
     //imprimo los resultados del fiteo
     gsl_multifit_covar (s -> J, 0.0, covar); //calculo la matriz de covarianza
 
@@ -197,7 +209,8 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
         double dof = size - n_param;
         double c = GSL_MAX_DBL(1, chi / sqrt(dof)); 
         FILE * fp = fopen("fit_data.tmp", "w");
-        printf("chisq/dof = %g\n",  pow(chi, 2.0) / dof);
+        //printf("chisq/dof = %g\n",  pow(chi, 2.0) / dof);
+
         fprintf(fp, "chisq/dof = %g\n",  pow(chi, 2.0) / dof);
         fprintf(fp, "Global_H:\n%6.5lf %6.5lf\nGlobal_eta:\n%6.5lf %6.5lf\n",  FIT(0), ERR(0), FIT(1), ERR(1));
         i = 2;
@@ -237,7 +250,7 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
     gsl_matrix_free(covar);
     gsl_multifit_fdfsolver_free (s);
 
-    printf("\nGod's in his heaven\nAll fine with the world\n");
+    //printf("\nGod's in his heaven\nAll fine with the world\n");
     return 0;
 }
 //FIN DEL MAIN

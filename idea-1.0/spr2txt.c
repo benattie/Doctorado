@@ -164,7 +164,7 @@ int main()
     
     //skip lines
     fgets(buf_temp, 22, fp); fgets(buf_temp, 2, fp);
-    fgets(buf_temp, 33, fp); fgets(buf_temp, 2, fp);
+    fgets(buf_temp, 33, fp); fgets(buf_temp, 1, fp);
     
     //le aviso al usuario el valor del flag que activa o desactiva la creacion del .log
     printf("\n correction log file = %s ", &logfile_yn_temp);
@@ -638,6 +638,7 @@ int main()
  }/*End of for(Z = 1; Z <= NrSample; Z++) */
  fclose(fp);
 
+ printf("Gimme tha power\n");
  return (0);
 } /*End of Main()*/
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

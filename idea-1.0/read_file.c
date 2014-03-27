@@ -9,7 +9,7 @@ void read_file(int flag, FILE * fit_fp, double * seed)
     char *token;
     char *search = "\t ";
     int i = 0;
-    if(flag == 1){
+    if(flag){
         fgets(buf, 250, fit_fp);//leo el chi
         fgets(buf, 250, fit_fp);//global H
         fgets(buf, 250, fit_fp);//valor de H (con error)

@@ -11,7 +11,7 @@ CC = gcc
 %: %.c
 	$(CC) $(CFLAGS) -c $(FILE1).c -o $(FILE1).o
 	$(CC) $(CFLAGS) -c $(FILE2).c -o $(FILE2).o
-	$(CC) $(CFLAGS) -c $@.c
+	$(CC) $(CFLAGS) -c $@.c -o $@.o
 	$(CC) $@.o $(FILE1).o $(FILE2).o -o $@.exe $(LIBS)
 
 # eg. do "make gsl_test" to make gsl_test from gsl_test.c
