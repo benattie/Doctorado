@@ -42,8 +42,8 @@ int pv_f (const gsl_vector * x, void * data, gsl_vector * f)
 
     for(i = 0; i < numrings; i++)
     {
-        I0[i] = gsl_vector_get(x, j);   j++;
         t0[i] = gsl_vector_get(x, j);   j++;
+        I0[i] = gsl_vector_get(x, j);   j++;
         shift_H[i] = gsl_vector_get(x, j);  j++;        
         shift_eta[i] = gsl_vector_get(x, j);    j++;
         bg_int[i][0] = gsl_vector_get(x, j);  j++;

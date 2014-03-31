@@ -21,7 +21,7 @@ int theta2bin(double theta, double pixel, double dist);
 
 //INICIO DEL MAIN
 int pv_fitting(int exists, double dist, double pixel, int size, int numrings, int spr, int gamma, 
-                int y_sang[2500], float t0_sang[20], float I0_sang[500][10], int bg_pos_left[15], int bg_pos_right[15],
+                int y_sang[2500], int bg_pos_left[15], int bg_pos_right[15],
                  double ** fwhm, double ** eta)
 {
     //declaracion de variables y allocacion de memoria
@@ -33,7 +33,7 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
     }
     else
     {
-        seed = vector_double_alloc(2 + 2 * numrings);
+        seed = vector_double_alloc(2 + 4 * numrings);
     }
     //variables auxiliares del programa
     int i = 0, j = 0;
@@ -112,9 +112,8 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
         x_init[i] = seed[k]; i++; k++;//eta global
         for(j = 0; j < numrings; j++)
         {
-            x_init[i] = 2. * t0_sang[j]; i++; //--> del t0_sang
-            x_init[i] = I0_sang[gamma][j]; i++; //--> del I0_sang
-            printf("%lf\n", I0_sang[gamma][j]);
+            x_init[i] = seed[k]; i++; k++; //--> theta0
+            x_init[i] = seed[k]; i++; k++; //--> I0
             x_init[i] = seed[k]; i++; k++;//shift_H
             x_init[i] = seed[k]; i++; k++;//shift_eta
             x_init[i] = gsl_vector_get(y, bg_pos_left[j]);  i++; //intensidad del punto de background a la izquierda
@@ -139,7 +138,8 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
     gsl_multifit_fdfsolver_set (s, &pv, &x.vector);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //inicio las iteraciones
-    print_state (iter, s);
+    //printf ("\nInicio del fit en spr #%d y gamma #%d\n", spr, gamma);
+    //print_state (iter, s);
     do
     {
         iter++;
@@ -152,13 +152,14 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
     }
     while (status == GSL_CONTINUE && iter < max_iter);
     fp_log = fopen("logfile.txt", "a");
+    //printf ("status = %s\n", gsl_strerror (status));
+    //print_state (iter, s);
     if(status != 0)//reportar errores
     {
         printf ("\nError #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
         fprintf(fp_log, "#Error #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
     }
-    //printf ("status = %s\n", gsl_strerror (status));
-    print_state (iter, s);
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //printf("Correccion de los resultados\n");
     //Escritura de los resultados del fiteo en los vectores fwhm y eta
@@ -169,7 +170,8 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
     //correccion de los anchos obtenidos del fiteo y escritura a los punteros de salida (fwhm y eta)
     j = 0;
     int bad_fit = 0;
-    fprintf(fp_log, "#Bad fits:\n#spr\tgamma\tpeak\tDI/I\tI\tH\teta\n");
+    //fprintf(fp_log, "#Bad fits:\n#spr\tgamma\tpeak\tDI/I\tI\tH\teta\n");
+    //fprintf(fp_log, "#spr\tgamma\tpeak\tDI/I\tI\tH\teta\n");
     for(i = 2; i < n_param; i += 6)
     {
         double theta = gsl_vector_get(s -> x, i);
@@ -195,7 +197,7 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
         }
         j++;
     }
-    fprintf(fp_log, "#-----------------------------------------------------\n");
+    //fprintf(fp_log, "#-----------------------------------------------------\n");
     fclose(fp_log);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //printf("Impresion de los resultados\n");
@@ -210,13 +212,12 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
         double c = GSL_MAX_DBL(1, chi / sqrt(dof)); 
         FILE * fp = fopen("fit_data.tmp", "w");
         //printf("chisq/dof = %g\n",  pow(chi, 2.0) / dof);
-
-        fprintf(fp, "chisq/dof = %g\n",  pow(chi, 2.0) / dof);
-        fprintf(fp, "Global_H:\n%6.5lf %6.5lf\nGlobal_eta:\n%6.5lf %6.5lf\n",  FIT(0), ERR(0), FIT(1), ERR(1));
-        i = 2;
-        fprintf (fp, "#t0\tsigma\tI\tsigma\tH\tsigma\t\teta\tsigma\t\t\tbg_l\tsigma\tbg_r\tsigma\n");
         if(bad_fit)
         {//si hubo un bad_fit paso como valores iniciales del siguiente fiteo los del anterior
+            fprintf(fp, "chisq/dof = %g\n",  pow(chi, 2.0) / dof);
+            fprintf(fp, "Global_H:\n%6.5lf -1\nGlobal_eta:\n%6.5lf -1\n",  x_init[0], x_init[1]);
+            i = 2;
+            fprintf (fp, "#t0\tsigma\tI\tsigma\tH\tsigma\t\teta\tsigma\t\t\tbg_l\tsigma\tbg_r\tsigma\n");
             for(j = 0; j < numrings; j++)
             {
                 fprintf (fp, "%.3lf\t-1\t%.3lf\t-1\t%.5lf\t-1\t%.5lf\t-1\t%.3lf\t-1\t%.3lf\t -1\n",
@@ -227,6 +228,10 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
         }
         else
         {//si el fiteo fue bueno uso los resultados como semilla del fiteo siguiente
+            fprintf(fp, "chisq/dof = %g\n",  pow(chi, 2.0) / dof);
+            fprintf(fp, "Global_H:\n%6.5lf -1\nGlobal_eta:\n%6.5lf -1\n",  x_init[0], x_init[1]);
+            i = 2;
+            fprintf (fp, "#t0\tsigma\tI\tsigma\tH\tsigma\t\teta\tsigma\t\t\tbg_l\tsigma\tbg_r\tsigma\n");
             for(j = 0; j < numrings; j++)
             {
                 fprintf (fp, "%.3lf\t%.3lf\t%.3lf\t%.3lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.3lf\t%.3lf\t%.3lf\t%.3lf\n",

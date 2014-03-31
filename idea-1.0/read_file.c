@@ -87,10 +87,10 @@ int main()
 {
     FILE * fit_fp;
     int i;
-    int size = 2 * (2 + 6 * 5);
+    int size = (2 + 7 * 4);
     double * seed = vector_double_alloc(size);
-    fit_fp = fopen("fit_data.tmp", "r");
-    read_file(1, fit_fp, seed);
+    fit_fp = fopen("fit_ini.dat", "r");
+    read_file(0, fit_fp, seed);
     for(i = 0; i < size; i++)
     {
         printf("%lf\n", seed[i]);
