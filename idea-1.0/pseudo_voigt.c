@@ -97,15 +97,16 @@ double HL_ins(IRF ins, double theta)
 void convolution(double * HG2, double * HL, double H, double eta)
 {
     double H2 = pow(H, 2.0);
-
-    HG2[0] = H2 * (1. - 0.74417 * eta - 0.24781 * pow(eta, 2.0) - 0.00810 * pow(eta, 3.0));
+    HG2[0] = H2 * (0.997379 - 0.719402 * eta - 0.294812 * pow(eta, 2.0) + 0.0172915 * pow(eta, 3.0));
     HL[0] = H * (0.72928 * eta + 0.19289 * pow(eta, 2.0) + 0.07783 * pow(eta, 3.0));
 }
 //VOIGT ---> PSEUDO-VOIGT
-void deconvolution(double * H, double * eta, double HG, double HL)
+void deconvolution(double * H, double * eta, double HG2, double HL)
 {
-    H[0] = pow(HG, 5.0) + 2.69269 *  pow(HG, 4.0) * HL + 2.42843 * pow(HG, 3.0) * pow(HL, 2.0) + 
-           pow(HL, 5.0) + 0.07842 * HG * pow(HL, 4.0) + 4.47163 * pow(HG, 2.0) * pow(HL, 3.0);
+    double HG = sqrt(HG2);
+    double H5 = pow(HG, 5.0) + 2.69269 *  pow(HG, 4.0) * HL + 2.42843 * pow(HG, 3.0) * pow(HL, 2.0) + 
+                pow(HL, 5.0) + 0.07842 *  HG * pow(HL, 4.0) + 4.47163 * pow(HG, 2.0) * pow(HL, 3.0);
+    *H = pow(H5, 0.2);
     double aux = HL / H[0];
     eta[0] = 1.36603 * aux - 0.47719 * pow(aux, 2.0) + 0.11116 * pow(aux, 3.0);
 }
@@ -116,7 +117,9 @@ void ins_correction(double * H, double * eta, IRF ins, double theta)
     double * HL = vector_double_alloc(1);
     convolution(HG2, HL, H[0], eta[0]);
     HG2[0] -= HG_ins2(ins, theta);
+    if(*HG2 <= 0) *HG2 = 0;
     HL[0] -= HL_ins(ins, theta);
+    if(*HL <= 0) *HL = 0;
     deconvolution(H, eta, HG2[0], HL[0]);
     free(HG2);
     free(HL);

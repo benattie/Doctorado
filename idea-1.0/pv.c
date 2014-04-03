@@ -20,7 +20,7 @@ double bin2theta(int bin, double pixel, double dist);
 int theta2bin(double theta, double pixel, double dist);
 
 //INICIO DEL MAIN
-int pv_fitting(int exists, double dist, double pixel, int size, int numrings, int spr, int gamma, 
+void pv_fitting(int exists, double dist, double pixel, int size, int numrings, int spr, int gamma, 
                 int y_sang[2500], int bg_pos_left[15], int bg_pos_right[15],
                  double ** fwhm, double ** eta)
 {
@@ -37,7 +37,9 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
     }
     //variables auxiliares del programa
     int i = 0, j = 0;
-    FILE *fp_fit, *fp_IRF, *fp_log;
+    FILE *fp_fit, *fp_bflog, *fp_errlog;
+    FILE *fp_IRF; 
+    IRF ins; //anchos instrumentales
     //variables del solver
     int status, iter = 0, max_iter = 500;
     double err_abs = 1e-4, err_rel = 1e-4;
@@ -53,24 +55,13 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
     gsl_multifit_function_fdf pv; //funcion a fitear
     gsl_matrix * covar = gsl_matrix_alloc (n_param, n_param);//matriz covariante 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //anchos instrumentales
-    fp_IRF = fopen("IRF.dat", "r");
-    IRF ins;
-    //FILE *pp = fopen("intens.dat", "w");
     //obtengo los datos
     for(i = 0; i < size; i++)
     {
         gsl_vector_set(ttheta, i, bin2theta(i, pixel, dist));//conversion de bin a coordenada angular
         gsl_vector_set(y, i, y_sang[i]);//tal vez haya que promediar los datos
-        //fprintf(pp, "%d\n", y_sang[i]);
-        //printf("%d\n", y_sang[i]);
         gsl_vector_set(sigma, i, sqrt(gsl_vector_get(y, i))); //calculo los sigma de las intensidades
     }
-    //fflush(pp);
-    //fclose(pp);
-    //printf("done\n");
-    //getchar();
-
 
     for(i = 0; i < numrings; i++)
     {
@@ -151,27 +142,29 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
         status = gsl_multifit_test_delta (s -> dx, s -> x, err_abs, err_rel);
     }
     while (status == GSL_CONTINUE && iter < max_iter);
-    fp_log = fopen("logfile.txt", "a");
     //printf ("status = %s\n", gsl_strerror (status));
     //print_state (iter, s);
+    fp_errlog = fopen("error_logfile.txt", "a");
     if(status != 0)//reportar errores
     {
-        printf ("\nError #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
-        fprintf(fp_log, "#Error #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
+        //printf ("\nError #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
+        fprintf(fp_errlog, "#Error #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
     }
-
+    fclose(fp_errlog);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //printf("Correccion de los resultados\n");
     //Escritura de los resultados del fiteo en los vectores fwhm y eta
+    
     //lectura del archivo con los valores de ancho de pico instrumental
     fp_IRF = fopen("IRF.dat", "r");
     ins = read_IRF(fp_IRF);
     fclose(fp_IRF);
+    
     //correccion de los anchos obtenidos del fiteo y escritura a los punteros de salida (fwhm y eta)
     j = 0;
     int bad_fit = 0;
-    //fprintf(fp_log, "#Bad fits:\n#spr\tgamma\tpeak\tDI/I\tI\tH\teta\n");
-    //fprintf(fp_log, "#spr\tgamma\tpeak\tDI/I\tI\tH\teta\n");
+    fp_bflog = fopen("logfile.txt", "a");
+    gsl_multifit_covar (s -> J, 0.0, covar); //calculo la matriz de covarianza
     for(i = 2; i < n_param; i += 6)
     {
         double theta = gsl_vector_get(s -> x, i);
@@ -184,7 +177,7 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
         double err_rel = fabs(DI / I);
         if(err_rel > 0.5 || I < 0 || H_corr[0] < 0 || H_corr[0] > 1 || eta_corr[0] < 0 || eta_corr[0] > 1)
         {
-            fprintf(fp_log, "%3d\t%5d\t%4d\t%5.3lf\t%8.3lf\t%8.5lf\t%8.5lf\n", spr, gamma, (i + 4) / 6, err_rel, I, H_corr[0], eta_corr[0]);
+            fprintf(fp_bflog, "%3d    %5d    %4d    %5.3lf    %8.3lf    %8.5lf    %8.5lf\n", spr, gamma, (i + 4) / 6, err_rel, I, H_corr[0], eta_corr[0]);
             fwhm[gamma][j] = -1.0;
             eta[gamma][j] = -1.0;
             bad_fit = 1;
@@ -197,49 +190,48 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
         }
         j++;
     }
-    //fprintf(fp_log, "#-----------------------------------------------------\n");
-    fclose(fp_log);
+    fclose(fp_bflog);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //printf("Impresion de los resultados\n");
     //imprimo los resultados del fiteo
-    gsl_multifit_covar (s -> J, 0.0, covar); //calculo la matriz de covarianza
-
+    //gsl_multifit_covar (s -> J, 0.0, covar); //calculo la matriz de covarianza
     #define FIT(i) gsl_vector_get(s -> x, i)
     #define ERR(i) sqrt(gsl_matrix_get(covar, i, i))
     { 
         double chi = gsl_blas_dnrm2(s -> f);
         double dof = size - n_param;
-        double c = GSL_MAX_DBL(1, chi / sqrt(dof)); 
+        //double c = GSL_MAX_DBL(1, chi / sqrt(dof)); 
         FILE * fp = fopen("fit_data.tmp", "w");
         //printf("chisq/dof = %g\n",  pow(chi, 2.0) / dof);
         if(bad_fit)
         {//si hubo un bad_fit paso como valores iniciales del siguiente fiteo los del anterior
+            //printf ("\nBad fit in spr #%d and gamma #%d with status %s(%d)\n", spr, gamma, gsl_strerror (status), status);
             fprintf(fp, "chisq/dof = %g\n",  pow(chi, 2.0) / dof);
             fprintf(fp, "Global_H:\n%6.5lf -1\nGlobal_eta:\n%6.5lf -1\n",  x_init[0], x_init[1]);
             i = 2;
-            fprintf (fp, "#t0\tsigma\tI\tsigma\tH\tsigma\t\teta\tsigma\t\t\tbg_l\tsigma\tbg_r\tsigma\n");
+            fprintf (fp, "#t0    sigma    I    sigma    H    sigma    eta    sigma    bg_l    sigma    bg_r    sigma\n");
             for(j = 0; j < numrings; j++)
             {
-                fprintf (fp, "%.3lf\t-1\t%.3lf\t-1\t%.5lf\t-1\t%.5lf\t-1\t%.3lf\t-1\t%.3lf\t -1\n",
+                fprintf (fp, "%.3lf   -1    %.3lf    -1    %.5lf    -1    %.5lf    -1    %.3lf    -1    %.3lf    -1\n",
                                 x_init[i], x_init[i + 1], x_init[0] + x_init[i + 2],
                                 x_init[1] + x_init[i + 3], x_init[i + 4], x_init[i + 5]);
-                i+=6;
+                i += 6;
             }
         }
         else
         {//si el fiteo fue bueno uso los resultados como semilla del fiteo siguiente
             fprintf(fp, "chisq/dof = %g\n",  pow(chi, 2.0) / dof);
-            fprintf(fp, "Global_H:\n%6.5lf -1\nGlobal_eta:\n%6.5lf -1\n",  x_init[0], x_init[1]);
+            fprintf(fp, "Global_H:\n%6.5lf %6.5lf\nGlobal_eta:\n%6.5lf %6.5lf\n",  FIT(0), ERR(0), FIT(1), ERR(1));
             i = 2;
-            fprintf (fp, "#t0\tsigma\tI\tsigma\tH\tsigma\t\teta\tsigma\t\t\tbg_l\tsigma\tbg_r\tsigma\n");
+            fprintf (fp, "#t0    sigma    I    sigma    H    sigma    eta    sigma    bg_l    sigma    bg_r    sigma\n");
             for(j = 0; j < numrings; j++)
             {
-                fprintf (fp, "%.3lf\t%.3lf\t%.3lf\t%.3lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.3lf\t%.3lf\t%.3lf\t%.3lf\n",
-                                FIT(i), c * ERR(i), FIT(i + 1), c * ERR(i + 1),
-                                FIT(0) + FIT(i + 2), c * sqrt(pow(ERR(0), 2) +  pow(ERR(i + 2), 2)),
-                                FIT(1) + FIT(i + 3), c * sqrt(pow(ERR(1), 2) +  pow(ERR(i + 3), 2)),
-                                FIT(i + 4), c * ERR(i + 4), FIT(i + 5),  c * ERR(i + 5));
-                i+=6;
+                fprintf (fp, "%.3lf    %.3lf    %.3lf    %.3lf    %.5lf    %.5lf    %.5lf    %.5lf    %.3lf    %.3lf    %.3lf    %.3lf\n",
+                                FIT(i), ERR(i), FIT(i + 1), ERR(i + 1),
+                                FIT(0) + FIT(i + 2), sqrt(pow(ERR(0), 2) +  pow(ERR(i + 2), 2)),
+                                FIT(1) + FIT(i + 3), sqrt(pow(ERR(1), 2) +  pow(ERR(i + 3), 2)),
+                                FIT(i + 4), ERR(i + 4), FIT(i + 5),  ERR(i + 5));
+                i += 6;
             }
         }
         fclose(fp);
@@ -256,7 +248,8 @@ int pv_fitting(int exists, double dist, double pixel, int size, int numrings, in
     gsl_multifit_fdfsolver_free (s);
 
     //printf("\nGod's in his heaven\nAll fine with the world\n");
-    return 0;
+    if((gamma % 30) == 0) printf("\nFin (%d %d)\n", spr, gamma);//imprimo progreso
+    //return 0;
 }
 //FIN DEL MAIN
 

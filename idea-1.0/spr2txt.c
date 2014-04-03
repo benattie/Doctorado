@@ -243,10 +243,10 @@ int main()
         write(fd[i], buf_temp, strlen(buf_temp));
 
     /*Begin ring data read-in and output in machine pole figure  (\gamma, \Omega)*/
-    FILE *fp_log;
-    fp_log = fopen("logfile.txt", "w");
-    fprintf(fp_log, "#Bad fits:\n#spr\tgamma\tpeak\tDI/I\tI\tH\teta\n");
-    fclose(fp_log);
+    FILE *fp_bflog;
+    fp_bflog = fopen("logfile.txt", "w");
+    fprintf(fp_bflog, "#Bad fits:\n#spr    gamma    peak    DI/I    I    H    eta\n");
+    fclose(fp_bflog);
 
     k = star_d;  // file index number : start_d to end_d
     do //Iteracion sobre todos los spr  
@@ -331,6 +331,7 @@ int main()
 		        intens[c][d] = 0; 
                     count_minus++;  
                 }
+                //printf("hola\n");
                 //escribo la intensidad integrada al archivo correspondiente en formato de diez columnas, separando por bloques los datos de cada pico
                 sprintf(buf, "%8.1f", intens[c][d]);
                 strcat(outinten,buf);
@@ -338,25 +339,28 @@ int main()
                     strcat(outinten, "\n");
                 if(c == ((end_g - rot_p) + 1))
                     strcat(outinten, "\n");
-                
+                //printf("mundo\n");
                 //escribo el fwhm en el archivo correspondiente
-                sprintf(buf, "%8.5lf", fwhm[c][d]);
+                sprintf(buf, "%8.5lf ", fwhm[c][d]);
                 strcat(outfwhm, buf);
                 if((c % 10) == 0)
                     strcat(outfwhm, "\n");
                 if(c == ((end_g - rot_p) + 1))
                     strcat(outfwhm, "\n");
-
+                //printf("como\n");
                 //escribo eta en el archivo correspondiente
-                sprintf(buf, "%8.5lf", eta[c][d]);
+                sprintf(buf, "%8.5lf ", eta[c][d]);
                 strcat(outeta, buf);
                 if((c % 10) == 0)
                     strcat(outeta, "\n");
                 if(c == ((end_g - rot_p) + 1))
                     strcat(outeta, "\n");
             }
+            //printf("andas\n");
             write(fd[d], outinten, strlen(outinten));
+            //printf("este\n");
             write(ffwhm[d], outfwhm, strlen(outfwhm));
+            //printf("dia\n");
             write(feta[d], outeta, strlen(outeta));            
 	    
             if(count_minus >= 1)//te avisa que tuviste picos con intensidades negativas
@@ -644,7 +648,7 @@ int main()
  fclose(fp);
 
  printf("Gimme tha power\n");
- return (0);
+ return 0;
 } /*End of Main()*/
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////DEFINICION DE LAS FUNCIONES DE TRANSFORMACION ANGULAR/////////////////////////////////////

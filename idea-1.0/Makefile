@@ -4,8 +4,8 @@ FILE1 = pseudo_voigt
 FILE2 = array_alloc
 CFLAGS = -Wall -O3 -I/usr/include
 #CFLAGS = -Wall -I.
-#LIBS = -L/usr/lib -lgsl -lgslcblas -lm
-LIBS = -lgsl -lgslcblas -lm
+LIBS = -L/usr/lib -lgsl -lgslcblas -lm
+#LIBS = -lgsl -lgslcblas -lm
 CC = gcc
 
 %: %.c
