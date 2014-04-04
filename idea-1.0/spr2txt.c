@@ -8,7 +8,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
+
 #include "pv.c"
+#include "read_IRF.c"
+#include "read_file.c"
 
 #define pi 3.141592654
 //#define max(x, y) (((x) > (y)) ? (x) : (y))
@@ -36,6 +39,7 @@ int main()
  double ** fwhm = matrix_double_alloc(500, 10);
  double ** eta = matrix_double_alloc(500, 10);
  float data1[2500], BG_m, intens[500][10];
+ peak_data difra;
 
  char buf_temp[100], buf[100], buf1[100];
  char path_out[150], path [150], filename1[100], inform[10], path1[150], inform1[10];
@@ -223,6 +227,21 @@ int main()
             printf("Cannot open ETA OUTPUT file.(for %d ring)", i + 1); exit(1);
         }
     }
+
+    //Reading of intrumental width files
+    FILE *fp_IRF = fopen("IRF.dat", "r");
+    IRF ins; //anchos instrumentales
+    ins = read_IRF(fp_IRF);
+    fclose(fp_IRF);
+    //structure holding syncrotron's information
+    exp_data sync_data = {dist, pixel, pixel_number, ins};
+    //Reading of initial parameters
+    double ** seeds = matrix_double_alloc(2, 6 * numrings + 2);
+    FILE *fp_init = fopen("fit_ini.dat", "r");
+    read_file(fp_init, seeds);
+
+    /////////////////////////////////////
+
     /* End of reading the parameter file and End of generation of Output-files for(i=0;i<numrings;i++)*/	
     
     fgets(buf_temp, 2, fp); //skip line
@@ -315,7 +334,15 @@ int main()
             //fiteo del difractograma para la obtencion del ancho de pico y eta
             int exists = 1;
             if(k == star_d && y == 1) exists = 0; //pregunto si este es el primer archivo con el que estoy trabajando
-            pv_fitting(exists, dist, pixel, pixel_number, numrings, k, y, data, ug_l, ug_r, fwhm, eta);
+            difra.numrings = numrings;
+            difra.spr = k;
+            difra.gamma = y;    
+            difra.intensity = data;
+            difra.bg_left = ug_l;
+            difra.bg_right = ug_r;
+            difra.fwhm = fwhm;
+            difra.eta = eta;
+            pv_fitting(exists, sync_data, difra, seeds);
         }/*end of the double FOR-routine gamma and pixel number*/
 
         //A esta altura ya termine de leer y procesar los datos de UN archivo spr. Falta imprimir los resultados a el archivo de salida

@@ -2,19 +2,30 @@
 #include "array_alloc.h"
 int main()
 {
-    IRF ins;
-    ins.U = 0.0;
-    ins.V = 0.0;
-    ins.W = 0.002;
-    ins.IG = 0.0;
-    ins.X = 0.0;
-    ins.Y = 0.0;
-    ins.Z = 0.000;
-    double * H = vector_double_alloc(1);
-    double * eta = vector_double_alloc(1);
-    *H = 0.020;
-    *eta = 0.40;
-    double theta = 1.41;
-    ins_correction(H, eta, ins, theta);
+    double *** r3 = r3_tensor_double_alloc(2, 2, 2);
+    int i, j, k;
+    for(i = 0; i < 2; i++)
+    {
+        for(j = 0; j < 2; j++)
+        {
+            for(k = 0; k < 2; k++)
+            {
+                r3[i][j][k] = i + j + k;
+            }
+        }
+    }
+    for(i = 0; i < 2; i++)
+    {
+        for(j = 0; j < 2; j++)
+        {
+            for(k = 0; k < 2; k++)
+            {
+                printf("%lf\t", r3[i][j][k]);
+            }
+            printf("    ");
+        }
+        printf("\n");
+    }
+    free_double_r3_tensor(r3, 2, 2);
     return 0;
 }
