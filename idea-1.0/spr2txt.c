@@ -39,8 +39,7 @@ int main()
  double ** fwhm = matrix_double_alloc(500, 10);
  double ** eta = matrix_double_alloc(500, 10);
  float data1[2500], BG_m, intens[500][10];
- peak_data difra;
-
+ 
  char buf_temp[100], buf[100], buf1[100];
  char path_out[150], path [150], filename1[100], inform[10], path1[150], inform1[10];
  char outfile[100], linfile[100], fwhmfile[100], etafile[100];
@@ -233,13 +232,10 @@ int main()
     IRF ins; //anchos instrumentales
     ins = read_IRF(fp_IRF);
     fclose(fp_IRF);
-    //structure holding syncrotron's information
-    exp_data sync_data = {dist, pixel, pixel_number, ins};
     //Reading of initial parameters
     double ** seeds = matrix_double_alloc(2, 6 * numrings + 2);
     FILE *fp_init = fopen("fit_ini.dat", "r");
     read_file(fp_init, seeds);
-
     /////////////////////////////////////
 
     /* End of reading the parameter file and End of generation of Output-files for(i=0;i<numrings;i++)*/	
@@ -297,7 +293,7 @@ int main()
 
         fgets(buf, 100, fp1); //skip line
 
-        printf("pixel=%d gamma=%d\n", pixel_number, gamma);
+        //printf("pixel=%d gamma=%d\n", pixel_number, gamma);
 
         /*Data Read-In */
         for(y = 1; y <= gamma; y++) //itero sobre todos los difractogramas (360) (recordar que iterar sobre todos los difractogramas implica obtener un valor de intensidad para cada punto del anillo de Debye)
@@ -334,15 +330,11 @@ int main()
             //fiteo del difractograma para la obtencion del ancho de pico y eta
             int exists = 1;
             if(k == star_d && y == 1) exists = 0; //pregunto si este es el primer archivo con el que estoy trabajando
-            difra.numrings = numrings;
-            difra.spr = k;
-            difra.gamma = y;    
-            difra.intensity = data;
-            difra.bg_left = ug_l;
-            difra.bg_right = ug_r;
-            difra.fwhm = fwhm;
-            difra.eta = eta;
-            pv_fitting(exists, sync_data, difra, seeds);
+            //structure holding syncrotron's information
+            exp_data sync_data = {dist, pixel, pixel_number, ins};
+            //structure holding experimental data
+            peak_data difra = {numrings, k, y, data, ug_l, ug_r, fwhm, eta};
+            pv_fitting(exists, &sync_data, &difra, seeds);
         }/*end of the double FOR-routine gamma and pixel number*/
 
         //A esta altura ya termine de leer y procesar los datos de UN archivo spr. Falta imprimir los resultados a el archivo de salida

@@ -16,6 +16,6 @@ void free_int_matrix(int ** matrix, int nrow);
 
 //allocacion de tensores de rango 3 de tamaño d1 x d2 x d3
 double *** r3_tensor_double_alloc(int d1, int d2, int d3);
-void free_double_r3_tensor(double *** tensor, int d2, int d3);
+void free_r3_tensor_double(double *** tensor, int d2, int d3);
 
 #endif

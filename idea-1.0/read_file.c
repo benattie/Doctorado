@@ -52,7 +52,7 @@ int main()
     FILE * fit_fp;
     int i;
     int size = (2 + 7 * 4);
-    double * seed = matrix_double_alloc(2, size);
+    double ** seed = matrix_double_alloc(2, size);
     fit_fp = fopen("fit_ini.dat", "r");
     read_file(fit_fp, seed);
     for(i = 0; i < size; i++)

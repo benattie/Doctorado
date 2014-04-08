@@ -5,7 +5,8 @@
 //f = vector diferencia entre los valores teoricos y los experimentales
 
 //ESTRUCTURA CON TODOS LOS DATOS EXPERIMENTALES
-struct data {
+struct data 
+{
     int n;
     int numrings;
     gsl_vector * ttheta;
@@ -13,26 +14,30 @@ struct data {
     gsl_vector * sigma;
     gsl_matrix * bg_pos;
 };
-
-typedef struct data_s1 {
+//ESTRUCTURA CON LOS PARAMETROS DE CADA FITEO
+typedef struct data_s1 
+{
     struct data d;
     double eta;
     double * shift_H;
     double * shift_eta;
 } data_s1;
 
-typedef struct data_s2 {
+typedef struct data_s2 
+{
     struct data d;
     double eta;  
     double * shift_eta;
 } data_s2;
 
-typedef struct data_s3 {
+typedef struct data_s3 
+{
     struct data d;
     double * shift_eta;
 } data_s3;
 
-typedef struct data_s4 {
+typedef struct data_s4 
+{
     struct data d;
     double eta;
 } data_s4;
@@ -199,7 +204,6 @@ int pv_f_step4 (const gsl_vector * x, void * data, gsl_vector * f)
     
     //inicializo los parametros
     H = gsl_vector_get (x, j); j++;
-    eta = gsl_vector_get (x, j); j++;
     for(i = 0; i < numrings; i++)
     {
         t0[i] = gsl_vector_get(x, j);   j++;

@@ -116,7 +116,7 @@ double *** r3_tensor_double_alloc(int d1, int d2, int d3)
     return tensor;
 }
 
-void free_double_r3_tensor(double *** tensor, int d2, int d3)
+void free_r3_tensor_double(double *** tensor, int d2, int d3)
 {
     int i, j;
     for(i = 0; i < d2; i++)
