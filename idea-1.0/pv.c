@@ -16,7 +16,10 @@
 double bin2theta(int bin, double pixel, double dist);
 int theta2bin(double theta, double pixel, double dist);
 void reset_all_seeds(double ** seeds, int size);
+void reset_almost_all_seeds(double ** seeds, int size);
+void reset_global_seeds(double ** seeds);
 void reset_peak_seeds(double ** seeds, int index);
+void check (double ** seeds, int size);
 
 
 //INICIO DEL MAIN
@@ -26,6 +29,7 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double ** s
     //DECLARACION DE VARIABLES Y ALLOCACION DE MEMORIA
     //numero de parametros a fitear (tengo 6 parametros por pico ademas del eta y el fwhm)    
     int n_param[4] = {4 * (*difra).numrings + 1, 5 * (*difra).numrings + 1, 5 * (*difra).numrings + 2, 6 * (*difra).numrings + 1};
+    int seeds_size = 6 * (*difra).numrings + 2;
     //variables auxiliares del programa
     int i = 0, j = 0;
     //Parametros fijos
@@ -56,10 +60,13 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double ** s
     //printf("Inicio de las iteraciones\n");
     //printf("Paso 1\n");
     pv_step1(exists, sync_data, difra, seeds, &d, n_param[0]);
+    check(seeds, seeds_size);
     //printf("Paso 2\n");
     pv_step2(exists, sync_data, difra, seeds, &d, n_param[1]);
+    check(seeds, seeds_size);
     //printf("Paso 3\n");
     pv_step3(exists, sync_data, difra, seeds, &d, n_param[2]);
+    check(seeds, seeds_size);
     //printf("Paso 4\n");
     pv_step4(exists, sync_data, difra, seeds, &d, n_param[3]);
     //printf("Fin de las iteraciones\n");
@@ -68,9 +75,10 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double ** s
     //Escritura de los resultados del fiteo en los vectores fwhm y eta
     //correccion de los anchos obtenidos del fiteo y escritura a los punteros de salida (fwhm y eta)
     j = 0;
-    //int bad_fit = 0;
+    int bad_fit = 0;
     //FILE *fp_bflog = fopen("logfile.txt", "a");
-    for(i = 2; i < 6 * (*difra).numrings + 2; i += 6)
+    //faltan los encabezados de fp_bflog
+    for(i = 2; i < seeds_size; i += 6)
     {
         double * H_corr = vector_double_alloc(1);
         double * eta_corr = vector_double_alloc(1);
@@ -79,22 +87,23 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double ** s
         *eta_corr = seeds[1][1] + seeds[1][i + 3];
         if(I < 0 || *H_corr < 0 || *H_corr > 1 || *eta_corr < 0 || *eta_corr > 1)
         {
-            //fprintf(fp_bflog, "%3d    %5d    %4d    %5.3lf    %8.3lf    %8.5lf    %8.5lf\n", spr, gamma, (i + 4) / 6, err_rel, I, H_corr[0], eta_corr[0]);
             (*difra).fwhm[(*difra).gamma][j] = -1.0;
-            (*difra).eta[(*difra).gamma][j] = -1.0;
-            //bad_fit = 1;
+            (*difra).eta[(*difra).gamma][j] = -1.0;            
             reset_peak_seeds(seeds, i);
+            //fprintf(fp_bflog, "%3d    %5d    %4d    %5.3lf    %8.3lf    %8.5lf    %8.5lf\n", spr, gamma, (i + 4) / 6, err_rel, I, H_corr[0], eta_corr[0]);
+            bad_fit = 1;
         }
         else
         {   
-            double theta = seeds[1][i];
-            ins_correction(H_corr, eta_corr, (*sync_data).ins, theta);
+            //double theta = seeds[1][i];
+            //ins_correction(H_corr, eta_corr, (*sync_data).ins, theta);
             (*difra).fwhm[(*difra).gamma][j] = *H_corr;
             (*difra).eta[(*difra).gamma][j] = *eta_corr;
         }
         j++;
     }
-    //if(bad_fit) reset_all_seeds(seeds, 6 * (*difra).numrings + 2);
+    if(bad_fit) check(seeds, seeds_size);
+    //if(bad_fit) reset_all_seeds(seeds, size);
     //fclose(fp_bflog);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //liberacion de memoria allocada y cierre de archivos
@@ -127,10 +136,54 @@ void reset_all_seeds(double ** seeds, int size)
     for(i = 0; i < size; i++)
         seeds[1][i] = seeds[0][i];
 }
+//reseteo todas las semillas menos la posicion del pico
+void reset_almost_all_seeds(double ** seeds, int size)
+{
+    int i, j;
+    reset_global_seeds(seeds);
+    for(i = 2; i < size; i += 6)
+    {
+        for(j = 1; j < 6; j++)
+            seeds[1][i + j] = seeds[0][i + j];
+    }
+        
+}
 
 void reset_peak_seeds(double ** seeds, int index)
 {
     int i;
     for(i = index; i < index + 4; i++)
         seeds[1][i] = seeds[0][i];
+}
+
+void reset_global_seeds(double ** seeds)
+{
+    seeds[1][0] = seeds[0][0];
+    seeds[1][1] = seeds[0][1];
+}
+
+void check (double ** seeds, int size)
+{
+    int i;
+    double H_global = seeds[1][0];
+    double eta_global = seeds[1][1];
+    if(H_global < 0 || H_global > 1)
+    {
+        reset_all_seeds(seeds, size);
+    }
+    else
+    {
+        if(eta_global < 0 || eta_global > 1)
+            seeds[1][1] = seeds[0][1];
+
+        for(i = 2; i < size; i += 6)
+        {
+            double dtheta = fabs(seeds[1][i] - seeds[0][i]);
+            double I = seeds[1][i + 1];
+            double shift_H = fabs(seeds[1][i + 2]);
+            double shift_eta = fabs(seeds[1][i + 3]);
+            if(I < 0 || shift_H > 1 || shift_eta > 1 || dtheta > 2)
+                reset_peak_seeds(seeds, i);
+        }
+    }
 }

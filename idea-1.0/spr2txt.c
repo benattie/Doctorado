@@ -258,11 +258,12 @@ int main()
         write(fd[i], buf_temp, strlen(buf_temp));
 
     /*Begin ring data read-in and output in machine pole figure  (\gamma, \Omega)*/
+    /*
     FILE *fp_bflog;
     fp_bflog = fopen("logfile.txt", "w");
     fprintf(fp_bflog, "#Bad fits:\n#spr    gamma    peak    DI/I    I    H    eta\n");
     fclose(fp_bflog);
-
+    */
     k = star_d;  // file index number : start_d to end_d
     do //Iteracion sobre todos los spr  
     {
@@ -324,9 +325,12 @@ int main()
                     intensity += intensss.nnew;
                 }                                       
                 intens[y][n] = (intensity / count) - BG_m;  // Integral values and BG correction
+                //printf("theta = %f\tIntensity[%d][%d] = %f\n", 2*theta[n], y, n + 1, intens[y][n]); 
                 n++;
             }
             while(n < numrings);
+            //getchar();
+            
             //fiteo del difractograma para la obtencion del ancho de pico y eta
             int exists = 1;
             if(k == star_d && y == 1) exists = 0; //pregunto si este es el primer archivo con el que estoy trabajando
@@ -335,6 +339,7 @@ int main()
             //structure holding experimental data
             peak_data difra = {numrings, k, y, data, ug_l, ug_r, fwhm, eta};
             pv_fitting(exists, &sync_data, &difra, seeds);
+            
         }/*end of the double FOR-routine gamma and pixel number*/
 
         //A esta altura ya termine de leer y procesar los datos de UN archivo spr. Falta imprimir los resultados a el archivo de salida
