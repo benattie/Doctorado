@@ -13,15 +13,6 @@
 #include "aux_functions.h"
 #include "pv_steps.c"
 
-void print_seeds(double *seeds, int size)
-{
-    int i;
-    printf("%lf\n%lf\n", seeds[0], seeds[1]);
-    for(i = 2; i < size; i += 6)
-        printf("%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", seeds[i], seeds[i + 1], seeds[i + 2], seeds[i + 3], seeds[i + 4], seeds[i + 5]);
-
-    getchar();
-}
 //INICIO DEL MAIN
 void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * intens, double ** seeds)
 {
@@ -29,7 +20,7 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     //DECLARACION DE VARIABLES Y ALLOCACION DE MEMORIA
     //variables auxiliares del programa
     int i, j, k;
-    // bad_fit = 0
+    int bad_fit = 0;
     int zero_peak_index[(*difra).numrings];
     float treshold = 3.0;
     //elimino los picos que tienen una intensidad menor que treshold
@@ -40,8 +31,8 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     // seteo el vector con las semillas
     double ** peak_seeds = matrix_double_alloc(2, seeds_size);
     //int ** peak_bg = matrix_int_alloc(2, n_peaks);
-    //set_seeds(all_seeds_size, zero_peak_index, exists, seeds, peak_seeds);
-    set_seeds(all_seeds_size, zero_peak_index, 0, seeds, peak_seeds);
+    set_seeds(all_seeds_size, zero_peak_index, exists, seeds, peak_seeds);
+    //set_seeds(all_seeds_size, zero_peak_index, 0, seeds, peak_seeds);
     //set_bg_pos((*difra).numrings, zero_peak_index, (*difra).bg_left, (*difra).bg_right, peak_bg);
     //numero de parametros a fitear para cada paso del fiteo 
     int n_param[4] = {4 * n_peaks + 1, 5 * n_peaks, 4 * n_peaks + 2, 6 * n_peaks};
@@ -77,22 +68,22 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     //printf("Inicio de las iteraciones\n");
     //printf("Paso 1\n");
     //print_seeds(peak_seeds[1], seeds_size);
-    pv_step1(1, peak_seeds, seeds_size, &d, n_param[0]);
+    pv_step1(exists, peak_seeds, seeds_size, &d, n_param[0]);
     //print_seeds(peak_seeds[1], seeds_size);
     check(peak_seeds, seeds_size);
     //printf("Paso 2\n");
     //print_seeds(peak_seeds[1], seeds_size);
-    pv_step2(1, peak_seeds, seeds_size, &d, n_param[1]);
+    pv_step2(exists, peak_seeds, seeds_size, &d, n_param[1]);
     //print_seeds(peak_seeds[1], seeds_size);
     check(peak_seeds, seeds_size);
     //printf("Paso 3\n");
     //print_seeds(peak_seeds[1], seeds_size);
-    pv_step3(1, peak_seeds, seeds_size,  &d, n_param[2]);
+    pv_step3(exists, peak_seeds, seeds_size,  &d, n_param[2]);
     //print_seeds(peak_seeds[1], seeds_size);
     check(peak_seeds, seeds_size);
     //printf("Paso 4\n");
     //print_seeds(peak_seeds[1], seeds_size);
-    pv_step4(1, peak_seeds, seeds_size, &d, n_param[3]);
+    pv_step4(exists, peak_seeds, seeds_size, &d, n_param[3]);
     //print_seeds(peak_seeds[1], seeds_size);
     //printf("Fin de las iteraciones\n");
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -107,12 +98,13 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     {
         if(zero_peak_index[k] == 0)
         {
-        /*  double * H_corr = vector_double_alloc(1);
-            double * eta_corr = vector_double_alloc(1);
+            
+            double * H = vector_double_alloc(1);
+            double * eta = vector_double_alloc(1);
             double I = peak_seeds[1][j + 1];
-            *H_corr = peak_seeds[1][0] + peak_seeds[1][j + 2];
-            *eta_corr = peak_seeds[1][1] + peak_seeds[1][j + 3];
-            if(I < 0 || *H_corr < 0 || *H_corr > 1 || *eta_corr < 0 || *eta_corr > 1)
+            *H = peak_seeds[1][0] + peak_seeds[1][j + 2];
+            *eta = peak_seeds[1][1] + peak_seeds[1][j + 3];
+            if(I < 0 || *H < 0 || *H > 1 || *eta < 0 || *eta > 1)
             {
                 (*difra).fwhm[(*difra).gamma][k] = -1.0;
                 (*difra).eta[(*difra).gamma][k] = -1.0;
@@ -124,13 +116,16 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
             {   
                 //double theta = peak_seeds[1][j];
                 //ins_correction(H_corr, eta_corr, (*sync_data).ins, theta);
-                (*difra).fwhm[(*difra).gamma][k] = *H_corr;
-                (*difra).eta[(*difra).gamma][k] = *eta_corr;
+                (*difra).fwhm[(*difra).gamma][k] = *H;
+                (*difra).eta[(*difra).gamma][k] = *eta;
             }
-            j += 6;*/
+            j += 6;
+
+            /*
             (*difra).fwhm[(*difra).gamma][k] = peak_seeds[1][0] + peak_seeds[1][j + 2];
             (*difra).eta[(*difra).gamma][k] = peak_seeds[1][1] + peak_seeds[1][j + 3];
             j += 6;
+            */
         }
         else
         {
@@ -139,25 +134,15 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
         }
         k++;
     }
-    //if(bad_fit) check(peak_seeds, seeds_size);
-    reset_seeds(all_seeds_size, peak_seeds[1], zero_peak_index, seeds);
-
-    //if(bad_fit) reset_all_seeds(seeds, size);
+    if(bad_fit) check(peak_seeds, seeds_size);
+    //reset_seeds(all_seeds_size, peak_seeds[1], zero_peak_index, seeds);
     //fclose(fp_bflog);
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
     //liberacion de memoria allocada y cierre de archivos
     gsl_vector_free(ttheta);
     gsl_vector_free(y);
     gsl_vector_free(sigma);
     gsl_matrix_free(bg_pos);
     free_double_matrix(peak_seeds, 2);
-    //free_int_matrix(peak_bg, 2);
-    
-    if((((*difra).gamma - 1) % 30) == 0) printf("\nFin (%d %d)\n", (*difra).spr, (*difra).gamma);//imprimo progreso
 }
 //FIN DEL MAIN
-//
-
-

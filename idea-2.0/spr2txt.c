@@ -45,7 +45,7 @@ int main()
  char outfile[100], linfile[100], fwhmfile[100], etafile[100];
  char marfile[150];
  char outinten[3000], outfwhm[6000], outeta[6000];
- char minus_zero; 
+ char minus_zero;
  char logfile_yn, logfile_yn_temp;
  
  FILE *fp, *fp1, *fp2, *fp3;
@@ -81,10 +81,10 @@ int main()
  //////////////////////INICIA LA LECTURA DEL ARCHIVO para_fit2d.dat/////////////////////////////////////////////
  //path hacia los archivos de salida
  fgets(buf_temp, 22, fp);
- fscanf(fp, "%s", path_out);   fgets(buf_temp, 2, fp);
+ fscanf(fp, "%s", path_out); fgets(buf_temp, 2, fp);
  //numero de muestras a trabajar (1)
  fgets(buf_temp, 22, fp);
- fscanf(fp, "%d", &NrSample);   fgets(buf_temp, 2, fp);
+ fscanf(fp, "%d", &NrSample); fgets(buf_temp, 2, fp);
 
  for(Z = 1; Z <= NrSample; Z++) // FOR-routine: whole routines
  {
@@ -93,9 +93,9 @@ int main()
     fgets(buf_temp, 60, fp);
     fgets(buf_temp, 2, fp);
     
-    //path hacia los spr (encabezado + 360 filas x 1725 columnas) (son 37) 
+    //path hacia los spr (encabezado + 360 filas x 1725 columnas) (son 37)
     fgets(buf_temp, 22, fp);
-    fscanf(fp, "%s", path);   fgets(buf_temp, 2, fp);
+    fscanf(fp, "%s", path); fgets(buf_temp, 2, fp);
 
     //lee raiz de los archivos spr (New_Al70R-tex_)
     fgets(buf_temp, 22, fp);
@@ -112,7 +112,7 @@ int main()
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%d", &star_d); fgets(buf_temp, 2, fp);
     
-    //angulo (\Omega) inicial 
+    //angulo (\Omega) inicial
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%d", &star_a); fgets(buf_temp, 2, fp);
     
@@ -150,7 +150,7 @@ int main()
 
     //flag que determina si las cuentas negativas se pasan a 0
     fgets(buf_temp, 22, fp);
-    fscanf(fp, "%s", &minus_zero); fgets(buf_temp, 2, fp);    
+    fscanf(fp, "%s", &minus_zero); fgets(buf_temp, 2, fp);
 
     //flag que determina si se genera el archivo .log?
     fgets(buf_temp, 22, fp);
@@ -161,9 +161,9 @@ int main()
     fgets(buf_temp, 15, fp);
     fgets(buf_temp, 2, fp);
 
-    //numero de picos a analizar 
+    //numero de picos a analizar
     fgets(buf_temp, 22, fp);
-    fscanf(fp, "%d", &numrings); fgets(buf_temp, 2, fp); 
+    fscanf(fp, "%d", &numrings); fgets(buf_temp, 2, fp);
     
     //skip lines
     fgets(buf_temp, 22, fp); fgets(buf_temp, 2, fp);
@@ -177,7 +177,7 @@ int main()
     printf("\n correction minus_zero = %s ", &minus_zero);
     
     //no se para que esta esto
-    printf("\n log_file minus_zero = %s  \n" ,&logfile_yn);
+    printf("\n log_file minus_zero = %s \n" ,&logfile_yn);
 
     for(i = 0; i < numrings; i++) //itera sobre cada pico (0 a 7) -> (1 a 8)
     {
@@ -214,15 +214,15 @@ int main()
         //genero los archivos en los que se guardan los datos (intens, fwhm, eta), en formato maquina, de cada pico.
         //En adelante seran llamados file_peak
         if((fd[i] = open(outfile, O_CREAT|O_TRUNC|O_RDWR,S_IREAD|S_IWRITE)) < 0)
-        { 
+        {
             printf("Cannot open INTENS OUTPUT file.(for %d ring)", i + 1); exit(1);
         }
         if((ffwhm[i] = open(fwhmfile, O_CREAT|O_TRUNC|O_RDWR,S_IREAD|S_IWRITE)) < 0)
-        { 
+        {
             printf("Cannot open FWHM OUTPUT file.(for %d ring)", i + 1); exit(1);
-        }    
+        }
         if((feta[i] = open(etafile, O_CREAT|O_TRUNC|O_RDWR,S_IREAD|S_IWRITE)) < 0)
-        { 
+        {
             printf("Cannot open ETA OUTPUT file.(for %d ring)", i + 1); exit(1);
         }
     }
@@ -232,13 +232,7 @@ int main()
     IRF ins; //anchos instrumentales
     ins = read_IRF(fp_IRF);
     fclose(fp_IRF);
-<<<<<<< HEAD:idea-1.0/spr2txt.c
-    //structure holding syncrotron's information
-    exp_data sync_data = {dist, pixel, pixel_number, ins};
-    //Reading of initial parameters
-=======
         //Reading of initial parameters
->>>>>>> afd1d422f47c32d71f779219cd7e2b5fb4d18e79:idea-2.0/spr2txt.c
     double ** seeds = matrix_double_alloc(2, 6 * numrings + 2);
     FILE *fp_init = fopen("fit_ini.dat", "r");
     read_file(fp_init, seeds);
@@ -248,30 +242,30 @@ int main()
     
     fgets(buf_temp, 2, fp); //skip line
 
-    //imprime en pantalla los datos relevantes de cada pico 
+    //imprime en pantalla los datos relevantes de cada pico
     for(i = 0; i < numrings; i++)
-        printf("Position of [%d]ring = Theta:%6.3f  %8d%8d%8d%8d\n", i + 1, theta[i], posring_l[i], posring_r[i], ug_l[i], ug_r[i]);
+        printf("Position of [%d]ring = Theta:%6.3f %8d%8d%8d%8d\n", i + 1, theta[i], posring_l[i], posring_r[i], ug_l[i], ug_r[i]);
 
     //imprime en cada file_peak el \gamma inicial, final y el paso
-    sprintf(buf_temp, "Anf., Ende, Schritt-Gamma:              %8d%8d       1\n", rot_p, end_g);
+    sprintf(buf_temp, "Anf., Ende, Schritt-Gamma: %8d%8d 1\n", rot_p, end_g);
 
     for(i = 0; i < numrings; i++)
         write(fd[i], buf_temp, strlen(buf_temp));
 
     //imprime en cada file_peak el \Omega inicial, final y el paso
-    sprintf(buf_temp, "Anf., Ende, Schritt-Omega:              %8d%8d%8d\n\n", star_a, end_a, del_a);
+    sprintf(buf_temp, "Anf., Ende, Schritt-Omega: %8d%8d%8d\n\n", star_a, end_a, del_a);
     for(i = 0; i < numrings; i++)
         write(fd[i], buf_temp, strlen(buf_temp));
 
-    /*Begin ring data read-in and output in machine pole figure  (\gamma, \Omega)*/
+    /*Begin ring data read-in and output in machine pole figure (\gamma, \Omega)*/
     /*
     FILE *fp_bflog;
     fp_bflog = fopen("logfile.txt", "w");
-    fprintf(fp_bflog, "#Bad fits:\n#spr    gamma    peak    DI/I    I    H    eta\n");
+    fprintf(fp_bflog, "#Bad fits:\n#spr gamma peak DI/I I H eta\n");
     fclose(fp_bflog);
     */
-    k = star_d + 1;  // file index number : star_d to end_d
-    do //Iteracion sobre todos los spr  
+    k = star_d; // file index number : star_d to end_d
+    do //Iteracion sobre todos los spr
     {
         //selecciono el archivo spr que voy a procesar
         strcpy(marfile, path1);
@@ -288,7 +282,7 @@ int main()
         strcat(marfile, ".");
         strcat(marfile, "spr");
 
-        printf("\nReading data from <====  %s\n", marfile);
+        printf("\nReading data from <==== %s\n", marfile);
         //abro el archivo spr del que voy a sacar las intensdades de los picos
         if((fp1 = fopen(marfile, "r")) == NULL)
         {
@@ -316,7 +310,7 @@ int main()
             {
                 intensity = 0; count = 0;
                 //los bin en donde se encuentra la informacion del bg para el pico n del difractograma
-                a = ug_l[n]; 
+                a = ug_l[n];
                 b = ug_r[n];
                 //valor de background correspondiente al bin del pico adecuado del difractograma correspondiente
                 BG_l = data[a];
@@ -325,26 +319,16 @@ int main()
                 BG_m = ((BG_l + BG_r) / 2);
 
                 for(z = posring_l[n]; z <= posring_r[n]; z++) //integro el pico
-                { 
+                {
                     count++;
                     intensss.nnew = data[z];
                     intensity += intensss.nnew;
-                }                                       
-                intens[y][n] = (intensity / count) - BG_m;  // Integral values and BG correction
-                printf("theta = %f\tIntensity[%d][%d] = %f\n", 2*theta[n], y, n + 1, intens[y][n]); 
+                }
+                intens[y][n] = (intensity / count) - BG_m; // Integral values and BG correction
+                //printf("theta = %f\tIntensity[%d][%d] = %f\n", 2*theta[n], y, n + 1, intens[y][n]);
                 n++;
             }
             while(n < numrings);
-<<<<<<< HEAD:idea-1.0/spr2txt.c
-            getchar();
-
-            //fiteo del difractograma para la obtencion del ancho de pico y eta
-            int exists = 1;
-            if(k == star_d && y == 1) exists = 0; //pregunto si este es el primer archivo con el que estoy trabajando
-            peak_data difra = {numrings, k, y, data, ug_l, ug_r, fwhm, eta};
-            pv_fitting(exists, &sync_data, &difra, intens[y], seeds);
-            getchar();
-=======
             //getchar();
 
             //fiteo del difractograma para la obtencion del ancho de pico y eta
@@ -357,23 +341,22 @@ int main()
             //fwhm & eta fitting
             pv_fitting(exists, &sync_data, &difra, intens[y], seeds);
             //getchar();
->>>>>>> afd1d422f47c32d71f779219cd7e2b5fb4d18e79:idea-2.0/spr2txt.c
         }/*end of the double FOR-routine gamma and pixel number*/
         
         //A esta altura ya termine de leer y procesar los datos de UN archivo spr. Falta imprimir los resultados a el archivo de salida
         for(d = 0; d < numrings; d++)//itero sobre todos los picos
-        { 
+        {
             strcpy(outinten, "");
             strcpy(outfwhm, "");
             strcpy(outeta, "");
             count_minus = 0;
             for(c = 1; c <= ((end_g - rot_p) + 1); c++) //itero sobre todo el anillo
-            { 
-	    	if(intens[c][d] < 0) //corrijo las intensidades negativas
-                { 
+            {
+if(intens[c][d] < 0) //corrijo las intensidades negativas
+                {
                     if((minus_zero == 'y') || (minus_zero == 'Y'))
-		        intens[c][d] = 0; 
-                    count_minus++;  
+intens[c][d] = 0;
+                    count_minus++;
                 }
                 //escribo la intensidad integrada al archivo correspondiente en formato de diez columnas, separando por bloques los datos de cada pico
                 sprintf(buf, "%8.1f", intens[c][d]);
@@ -397,12 +380,12 @@ int main()
             }
             write(fd[d], outinten, strlen(outinten));
             write(ffwhm[d], outfwhm, strlen(outfwhm));
-            write(feta[d], outeta, strlen(outeta));            
-	    
+            write(feta[d], outeta, strlen(outeta));
+
             if(count_minus >= 1)//te avisa que tuviste picos con intensidades negativas
-    	    {
+     {
                 printf("\n!!Number of MINUS intensity in the [%d]th pole figure = %d !!! \n", d + 1, count_minus);
-            } 		 
+            }
         }
         fclose(fp1);
         k += del_d; //paso al siguiente spr
@@ -418,21 +401,21 @@ int main()
         close(ffwhm[d]);
         close(feta[d]);
     }
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**** Angular Transformation to Pole figure coordinate***/
     /**** LIN2GKSS-ROUTINE **********************************/
     printf("\n====== Begin angular transformation ====== \n");
     timer = time(NULL); // present time in sec
     zeit = localtime(&timer); // save "time in sec" into structure tm
     /*
-    printf("Unix Time: %d sec\n\n", timer); // began at 1970-1-1 0h0min0sec
-    printf("year: %d\n",   zeit->tm_year + 1900);
-    printf("month: %d\n",   zeit->tm_mon + 1);
-    printf("day: %d\n\n", zeit->tm_mday);
-    printf("hour: %d\n",   zeit->tm_hour);
-    printf("min: %d\n",   zeit->tm_min);
-    printf("sec: %d\n\n", zeit->tm_sec);
-    */
+printf("Unix Time: %d sec\n\n", timer); // began at 1970-1-1 0h0min0sec
+printf("year: %d\n", zeit->tm_year + 1900);
+printf("month: %d\n", zeit->tm_mon + 1);
+printf("day: %d\n\n", zeit->tm_mday);
+printf("hour: %d\n", zeit->tm_hour);
+printf("min: %d\n", zeit->tm_min);
+printf("sec: %d\n\n", zeit->tm_sec);
+*/
 
     for(m = 0; m < numrings; m++)//itero sobre todos los picos
     {
@@ -553,7 +536,7 @@ int main()
         //Imprimo el tiempo de ejecucion del programa en el .mtex
         fprintf(fp1, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
         fprintf(fp_fwhm_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
-        fprintf(fp_eta_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);        
+        fprintf(fp_eta_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
         
         k = 0;//contador del archvo grid y el de mtex
         //tranformacion angular (gamma, omega)-->(alpha,beta)
@@ -567,8 +550,8 @@ int main()
                     neu_gam1 = j;
                     neu_ome1 = i;
                     //transformacion geometrica
-		    if(neu_ome1 > 90)
-		    {
+                    if(neu_ome1 > 90)
+                    {
                         neu_ome = neu_ome1 - 90;
                         neu_gam = neu_gam1 + 180;
                     }
@@ -579,7 +562,7 @@ int main()
                     }
                     
                     alpha = winkel_al(theta[m], neu_ome, neu_gam);
-                    beta  = winkel_be(theta[m], neu_ome, neu_gam, alpha);
+                    beta = winkel_be(theta[m], neu_ome, neu_gam, alpha);
                     
                     if(j % step == 0)
                     {
@@ -608,7 +591,7 @@ int main()
                             alpha = alpha;
                         
                         //imprimo las intensidades en formato figura de polos, asi como el grid
-	                if(theta > 0)
+                        if(theta > 0)
                         {
                             fprintf(fp1, "%11d%10.4f%10.4f%10.4f%10.4f%12.0f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, nn_intens);
                             fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, nn_fwhm);
@@ -620,7 +603,7 @@ int main()
                             fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, -2 * theta[m], -1 * theta[m], alpha, beta, nn_fwhm);
                             fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, -2 * theta[m], -1 * theta[m], alpha, beta, nn_eta);
                         }
-	                fprintf(fp3, "%11d%10.1f%10.1f%10.4f%10.4f\n", k + 1, neu_ome, neu_gam, alpha, beta); 
+                        fprintf(fp3, "%11d%10.1f%10.1f%10.4f%10.4f\n", k + 1, neu_ome, neu_gam, alpha, beta);
                         k++;
                     }
                 }
@@ -638,7 +621,7 @@ int main()
                     neu_ome = i;
                     
                     alpha = winkel_al(theta[m], neu_ome, neu_gam);
-                    beta  = winkel_be(theta[m], neu_ome, neu_gam, alpha);
+                    beta = winkel_be(theta[m], neu_ome, neu_gam, alpha);
                     
                     fscanf(fp2, "%f", &m_intens);
                     fscanf(fp_fwhm, "%lf", &m_fwhm);
@@ -655,7 +638,7 @@ int main()
                         
                         if(theta > 0)
                         {
-                            fprintf(fp1, "%11d%10.4f%10.4f%10.4f%10.4f%12.0f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, m_intens); 
+                            fprintf(fp1, "%11d%10.4f%10.4f%10.4f%10.4f%12.0f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, m_intens);
                             fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, m_fwhm);
                             fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, m_eta);
                         }
@@ -692,9 +675,9 @@ int main()
 
 float winkel_al(float th, float om, float ga)
 {
-    float   al,rad,chi,phi;
-    double  omr, gar, thr, phir, chir;
-    double  COSAL;
+    float al,rad,chi,phi;
+    double omr, gar, thr, phir, chir;
+    double COSAL;
 
     rad = pi / 180;
     chi = 0.0;
@@ -706,7 +689,7 @@ float winkel_al(float th, float om, float ga)
     chir = chi * rad;
 
     /***the multiplication of matrix G and s */
-     COSAL=(  ( (-1 * cos(omr) * sin(phir)) - (sin(omr) * cos(phir) * cos(chir)) ) * (-1 * sin(thr)) )
+     COSAL=( ( (-1 * cos(omr) * sin(phir)) - (sin(omr) * cos(phir) * cos(chir)) ) * (-1 * sin(thr)) )
            + ( (-1 * sin(omr) * sin(phir)) + (cos(omr) * cos(phir) * cos(chir)) ) * (cos(thr) * cos(gar));
 
      al = (float)(acos(COSAL)) / rad;
@@ -715,9 +698,9 @@ float winkel_al(float th, float om, float ga)
 
 float winkel_be(float thb, float omb, float gab, float alb)
 {
-    float   be,rad_be,chi_be,phi_be;
-    double  thbr, ombr, gabr, albr, phibr, chibr;
-    double  SINALCOSBE,COSBE,SINALSINBE,SINBE;
+    float be,rad_be,chi_be,phi_be;
+    double thbr, ombr, gabr, albr, phibr, chibr;
+    double SINALCOSBE,COSBE,SINALSINBE,SINBE;
     
     rad_be = pi / 180;
     chi_be = 0.0;

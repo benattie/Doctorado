@@ -81,6 +81,7 @@ double bin2theta(int bin, double pixel, double dist);
 int theta2bin(double theta, double pixel, double dist);
 void print_state (int iter, gsl_multifit_fdfsolver * s);
 
+void print_seeds(double *seeds, int size);
 void reset_all_seeds(double ** seeds, int size);
 //reseteo todas las semillas menos la posicion del pico
 void reset_almost_all_seeds(double ** seeds, int size);

@@ -32,7 +32,7 @@ int main()
  int fd[15];
  int ffwhm[15], feta[15];
 
- int pixel_number, gamma, n_av;
+ int pixel_number, gamma, n_av = 5;
  int data[2500], intensity;
 
  double pixel, dist;
@@ -247,17 +247,33 @@ int main()
     //imprime en pantalla los datos relevantes de cada pico 
     for(i = 0; i < numrings; i++)
         printf("Position of [%d]ring = Theta:%6.3f  %8d%8d%8d%8d\n", i + 1, theta[i], posring_l[i], posring_r[i], ug_l[i], ug_r[i]);
-
-    //imprime en cada file_peak el \gamma inicial, final y el paso
+    //INTENSIDAD
+    //imprime en cada file_peak el \gamma inicial, final
     sprintf(buf_temp, "Anf., Ende, Schritt-Gamma:              %8d%8d       1\n", rot_p, end_g);
-
     for(i = 0; i < numrings; i++)
         write(fd[i], buf_temp, strlen(buf_temp));
-
     //imprime en cada file_peak el \Omega inicial, final y el paso
     sprintf(buf_temp, "Anf., Ende, Schritt-Omega:              %8d%8d%8d\n\n", star_a, end_a, del_a);
     for(i = 0; i < numrings; i++)
         write(fd[i], buf_temp, strlen(buf_temp));
+    //FWHM
+    //imprime en cada file_peak el \gamma inicial, final y el paso para la figura de polos de intensidad
+    sprintf(buf_temp, "Anf., Ende, Schritt-Gamma:              %8d%8d       %d\n", rot_p, end_g, n_av);
+    for(i = 0; i < numrings; i++)
+        write(ffwhm[i], buf_temp, strlen(buf_temp));
+    //imprime en cada file_peak el \Omega inicial, final y el paso
+    sprintf(buf_temp, "Anf., Ende, Schritt-Omega:              %8d%8d%8d\n\n", star_a, end_a, del_a);
+    for(i = 0; i < numrings; i++)
+        write(ffwhm[i], buf_temp, strlen(buf_temp));
+    //ETA
+    //imprime en cada file_peak el \gamma inicial, final y el paso para la figura de polos de intensidad
+    sprintf(buf_temp, "Anf., Ende, Schritt-Gamma:              %8d%8d       %d\n", rot_p, end_g, n_av);
+    for(i = 0; i < numrings; i++)
+        write(ffwhm[i], buf_temp, strlen(buf_temp));
+    //imprime en cada file_peak el \Omega inicial, final y el paso
+    sprintf(buf_temp, "Anf., Ende, Schritt-Omega:              %8d%8d%8d\n\n", star_a, end_a, del_a);
+    for(i = 0; i < numrings; i++)
+        write(ffwhm[i], buf_temp, strlen(buf_temp));
 
     /*Begin ring data read-in and output in machine pole figure  (\gamma, \Omega)*/
     /*
@@ -266,7 +282,7 @@ int main()
     fprintf(fp_bflog, "#Bad fits:\n#spr    gamma    peak    DI/I    I    H    eta\n");
     fclose(fp_bflog);
     */
-    k = star_d + 1;  // file index number : star_d to end_d
+    k = star_d;  // file index number : star_d to end_d
     do //Iteracion sobre todos los spr  
     {
         //selecciono el archivo spr que voy a procesar
@@ -351,7 +367,7 @@ int main()
                 pv_fitting(exists, &sync_data, &difra, peak_intens_av, seeds);
                 memset(intens_av, 0, 1800 * sizeof(float));
                 memset(peak_intens_av, 0, 10 * sizeof(float));
-                if((y % 30) == 0) printf("\nFin (%d %d)\n", k, y);//imprimo progreso
+                if(((y - 1) % 90) == 0) printf("\nFin (%d %d)\n", k, y);//imprimo progreso
                 //getchar();
             }
 
@@ -375,10 +391,13 @@ int main()
                 //escribo la intensidad integrada al archivo correspondiente en formato de diez columnas, separando por bloques los datos de cada pico
                 sprintf(buf, "%8.1f", intens[c][d]);
                 strcat(outinten, buf);
-                sprintf(buf_fwhm, "%8.5lf ", fwhm[c][d]);
-                strcat(outfwhm, buf_fwhm);
-                sprintf(buf_eta, "%8.5lf ", eta[c][d]);
-                strcat(outeta, buf_eta);
+                if((c % n_av) == 0)
+                {
+                    sprintf(buf_fwhm, "%8.5lf ", fwhm[c][d]);
+                    strcat(outfwhm, buf_fwhm);
+                    sprintf(buf_eta, "%8.5lf ", eta[c][d]);
+                    strcat(outeta, buf_eta);
+                }
                 if((c % 10) == 0)
                 {
                     strcat(outinten, "\n");
@@ -434,7 +453,8 @@ int main()
     for(m = 0; m < numrings; m++)//itero sobre todos los picos
     {
         step = 1;//Si step > 1 lo que hago es promediar step's intensidades de la figura de polos en formato maquina
-        
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        //INTENSIDADES
         //genero string con el nombre del archivo con la figura de polos (intensidades) en el formato maquina
         strcpy(outfile, "");
         strcat(outfile, path_out);
@@ -467,6 +487,7 @@ int main()
             fprintf(stderr, "Error beim oeffnen der Datei(%s).", linfile); exit(1);
         }
         ////////////////////////////////////////////////////////////////////////////////////////////
+        //FWHM
         //genero string con el nombre del archivo con la figura de polos (fwhm) en el formato maquina
         strcpy(fwhmfile, "");
         strcat(fwhmfile, path_out);
@@ -494,6 +515,7 @@ int main()
             fprintf(stderr, "Error beim oeffnen der Datei(%s).", fwhmfile); exit(1);
         }
         ////////////////////////////////////////////////////////////////////////////////////////////
+        //ETA
         //genero string con el nombre del archivo con la figura de polos (eta) en el formato maquina
         strcpy(etafile, "");
         strcat(etafile, path_out);
@@ -521,12 +543,14 @@ int main()
             fprintf(stderr, "Error beim oeffnen der Datei(%s).", etafile); exit(1);
         }
         ////////////////////////////////////////////////////////////////////////////////////////////
+        //GRID
         //genero archivo con el grid de la figura de polos
         if((fp3 = fopen("PF_grid.dat", "w")) == NULL )
         {
             fprintf(stderr, "Error opening file PF_grid.dat"); exit(1);
         }
-        
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        //INTESIDADES
         //leo el \gamma inicial, el final y el salto
         fgets(buf, 42, fp2);
         fscanf(fp2, "%d", &anf_gam);
@@ -544,6 +568,21 @@ int main()
         printf("anf_gam=%5d , end_gam=%5d , del_gam=%5d \nanf_ome=%5.1f , end_ome=%5.1f , del_ome=%5.1f \n\n", anf_gam, ende_gam, del_gam, anf_ome, ende_ome, del_ome);
         //step_ome = abs((ende_ome - anf_ome) / del_ome);
         
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        //FWHM
+        strcpy(buf_temp, "");
+        fgets(buf_temp, 70, fp_fwhm);
+        fgets(buf_temp, 70, fp_fwhm);
+        fgets(buf_temp, 70, fp_fwhm);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        //ETA
+        strcpy(buf_temp, "");
+        fgets(buf_temp, 70, fp_fwhm);
+        fgets(buf_temp, 70, fp_fwhm);
+        fgets(buf_temp, 70, fp_fwhm);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
         if(ende_ome < anf_ome)
             del_ome = -1 * del_ome;
         
@@ -587,10 +626,13 @@ int main()
                         {
                             fscanf(fp2, "%f", &m_intens);//leo la intensidad de la figura de polos en formato maquina
                             n_intens += m_intens;
-                            fscanf(fp_fwhm, "%lf", &m_fwhm);//leo el ancho de pico de la figura de polos en formato maquina
-                            n_fwhm += m_fwhm;
-                            fscanf(fp_eta, "%lf", &m_eta);//leo el eta de la figura de polos en formato maquina
-                            n_eta += m_eta;
+                            if((j % n_av) == 0)
+                            {
+                                fscanf(fp_fwhm, "%lf", &m_fwhm);//leo el ancho de pico de la figura de polos en formato maquina
+                                n_fwhm += m_fwhm;
+                                fscanf(fp_eta, "%lf", &m_eta);//leo el eta de la figura de polos en formato maquina
+                                n_eta += m_eta;
+                            }
                         }
                         nn_intens = n_intens / step;
                         nn_fwhm = n_fwhm / step;
@@ -608,14 +650,20 @@ int main()
 	                if(theta > 0)
                         {
                             fprintf(fp1, "%11d%10.4f%10.4f%10.4f%10.4f%12.0f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, nn_intens);
-                            fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, nn_fwhm);
-                            fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, nn_eta);
+                            if((j % n_av) == 0)
+                            {
+                                fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", (k + 1) / n_av, 2 * theta[m], theta[m], alpha, beta, nn_fwhm);
+                                fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", (k + 1) / n_av, 2 * theta[m], theta[m], alpha, beta, nn_eta);
+                            }
                         }
                         else
                         {
                             fprintf(fp1, "%11d%10.4f%10.4f%10.4f%10.4f%12.0f\n", k + 1, -2 * theta[m], -1 * theta[m], alpha, beta, nn_intens);
-                            fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, -2 * theta[m], -1 * theta[m], alpha, beta, nn_fwhm);
-                            fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, -2 * theta[m], -1 * theta[m], alpha, beta, nn_eta);
+                            if((j % n_av) == 0)
+                            {
+                                fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", (k + 1) / n_av, -2 * theta[m], -1 * theta[m], alpha, beta, nn_fwhm);
+                                fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", (k + 1) / n_av, -2 * theta[m], -1 * theta[m], alpha, beta, nn_eta);
+                            }
                         }
 	                fprintf(fp3, "%11d%10.1f%10.1f%10.4f%10.4f\n", k + 1, neu_ome, neu_gam, alpha, beta); 
                         k++;
@@ -638,8 +686,11 @@ int main()
                     beta  = winkel_be(theta[m], neu_ome, neu_gam, alpha);
                     
                     fscanf(fp2, "%f", &m_intens);
-                    fscanf(fp_fwhm, "%lf", &m_fwhm);
-                    fscanf(fp_eta, "%lf", &m_eta);
+                    if((j % n_av) == 0)
+                    {
+                        fscanf(fp_fwhm, "%lf", &m_fwhm);
+                        fscanf(fp_eta, "%lf", &m_eta);
+                    }
                     if(j % step == 0)
                     {
                         if(alpha > 90)
@@ -652,17 +703,22 @@ int main()
                         
                         if(theta > 0)
                         {
-                            fprintf(fp1, "%11d%10.4f%10.4f%10.4f%10.4f%12.0f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, m_intens); 
-                            fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, m_fwhm);
-                            fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, m_eta);
+                            fprintf(fp1, "%11d%10.4f%10.4f%10.4f%10.4f%12.0f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, m_intens);
+                            if((j % n_av) == 0)
+                            {
+                                fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", (k + 1) / n_av, 2 * theta[m], theta[m], alpha, beta, m_fwhm);
+                                fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", (k + 1) / n_av, 2 * theta[m], theta[m], alpha, beta, m_eta);
+                            }
                         }
                         else
                         {
                             fprintf(fp1, "%11d%10.4f%10.4f%10.4f%10.4f%12.0f\n", k + 1, -2 * theta[m], -1 * theta[m], alpha, beta, m_intens);
-                            fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, -2 * theta[m], -1 * theta[m], alpha, beta, m_fwhm);
-                            fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, -2 * theta[m], -1 * theta[m], alpha, beta, m_eta);
+                            if((j % n_av) == 0)
+                            {
+                                fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", (k + 1) / n_av, -2 * theta[m], -1 * theta[m], alpha, beta, m_fwhm);
+                                fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", (k + 1) / n_av, -2 * theta[m], -1 * theta[m], alpha, beta, m_eta);
+                            }
                         }
-                        
                         fprintf(fp3, "%11d%10.1f%10.1f%10.4f%10.4f\n", k + 1, neu_ome, neu_gam, alpha, beta);
                         k++;
                     }

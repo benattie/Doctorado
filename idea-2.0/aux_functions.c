@@ -17,6 +17,13 @@ void print_state (int iter, gsl_multifit_fdfsolver * s)
     printf ("iter: %3d\t|f(x)| = %g\n", iter, gsl_blas_dnrm2 (s -> f));
 }
 
+void print_seeds(double *seeds, int size)
+{
+    int i;
+    printf("%lf\n%lf\n", seeds[0], seeds[1]);
+    for(i = 2; i < size; i += 6)
+        printf("%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", seeds[i], seeds[i + 1], seeds[i + 2], seeds[i + 3], seeds[i + 4], seeds[i + 5]);
+}
 
 void reset_all_seeds(double ** seeds, int size)
 {

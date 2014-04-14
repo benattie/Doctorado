@@ -13,11 +13,7 @@
 #include "aux_functions.h"
 #include "pv_f.c"
 
-<<<<<<< HEAD:idea-1.0/pv_steps.c
-void pv_step1(int exists, exp_data * sync_data, peak_data * difra, double ** seeds, struct data * d, int n_param)
-=======
 void pv_step1(int exists, double ** seeds, int seeds_size, struct data * d, int n_param)
->>>>>>> afd1d422f47c32d71f779219cd7e2b5fb4d18e79:idea-2.0/pv_steps.c
 {
     //variables generales del programa
     int i, j;
@@ -46,7 +42,7 @@ void pv_step1(int exists, double ** seeds, int seeds_size, struct data * d, int 
         x_init[j] = seeds[exists][i]; j++; //theta_0
         x_init[j] = seeds[exists][i + 1]; j++; //Intesity
         x_init[j] = seeds[exists][i + 4]; j++; //Bg_Left
-        x_init[j] = seeds[exists][i + 5]; j++; //Bg_Right    
+        x_init[j] = seeds[exists][i + 5]; j++; //Bg_Right
     }
     gsl_vector_view x = gsl_vector_view_array (x_init, n_param); //inicializo el vector con los datos a fitear
 
@@ -55,8 +51,8 @@ void pv_step1(int exists, double ** seeds, int seeds_size, struct data * d, int 
     j = 0;
     for(i = 2; i < seeds_size; i += 6)
     {
-        shift_H[j] = seeds[exists][i + 2]; 
-        shift_eta[j] = seeds[exists][i + 3]; 
+        shift_H[j] = seeds[exists][i + 2];
+        shift_eta[j] = seeds[exists][i + 3];
         j++;
     }
     data_s1 d1 = {*d, eta, shift_H, shift_eta};
@@ -94,8 +90,8 @@ void pv_step1(int exists, double ** seeds, int seeds_size, struct data * d, int 
     //FILE *fp_errlog = fopen("error_logfile.txt", "a");
     //if(status != 0)//reportar errores
     //{
-    //    printf ("\nError #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
-    //    fprintf(fp_errlog, "#Error #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
+    // printf ("\nError #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
+    // fprintf(fp_errlog, "#Error #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
     //}
     //fclose(fp_errlog);
     
@@ -153,8 +149,8 @@ void pv_step2(int exists, double ** seeds, int seeds_size, struct data * d, int 
     eta = seeds[exists][1];
     j = 0;
     for(i = 2; i < seeds_size; i += 6)
-    { 
-        shift_eta[j] = seeds[exists][i + 3]; 
+    {
+        shift_eta[j] = seeds[exists][i + 3];
         j++;
     }
     data_s2 d2 = {*d, H, eta, shift_eta};
@@ -192,8 +188,8 @@ void pv_step2(int exists, double ** seeds, int seeds_size, struct data * d, int 
     //FILE *fp_errlog = fopen("error_logfile.txt", "a");
     //if(status != 0)//reportar errores
     //{
-    //    printf ("\nError #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
-    //    fprintf(fp_errlog, "#Error #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
+    // printf ("\nError #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
+    // fprintf(fp_errlog, "#Error #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
     //}
     //fclose(fp_errlog);
     
@@ -227,7 +223,7 @@ void pv_step3(int exists, double ** seeds, int seeds_size, struct data * d, int 
 
     //Funcion del fiteo y su jacobiano
     gsl_multifit_function_fdf pv; //funcion a fitear
-    //gsl_matrix * covar = gsl_matrix_alloc (n_param, n_param);//matriz covariante ---> moverlo para el principio de cada paso (o solo para el ultimo, no se) 
+    //gsl_matrix * covar = gsl_matrix_alloc (n_param, n_param);//matriz covariante ---> moverlo para el principio de cada paso (o solo para el ultimo, no se)
 
     //un vector de valores iniciales para cada paso de la iteracion
     double * x_init = vector_double_alloc(n_param);
@@ -250,8 +246,8 @@ void pv_step3(int exists, double ** seeds, int seeds_size, struct data * d, int 
     j = 0;
     for(i = 2; i < seeds_size; i += 6)
     {
-        shift_H[j] = seeds[1][i + 2]; 
-        shift_eta[j] = seeds[exists][i + 3]; 
+        shift_H[j] = seeds[1][i + 2];
+        shift_eta[j] = seeds[exists][i + 3];
         j++;
     }
     data_s3 d3 = {*d, shift_H, shift_eta};
@@ -289,8 +285,8 @@ void pv_step3(int exists, double ** seeds, int seeds_size, struct data * d, int 
     //FILE *fp_errlog = fopen("error_logfile.txt", "a");
     //if(status != 0)//reportar errores
     //{
-    //    printf ("\nError #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
-    //    fprintf(fp_errlog, "#Error #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
+    // printf ("\nError #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
+    // fprintf(fp_errlog, "#Error #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
     //}
     //fclose(fp_errlog);
     
@@ -381,8 +377,8 @@ void pv_step4(int exists, double ** seeds, int seeds_size, struct data * d, int 
     //FILE *fp_errlog = fopen("error_logfile.txt", "a");
     //if(status != 0)//reportar errores
     //{
-    //    printf ("\nError #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
-    //    fprintf(fp_errlog, "#Error #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
+    // printf ("\nError #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
+    // fprintf(fp_errlog, "#Error #%d en spr #%d y gamma #%d: %s\n", status, spr, gamma, gsl_strerror (status));
     //}
     //fclose(fp_errlog);
     
