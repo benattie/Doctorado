@@ -32,12 +32,14 @@ int main()
  int fd[15];
  int ffwhm[15], feta[15];
 
- int pixel_number, gamma;
+ int pixel_number, gamma, n_av;
  int data[2500], intensity;
 
  double pixel, dist;
  double ** fwhm = matrix_double_alloc(500, 10);
  double ** eta = matrix_double_alloc(500, 10);
+ float intens_av[1800], peak_intens_av[10];
+
  float data1[2500], BG_m, intens[500][10];
  
  char buf_temp[100], buf[100], buf1[100], buf_fwhm[500], buf_eta[500];
@@ -232,9 +234,7 @@ int main()
     IRF ins; //anchos instrumentales
     ins = read_IRF(fp_IRF);
     fclose(fp_IRF);
-    //structure holding syncrotron's information
-    exp_data sync_data = {dist, pixel, pixel_number, ins};
-    //Reading of initial parameters
+        //Reading of initial parameters
     double ** seeds = matrix_double_alloc(2, 6 * numrings + 2);
     FILE *fp_init = fopen("fit_ini.dat", "r");
     read_file(fp_init, seeds);
@@ -266,7 +266,7 @@ int main()
     fprintf(fp_bflog, "#Bad fits:\n#spr    gamma    peak    DI/I    I    H    eta\n");
     fclose(fp_bflog);
     */
-    k = star_d;  // file index number : start_d to end_d
+    k = star_d + 1;  // file index number : star_d to end_d
     do //Iteracion sobre todos los spr  
     {
         //selecciono el archivo spr que voy a procesar
@@ -297,7 +297,8 @@ int main()
         fgets(buf, 100, fp1); //skip line
 
         //printf("pixel=%d gamma=%d\n", pixel_number, gamma);
-
+        memset(intens_av, 0, 1800 * sizeof(float));
+        memset(peak_intens_av, 0, 10 * sizeof(float));
         /*Data Read-In */
         for(y = 1; y <= gamma; y++) //itero sobre todos los difractogramas (360) (recordar que iterar sobre todos los difractogramas implica obtener un valor de intensidad para cada punto del anillo de Debye)
         {
@@ -305,6 +306,7 @@ int main()
             {
                 //leo la intensidad de cada bin y la paso a formato de entero
                 fscanf(fp1, "%e", &data1[x]);
+                intens_av[x] += data1[x];
                 data[x] = (int)data1[x];
             }
             n = 0; //numero de pico del difractograma
@@ -327,18 +329,32 @@ int main()
                     intensity += intensss.nnew;
                 }                                       
                 intens[y][n] = (intensity / count) - BG_m;  // Integral values and BG correction
-                printf("theta = %f\tIntensity[%d][%d] = %f\n", 2*theta[n], y, n + 1, intens[y][n]); 
+                if(intens[y][n] >= 0) 
+                    peak_intens_av[n] += intens[y][n];
+                //printf("theta = %f\tIntensity[%d][%d] = %f\n", 2*theta[n], y, n + 1, intens[y][n]); 
                 n++;
             }
             while(n < numrings);
-            getchar();
-
+            //getchar();
+            n_av = 5;
             //fiteo del difractograma para la obtencion del ancho de pico y eta
-            int exists = 1;
-            if(k == star_d && y == 1) exists = 0; //pregunto si este es el primer archivo con el que estoy trabajando
-            peak_data difra = {numrings, k, y, data, ug_l, ug_r, fwhm, eta};
-            pv_fitting(exists, &sync_data, &difra, intens[y], seeds);
-            getchar();
+            if((y % n_av) == 0)
+            {
+                int exists = 1;
+                if(y == 1) exists = 0; //pregunto si este es el primer archivo con el que estoy trabajando
+                average(intens_av, peak_intens_av, n_av, pixel_number, numrings);
+                //structure holding syncrotron's information
+                exp_data sync_data = {dist, pixel, pixel_number, ins};
+                //structure holding difractogram's information
+                peak_data difra = {numrings, k, y, intens_av, ug_l, ug_r, fwhm, eta};
+                //fwhm & eta fitting
+                pv_fitting(exists, &sync_data, &difra, peak_intens_av, seeds);
+                memset(intens_av, 0, 1800 * sizeof(float));
+                memset(peak_intens_av, 0, 10 * sizeof(float));
+                if((y % 30) == 0) printf("\nFin (%d %d)\n", k, y);//imprimo progreso
+                //getchar();
+            }
+
         }/*end of the double FOR-routine gamma and pixel number*/
         
         //A esta altura ya termine de leer y procesar los datos de UN archivo spr. Falta imprimir los resultados a el archivo de salida
@@ -382,7 +398,7 @@ int main()
 	    
             if(count_minus >= 1)//te avisa que tuviste picos con intensidades negativas
     	    {
-                printf("\n!!Number of MINUS intensity in the [%d]th pole figure=%d !!! \n", d + 1, count_minus);
+                printf("\n!!Number of MINUS intensity in the [%d]th pole figure = %d !!! \n", d + 1, count_minus);
             } 		 
         }
         fclose(fp1);

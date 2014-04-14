@@ -103,30 +103,31 @@ int check_for_null_peaks (float treshold, int numrings, int * zero_peak_index, f
     return n_peaks;
 }
 
-void set_seeds(int size, int * zero_peak_index, double ** seeds, double ** peak_seeds)
+void set_seeds(int size, int * zero_peak_index, int exists, double ** seeds, double ** peak_seeds)
 {
-    int i, j = 2, k;
+    int i, j = 2, k, l = 0;
     peak_seeds[0][0] = seeds[0][0];
-    peak_seeds[1][0] = seeds[0][0];
+    peak_seeds[1][0] = seeds[exists][0];
 
     peak_seeds[0][1] = seeds[0][1];
-    peak_seeds[1][1] = seeds[0][1];
+    peak_seeds[1][1] = seeds[exists][1];
 
 
     for(i = 2; i < size; i += 6)
     {
-        if(zero_peak_index[(i / 6)] == 0)
+        if(zero_peak_index[l] == 0)
         {
             for(k = 0; k < 6; k++)
             {
                 peak_seeds[0][j + k] = seeds[0][i + k];
-                peak_seeds[1][j + k] = seeds[0][i + k];
+                peak_seeds[1][j + k] = seeds[exists][i + k];
             }
             j += 6;
         }
+        l++;
     }
 }
-
+/*
 void set_bg_pos(int n_peaks, int * zero_peak_index, int * bg_left, int * bg_right, int ** peak_bg)
 {
     int i, j = 0;
@@ -140,3 +141,35 @@ void set_bg_pos(int n_peaks, int * zero_peak_index, int * bg_left, int * bg_righ
         }
     }
 }
+*/
+void reset_seeds(int size, double * peak_seeds, int * zero_peak_index, double ** seeds)
+{
+    int i, j = 2, k;
+    seeds[1][0] = peak_seeds[0];
+    seeds[1][1] = peak_seeds[1];
+
+    for(i = 2; i < size; i += 6)
+    {
+        if(zero_peak_index[(i / 6)] == 0)
+        {
+            for(k = 0; k < 6; k++)
+                seeds[1][i + k] = peak_seeds[j + k];
+            j += 6;
+        }
+    }
+}
+
+void average(float * intens_av, float * peak_intens_av, int n_av, int size, int numrings)
+{
+    int i;
+    for(i = 0; i < size; i++)
+    {
+        intens_av[i] /= n_av;
+    }
+    for(i = 0; i < numrings; i++)
+    {
+        peak_intens_av[i] /= n_av;
+    }
+}
+
+

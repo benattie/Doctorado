@@ -60,20 +60,19 @@ int pv_f_step2 (const gsl_vector * x, void * data, gsl_vector * f)
     gsl_vector * y = d_int.y;
     gsl_vector * sigma = d_int.sigma;
     gsl_matrix * bg_pos = d_int.bg_pos;
+    double H = ((data_s2 *)data) -> H;
     double eta = ((data_s2 *)data) -> eta;
     double * shift_eta = ((data_s2 *)data) -> shift_eta;
 
     int i, j = 0;
 
     //parametros del fiteo (para el programa representan las variables independientes)
-    double H;
     double I0[numrings];
     double t0[numrings];
     double shift_H[numrings];
     double bg_int[numrings][2];
     
     //inicializo los parametros
-    H = gsl_vector_get (x, j); j++;
     for(i = 0; i < numrings; i++)
     {
         t0[i] = gsl_vector_get(x, j);   j++;
@@ -106,8 +105,8 @@ int pv_f_step3 (const gsl_vector * x, void * data, gsl_vector * f)
     gsl_vector * y = d_int.y;
     gsl_vector * sigma = d_int.sigma;
     gsl_matrix * bg_pos = d_int.bg_pos;
+    double * shift_H = ((data_s3 *)data) -> shift_H;
     double * shift_eta = ((data_s3 *)data) -> shift_eta;
-
     int i, j = 0;
 
     //parametros del fiteo (para el programa representan las variables independientes)
@@ -115,7 +114,6 @@ int pv_f_step3 (const gsl_vector * x, void * data, gsl_vector * f)
     double eta;
     double I0[numrings];
     double t0[numrings];
-    double shift_H[numrings];
     double bg_int[numrings][2];
     
     //inicializo los parametros
@@ -125,7 +123,6 @@ int pv_f_step3 (const gsl_vector * x, void * data, gsl_vector * f)
     {
         t0[i] = gsl_vector_get(x, j);   j++;
         I0[i] = gsl_vector_get(x, j);   j++;
-        shift_H[i] = gsl_vector_get(x, j); j++;
         bg_int[i][0] = gsl_vector_get(x, j);  j++;
         bg_int[i][1] = gsl_vector_get(x, j);  j++;
     }
@@ -153,12 +150,11 @@ int pv_f_step4 (const gsl_vector * x, void * data, gsl_vector * f)
     gsl_vector * y = d_int.y;
     gsl_vector * sigma = d_int.sigma;
     gsl_matrix * bg_pos = d_int.bg_pos;
+    double H = ((data_s4 *)data) -> H;
     double eta = ((data_s4 *)data) -> eta;
-
     int i, j = 0;
 
     //parametros del fiteo (para el programa representan las variables independientes)
-    double H;
     double I0[numrings];
     double t0[numrings];
     double shift_H[numrings];
@@ -166,7 +162,6 @@ int pv_f_step4 (const gsl_vector * x, void * data, gsl_vector * f)
     double bg_int[numrings][2];
     
     //inicializo los parametros
-    H = gsl_vector_get (x, j); j++;
     for(i = 0; i < numrings; i++)
     {
         t0[i] = gsl_vector_get(x, j);   j++;
