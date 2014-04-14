@@ -1,18 +1,6 @@
 #include "pseudo_voigt.h"
 #include "array_alloc.h"
 
-/*
-typedef struct IRF
-{
-    double U;
-    double V;
-    double W;
-    double IG;
-    double X;
-    double Y;
-    double Z;
-} IRF;
-*/
 //FUNCION BACKGROUND (INTERPOLACION LINEAL)
 double background(int N, double x, gsl_matrix * bg_pos, double bg_int[N][2])
 {

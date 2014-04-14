@@ -10,32 +10,8 @@
 
 //COSAS MIAS
 #include "array_alloc.h"
+#include "aux_functions.h"
 #include "pv_f.c"
-
-//FUNCIONES
-void print_state (int iter, gsl_multifit_fdfsolver * s);
-
-//ESTRUCTURAS PROPIAS
-typedef struct exp_data
-{
-    double dist;
-    double pixel;
-    int size;
-    IRF ins;
-} exp_data;
-
-typedef struct peak_data
-{
-    int numrings;
-    int spr;
-    int gamma;
-    int * intensity;
-    int * bg_left;
-    int * bg_right;
-    double ** fwhm;
-    double ** eta;
-} peak_data;
-
 
 void pv_step1(int exists, exp_data * sync_data, peak_data * difra, double ** seeds, struct data * d, int n_param)
 {
@@ -422,15 +398,4 @@ void pv_step4(int exists, exp_data * sync_data, peak_data * difra, double ** see
     free(x_init);
     gsl_multifit_fdfsolver_free (s);
     //printf("Fin del paso 4\n");
-}
-
-//FUNCIONES AUXILIARES
-void print_state (int iter, gsl_multifit_fdfsolver * s)
-{
-    printf ("iter: %3d\t|f(x)| = %g\n", iter, gsl_blas_dnrm2 (s -> f));
-}
-
-void reset_single_seed(double ** seeds, int index)
-{
-    seeds[1][index] = seeds[0][index];
 }

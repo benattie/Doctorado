@@ -10,37 +10,38 @@
 
 //COSAS MIAS
 #include "array_alloc.h"
+#include "aux_functions.h"
 #include "pv_steps.c"
 
-//FUNCIONES
-double bin2theta(int bin, double pixel, double dist);
-int theta2bin(double theta, double pixel, double dist);
-void reset_all_seeds(double ** seeds, int size);
-void reset_almost_all_seeds(double ** seeds, int size);
-void reset_global_seeds(double ** seeds);
-void reset_peak_seeds(double ** seeds, int index);
-void check (double ** seeds, int size);
-
-
 //INICIO DEL MAIN
-void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double ** seeds)
+void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * intens, double ** seeds)
 {
     //printf("Inicio pv_fitting\n");
     //DECLARACION DE VARIABLES Y ALLOCACION DE MEMORIA
-    //numero de parametros a fitear (tengo 6 parametros por pico ademas del eta y el fwhm)    
-    int n_param[4] = {4 * (*difra).numrings + 1, 5 * (*difra).numrings + 1, 5 * (*difra).numrings + 2, 6 * (*difra).numrings + 1};
-    int seeds_size = 6 * (*difra).numrings + 2;
     //variables auxiliares del programa
-    int i = 0, j = 0;
+    int i, j;
+    float treshold = 3.0;
+    int zero_peak_index[(*difra).numrings];
+    //elimino los picos que tienen una intensidad menor que treshold
+    int n_peaks = check_for_null_peaks (treshold, (*difra).numrings, zero_peak_index, intens);
+    int seeds_size = 6 * n_peaks + 2;
+    // seteo el vector con las semillas
+    double ** peak_seeds = matrix_double_alloc(2, seeds_size);
+    int ** peak_bg = matrix_int_alloc(2, n_peaks);
+    set_seeds(6 * (*difra).numrings + 2, zero_peak_index, seeds, peak_seeds);
+    set_bg_pos(6 * (*difra).numrings + 2, zero_peak_index, (*difra).bg_left, (*difra).bg_right, peak_bg);
+    //numero de parametros a fitear para cada paso del fiteo 
+    int n_param[4] = {4 * n_peaks + 1, 5 * n_peaks + 1, 5 * n_peaks + 2, 6 * n_peaks + 1};
+
     //Parametros fijos
     gsl_vector * ttheta = gsl_vector_alloc((*sync_data).size); //valores de 2theta
     gsl_vector * y = gsl_vector_alloc((*sync_data).size); //intensidades del difractograma
     gsl_vector * sigma = gsl_vector_alloc((*sync_data).size); //error de las intensidades del difractograma
-    gsl_matrix * bg_pos = gsl_matrix_alloc ((*difra).numrings, 2); //posicion de los puntos que tomo para calcular el background (en unidades de angulo)
+    gsl_matrix * bg_pos = gsl_matrix_alloc (n_peaks, 2); //posicion de los puntos que tomo para calcular el background (en unidades de angulo)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //obtengo los datos
     //printf("Obteniendo datos\n");
-    (*sync_data).size = (*difra).bg_right[(*difra).numrings - 1];//leo hasta el ultimo punto de background
+    (*sync_data).size = peak_bg[1][n_peaks - 1];//leo hasta el ultimo punto de background
     for(i = 0; i < (*sync_data).size; i++)
     {
         gsl_vector_set(ttheta, i, bin2theta(i, (*sync_data).pixel, (*sync_data).dist));//conversion de bin a coordenada angular
@@ -48,12 +49,14 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double ** s
         gsl_vector_set(sigma, i, sqrt((*difra).intensity[i])); //calculo los sigma de las intensidades
     }
 
-    for(i = 0; i < (*difra).numrings; i++)
+    for(i = 0; i < n_peaks; i++)
     {
-        gsl_matrix_set(bg_pos, i, 0, bin2theta((*difra).bg_left[i], (*sync_data).pixel, (*sync_data).dist)); //bin del punto definido bg_left
-        gsl_matrix_set(bg_pos, i, 1, bin2theta((*difra).bg_right[i], (*sync_data).pixel, (*sync_data).dist)); //bin del punto definido bg_right
+        printf("%d\t%d\n--\n", peak_bg[0][i], peak_bg[1][i]);
+        gsl_matrix_set(bg_pos, i, 0, bin2theta(peak_bg[0][i], (*sync_data).pixel, (*sync_data).dist)); //bin del punto definido bg_left
+        gsl_matrix_set(bg_pos, i, 1, bin2theta(peak_bg[1][i], (*sync_data).pixel, (*sync_data).dist)); //bin del punto definido bg_right
+        printf("%lf\t%lf", gsl_matrix_get(bg_pos, i, 0), gsl_matrix_get(bg_pos, i, 1));
     }
-
+/*
     struct data d = {(*sync_data).size, (*difra).numrings, ttheta, y, sigma, bg_pos}; //estructura que contiene los datos experimentales
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //Fiteo
@@ -111,79 +114,11 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double ** s
     gsl_vector_free(y);
     gsl_vector_free(sigma);
     gsl_matrix_free(bg_pos);
+    free_double_matrix(peak_seeds, 2);
 
     //printf("\nGod's in his heaven\nAll fine with the world\n");
     if((((*difra).gamma - 1) % 30) == 0) printf("\nFin (%d %d)\n", (*difra).spr, (*difra).gamma);//imprimo progreso
     //return 0;
+    */
 }
 //FIN DEL MAIN
-
-//FUNCIONES AUXILIARES
-double bin2theta(int bin, double pixel, double dist)
-{
-    return atan((double) bin * pixel / dist) * 180. / M_PI;
-}
-
-int theta2bin(double theta, double pixel, double dist)
-{
-    double aux = dist / pixel * tan(theta * M_PI / 180.);
-    return (int) aux;
-}
-
-void reset_all_seeds(double ** seeds, int size)
-{
-    int i;
-    for(i = 0; i < size; i++)
-        seeds[1][i] = seeds[0][i];
-}
-//reseteo todas las semillas menos la posicion del pico
-void reset_almost_all_seeds(double ** seeds, int size)
-{
-    int i, j;
-    reset_global_seeds(seeds);
-    for(i = 2; i < size; i += 6)
-    {
-        for(j = 1; j < 6; j++)
-            seeds[1][i + j] = seeds[0][i + j];
-    }
-        
-}
-
-void reset_peak_seeds(double ** seeds, int index)
-{
-    int i;
-    for(i = index; i < index + 4; i++)
-        seeds[1][i] = seeds[0][i];
-}
-
-void reset_global_seeds(double ** seeds)
-{
-    seeds[1][0] = seeds[0][0];
-    seeds[1][1] = seeds[0][1];
-}
-
-void check (double ** seeds, int size)
-{
-    int i;
-    double H_global = seeds[1][0];
-    double eta_global = seeds[1][1];
-    if(H_global < 0 || H_global > 1)
-    {
-        reset_all_seeds(seeds, size);
-    }
-    else
-    {
-        if(eta_global < 0 || eta_global > 1)
-            seeds[1][1] = seeds[0][1];
-
-        for(i = 2; i < size; i += 6)
-        {
-            double dtheta = fabs(seeds[1][i] - seeds[0][i]);
-            double I = seeds[1][i + 1];
-            double shift_H = fabs(seeds[1][i + 2]);
-            double shift_eta = fabs(seeds[1][i + 3]);
-            if(I < 0 || shift_H > 1 || shift_eta > 1 || dtheta > 2)
-                reset_peak_seeds(seeds, i);
-        }
-    }
-}

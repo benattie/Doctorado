@@ -40,7 +40,7 @@ int main()
  double ** eta = matrix_double_alloc(500, 10);
  float data1[2500], BG_m, intens[500][10];
  
- char buf_temp[100], buf[100], buf1[100];
+ char buf_temp[100], buf[100], buf1[100], buf_fwhm[500], buf_eta[500];
  char path_out[150], path [150], filename1[100], inform[10], path1[150], inform1[10];
  char outfile[100], linfile[100], fwhmfile[100], etafile[100];
  char marfile[150];
@@ -232,6 +232,8 @@ int main()
     IRF ins; //anchos instrumentales
     ins = read_IRF(fp_IRF);
     fclose(fp_IRF);
+    //structure holding syncrotron's information
+    exp_data sync_data = {dist, pixel, pixel_number, ins};
     //Reading of initial parameters
     double ** seeds = matrix_double_alloc(2, 6 * numrings + 2);
     FILE *fp_init = fopen("fit_ini.dat", "r");
@@ -325,27 +327,26 @@ int main()
                     intensity += intensss.nnew;
                 }                                       
                 intens[y][n] = (intensity / count) - BG_m;  // Integral values and BG correction
-                //printf("theta = %f\tIntensity[%d][%d] = %f\n", 2*theta[n], y, n + 1, intens[y][n]); 
+                printf("theta = %f\tIntensity[%d][%d] = %f\n", 2*theta[n], y, n + 1, intens[y][n]); 
                 n++;
             }
             while(n < numrings);
-            //getchar();
-            
+            getchar();
+
             //fiteo del difractograma para la obtencion del ancho de pico y eta
             int exists = 1;
             if(k == star_d && y == 1) exists = 0; //pregunto si este es el primer archivo con el que estoy trabajando
-            //structure holding syncrotron's information
-            exp_data sync_data = {dist, pixel, pixel_number, ins};
-            //structure holding experimental data
             peak_data difra = {numrings, k, y, data, ug_l, ug_r, fwhm, eta};
-            pv_fitting(exists, &sync_data, &difra, seeds);
-            
+            pv_fitting(exists, &sync_data, &difra, intens[y], seeds);
+            getchar();
         }/*end of the double FOR-routine gamma and pixel number*/
-
+        
         //A esta altura ya termine de leer y procesar los datos de UN archivo spr. Falta imprimir los resultados a el archivo de salida
         for(d = 0; d < numrings; d++)//itero sobre todos los picos
         { 
             strcpy(outinten, "");
+            strcpy(outfwhm, "");
+            strcpy(outeta, "");
             count_minus = 0;
             for(c = 1; c <= ((end_g - rot_p) + 1); c++) //itero sobre todo el anillo
             { 
@@ -355,36 +356,28 @@ int main()
 		        intens[c][d] = 0; 
                     count_minus++;  
                 }
-                //printf("hola\n");
                 //escribo la intensidad integrada al archivo correspondiente en formato de diez columnas, separando por bloques los datos de cada pico
                 sprintf(buf, "%8.1f", intens[c][d]);
-                strcat(outinten,buf);
+                strcat(outinten, buf);
+                sprintf(buf_fwhm, "%8.5lf ", fwhm[c][d]);
+                strcat(outfwhm, buf_fwhm);
+                sprintf(buf_eta, "%8.5lf ", eta[c][d]);
+                strcat(outeta, buf_eta);
                 if((c % 10) == 0)
+                {
                     strcat(outinten, "\n");
+                    strcat(outfwhm, "\n");
+                    strcat(outeta, "\n");
+                }
                 if(c == ((end_g - rot_p) + 1))
+                {
                     strcat(outinten, "\n");
-                //printf("mundo\n");
-                //escribo el fwhm en el archivo correspondiente
-                sprintf(buf, "%8.5lf ", fwhm[c][d]);
-                strcat(outfwhm, buf);
-                if((c % 10) == 0)
                     strcat(outfwhm, "\n");
-                if(c == ((end_g - rot_p) + 1))
-                    strcat(outfwhm, "\n");
-                //printf("como\n");
-                //escribo eta en el archivo correspondiente
-                sprintf(buf, "%8.5lf ", eta[c][d]);
-                strcat(outeta, buf);
-                if((c % 10) == 0)
                     strcat(outeta, "\n");
-                if(c == ((end_g - rot_p) + 1))
-                    strcat(outeta, "\n");
+                }
             }
-            //printf("andas\n");
             write(fd[d], outinten, strlen(outinten));
-            //printf("este\n");
             write(ffwhm[d], outfwhm, strlen(outfwhm));
-            //printf("dia\n");
             write(feta[d], outeta, strlen(outeta));            
 	    
             if(count_minus >= 1)//te avisa que tuviste picos con intensidades negativas

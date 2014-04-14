@@ -1,46 +1,9 @@
 #include "pseudo_voigt.h"
+#include "aux_functions.h"
 #define S 1
 //x = vector de valores a ajustar
 //data = estructura a los parametros fijos de la funcion (datos experimentales, etc)
 //f = vector diferencia entre los valores teoricos y los experimentales
-
-//ESTRUCTURA CON TODOS LOS DATOS EXPERIMENTALES
-struct data 
-{
-    int n;
-    int numrings;
-    gsl_vector * ttheta;
-    gsl_vector * y;
-    gsl_vector * sigma;
-    gsl_matrix * bg_pos;
-};
-//ESTRUCTURA CON LOS PARAMETROS DE CADA FITEO
-typedef struct data_s1 
-{
-    struct data d;
-    double eta;
-    double * shift_H;
-    double * shift_eta;
-} data_s1;
-
-typedef struct data_s2 
-{
-    struct data d;
-    double eta;  
-    double * shift_eta;
-} data_s2;
-
-typedef struct data_s3 
-{
-    struct data d;
-    double * shift_eta;
-} data_s3;
-
-typedef struct data_s4 
-{
-    struct data d;
-    double eta;
-} data_s4;
 
 //INICIO DE LA FUNCION DEL PASO 1
 int pv_f_step1 (const gsl_vector * x, void * data, gsl_vector * f)
