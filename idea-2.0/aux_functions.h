@@ -31,6 +31,7 @@ typedef struct peak_data
     float * intensity;
     int * bg_left;
     int * bg_right;
+    double ** intens;
     double ** fwhm;
     double ** eta;
 } peak_data;

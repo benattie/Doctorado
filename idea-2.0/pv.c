@@ -103,6 +103,7 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
             *eta = peak_seeds[1][1] + peak_seeds[1][j + 3];
             if(I < 0 || *H < 0 || *H > 1 || *eta < 0 || *eta > 1)
             {
+                (*difra).intens[(*difra).gamma][k] = -1.0;
                 (*difra).fwhm[(*difra).gamma][k] = -1.0;
                 (*difra).eta[(*difra).gamma][k] = -1.0;
                 reset_peak_seeds(peak_seeds, j);
@@ -113,6 +114,7 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
             {   
                 //double theta = peak_seeds[1][j] / 2.; //necesito theta y NO 2theta para poder ahcer la correccion por ancho instrumental
                 //ins_correction(H, eta, (*sync_data).ins, theta);
+                (*difra).intens[(*difra).gamma][k] = I;
                 (*difra).fwhm[(*difra).gamma][k] = *H;
                 (*difra).eta[(*difra).gamma][k] = *eta;
             }

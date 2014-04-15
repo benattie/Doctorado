@@ -30,37 +30,37 @@ int main()
  int NrSample, star_d, end_d, star_a, end_a, del_d, del_a, rot_p, end_g, del_g, numrings;
  int posring_l[15], posring_r[15], ug_l[15], ug_r[15];
  int fd[15];
- int ffwhm[15], feta[15];
+ int ffinten[15], ffwhm[15], feta[15];
 
  int pixel_number, gamma;
  int data[2500], intensity;
 
  double pixel, dist;
+ double ** fit_inten = matrix_double_alloc(500, 10);
  double ** fwhm = matrix_double_alloc(500, 10);
  double ** eta = matrix_double_alloc(500, 10);
  float data1[2500], BG_m, intens[500][10];
  
  char buf_temp[100], buf[100], buf1[100], buf_fwhm[500], buf_eta[500];
  char path_out[150], path [150], filename1[100], inform[10], path1[150], inform1[10];
- char outfile[100], linfile[100], fwhmfile[100], etafile[100];
+ char outfile[100], linfile[100], fit_intenfile[100], fwhmfile[100], etafile[100];
  char marfile[150];
- char outinten[3000], outfwhm[6000], outeta[6000];
+ char outinten[3000], outfitinten[6000], outfwhm[6000], outeta[6000];
  char minus_zero;
  char logfile_yn, logfile_yn_temp;
  
  FILE *fp, *fp1, *fp2, *fp3;
- FILE *fp_fwhm, *fp_fwhm_pf, *fp_eta, *fp_eta_pf;
+ FILE *fp_fitinten, *fp_fitinten_pf, *fp_fwhm, *fp_fwhm_pf, *fp_eta, *fp_eta_pf;
 
  struct DAT intensss;
 
  int j, l, m, step, anf_gam, ende_gam, del_gam;
- //float step_ome;
  float anf_ome, ende_ome, del_ome;
  float m_intens, n_intens, nn_intens;
+ double m_fintens, n_fintens, nn_fintens;
  double m_fwhm, n_fwhm, nn_fwhm;
  double m_eta, n_eta, nn_eta;
  float theta[20], neu_ome, neu_ome1, neu_gam1, neu_gam, alpha, beta;
- //float diode[200], max_diode, min_diode, max_diode_temp, min_diode_temp, ratio, inten, new_int;
 
  time_t timer;
  struct tm *zeit;
@@ -143,7 +143,7 @@ int main()
     //delta gamma
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%d", &del_g); fgets(buf_temp, 2, fp);
-    /////////////////////////////////////////////////////
+    /////////////////////////////////////////////////
     //Distancia de la muestra al detector
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%lf", &dist); fgets(buf_temp, 2, fp);
@@ -199,6 +199,14 @@ int main()
         strcat(outfile, buf);
         strcat(outfile, ".dat");
 
+        strcpy(fit_intenfile, "");
+        strcat(fit_intenfile, path_out);
+        strcat(fit_intenfile, filename1);
+        strcat(fit_intenfile, "INT_PF_");
+        sprintf(buf,"%d", i + 1);
+        strcat(fit_intenfile, buf);
+        strcat(fit_intenfile, ".dat");
+
         strcpy(fwhmfile, "");
         strcat(fwhmfile, path_out);
         strcat(fwhmfile, filename1);
@@ -221,6 +229,10 @@ int main()
         {
             printf("Cannot open INTENS OUTPUT file.(for %d ring)", i + 1); exit(1);
         }
+        if((ffinten[i] = open(fit_intenfile, O_CREAT|O_TRUNC|O_RDWR,S_IREAD|S_IWRITE)) < 0)
+        {
+            printf("Cannot open FIT INTENS OUTPUT file.(for %d ring)", i + 1); exit(1);
+        }
         if((ffwhm[i] = open(fwhmfile, O_CREAT|O_TRUNC|O_RDWR,S_IREAD|S_IWRITE)) < 0)
         {
             printf("Cannot open FWHM OUTPUT file.(for %d ring)", i + 1); exit(1);
@@ -241,7 +253,6 @@ int main()
     FILE *fp_init = fopen("fit_ini.dat", "r");
     read_file(fp_init, seeds);
     /////////////////////////////////////
-
     /* End of reading the parameter file and End of generation of Output-files for(i=0;i<numrings;i++)*/	
     
     fgets(buf_temp, 2, fp); //skip line
@@ -341,7 +352,7 @@ int main()
             //structure holding syncrotron's information
             exp_data sync_data = {dist, pixel, pixel_number, ins};
             //structure holding difractogram's information
-            peak_data difra = {numrings, k, y, data1, ug_l, ug_r, fwhm, eta};
+            peak_data difra = {numrings, k, y, data1, ug_l, ug_r, fit_inten, fwhm, eta};
             //fwhm & eta fitting
             pv_fitting(exists, &sync_data, &difra, intens[y], seeds);
             if(((y - 1) % 90) == 0) printf("\nFin (%d %d)\n", k, y);//imprimo progreso
@@ -352,6 +363,7 @@ int main()
         for(d = 0; d < numrings; d++)//itero sobre todos los picos
         {
             strcpy(outinten, "");
+            strcpy(outfitinten, "");
             strcpy(outfwhm, "");
             strcpy(outeta, "");
             count_minus = 0;
@@ -366,6 +378,8 @@ int main()
                 //escribo la intensidad integrada al archivo correspondiente en formato de diez columnas, separando por bloques los datos de cada pico
                 sprintf(buf, "%8.1f", intens[c][d]);
                 strcat(outinten, buf);
+                sprintf(buf, "%8.3f", fit_inten[c][d]);
+                strcat(outinten, buf);
                 sprintf(buf_fwhm, "%8.5lf ", fwhm[c][d]);
                 strcat(outfwhm, buf_fwhm);
                 sprintf(buf_eta, "%8.5lf ", eta[c][d]);
@@ -373,17 +387,20 @@ int main()
                 if((c % 10) == 0)
                 {
                     strcat(outinten, "\n");
+                    strcat(outfitinten, "\n");
                     strcat(outfwhm, "\n");
                     strcat(outeta, "\n");
                 }
                 if(c == ((end_g - rot_p) + 1))
                 {
                     strcat(outinten, "\n");
+                    strcat(outfitinten, "\n");
                     strcat(outfwhm, "\n");
                     strcat(outeta, "\n");
                 }
             }
             write(fd[d], outinten, strlen(outinten));
+            write(ffinten[d], outfitinten, strlen(outfitinten));
             write(ffwhm[d], outfwhm, strlen(outfwhm));
             write(feta[d], outeta, strlen(outeta));
 
@@ -403,6 +420,7 @@ int main()
     for(d = 0; d < numrings; d++)
     {
         close(fd[d]);
+        close(ffinten[d]);
         close(ffwhm[d]);
         close(feta[d]);
     }
@@ -456,6 +474,34 @@ printf("sec: %d\n\n", zeit->tm_sec);
         if((fp1 = fopen(linfile, "w")) == NULL)
         {
             fprintf(stderr, "Error beim oeffnen der Datei(%s).", linfile); exit(1);
+        }
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        //genero string con el nombre del archivo con la figura de polos (intensidades fiteadas) en el formato maquina
+        strcpy(fit_intenfile, "");
+        strcat(fit_intenfile, path_out);
+        strcat(fit_intenfile, filename1);
+        strcat(fit_intenfile, "INT_PF_");
+        sprintf(buf, "%d", m + 1);
+        strcat(fit_intenfile, buf);
+        strcat(fit_intenfile, ".dat");
+
+        if((fp_fitinten = fopen(fit_intenfile, "r")) == NULL )
+        {
+            fprintf(stderr, "Error beim oeffnen der Datei(%s).", fit_intenfile); exit(1);
+        }
+
+        //genero el string con los datos en formato MTEX
+        strcpy(fit_intenfile, "");
+        strcat(fit_intenfile, path_out);
+        strcat(fit_intenfile, filename1);
+        strcat(fit_intenfile, "INT_PF_");
+        sprintf(buf, "%d", m + 1);
+        strcat(fit_intenfile, buf);
+        strcat(fit_intenfile, ".mtex");
+
+        if((fp_fitinten_pf = fopen(fit_intenfile, "w")) == NULL)
+        {
+            fprintf(stderr, "Error beim oeffnen der Datei(%s).", fit_intenfile); exit(1);
         }
         ////////////////////////////////////////////////////////////////////////////////////////////
         //genero string con el nombre del archivo con la figura de polos (fwhm) en el formato maquina
@@ -540,6 +586,7 @@ printf("sec: %d\n\n", zeit->tm_sec);
         
         //Imprimo el tiempo de ejecucion del programa en el .mtex
         fprintf(fp1, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
+        fprintf(fp_fitinten_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
         fprintf(fp_fwhm_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
         fprintf(fp_eta_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
         
@@ -572,18 +619,22 @@ printf("sec: %d\n\n", zeit->tm_sec);
                     if(j % step == 0)
                     {
                         n_intens = 0;
+                        n_fintens = 0;
                         n_fwhm = 0;
                         n_eta = 0;
                         for(l = 1; l <= step; l++)
                         {
                             fscanf(fp2, "%f", &m_intens);//leo la intensidad de la figura de polos en formato maquina
                             n_intens += m_intens;
+                            fscanf(fp_fitinten, "%lf", &m_fintens);//leo la intensidad fiteada de la figura de polos en formato maquina
+                            n_fintens += m_fintens;
                             fscanf(fp_fwhm, "%lf", &m_fwhm);//leo el ancho de pico de la figura de polos en formato maquina
                             n_fwhm += m_fwhm;
                             fscanf(fp_eta, "%lf", &m_eta);//leo el eta de la figura de polos en formato maquina
                             n_eta += m_eta;
                         }
                         nn_intens = n_intens / step;
+                        nn_fintens = n_fintens / step;
                         nn_fwhm = n_fwhm / step;
                         nn_eta = n_eta / step;
 
@@ -599,12 +650,14 @@ printf("sec: %d\n\n", zeit->tm_sec);
                         if(theta > 0)
                         {
                             fprintf(fp1, "%11d%10.4f%10.4f%10.4f%10.4f%12.0f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, nn_intens);
+                            fprintf(fp_fitinten_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.3f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, nn_fintens);
                             fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, nn_fwhm);
                             fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, nn_eta);
                         }
                         else
                         {
                             fprintf(fp1, "%11d%10.4f%10.4f%10.4f%10.4f%12.0f\n", k + 1, -2 * theta[m], -1 * theta[m], alpha, beta, nn_intens);
+                            fprintf(fp_fitinten_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, -2 * theta[m], -1 * theta[m], alpha, beta, nn_fintens);
                             fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, -2 * theta[m], -1 * theta[m], alpha, beta, nn_fwhm);
                             fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, -2 * theta[m], -1 * theta[m], alpha, beta, nn_eta);
                         }
@@ -629,6 +682,7 @@ printf("sec: %d\n\n", zeit->tm_sec);
                     beta = winkel_be(theta[m], neu_ome, neu_gam, alpha);
                     
                     fscanf(fp2, "%f", &m_intens);
+                    fscanf(fp_fitinten, "%lf", &m_fintens);
                     fscanf(fp_fwhm, "%lf", &m_fwhm);
                     fscanf(fp_eta, "%lf", &m_eta);
                     if(j % step == 0)
@@ -644,12 +698,14 @@ printf("sec: %d\n\n", zeit->tm_sec);
                         if(theta > 0)
                         {
                             fprintf(fp1, "%11d%10.4f%10.4f%10.4f%10.4f%12.0f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, m_intens);
+                            fprintf(fp_fitinten_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.3f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, m_fintens);
                             fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, m_fwhm);
                             fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, m_eta);
                         }
                         else
                         {
                             fprintf(fp1, "%11d%10.4f%10.4f%10.4f%10.4f%12.0f\n", k + 1, -2 * theta[m], -1 * theta[m], alpha, beta, m_intens);
+                            fprintf(fp_fitinten_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.3f\n", k + 1, -2 * theta[m], -1 * theta[m], alpha, beta, m_fintens);
                             fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, -2 * theta[m], -1 * theta[m], alpha, beta, m_fwhm);
                             fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, -2 * theta[m], -1 * theta[m], alpha, beta, m_eta);
                         }
@@ -662,9 +718,11 @@ printf("sec: %d\n\n", zeit->tm_sec);
             }
         }
         fflush(fp1); fflush(fp2); fflush(fp3);
+        fflush(fp_fitinten); fflush(fp_fitinten_pf);
         fflush(fp_fwhm); fflush(fp_fwhm_pf);
         fflush(fp_eta); fflush(fp_eta_pf);
         fclose(fp3); fclose(fp1); fclose(fp2);
+        fclose(fp_fitinten); fclose(fp_fitinten_pf);
         fclose(fp_fwhm); fclose(fp_fwhm_pf);
         fclose(fp_eta); fclose(fp_eta_pf);
     }/* End for(m = 0; m < numrings; m++)*/
