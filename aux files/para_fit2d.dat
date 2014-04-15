@@ -13,10 +13,11 @@ Input Data - 1
 11.Delta Angle      : 5
 12.Start Gamma      : 0
 13.End Gamma        : 359
-14.Distance         : 1081e-3
-15.Pixel value      : 100e-6
-16.MinusToZero(y/n) : y
-17.LogFileCorrection: n
+14.Delta Gamma      : 5
+15.Distance         : 1081e-3
+16.Pixel value      : 100e-6
+17.MinusToZero(y/n) : y
+18.LogFileCorrection: n
 
 Peak Positions
 I. NrOfPeaks        : 7
