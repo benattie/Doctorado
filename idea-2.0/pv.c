@@ -30,10 +30,7 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
 
     // seteo el vector con las semillas
     double ** peak_seeds = matrix_double_alloc(2, seeds_size);
-    //int ** peak_bg = matrix_int_alloc(2, n_peaks);
     set_seeds(all_seeds_size, zero_peak_index, exists, seeds, peak_seeds);
-    //set_seeds(all_seeds_size, zero_peak_index, 0, seeds, peak_seeds);
-    //set_bg_pos((*difra).numrings, zero_peak_index, (*difra).bg_left, (*difra).bg_right, peak_bg);
     //numero de parametros a fitear para cada paso del fiteo 
     int n_param[4] = {4 * n_peaks + 1, 5 * n_peaks, 4 * n_peaks + 2, 6 * n_peaks};
 
@@ -53,7 +50,7 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     }
     
     j = 0;
-    for(i = 0; i < n_peaks; i++)
+    for(i = 0; i < (*difra).numrings; i++)
     {
         if(zero_peak_index[i] == 0)
         {
@@ -114,8 +111,8 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
             }
             else
             {   
-                //double theta = peak_seeds[1][j];
-                //ins_correction(H_corr, eta_corr, (*sync_data).ins, theta);
+                //double theta = peak_seeds[1][j] / 2.; //necesito theta y NO 2theta para poder ahcer la correccion por ancho instrumental
+                //ins_correction(H, eta, (*sync_data).ins, theta);
                 (*difra).fwhm[(*difra).gamma][k] = *H;
                 (*difra).eta[(*difra).gamma][k] = *eta;
             }
@@ -135,7 +132,6 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
         k++;
     }
     if(bad_fit) check(peak_seeds, seeds_size);
-    //reset_seeds(all_seeds_size, peak_seeds[1], zero_peak_index, seeds);
     //fclose(fp_bflog);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //liberacion de memoria allocada y cierre de archivos

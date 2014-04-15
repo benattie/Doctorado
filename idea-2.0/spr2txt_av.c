@@ -32,7 +32,7 @@ int main()
  int fd[15];
  int ffwhm[15], feta[15];
 
- int pixel_number, gamma, n_av = 5;
+ int pixel_number, gamma, n_av;
  int data[2500], intensity;
 
  double pixel, dist;
@@ -141,7 +141,11 @@ int main()
     //gamma final
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%d", &end_g); fgets(buf_temp, 2, fp);
-    
+    /////////////////////////////////////////////////
+    //delta gamma
+    fgets(buf_temp, 22, fp);
+    fscanf(fp, "%d", &n_av); fgets(buf_temp, 2, fp);
+    ///////////////////////////////////////////////////// 
     //Distancia de la muestra al detector
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%lf", &dist); fgets(buf_temp, 2, fp);
@@ -352,7 +356,7 @@ int main()
             }
             while(n < numrings);
             //getchar();
-            n_av = 5;
+            //n_av = 5;
             //fiteo del difractograma para la obtencion del ancho de pico y eta
             if((y % n_av) == 0)
             {
@@ -367,10 +371,9 @@ int main()
                 pv_fitting(exists, &sync_data, &difra, peak_intens_av, seeds);
                 memset(intens_av, 0, 1800 * sizeof(float));
                 memset(peak_intens_av, 0, 10 * sizeof(float));
-                if(((y - 1) % 90) == 0) printf("\nFin (%d %d)\n", k, y);//imprimo progreso
                 //getchar();
             }
-
+            if(((y - 1) % 90) == 0) printf("\nFin (%d %d)\n", k, y);//imprimo progreso
         }/*end of the double FOR-routine gamma and pixel number*/
         
         //A esta altura ya termine de leer y procesar los datos de UN archivo spr. Falta imprimir los resultados a el archivo de salida

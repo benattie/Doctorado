@@ -134,21 +134,7 @@ void set_seeds(int size, int * zero_peak_index, int exists, double ** seeds, dou
         l++;
     }
 }
-/*
-void set_bg_pos(int n_peaks, int * zero_peak_index, int * bg_left, int * bg_right, int ** peak_bg)
-{
-    int i, j = 0;
-    for(i = 0; i < n_peaks; i++)
-    {
-        if(zero_peak_index[i] == 0)
-        {
-            peak_bg[0][j] = bg_left[i];
-            peak_bg[1][j] = bg_right[i];
-            j++;
-        }
-    }
-}
-*/
+
 void reset_seeds(int size, double * peak_seeds, int * zero_peak_index, double ** seeds)
 {
     int i, j = 2, k;

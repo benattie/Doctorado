@@ -27,7 +27,7 @@ int main()
  int Z, i, k, n, x, y;
  int a, b, z, count, c, d, count_minus;
  int BG_l, BG_r;
- int NrSample, star_d, end_d, star_a, end_a, del_d, del_a, rot_p, end_g, numrings;
+ int NrSample, star_d, end_d, star_a, end_a, del_d, del_a, rot_p, end_g, del_g, numrings;
  int posring_l[15], posring_r[15], ug_l[15], ug_r[15];
  int fd[15];
  int ffwhm[15], feta[15];
@@ -139,7 +139,11 @@ int main()
     //gamma final
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%d", &end_g); fgets(buf_temp, 2, fp);
-    
+    /////////////////////////////////////////////////
+    //delta gamma
+    fgets(buf_temp, 22, fp);
+    fscanf(fp, "%d", &del_g); fgets(buf_temp, 2, fp);
+    /////////////////////////////////////////////////////
     //Distancia de la muestra al detector
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%lf", &dist); fgets(buf_temp, 2, fp);
@@ -340,6 +344,7 @@ int main()
             peak_data difra = {numrings, k, y, data1, ug_l, ug_r, fwhm, eta};
             //fwhm & eta fitting
             pv_fitting(exists, &sync_data, &difra, intens[y], seeds);
+            if(((y - 1) % 90) == 0) printf("\nFin (%d %d)\n", k, y);//imprimo progreso
             //getchar();
         }/*end of the double FOR-routine gamma and pixel number*/
         
@@ -352,10 +357,10 @@ int main()
             count_minus = 0;
             for(c = 1; c <= ((end_g - rot_p) + 1); c++) //itero sobre todo el anillo
             {
-if(intens[c][d] < 0) //corrijo las intensidades negativas
+                if(intens[c][d] < 0) //corrijo las intensidades negativas
                 {
                     if((minus_zero == 'y') || (minus_zero == 'Y'))
-intens[c][d] = 0;
+                    intens[c][d] = 0;
                     count_minus++;
                 }
                 //escribo la intensidad integrada al archivo correspondiente en formato de diez columnas, separando por bloques los datos de cada pico

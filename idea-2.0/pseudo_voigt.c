@@ -75,7 +75,7 @@ double HG_ins2(IRF ins, double theta)
     double result = ins.U * pow(tan(theta), 2.0) + ins.V * tan(theta) + ins.W + ins.IG / cos(theta);
     return result;
 }
-//FUNCION PARA CALCULAR EL ANCHO INSTRUMENTAL LORENZIANO(CAGLIOTI)
+//FUNCION PARA CALCULAR EL ANCHO INSTRUMENTAL LORENZIANO
 double HL_ins(IRF ins, double theta)
 {
     double result = ins.X * tan(theta) + ins.Y / cos(theta) + ins.Z;
