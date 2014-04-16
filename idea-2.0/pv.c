@@ -19,9 +19,7 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     //printf("Inicio pv_fitting\n");
     //DECLARACION DE VARIABLES Y ALLOCACION DE MEMORIA
     //variables auxiliares del programa
-    int i, j, k;
-    int bad_fit = 0;
-    int zero_peak_index[(*difra).numrings];
+    int i, j, k, bad_fit = 0, zero_peak_index[(*difra).numrings];
     float treshold = 3.0;
     //elimino los picos que tienen una intensidad menor que treshold
     int n_peaks = check_for_null_peaks (treshold, (*difra).numrings, zero_peak_index, intens);
@@ -38,7 +36,6 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     gsl_vector * sigma = gsl_vector_alloc(net_size); //error de las intensidades del difractograma
     gsl_matrix * bg_pos = gsl_matrix_alloc(n_peaks, 2); //posicion de los puntos que tomo para calcular el background (en unidades de angulo)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //obtengo los datos
     //printf("Obteniendo datos\n");
     for(i = 0; i < net_size; i++)
     {
@@ -86,8 +83,6 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     //printf("Fin de las iteraciones\n");
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //printf("Correccion de los resultados\n");
-    //Escritura de los resultados del fiteo en los vectores fwhm y eta
-    //correccion de los anchos obtenidos del fiteo y escritura a los punteros de salida (fwhm y eta)
     j = 2;
     k = 0;
     for(i = 2; i < all_seeds_size; i += 6)
@@ -156,5 +151,6 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     gsl_vector_free(sigma);
     gsl_matrix_free(bg_pos);
     free_double_matrix(peak_seeds, 2);
+    //printf("Fin pv_fitting\n");
 }
 //FIN DE PV_FITTING
