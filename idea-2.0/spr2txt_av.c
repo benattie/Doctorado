@@ -250,13 +250,12 @@ int main()
     IRF ins; //anchos instrumentales
     ins = read_IRF(fp_IRF);
     fclose(fp_IRF);
-        //Reading of initial parameters
+    //Reading of initial parameters
     double ** seeds = matrix_double_alloc(2, 6 * numrings + 2);
     FILE *fp_init = fopen("fit_ini.dat", "r");
     read_file(fp_init, seeds);
     /////////////////////////////////////
     /* End of reading the parameter file and End of generation of Output-files for(i=0;i<numrings;i++)*/	
-    
     fgets(buf_temp, 2, fp); //skip line
 
     //imprime en pantalla los datos relevantes de cada pico 
@@ -306,7 +305,7 @@ int main()
     fprintf(fp_bflog, "#Bad fits:\n#spr    gamma    peak    DI/I    I    H    eta\n");
     fclose(fp_bflog);
     */
-    k = star_d;  // file index number : star_d to end_d
+    k = star_d + 1;  // file index number : star_d to end_d
     do //Iteracion sobre todos los spr  
     {
         //selecciono el archivo spr que voy a procesar
@@ -371,12 +370,9 @@ int main()
                 intens[y][n] = (intensity / count) - BG_m;  // Integral values and BG correction
                 if(intens[y][n] >= 0) 
                     peak_intens_av[n] += intens[y][n];
-                //printf("theta = %f\tIntensity[%d][%d] = %f\n", 2*theta[n], y, n + 1, intens[y][n]); 
                 n++;
             }
             while(n < numrings);
-            //getchar();
-            //n_av = 5;
             //fiteo del difractograma para la obtencion del ancho de pico y eta
             if((y % n_av) == 0)
             {
@@ -391,9 +387,8 @@ int main()
                 pv_fitting(exists, &sync_data, &difra, peak_intens_av, seeds);
                 memset(intens_av, 0, 1800 * sizeof(float));
                 memset(peak_intens_av, 0, 10 * sizeof(float));
-                //getchar();
             }
-            if(((y - 1) % 90) == 0) printf("\nFin (%d %d)\n", k, y);//imprimo progreso
+            //if(((y - 1) % 30) == 0) printf("Fin (%d %d)\n", k, y);
         }/*end of the double FOR-routine gamma and pixel number*/
         
         //A esta altura ya termine de leer y procesar los datos de UN archivo spr. Falta imprimir los resultados a el archivo de salida

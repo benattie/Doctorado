@@ -27,13 +27,11 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     int n_peaks = check_for_null_peaks (treshold, (*difra).numrings, zero_peak_index, intens);
     int seeds_size = 6 * n_peaks + 2, all_seeds_size = 6 * (*difra).numrings + 2;
     int net_size = (*difra).bg_right[(*difra).numrings - 1];
-
     // seteo el vector con las semillas
     double ** peak_seeds = matrix_double_alloc(2, seeds_size);
     set_seeds(all_seeds_size, zero_peak_index, exists, seeds, peak_seeds);
     //numero de parametros a fitear para cada paso del fiteo 
     int n_param[4] = {4 * n_peaks + 1, 5 * n_peaks, 4 * n_peaks + 2, 6 * n_peaks};
-
     //Parametros fijos
     gsl_vector * ttheta = gsl_vector_alloc(net_size); //valores de 2theta
     gsl_vector * y = gsl_vector_alloc(net_size); //intensidades del difractograma
@@ -61,27 +59,30 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     }
     struct data d = {net_size, n_peaks, ttheta, y, sigma, bg_pos}; //estructura que contiene los datos experimentales
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //Fiteo
     //printf("Inicio de las iteraciones\n");
     //printf("Paso 1\n");
     //print_seeds(peak_seeds[1], seeds_size);
     pv_step1(exists, peak_seeds, seeds_size, &d, n_param[0]);
     //print_seeds(peak_seeds[1], seeds_size);
     check(peak_seeds, seeds_size);
+    //getchar();
     //printf("Paso 2\n");
     //print_seeds(peak_seeds[1], seeds_size);
     pv_step2(exists, peak_seeds, seeds_size, &d, n_param[1]);
     //print_seeds(peak_seeds[1], seeds_size);
     check(peak_seeds, seeds_size);
+    //getchar();
     //printf("Paso 3\n");
     //print_seeds(peak_seeds[1], seeds_size);
     pv_step3(exists, peak_seeds, seeds_size,  &d, n_param[2]);
     //print_seeds(peak_seeds[1], seeds_size);
     check(peak_seeds, seeds_size);
+    //getchar();
     //printf("Paso 4\n");
     //print_seeds(peak_seeds[1], seeds_size);
     pv_step4(exists, peak_seeds, seeds_size, &d, n_param[3]);
     //print_seeds(peak_seeds[1], seeds_size);
+    //getchar();
     //printf("Fin de las iteraciones\n");
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //printf("Correccion de los resultados\n");
@@ -89,8 +90,6 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     //correccion de los anchos obtenidos del fiteo y escritura a los punteros de salida (fwhm y eta)
     j = 2;
     k = 0;
-    //FILE *fp_bflog = fopen("logfile.txt", "a");
-    //faltan los encabezados de fp_bflog
     for(i = 2; i < all_seeds_size; i += 6)
     {
         if(zero_peak_index[k] == 0)
@@ -101,40 +100,55 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
             double I = peak_seeds[1][j + 1];
             *H = peak_seeds[1][0] + peak_seeds[1][j + 2];
             *eta = peak_seeds[1][1] + peak_seeds[1][j + 3];
-            if(I < 0 || *H < 0 || *H > 1 || *eta < 0 || *eta > 1)
+            if(I < 0)
             {
+                bad_fit = 1;
                 (*difra).intens[(*difra).gamma][k] = -1.0;
                 (*difra).fwhm[(*difra).gamma][k] = -1.0;
                 (*difra).eta[(*difra).gamma][k] = -1.0;
                 reset_peak_seeds(peak_seeds, j);
-                //fprintf(fp_bflog, "%3d    %5d    %4d    %5.3lf    %8.3lf    %8.5lf    %8.5lf\n", spr, gamma, (i + 4) / 6, err_rel, I, H_corr[0], eta_corr[0]);
-                bad_fit = 1;
             }
             else
-            {   
-                //double theta = peak_seeds[1][j] / 2.; //necesito theta y NO 2theta para poder ahcer la correccion por ancho instrumental
-                //ins_correction(H, eta, (*sync_data).ins, theta);
-                (*difra).intens[(*difra).gamma][k] = I;
-                (*difra).fwhm[(*difra).gamma][k] = *H;
-                (*difra).eta[(*difra).gamma][k] = *eta;
+            {
+                if(*H < 0 || *H > 1)
+                {
+                    bad_fit = 1;
+                    (*difra).intens[(*difra).gamma][k] = I;
+                    (*difra).fwhm[(*difra).gamma][k] = -1.0;
+                    (*difra).eta[(*difra).gamma][k] = -1.0;
+                    reset_peak_seeds(peak_seeds, j);
+                }
+                else
+                {
+                     if(*eta < 0 || *eta > 1)
+                    {
+                        bad_fit = 1;
+                        (*difra).intens[(*difra).gamma][k] = I;
+                        (*difra).fwhm[(*difra).gamma][k] = *H;
+                        (*difra).eta[(*difra).gamma][k] = -1.0;
+                        reset_peak_seeds(peak_seeds, j);
+                    }
+                    else
+                    {
+                        //double theta = peak_seeds[1][j] / 2.; //necesito theta y NO 2theta para poder ahcer la correccion por ancho instrumental
+                        //ins_correction(H, eta, (*sync_data).ins, theta);
+                        (*difra).intens[(*difra).gamma][k] = I;
+                        (*difra).fwhm[(*difra).gamma][k] = *H;
+                        (*difra).eta[(*difra).gamma][k] = *eta;
+                    }
+                }
             }
             j += 6;
-
-            /*
-            (*difra).fwhm[(*difra).gamma][k] = peak_seeds[1][0] + peak_seeds[1][j + 2];
-            (*difra).eta[(*difra).gamma][k] = peak_seeds[1][1] + peak_seeds[1][j + 3];
-            j += 6;
-            */
         }
         else
         {
-                (*difra).fwhm[(*difra).gamma][k] = -2.0;
-                (*difra).eta[(*difra).gamma][k] = -2.0;
+                (*difra).intens[(*difra).gamma][k] = 0.0;
+                (*difra).fwhm[(*difra).gamma][k] = 0.0;
+                (*difra).eta[(*difra).gamma][k] = 0.0;
         }
         k++;
     }
     if(bad_fit) check(peak_seeds, seeds_size);
-    //fclose(fp_bflog);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //liberacion de memoria allocada y cierre de archivos
     gsl_vector_free(ttheta);
@@ -143,4 +157,4 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     gsl_matrix_free(bg_pos);
     free_double_matrix(peak_seeds, 2);
 }
-//FIN DEL MAIN
+//FIN DE PV_FITTING

@@ -254,7 +254,6 @@ int main()
     read_file(fp_init, seeds);
     /////////////////////////////////////
     /* End of reading the parameter file and End of generation of Output-files for(i=0;i<numrings;i++)*/	
-    
     fgets(buf_temp, 2, fp); //skip line
 
     //imprime en pantalla los datos relevantes de cada pico
@@ -279,7 +278,7 @@ int main()
     fprintf(fp_bflog, "#Bad fits:\n#spr gamma peak DI/I I H eta\n");
     fclose(fp_bflog);
     */
-    k = star_d; // file index number : star_d to end_d
+    k = star_d + 1; // file index number : star_d to end_d
     do //Iteracion sobre todos los spr
     {
         //selecciono el archivo spr que voy a procesar
@@ -340,11 +339,9 @@ int main()
                     intensity += intensss.nnew;
                 }
                 intens[y][n] = (intensity / count) - BG_m; // Integral values and BG correction
-                //printf("theta = %f\tIntensity[%d][%d] = %f\n", 2*theta[n], y, n + 1, intens[y][n]);
                 n++;
             }
             while(n < numrings);
-            //getchar();
 
             //fiteo del difractograma para la obtencion del ancho de pico y eta
             int exists = 1;
@@ -355,8 +352,8 @@ int main()
             peak_data difra = {numrings, k, y, data1, ug_l, ug_r, fit_inten, fwhm, eta};
             //fwhm & eta fitting
             pv_fitting(exists, &sync_data, &difra, intens[y], seeds);
-            if(((y - 1) % 90) == 0) printf("\nFin (%d %d)\n", k, y);//imprimo progreso
-            //getchar();
+            //imprimo progreso
+            //if(((y - 1) % 30) == 0) printf("Fin (%d %d)\n", k, y);
         }/*end of the double FOR-routine gamma and pixel number*/
         
         //A esta altura ya termine de leer y procesar los datos de UN archivo spr. Falta imprimir los resultados a el archivo de salida
