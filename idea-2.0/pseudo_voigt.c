@@ -2,40 +2,25 @@
 #include "array_alloc.h"
 
 //FUNCION BACKGROUND (INTERPOLACION LINEAL)
-double background(int N, double x, gsl_matrix * bg_pos, double bg_int[N][2])
+double background(int N, double x, gsl_vector * bg_pos, double * bg_int)
 {
-    int i, j = 0;
+    int i;
     double m, h, delta;
-    double aux[2 * N], aux_bg[2 * N];
+    
+    if(x <= gsl_vector_get(bg_pos, 0))
+    	return bg_int[0];
     
     for(i = 0; i < N; i++)
-    {//paso a las posiciones de una matriz a un vector   
-        aux[j] = gsl_matrix_get(bg_pos, i, 0); 
-        aux_bg[j] = bg_int[i][0];
-        j++;
-
-        aux[j] = gsl_matrix_get(bg_pos, i, 1);
-        aux_bg[j] = bg_int[i][1];
-        j++;
-    }
-
-    if(x <= aux[0])
     {
-	return aux_bg[0];
+    	if(x >= gsl_vector_get(bg_pos, i) && x < gsl_vector_get(bg_pos, i + 1))
+    	{
+            m = (bg_int[i + 1] - bg_int[i]) / (gsl_vector_get(bg_pos, i + 1) - gsl_vector_get(bg_pos, i));
+            delta = x - gsl_vector_get(bg_pos, i);
+            h = bg_int[i];
+    	    return m * delta + h;
+	    }
     }
-    
-    for(i = 0; i < 2 * N; i++)
-    {
-	if(x >= aux[i] && x < aux[i + 1])
-	{
-            m = (aux_bg[i + 1] - aux_bg[i]) / (aux[i + 1] - aux[i]);
-            delta = x - aux[i];
-            h = aux_bg[i];
-
-	    return m * delta + h;
-	}
-    }
-    return aux_bg[2 * N - 1];
+    return bg_int[N - 1];
 }
 
 //PSEUDO-VOIGT NORMALIZADA (EN AREA)
@@ -50,7 +35,7 @@ double pseudo_voigt_n(double x, double x0, double eta, double H)
 }
 
 //FUNCION PSEUDO-VOIGT
-double pseudo_voigt(double ttheta, int numrings, double I0[numrings], double t0[numrings], double H, double eta, double shift_H[numrings], double shift_eta[numrings], gsl_matrix * bg_pos, double bg_int[numrings][2])
+double pseudo_voigt(double ttheta, int numrings, double I0[numrings], double t0[numrings], double H, double eta, double shift_H[numrings], double shift_eta[numrings], int n_bg, gsl_vector * bg_pos, double * bg_int)
 {
     int i;
     double eta_i, H_i, BG, pv_n;
@@ -63,9 +48,8 @@ double pseudo_voigt(double ttheta, int numrings, double I0[numrings], double t0[
         pv_n = pseudo_voigt_n(ttheta, t0[i], eta_i, H_i);
         result += I0[i] * pv_n;
     }
-    BG = background(numrings, ttheta, bg_pos, bg_int);
+    BG = background(n_bg, ttheta, bg_pos, bg_int);
     result += BG;
-
     return result;
 }
 

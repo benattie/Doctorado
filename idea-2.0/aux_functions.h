@@ -28,11 +28,11 @@ typedef struct exp_data
 typedef struct peak_data
 {
     int numrings;
+    int n_bg;
     int spr;
     int gamma;
     float * intensity;
-    int * bg_left;
-    int * bg_right;
+    double ** bg;
     double ** intens;
     double ** fwhm;
     double ** eta;
@@ -43,10 +43,11 @@ struct data
 {
     int n;
     int numrings;
+    int n_bg;
     gsl_vector * ttheta;
     gsl_vector * y;
     gsl_vector * sigma;
-    gsl_matrix * bg_pos;
+    gsl_vector * bg_pos;
 };
 
 //datos adicionales necesarios para cada paso del fiteo
@@ -87,18 +88,16 @@ double bin2theta(int bin, double pixel, double dist);
 int theta2bin(double theta, double pixel, double dist);
 void print_state (int iter, gsl_multifit_fdfsolver * s);
 
-void print_seeds(double *seeds, int size);
-void reset_all_seeds(double ** seeds, int size);
-//reseteo todas las semillas menos la posicion del pico
-void reset_almost_all_seeds(double ** seeds, int size);
-void reset_peak_seeds(double ** seeds, int index);
-void reset_global_seeds(double ** seeds);
+void print_seeds(double * seeds, int seeds_size, double ** bg, int bg_size);
 void reset_single_seed(double ** seeds, int index);
-void check (double ** seeds, int size);
-
+void reset_global_seeds(double ** seeds);
+void reset_peak_seeds(double ** seeds, int peak_index);
+void reset_bg_seeds(gsl_vector * y, double ** bg, int size);
+void reset_all_seeds(gsl_vector * y, double ** seeds, int seeds_size, int n_peaks, double ** bg, int bg_size);
+void check (gsl_vector * y, double ** seeds, int seeds_size, int n_peaks, double ** bg, int bg_size);
 int check_for_null_peaks (float treshold, int numrings, int * zero_peak_index, float * intens);
 void set_seeds(int size, int * zero_peak_index, int exists, double ** seeds, double ** peak_seeds);
-void reset_seeds(int size, double * peak_seeds, int * zero_peak_index, double ** seeds);
+//void reset_seeds(int size, double * peak_seeds, int * zero_peak_index, double ** seeds);
 void average(float * intens_av, float * peak_intens_av, int n_av, int size, int numrings);
 
 #endif

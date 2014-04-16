@@ -1,12 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
-//#include <string.h>
 #include "array_alloc.h"
-void read_file(FILE * fit_fp, double ** seed)
+void read_file(FILE * fit_fp, double ** seed, int seeds_size, double ** bg, int bg_size)
 {
     char buf[250];
     int i = 0;
-    fgets(buf, 250, fit_fp);//leo el titulo
     fgets(buf, 250, fit_fp);//"global H"
     fscanf(fit_fp,"%lf", &seed[0][i]);//valor de H
     fgets(buf, 250, fit_fp);
@@ -18,37 +16,55 @@ void read_file(FILE * fit_fp, double ** seed)
     seed[1][i] = seed[0][i];
     fgets(buf, 250, fit_fp);
     i++;
-    
     fgets(buf, 250, fit_fp);//encabezado
     //leo el resto de los valores a afinar
-    while(fscanf(fit_fp, "%lf", &seed[0][i]) != EOF)
+    while(i < seeds_size)
     {
+        fscanf(fit_fp, "%lf", &seed[0][i]);
         seed[1][i] = seed[0][i];
         i++;
+    }
+    fgets(buf, 250, fit_fp);//encabezado
+    fgets(buf, 250, fit_fp);//encabezado
+    for(i = 0; i < bg_size; i++)
+    {
+        fscanf(fit_fp, "%lf", &bg[0][i]);
+        fscanf(fit_fp, "%lf", &bg[1][i]);
     }
 }
 /*
 int main()
 {
     FILE * fit_fp;
-    int i;
-    int size = (2 + 7 * 6);
-    double ** seed = matrix_double_alloc(2, size);
-    fit_fp = fopen("fit_ini.dat", "r");
-    read_file(fit_fp, seed);
+    char buf[250];
+    int i, seeds_size, bg_size, n_peaks;
+    double ** seed, ** bg_seed; 
+    fit_fp = fopen("fit_ini_2.dat", "r");
+    fgets(buf, 250, fit_fp);//leo el titulo
+    fgets(buf, 250, fit_fp);//leo el encabezado
+    fscanf(fit_fp, "%d", &n_peaks);
+    fscanf(fit_fp, "%d", &bg_size);
+    seeds_size = 4 * n_peaks + 2;
+    seed = matrix_double_alloc(2, seeds_size);
+    bg_seed = matrix_double_alloc(2, bg_size);
+    fgets(buf, 250, fit_fp);//skip line
+    read_file(fit_fp, seed, seeds_size, bg_seed, bg_size);
     printf("%lf\n", seed[0][0]);
     printf("%lf\n", seed[0][1]);
-    for(i = 2; i < size; i += 6)
-    {
-        printf("%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", seed[0][i], seed[0][i + 1], seed[0][i + 2], seed[0][i + 3], seed[0][i + 4], seed[0][i + 5]);
-    }
+    for(i = 2; i < seeds_size; i += 4)
+        printf("%lf\t%lf\t%lf\t%lf\n", seed[0][i], seed[0][i + 1], seed[0][i + 2], seed[0][i + 3]);
+    
+    for(i = 0; i < bg_size; i++)
+        printf("%lf\t%lf\n", bg_seed[0][i], bg_seed[1][i]);
+    
     printf("%lf\n", seed[1][0]);
     printf("%lf\n", seed[1][1]);
-    for(i = 2; i < size; i += 6)
-    {
-        printf("%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", seed[1][i], seed[1][i + 1], seed[1][i + 2], seed[1][i + 3], seed[1][i + 4], seed[1][i + 5]);
-    }
-
+    for(i = 2; i < seeds_size; i += 4)
+        printf("%lf\t%lf\t%lf\t%lf\n", seed[1][i], seed[1][i + 1], seed[1][i + 2], seed[1][i + 3]);
+   
+    free_double_matrix(seed, 2);
+    free_double_matrix(bg_seed, 2);
+    fclose(fit_fp);
     return 0;
 }
 */

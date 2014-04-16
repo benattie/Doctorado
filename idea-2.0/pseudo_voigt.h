@@ -20,11 +20,11 @@ typedef struct IRF
 } IRF;
 
 //FUNCION BACKGROUND (INTERPOLACION LINEAL)
-double background(int N, double x, gsl_matrix * bg_pos, double bg_int[N][2]);
+double background(int N, double x, gsl_vector * bg_pos, double * bg_int);
 //PSEUDO-VOIGT NORMALIZADA (EN AREA)
 double pseudo_voigt_n(double x, double x0, double eta, double H);
 //FUNCION PSEUDO-VOIGT
-double pseudo_voigt(double ttheta, int numrings, double I0[numrings], double t0[numrings], double H, double eta, double shift_H[numrings], double shift_eta[numrings], gsl_matrix * bg_pos, double bg_int[numrings][2]);
+double pseudo_voigt(double ttheta, int numrings, double I0[numrings], double t0[numrings], double H, double eta, double shift_H[numrings], double shift_eta[numrings], int n_bg, gsl_vector * bg_pos, double * bg_int);
 //FUNCION PARA CALCULAR EL ANCHO INSTRUMENTAL GAUSSIANO(CAGLIOTI)
 double HG_ins2(IRF ins, double theta);
 //FUNCION PARA CALCULAR EL ANCHO INSTRUMENTAL LORENZIANO(CAGLIOTI)

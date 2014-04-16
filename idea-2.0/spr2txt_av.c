@@ -220,11 +220,20 @@ int main()
     ins = read_IRF(fp_IRF);
     fclose(fp_IRF);
     //Reading of initial parameters
-    double ** seeds = matrix_double_alloc(2, 6 * numrings + 2);
-    FILE *fp_init = fopen("fit_ini.dat", "r");
-    read_file(fp_init, seeds);
-    //Reading background points
-    //
+    FILE * fit_fp;
+    int seeds_size, bg_size, n_peaks;
+    double ** seeds, ** bg_seed; 
+    fit_fp = fopen("fit_ini.dat", "r");
+    fgets(buf, 250, fit_fp);//leo el titulo
+    fgets(buf, 250, fit_fp);//leo el encabezado
+    fscanf(fit_fp, "%d", &n_peaks);
+    fscanf(fit_fp, "%d", &bg_size);
+    seeds_size = 4 * numrings + 2;
+    seeds = matrix_double_alloc(2, seeds_size);
+    bg_seed = matrix_double_alloc(2, bg_size);
+    fgets(buf, 250, fit_fp);//skip line
+    read_file(fit_fp, seeds, seeds_size, bg_seed, bg_size);
+    //print_seeds(seeds[0], seeds_size, bg_seed, bg_size);
     fgets(buf_temp, 2, fp); //skip line
     //imprime en pantalla los datos relevantes de cada pico 
     for(i = 0; i < numrings; i++)
@@ -336,18 +345,18 @@ int main()
             if((y % n_av) == 0)
             {
                 int exists = 1;
-                if(y == 1) exists = 0; //pregunto si este es el primer archivo con el que estoy trabajando
+                if(y == 5) exists = 0; //pregunto si este es el primer archivo con el que estoy trabajando
                 average(intens_av, peak_intens_av, n_av, pixel_number, numrings);
                 //structure holding syncrotron's information
                 exp_data sync_data = {dist, pixel, pixel_number, ins};
                 //structure holding difractogram's information
-                peak_data difra = {numrings, k, y, data1, ug_l, ug_r, fit_inten, fwhm, eta};
+                peak_data difra = {numrings, bg_size, k, y, data1, bg_seed, fit_inten, fwhm, eta};
                 //fwhm & eta fitting
                 pv_fitting(exists, &sync_data, &difra, peak_intens_av, seeds);
                 memset(intens_av, 0, 1800 * sizeof(float));
                 memset(peak_intens_av, 0, 10 * sizeof(float));
             }
-            //if(((y - 1) % 30) == 0) printf("Fin (%d %d)\n", k, y);
+            //if(((y - 1) % 1) == 0) printf("Fin (%d %d)\n", k, y);
         }//end of for routine for(y = 1; y <= gamma; y++)
         
         //A esta altura ya termine de leer y procesar los datos de UN archivo spr. Falta imprimir los resultados a el archivo de salida
