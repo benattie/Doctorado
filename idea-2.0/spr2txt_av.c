@@ -13,14 +13,10 @@
 #include "read_IRF.c"
 #include "read_file.c"
 
-#define pi 3.141592654
 //#define max(x, y) (((x) > (y)) ? (x) : (y))
 //#define min(x, y) (((x) < (y)) ? (x) : (y))
 
 struct DAT {float old; float nnew;};
-
-float winkel_al(float, float, float);
-float winkel_be(float, float, float, float );
 
 int main()
 {
@@ -29,8 +25,7 @@ int main()
  int BG_l, BG_r;
  int NrSample, star_d, end_d, star_a, end_a, del_d, del_a, rot_p, end_g, numrings;
  int posring_l[15], posring_r[15], ug_l[15], ug_r[15];
- int fd[15];
- int ffinten[15], ffwhm[15], feta[15];
+ int fd[15], ffinten[15], ffwhm[15], feta[15];
 
  int pixel_number, gamma, n_av;
  int data[2500], intensity;
@@ -40,7 +35,6 @@ int main()
  double ** fwhm = matrix_double_alloc(500, 10);
  double ** eta = matrix_double_alloc(500, 10);
  float intens_av[1800], peak_intens_av[10];
-
  float data1[2500], BG_m, intens[500][10];
  
  char buf_temp[100], buf[100], buf1[100], buf_finten[500], buf_fwhm[500], buf_eta[500];
@@ -75,12 +69,11 @@ int main()
  puts("Options: \n 1. Replacement negative intensity values to ZERO\n 2. Intensity correction with LogFile.txt\n");
  puts("Error or suggestion to sangbong.yi@hzg.de");
  puts("\n****************************************************************************");
-
+ //LECTURA DEL ARCHIVO para_fit2d.dat
  if((fp = fopen("para_fit2d.dat", "r")) == NULL )
  {
      fprintf(stderr, "Error opening file para_fit2d.txt."); exit(1);
  }
- //////////////////////INICIA LA LECTURA DEL ARCHIVO para_fit2d.dat/////////////////////////////////////////////
  //path hacia los archivos de salida
  fgets(buf_temp, 22, fp);
  fscanf(fp, "%s", path_out);   fgets(buf_temp, 2, fp);
@@ -94,94 +87,71 @@ int main()
     fgets(buf_temp, 2, fp);
     fgets(buf_temp, 60, fp);
     fgets(buf_temp, 2, fp);
-    
     //path hacia los spr (encabezado + 360 filas x 1725 columnas) (son 37) 
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%s", path);   fgets(buf_temp, 2, fp);
-
     //lee raiz de los archivos spr (New_Al70R-tex_)
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%s", filename1); fgets(buf_temp, 2, fp);
-
     //lee la extension de los archivos (spr)
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%s", inform); fgets(buf_temp, 2, fp);
-
     //pasa los contenidos de path e inform hacia path1 e inform1 (why?)
     strcpy(path1, path); strcpy(inform1, inform);
-    
     //numero asociado al primer spr (relacionado con omega)
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%d", &star_d); fgets(buf_temp, 2, fp);
-    
     //angulo (\Omega) inicial 
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%d", &star_a); fgets(buf_temp, 2, fp);
-    
     //numero asociado al ultimo spr
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%d", &end_d); fgets(buf_temp, 2, fp);
-    
     //angulo (\Omega) final
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%d", &end_a); fgets(buf_temp, 2, fp);
-    
     //delta en los spr
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%d", &del_d); fgets(buf_temp, 2, fp);
-    
     //delta en el angulo \omega
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%d", &del_a); fgets(buf_temp, 2, fp);
-    
     //gamma inicial
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%d", &rot_p); fgets(buf_temp, 2, fp);
-    
     //gamma final
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%d", &end_g); fgets(buf_temp, 2, fp);
-    /////////////////////////////////////////////////
     //delta gamma
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%d", &n_av); fgets(buf_temp, 2, fp);
-    ///////////////////////////////////////////////////// 
     //Distancia de la muestra al detector
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%lf", &dist); fgets(buf_temp, 2, fp);
-    
     //Distancia que cubre un pixel en el difractograma
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%lf", &pixel); fgets(buf_temp, 2, fp);
-
     //flag que determina si las cuentas negativas se pasan a 0
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%s", &minus_zero); fgets(buf_temp, 2, fp);    
-
     //flag que determina si se genera el archivo .log?
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%s", &logfile_yn_temp); fgets(buf_temp, 2, fp);
-    
     //skip lines
     fgets(buf_temp, 2, fp);
     fgets(buf_temp, 15, fp);
     fgets(buf_temp, 2, fp);
-
     //numero de picos a analizar 
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%d", &numrings); fgets(buf_temp, 2, fp); 
-    
     //skip lines
     fgets(buf_temp, 22, fp); fgets(buf_temp, 2, fp);
     fgets(buf_temp, 33, fp); fgets(buf_temp, 1, fp);
-    
     //le aviso al usuario el valor del flag que activa o desactiva la creacion del .log
     printf("\n correction log file = %s ", &logfile_yn_temp);
     logfile_yn = logfile_yn_temp;
-    
     //le aviso al usuario el valor del flag que activa o desactiva la correccion de cuentas negativas
     printf("\n correction minus_zero = %s ", &minus_zero);
-    
     //no se para que esta esto
     printf("\n log_file minus_zero = %s  \n" ,&logfile_yn);
 
@@ -193,6 +163,7 @@ int main()
         fscanf(fp, "%d", &ug_l[i]); //bin de bg a la izquierda del pico
         fscanf(fp, "%d", &ug_r[i]); //bin de bg a la derecha del pico
 
+        //genero los archivos en los que se guardan los datos (intens, fwhm, eta), en formato maquina, de cada pico.
         strcpy(outfile, "");
         strcat(outfile, path_out);
         strcat(outfile, filename1);
@@ -225,8 +196,6 @@ int main()
         strcat(etafile, buf);
         strcat(etafile, ".dat");
         
-        //genero los archivos en los que se guardan los datos (intens, fwhm, eta), en formato maquina, de cada pico.
-        //En adelante seran llamados file_peak
         if((fd[i] = open(outfile, O_CREAT|O_TRUNC|O_RDWR,S_IREAD|S_IWRITE)) < 0)
         {
             printf("Cannot open INTENS OUTPUT file.(for %d ring)", i + 1); exit(1);
@@ -243,7 +212,7 @@ int main()
         {
             printf("Cannot open ETA OUTPUT file.(for %d ring)", i + 1); exit(1);
         }
-    }
+    }// End of reading the parameter file and End of generation of Output-files for(i=0;i<numrings;i++)
 
     //Reading of intrumental width files
     FILE *fp_IRF = fopen("IRF.dat", "r");
@@ -254,10 +223,9 @@ int main()
     double ** seeds = matrix_double_alloc(2, 6 * numrings + 2);
     FILE *fp_init = fopen("fit_ini.dat", "r");
     read_file(fp_init, seeds);
-    /////////////////////////////////////
-    /* End of reading the parameter file and End of generation of Output-files for(i=0;i<numrings;i++)*/	
+    //Reading background points
+    //
     fgets(buf_temp, 2, fp); //skip line
-
     //imprime en pantalla los datos relevantes de cada pico 
     for(i = 0; i < numrings; i++)
         printf("Position of [%d]ring = Theta:%6.3f  %8d%8d%8d%8d\n", i + 1, theta[i], posring_l[i], posring_r[i], ug_l[i], ug_r[i]);
@@ -298,13 +266,6 @@ int main()
     for(i = 0; i < numrings; i++)
         write(ffwhm[i], buf_temp, strlen(buf_temp));
 
-    /*Begin ring data read-in and output in machine pole figure  (\gamma, \Omega)*/
-    /*
-    FILE *fp_bflog;
-    fp_bflog = fopen("logfile.txt", "w");
-    fprintf(fp_bflog, "#Bad fits:\n#spr    gamma    peak    DI/I    I    H    eta\n");
-    fclose(fp_bflog);
-    */
     k = star_d + 1;  // file index number : star_d to end_d
     do //Iteracion sobre todos los spr  
     {
@@ -329,17 +290,15 @@ int main()
         {
             fprintf(stderr, "Error opening READ_file: %s \n", marfile); exit(1);
         }
-
         fscanf(fp1, "%d", &pixel_number); //pixel number = los bin de los difractogramas
         fscanf(fp1, "%d", &gamma); //gamma = cantidad de difractogramas (360 en este caso)
-
         fgets(buf, 100, fp1); //skip line
 
         //printf("pixel=%d gamma=%d\n", pixel_number, gamma);
         memset(intens_av, 0, 1800 * sizeof(float));
         memset(peak_intens_av, 0, 10 * sizeof(float));
         /*Data Read-In */
-        for(y = 1; y <= gamma; y++) //itero sobre todos los difractogramas (360) (recordar que iterar sobre todos los difractogramas implica obtener un valor de intensidad para cada punto del anillo de Debye)
+        for(y = 1; y <= gamma; y++) //itero sobre todos los difractogramas (360) (recorro el anillo de Debye)
         {
             for(x = 1; x <= pixel_number; x++) //iteracion dentro de cada uno de los difractogramas (con 1725 puntos) (cada porcion del anillo de Debye)
             {
@@ -389,7 +348,7 @@ int main()
                 memset(peak_intens_av, 0, 10 * sizeof(float));
             }
             //if(((y - 1) % 30) == 0) printf("Fin (%d %d)\n", k, y);
-        }/*end of the double FOR-routine gamma and pixel number*/
+        }//end of for routine for(y = 1; y <= gamma; y++)
         
         //A esta altura ya termine de leer y procesar los datos de UN archivo spr. Falta imprimir los resultados a el archivo de salida
         for(d = 0; d < numrings; d++)//itero sobre todos los picos
@@ -404,7 +363,7 @@ int main()
 	    	if(intens[c][d] < 0) //corrijo las intensidades negativas
                 { 
                     if((minus_zero == 'y') || (minus_zero == 'Y'))
-		        intens[c][d] = 0; 
+        		        intens[c][d] = 0; 
                     count_minus++;  
                 }
                 //escribo la intensidad integrada al archivo correspondiente en formato de diez columnas, separando por bloques los datos de cada pico
@@ -443,11 +402,11 @@ int main()
     	    {
                 printf("\n!!Number of MINUS intensity in the [%d]th pole figure = %d !!! \n", d + 1, count_minus);
             } 		 
-        }
+        }//end of for routine for(d = 0; d < numrings; d++)
         fclose(fp1);
         k += del_d; //paso al siguiente spr
     }
-    while(k <= end_d);
+    while(k <= end_d); //end of spr iteration
     /*End pole figure data in Machine coordinates*/
     
     printf("\nReduction of the Fit2D-DATA is finished.\n%d pole figure data are generated.\n\n", d);
@@ -465,16 +424,6 @@ int main()
     printf("\n====== Begin angular transformation ====== \n");
     timer = time(NULL); // present time in sec
     zeit = localtime(&timer); // save "time in sec" into structure tm
-    /*
-    printf("Unix Time: %d sec\n\n", timer); // began at 1970-1-1 0h0min0sec
-    printf("year: %d\n",   zeit->tm_year + 1900);
-    printf("month: %d\n",   zeit->tm_mon + 1);
-    printf("day: %d\n\n", zeit->tm_mday);
-    printf("hour: %d\n",   zeit->tm_hour);
-    printf("min: %d\n",   zeit->tm_min);
-    printf("sec: %d\n\n", zeit->tm_sec);
-    */
-
     for(m = 0; m < numrings; m++)//itero sobre todos los picos
     {
         step = 1;//Si step > 1 lo que hago es promediar step's intensidades de la figura de polos en formato maquina
@@ -603,7 +552,7 @@ int main()
             fprintf(stderr, "Error opening file PF_grid.dat"); exit(1);
         }
         ////////////////////////////////////////////////////////////////////////////////////////////
-        //INTESIDADES
+        //INTENSIDADES
         //leo el \gamma inicial, el final y el salto
         fgets(buf, 42, fp2);
         fscanf(fp2, "%d", &anf_gam);
@@ -621,7 +570,7 @@ int main()
         printf("anf_gam=%5d , end_gam=%5d , del_gam=%5d \nanf_ome=%5.1f , end_ome=%5.1f , del_ome=%5.1f \n\n", anf_gam, ende_gam, del_gam, anf_ome, ende_ome, del_ome);
         //step_ome = abs((ende_ome - anf_ome) / del_ome);
         ////////////////////////////////////////////////////////////////////////////////////////////
-        //FITTED INTENSITIE
+        //FITTED INTENSITIES
         strcpy(buf_temp, "");
         fgets(buf_temp, 70, fp_fitinten);
         fgets(buf_temp, 70, fp_fitinten);
@@ -807,80 +756,3 @@ int main()
  printf("Gimme tha power\n");
  return 0;
 } /*End of Main()*/
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////DEFINICION DE LAS FUNCIONES DE TRANSFORMACION ANGULAR/////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-float winkel_al(float th, float om, float ga)
-{
-    float   al,rad,chi,phi;
-    double  omr, gar, thr, phir, chir;
-    double  COSAL;
-
-    rad = pi / 180;
-    chi = 0.0;
-    phi = 0.0;
-    omr = om * rad;
-    gar = ga * rad;
-    thr = th * rad;
-    phir = phi * rad;
-    chir = chi * rad;
-
-    /***the multiplication of matrix G and s */
-     COSAL=(  ( (-1 * cos(omr) * sin(phir)) - (sin(omr) * cos(phir) * cos(chir)) ) * (-1 * sin(thr)) )
-           + ( (-1 * sin(omr) * sin(phir)) + (cos(omr) * cos(phir) * cos(chir)) ) * (cos(thr) * cos(gar));
-
-     al = (float)(acos(COSAL)) / rad;
-     return (al);
-}
-
-float winkel_be(float thb, float omb, float gab, float alb)
-{
-    float   be,rad_be,chi_be,phi_be;
-    double  thbr, ombr, gabr, albr, phibr, chibr;
-    double  SINALCOSBE,COSBE,SINALSINBE,SINBE;
-    
-    rad_be = pi / 180;
-    chi_be = 0.0;
-    phi_be = 0.0;
-    thbr = thb * rad_be;
-    ombr = omb * rad_be;
-    gabr = gab * rad_be;
-    albr = alb * rad_be;
-    chibr = chi_be * rad_be;
-    phibr = phi_be * rad_be;
-
-    /*** the multiplication of matrix G and s */
-
-    SINALCOSBE
-    = ( cos(ombr)*(-1 * sin(thbr)) ) + ( ( (sin(ombr) * cos(phibr)) + (cos(ombr) * sin(phibr) * cos(chibr)) ) * (cos(thbr) * cos(gabr)) );
-
-    COSBE = SINALCOSBE / sin(albr);
-
-    SINALSINBE = cos(thbr) * sin(gabr);
-
-    SINBE = SINALSINBE / sin(albr);
-
-    if(COSBE > 1.0)
-    {
-        be = 0.0;
-        COSBE = 1;
-    }
-    if(COSBE < -1)
-    {
-        be = 180.0;
-        COSBE = -1;
-    }
-
-    if(SINBE < 0)
-        be = (float) 360 - ( acos(COSBE) / rad_be );
-    else
-        be = (float) acos(COSBE) / rad_be;
-
-    if((omb == 0) && (be > 270.0))
-        be = 360 - be;
-    if((omb == 0) && (be <= 80.0))
-        be = 360 - be;
-
-    return (be);
-}

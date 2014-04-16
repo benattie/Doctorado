@@ -3,3 +3,4 @@ Mejoras para el programa spr2txt
 1. Tomar los puntos de background de un archivo diferente
 2. Armar una GUI
 3. Ordenar un poco el programa original
+4. Agregar ajuste de Williamson-Hall

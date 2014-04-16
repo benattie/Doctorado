@@ -1,6 +1,6 @@
 #ifndef AUX_FUNCT_H_   /* Include guard */
 #define AUX_FUNCT_H_
-
+//librerias necesarias
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -12,6 +12,8 @@
 #include "array_alloc.h"
 #include "pseudo_voigt.h"
 
+//definiciones importantes
+#define pi 3.141592654
 
 //DEFINICION DE ESTRUCTURAS
 //datos del equipo
@@ -77,6 +79,9 @@ typedef struct data_s4
     double H;
     double eta;
 } data_s4;
+//DEFINICION DE FUNCIONES
+float winkel_al(float th, float om, float ga);
+float winkel_be(float thb, float omb, float gab, float alb);
 
 double bin2theta(int bin, double pixel, double dist);
 int theta2bin(double theta, double pixel, double dist);
@@ -93,7 +98,6 @@ void check (double ** seeds, int size);
 
 int check_for_null_peaks (float treshold, int numrings, int * zero_peak_index, float * intens);
 void set_seeds(int size, int * zero_peak_index, int exists, double ** seeds, double ** peak_seeds);
-//void set_bg_pos(int n_peaks,int * zero_peak_index, int * bg_left, int * bg_right, int ** peak_bg);
 void reset_seeds(int size, double * peak_seeds, int * zero_peak_index, double ** seeds);
 void average(float * intens_av, float * peak_intens_av, int n_av, int size, int numrings);
 
