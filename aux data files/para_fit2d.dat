@@ -1,9 +1,9 @@
-1.PathForOutput     : D:\Emanuel\Git\Doctorado\tmp\out\
+1.PathForOutput     : /home/benattie/Documents/Doctorado/Git/tmp/Al-AR-M-H/out/
 2.NrOfSamples(1)    : 1
 
 Input Data - 1
-3.InputFilePath     : D:\Emanuel\Git\Doctorado\tmp\spr\
-4.InputFileName     : New_Al70R-tex_
+3.InputFilePath     : /home/benattie/Documents/Doctorado/Git/tmp/Al-AR-M-H/spr/
+4.InputFileName     : Al-AR-M-H-tex_
 5.FileExtension     : spr
 6.IndexNr Start     : 1
 7.Start Angle       : 1
@@ -23,10 +23,10 @@ Peak Positions
 I. NrOfPeaks        : 7
 II. Peak Positions
 (Theta Peak-L Peak-R BG-L BG-R):
-1.739 645 668 600 700
-2.011 720 800 701 900
-2.847 1065 1090 1050 1120
-3.337 1235 1280 1200 1400
-3.484 1310 1333 1200 1400
-4.028 1500 1555 1450 1600
-4.391 1653 1683 1640 1700
+1.742 600 710 570 900
+2.013 710 845 570 900
+2.850 1000 1060 970 1200
+3.337 1240 1290 1200 1430
+3.494 1295 1340 1200 1430
+4.028 1500 1565 1450 1600
+4.391 1650 1685 1615 1699
