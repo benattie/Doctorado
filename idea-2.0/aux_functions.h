@@ -82,22 +82,38 @@ typedef struct data_s4
 } data_s4;
 //DEFINICION DE FUNCIONES
 float winkel_al(float th, float om, float ga);
+
 float winkel_be(float thb, float omb, float gab, float alb);
 
 double bin2theta(int bin, double pixel, double dist);
+
 int theta2bin(double theta, double pixel, double dist);
+
 void print_state (int iter, gsl_multifit_fdfsolver * s);
 
 void print_seeds(double * seeds, int seeds_size, double ** bg, int bg_size);
+
 void reset_single_seed(double ** seeds, int index);
+
 void reset_global_seeds(double ** seeds);
+
 void reset_peak_seeds(double ** seeds, int peak_index);
+
 void reset_bg_seeds(gsl_vector * y, double ** bg, int size);
+
 void reset_all_seeds(gsl_vector * y, double ** seeds, int seeds_size, int n_peaks, double ** bg, int bg_size);
+
 void check (gsl_vector * y, double ** seeds, int seeds_size, int n_peaks, double ** bg, int bg_size);
+
 int check_for_null_peaks (float treshold, int numrings, int * zero_peak_index, float * intens);
+
 void set_seeds(int size, int * zero_peak_index, int exists, double ** seeds, double ** peak_seeds);
+
 //void reset_seeds(int size, double * peak_seeds, int * zero_peak_index, double ** seeds);
+
 void average(float * intens_av, float * peak_intens_av, int n_av, int size, int numrings);
 
+void solver_iterator(int * status, gsl_multifit_fdfsolver * s, const gsl_multifit_fdfsolver_type * T);
+
+int results_print(int all_seeds_size, double ** peak_seeds, int * zero_peak_index, exp_data * sync_data, peak_data * difra);
 #endif

@@ -6,17 +6,17 @@
 		2theta_0
 		I_0
 		Posicion de los picos
-		Puntos de backgound
+		Posicion/intensidad de los puntos de backgound
 	2.2 Completar fit_ini.dat
 3. Completar para_fit2d.dat
 	Ruta a los archivos de salida
 	Ruta a los archivos spr
 	Raiz de los achivos spr (sin el numero)
-	Delta gamma
+	Delta gamma (numero de difractogramas a promediar)
 	Ditancia detector/muestra
 	Resolucion espacial de un pixel
-	Numero de picos a ajustar
-	Posciciones de los picos en la forma:
+	Numero (maximo) de picos a ajustar
+	Posiciones de los picos en la forma:
 	theta_0|Izquierda del pico|Derecha del pico|Background a la izquierda|Background a la derecha
 4. Completar el IRF.dat
 	Los parametros son tales que:

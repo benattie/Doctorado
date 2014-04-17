@@ -10,8 +10,8 @@
 #include <time.h>
 
 #include "pv.c"
-#include "read_IRF.c"
-#include "read_file.c"
+//#include "read_IRF.c"
+#include "read_files.c"
 
 //#define max(x, y) (((x) > (y)) ? (x) : (y))
 //#define min(x, y) (((x) < (y)) ? (x) : (y))
@@ -251,29 +251,19 @@ int main()
     //imprime en cada file_peak el \gamma inicial, final y el paso para la figura de polos de intensidad
     sprintf(buf_temp, "Anf., Ende, Schritt-Gamma:              %8d%8d       %d\n", rot_p, end_g, n_av);
     for(i = 0; i < numrings; i++)
+    {
         write(ffinten[i], buf_temp, strlen(buf_temp));
+        write(ffwhm[i], buf_temp, strlen(buf_temp));
+        write(ffwhm[i], buf_temp, strlen(buf_temp));
+    }
     //imprime en cada file_peak el \Omega inicial, final y el paso
     sprintf(buf_temp, "Anf., Ende, Schritt-Omega:              %8d%8d%8d\n\n", star_a, end_a, del_a);
     for(i = 0; i < numrings; i++)
+    {
         write(ffinten[i], buf_temp, strlen(buf_temp));
-    //FWHM
-    //imprime en cada file_peak el \gamma inicial, final y el paso para la figura de polos de intensidad
-    sprintf(buf_temp, "Anf., Ende, Schritt-Gamma:              %8d%8d       %d\n", rot_p, end_g, n_av);
-    for(i = 0; i < numrings; i++)
         write(ffwhm[i], buf_temp, strlen(buf_temp));
-    //imprime en cada file_peak el \Omega inicial, final y el paso
-    sprintf(buf_temp, "Anf., Ende, Schritt-Omega:              %8d%8d%8d\n\n", star_a, end_a, del_a);
-    for(i = 0; i < numrings; i++)
-        write(ffwhm[i], buf_temp, strlen(buf_temp));
-    //ETA
-    //imprime en cada file_peak el \gamma inicial, final y el paso para la figura de polos de intensidad
-    sprintf(buf_temp, "Anf., Ende, Schritt-Gamma:              %8d%8d       %d\n", rot_p, end_g, n_av);
-    for(i = 0; i < numrings; i++)
-        write(ffwhm[i], buf_temp, strlen(buf_temp));
-    //imprime en cada file_peak el \Omega inicial, final y el paso
-    sprintf(buf_temp, "Anf., Ende, Schritt-Omega:              %8d%8d%8d\n\n", star_a, end_a, del_a);
-    for(i = 0; i < numrings; i++)
-        write(ffwhm[i], buf_temp, strlen(buf_temp));
+        write(feta[i], buf_temp, strlen(buf_temp));
+    }
 
     k = star_d + 1;  // file index number : star_d to end_d
     do //Iteracion sobre todos los spr  
@@ -369,7 +359,7 @@ int main()
             count_minus = 0;
             for(c = 1; c <= ((end_g - rot_p) + 1); c++) //itero sobre todo el anillo
             { 
-	    	if(intens[c][d] < 0) //corrijo las intensidades negativas
+                if(intens[c][d] < 0) //corrijo las intensidades negativas
                 { 
                     if((minus_zero == 'y') || (minus_zero == 'Y'))
         		        intens[c][d] = 0; 
@@ -593,9 +583,9 @@ int main()
         ////////////////////////////////////////////////////////////////////////////////////////////
         //ETA
         strcpy(buf_temp, "");
-        fgets(buf_temp, 70, fp_fwhm);
-        fgets(buf_temp, 70, fp_fwhm);
-        fgets(buf_temp, 70, fp_fwhm);
+        fgets(buf_temp, 70, fp_eta);
+        fgets(buf_temp, 70, fp_eta);
+        fgets(buf_temp, 70, fp_eta);
         ////////////////////////////////////////////////////////////////////////////////////////////
         if(ende_ome < anf_ome)
             del_ome = -1 * del_ome;
@@ -604,7 +594,7 @@ int main()
         fprintf(fp1, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
         fprintf(fp_fitinten_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
         fprintf(fp_fwhm_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
-        fprintf(fp_eta_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);        
+        fprintf(fp_eta_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec); 
         
         k = 0;//contador del archvo grid y el de mtex
         //tranformacion angular (gamma, omega)-->(alpha,beta)
@@ -618,8 +608,8 @@ int main()
                     neu_gam1 = j;
                     neu_ome1 = i;
                     //transformacion geometrica
-		    if(neu_ome1 > 90)
-		    {
+                    if(neu_ome1 > 90)
+                    {
                         neu_ome = neu_ome1 - 90;
                         neu_gam = neu_gam1 + 180;
                     }
@@ -627,8 +617,7 @@ int main()
                     {
                         neu_ome = neu_ome1;
                         neu_gam = neu_gam1;
-                    }
-                    
+                    } 
                     alpha = winkel_al(theta[m], neu_ome, neu_gam);
                     beta  = winkel_be(theta[m], neu_ome, neu_gam, alpha);
                     
@@ -666,7 +655,7 @@ int main()
                             alpha = alpha;
                         
                         //imprimo las intensidades en formato figura de polos, asi como el grid
-	                if(theta > 0)
+                        if(theta > 0)
                         {
                             fprintf(fp1, "%11d%10.4f%10.4f%10.4f%10.4f%12.0f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, nn_intens);
                             if((j % n_av) == 0)
@@ -686,12 +675,12 @@ int main()
                                 fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", (k + 1) / n_av, -2 * theta[m], -1 * theta[m], alpha, beta, nn_eta);
                             }
                         }
-	                fprintf(fp3, "%11d%10.1f%10.1f%10.4f%10.4f\n", k + 1, neu_ome, neu_gam, alpha, beta); 
+                        fprintf(fp3, "%11d%10.1f%10.1f%10.4f%10.4f\n", k + 1, neu_ome, neu_gam, alpha, beta); 
                         k++;
-                    }
-                }
+                    }// end if  if(j % step == 0)
+                }//end for routine for(j = anf_gam; j <= ende_gam; j += del_gam)
                 i += del_ome;
-            }
+            }//end while routine while(i <= ende_ome)
         }
         else
         {
@@ -746,10 +735,10 @@ int main()
                         fprintf(fp3, "%11d%10.1f%10.1f%10.4f%10.4f\n", k + 1, neu_ome, neu_gam, alpha, beta);
                         k++;
                     }
-                }
+                }//end for routine for(j = anf_gam; j <= ende_gam; j += del_gam)
                 i += del_ome;
-            }
-        }
+            }//en while routine while(i >= ende_ome)
+        }//end if if(ende_ome > anf_ome)
         fflush(fp1); fflush(fp2); fflush(fp3);
         fflush(fp_fitinten); fflush(fp_fitinten_pf);
         fflush(fp_fwhm); fflush(fp_fwhm_pf);
@@ -762,6 +751,6 @@ int main()
  }/*End of for(Z = 1; Z <= NrSample; Z++) */
  fclose(fp);
 
- printf("Gimme tha power\n");
+ printf("Rock'n'rolla\n");
  return 0;
 } /*End of Main()*/

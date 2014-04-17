@@ -21,15 +21,13 @@ void pv_step1(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     double * shift_H = vector_double_alloc((*d).numrings);
     double * shift_eta = vector_double_alloc((*d).numrings);
     //variables del solver
-    int status, iter = 0, max_iter = 500;
-    double err_abs = 1e-4, err_rel = 1e-4;
+    int status;
     const gsl_multifit_fdfsolver_type * T;
     gsl_multifit_fdfsolver * s;
     gsl_multifit_function_fdf pv; //funcion a fitear
     //gsl_matrix * covar = gsl_matrix_alloc (n_param, n_param);//matriz covariante
     double * x_init = vector_double_alloc(n_param);
 
-    //semillas de los parametros variables del fiteo
     //printf("Inicializando los parametros\n");
     j = 0;
     x_init[j] = seeds[exists][0]; j++;//H
@@ -64,28 +62,12 @@ void pv_step1(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     pv.params = &d1; //datos experimentales
  
     //inicializo el solver
+    //printf ("\nInicio del fit en spr #%d y gamma #%d\n", (*difra).spr, (*difra).gamma);
     T = gsl_multifit_fdfsolver_lmsder;
     s = gsl_multifit_fdfsolver_alloc (T, (*d).n, n_param);
     gsl_multifit_fdfsolver_set (s, &pv, &x.vector);
-    
-    //inicio las iteraciones
-    //printf ("\nInicio del fit en spr #%d y gamma #%d\n", (*difra).spr, (*difra).gamma);
-    //print_state (iter, s);
-    do
-    {
-        iter++;
-        status = gsl_multifit_fdfsolver_iterate (s);
-        //printf ("status = %s\n", gsl_strerror (status));
-        //print_state (iter, s);
-        if (status)
-            break;
-        status = gsl_multifit_test_delta (s -> dx, s -> x, err_abs, err_rel);
-    }
-    while (status == GSL_CONTINUE && iter < max_iter);
-    //printf ("status = %s\n", gsl_strerror (status));
-    //print_state (iter, s);
-    
-    //imprimo los resultados
+    solver_iterator(&status, s, T);
+
     //printf("Salida de los resultados del paso 1\n");
     j = 0;
     seeds[1][0] = gsl_vector_get(s -> x, j); j++;//H
@@ -109,15 +91,13 @@ void pv_step2(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     double H, eta;
     double * shift_eta = vector_double_alloc((*d).numrings);
     //variables del solver
-    int status, iter = 0, max_iter = 500;
-    double err_abs = 1e-4, err_rel = 1e-4;
+    int status;
     const gsl_multifit_fdfsolver_type * T;
     gsl_multifit_fdfsolver * s;
     gsl_multifit_function_fdf pv; //funcion a fitear
     //gsl_matrix * covar = gsl_matrix_alloc (n_param, n_param);//matriz covariante
     double * x_init = vector_double_alloc(n_param);
 
-    //semillas de los parametros
     //printf("Inicializando los parametros\n");
     j = 0;
     for(i = 2; i < seeds_size; i += 4)
@@ -155,25 +135,8 @@ void pv_step2(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     T = gsl_multifit_fdfsolver_lmsder;
     s = gsl_multifit_fdfsolver_alloc (T, (*d).n, n_param);
     gsl_multifit_fdfsolver_set (s, &pv, &x.vector);
+    solver_iterator(&status, s, T);
     
-    //inicio las iteraciones
-    //printf ("\nInicio del fit en spr #%d y gamma #%d\n", difra.spr, difra.gamma);
-    //print_state (iter, s);
-    do
-    {
-        iter++;
-        status = gsl_multifit_fdfsolver_iterate (s);
-        //printf ("status = %s\n", gsl_strerror (status));
-        //print_state (iter, s);
-        if (status)
-            break;
-        status = gsl_multifit_test_delta (s -> dx, s -> x, err_abs, err_rel);
-    }
-    while (status == GSL_CONTINUE && iter < max_iter);
-    //printf ("status = %s\n", gsl_strerror (status));
-    //print_state (iter, s);
-    
-    //imprimo los resultados
     //printf("Salida de los resultados del paso 2\n");
     j = 0;
     for(i = 2; i < seeds_size; i += 4)
@@ -197,15 +160,13 @@ void pv_step3(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     double * shift_H = vector_double_alloc((*d).numrings);
     double * shift_eta = vector_double_alloc((*d).numrings);
     //variables del solver
-    int status, iter = 0, max_iter = 500;
-    double err_abs = 1e-4, err_rel = 1e-4;
+    int status;
     const gsl_multifit_fdfsolver_type * T;
     gsl_multifit_fdfsolver * s;
     gsl_multifit_function_fdf pv; //funcion a fitear
     //gsl_matrix * covar = gsl_matrix_alloc (n_param, n_param);//matriz covariante ---> moverlo para el principio de cada paso (o solo para el ultimo, no se)
     double * x_init = vector_double_alloc(n_param);
 
-    //semillas de los parametros
     //printf("Inicializando los parametros\n");
     j = 0;
     x_init[j] = seeds[1][0]; j++;//H
@@ -243,25 +204,8 @@ void pv_step3(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     T = gsl_multifit_fdfsolver_lmsder;
     s = gsl_multifit_fdfsolver_alloc (T, (*d).n, n_param);
     gsl_multifit_fdfsolver_set (s, &pv, &x.vector);
+    solver_iterator(&status, s, T);
     
-    //inicio las iteraciones
-    //printf ("\nInicio del fit en spr #%d y gamma #%d\n", difra.spr, difra.gamma);
-    //print_state (iter, s);
-    do
-    {
-        iter++;
-        status = gsl_multifit_fdfsolver_iterate (s);
-        //printf ("status = %s\n", gsl_strerror (status));
-        //print_state (iter, s);
-        if (status)
-            break;
-        status = gsl_multifit_test_delta (s -> dx, s -> x, err_abs, err_rel);
-    }
-    while (status == GSL_CONTINUE && iter < max_iter);
-    //printf ("status = %s\n", gsl_strerror (status));
-    //print_state (iter, s);
-    
-    //imprimo los resultados
     //printf("Salida de los resultados del paso 3\n");
     j = 0;
     seeds[1][0] = gsl_vector_get(s -> x, j); j++;//H
@@ -284,17 +228,14 @@ void pv_step4(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     //variables generales del programa
     int i, j;
     double H, eta;
-    //FILE *fp_errlog;
     //variables del solver
-    int status, iter = 0, max_iter = 500;
-    double err_abs = 1e-4, err_rel = 1e-4;
+    int status;
     const gsl_multifit_fdfsolver_type * T;
     gsl_multifit_fdfsolver * s;
     gsl_multifit_function_fdf pv; //funcion a fitear
     //gsl_matrix * covar = gsl_matrix_alloc (n_param, n_param);//matriz covariante
     double * x_init = vector_double_alloc(n_param);
 
-    //semillas de los parametros
     //printf("Inicializando los parametros\n");
     j = 0;
     for(i = 2; i < seeds_size; i += 4)
@@ -326,25 +267,8 @@ void pv_step4(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     T = gsl_multifit_fdfsolver_lmsder;
     s = gsl_multifit_fdfsolver_alloc (T, (*d).n, n_param);
     gsl_multifit_fdfsolver_set (s, &pv, &x.vector);
+    solver_iterator(&status, s, T);
     
-    //inicio las iteraciones
-    //printf ("\nInicio del fit en spr #%d y gamma #%d\n", difra.spr, difra.gamma);
-    //print_state (iter, s);
-    do
-    {
-        iter++;
-        status = gsl_multifit_fdfsolver_iterate (s);
-        //printf ("status = %s\n", gsl_strerror (status));
-        //print_state (iter, s);
-        if (status)
-            break;
-        status = gsl_multifit_test_delta (s -> dx, s -> x, err_abs, err_rel);
-    }
-    while (status == GSL_CONTINUE && iter < max_iter);
-    //printf ("status = %s\n", gsl_strerror (status));
-    //print_state (iter, s);
-    
-    //imprimo los resultados
     //printf("Salida de los resultados del paso 4\n");
     j = 0;
     for(i = 2; i < seeds_size; i += 4)

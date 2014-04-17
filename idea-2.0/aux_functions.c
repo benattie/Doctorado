@@ -207,24 +207,7 @@ void set_seeds(int size, int * zero_peak_index, int exists, double ** seeds, dou
         l++;
     }
 }
-/*
-void reset_seeds(int size, double * peak_seeds, int * zero_peak_index, double ** seeds)
-{
-    int i, j = 2, k;
-    seeds[1][0] = peak_seeds[0];
-    seeds[1][1] = peak_seeds[1];
 
-    for(i = 2; i < size; i += 4)
-    {
-        if(zero_peak_index[(i / 4)] == 0)
-        {
-            for(k = 0; k < 4; k++)
-                seeds[1][i + k] = peak_seeds[j + k];
-            j += 4;
-        }
-    }
-}
-*/
 void average(float * intens_av, float * peak_intens_av, int n_av, int size, int numrings)
 {
     int i;
@@ -236,4 +219,84 @@ void average(float * intens_av, float * peak_intens_av, int n_av, int size, int 
     {
         peak_intens_av[i] /= n_av;
     }
+}
+
+void solver_iterator(int * status, gsl_multifit_fdfsolver * s, const gsl_multifit_fdfsolver_type * T)
+{
+    int iter = 0, max_iter = 500;
+    double err_abs = 1e-4, err_rel = 1e-4;
+    //print_state (iter, s);
+    do
+    {
+        iter++;
+        *status = gsl_multifit_fdfsolver_iterate (s);
+        //printf ("status = %s\n", gsl_strerror (*status));
+        //print_state (iter, s);
+        if (*status)
+            break;
+        *status = gsl_multifit_test_delta (s -> dx, s -> x, err_abs, err_rel);
+    }
+    while (*status == GSL_CONTINUE && iter < max_iter);
+    //printf ("status = %s\n", gsl_strerror (*status));
+    //print_state (iter, s);
+}
+
+int results_print(int all_seeds_size, double ** peak_seeds, int * zero_peak_index, exp_data * sync_data, peak_data * difra)
+{
+    int bad_fit = 0, i, j = 2, k = 0;
+    double *H = vector_double_alloc(1), *eta = vector_double_alloc(1), I;
+    
+    for(i = 2; i < all_seeds_size; i += 4)
+    {
+        if(zero_peak_index[k] == 0)
+        {
+            I = peak_seeds[1][j + 1];
+            *H = peak_seeds[1][0] + peak_seeds[1][j + 2];
+            *eta = peak_seeds[1][1] + peak_seeds[1][j + 3];
+            if(I < 0)
+            {
+                bad_fit = 1;
+                (*difra).intens[(*difra).gamma][k] = -1.0;
+                (*difra).fwhm[(*difra).gamma][k] = -1.0;
+                (*difra).eta[(*difra).gamma][k] = -1.0;
+            }
+            else
+            {
+                if(*H < 0 || *H > 1)
+                {
+                    bad_fit = 1;
+                    (*difra).intens[(*difra).gamma][k] = I;
+                    (*difra).fwhm[(*difra).gamma][k] = -1.0;
+                    (*difra).eta[(*difra).gamma][k] = -1.0;
+                }
+                else
+                {
+                     if(*eta < 0 || *eta > 1)
+                    {
+                        bad_fit = 1;
+                        (*difra).intens[(*difra).gamma][k] = I;
+                        (*difra).fwhm[(*difra).gamma][k] = *H;
+                        (*difra).eta[(*difra).gamma][k] = -1.0;
+                    }
+                    else
+                    {
+                        //double theta = peak_seeds[1][j] / 2.; //necesito theta y NO 2theta para poder ahcer la correccion por ancho instrumental
+                        //ins_correction(H, eta, (*sync_data).ins, theta);
+                        (*difra).intens[(*difra).gamma][k] = I;
+                        (*difra).fwhm[(*difra).gamma][k] = *H;
+                        (*difra).eta[(*difra).gamma][k] = *eta;
+                    }
+                }
+            }
+            j += 4;
+        }
+        else
+        {
+            (*difra).intens[(*difra).gamma][k] = 0.0;
+            (*difra).fwhm[(*difra).gamma][k] = 0.0;
+            (*difra).eta[(*difra).gamma][k] = 0.0;
+        }
+        k++;
+    }
+    return bad_fit;
 }
