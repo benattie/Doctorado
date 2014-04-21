@@ -212,13 +212,10 @@ void average(float * intens_av, float * peak_intens_av, int n_av, int size, int 
 {
     int i;
     for(i = 0; i < size; i++)
-    {
         intens_av[i] /= n_av;
-    }
+
     for(i = 0; i < numrings; i++)
-    {
         peak_intens_av[i] /= n_av;
-    }
 }
 
 void solver_iterator(int * status, gsl_multifit_fdfsolver * s, const gsl_multifit_fdfsolver_type * T)

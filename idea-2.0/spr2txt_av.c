@@ -339,7 +339,7 @@ int main()
                 average(intens_av, peak_intens_av, n_av, pixel_number, numrings);
                 //structure holding syncrotron's information
                 exp_data sync_data = {dist, pixel, pixel_number, ins};
-                //structure holding difractogram's information
+                //structure holding difractograms information
                 peak_data difra = {numrings, bg_size, k, y, data1, bg_seed, fit_inten, fwhm, eta};
                 //fwhm & eta fitting
                 pv_fitting(exists, &sync_data, &difra, peak_intens_av, seeds);
@@ -378,12 +378,16 @@ int main()
                     strcat(outeta, buf_eta);
                 }
                 if((c % 10) == 0)
-                {
                     strcat(outinten, "\n");
+
+                if((c % (10 * n_av)) == 0)
+                {
                     strcat(outfitinten, "\n");
                     strcat(outfwhm, "\n");
                     strcat(outeta, "\n");
                 }
+
+
                 if(c == ((end_g - rot_p) + 1))
                 {
                     strcat(outinten, "\n");
@@ -398,9 +402,7 @@ int main()
             write(feta[d], outeta, strlen(outeta));            
 	    
             if(count_minus >= 1)//te avisa que tuviste picos con intensidades negativas
-    	    {
                 printf("\n!!Number of MINUS intensity in the [%d]th pole figure = %d !!! \n", d + 1, count_minus);
-            } 		 
         }//end of for routine for(d = 0; d < numrings; d++)
         fclose(fp1);
         k += del_d; //paso al siguiente spr
@@ -621,14 +623,14 @@ int main()
                     alpha = winkel_al(theta[m], neu_ome, neu_gam);
                     beta  = winkel_be(theta[m], neu_ome, neu_gam, alpha);
                     
-                    if(j % step == 0)
-                    {
-                        n_intens = 0;
-                        n_fintens = 0;
-                        n_fwhm = 0;
-                        n_eta = 0;
-                        for(l = 1; l <= step; l++)
-                        {
+                    //if(j % step == 0)
+                    //{
+                        n_intens = 0.0;
+                        n_fintens = 0.0;
+                        n_fwhm = 0.0;
+                        n_eta = 0.0;
+                        //for(l = 1; l <= step; l++)
+                        //{
                             fscanf(fp2, "%f", &m_intens);//leo la intensidad de la figura de polos en formato maquina
                             n_intens += m_intens;
                             if((j % n_av) == 0)
@@ -640,7 +642,7 @@ int main()
                                 fscanf(fp_eta, "%lf", &m_eta);//leo el eta de la figura de polos en formato maquina
                                 n_eta += m_eta;
                             }
-                        }
+                        //}
                         nn_intens = n_intens / step;
                         nn_fintens = n_fintens / step;
                         nn_fwhm = n_fwhm / step;
@@ -677,7 +679,7 @@ int main()
                         }
                         fprintf(fp3, "%11d%10.1f%10.1f%10.4f%10.4f\n", k + 1, neu_ome, neu_gam, alpha, beta); 
                         k++;
-                    }// end if  if(j % step == 0)
+                    //}// end if  if(j % step == 0)
                 }//end for routine for(j = anf_gam; j <= ende_gam; j += del_gam)
                 i += del_ome;
             }//end while routine while(i <= ende_ome)

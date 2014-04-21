@@ -3,3 +3,4 @@ Mejoras para el programa spr2txt
 1. Armar una GUI
 2. Ordenar un poco el programa original
 3. Agregar ajuste de Williamson-Hall
+4. Corregir las funciones para restar el ancho de pico
