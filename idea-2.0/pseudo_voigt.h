@@ -13,11 +13,9 @@ typedef struct IRF
     double UG;
     double VG;
     double WG;
-    double IG;
     double UL;
     double VL;
     double WL;
-    double IL;
 } IRF;
 
 //FUNCION BACKGROUND (INTERPOLACION LINEAL)

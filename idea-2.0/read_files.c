@@ -59,9 +59,6 @@ IRF read_IRF(FILE * fp)
     fscanf(fp, "%lf", &ins.WG);
     fgets(buf, 100, fp);
     fgets(buf, 4, fp);
-    fscanf(fp, "%lf", &ins.IG);
-    fgets(buf, 100, fp);
-    fgets(buf, 4, fp);
     fscanf(fp, "%lf", &ins.UL);
     fgets(buf, 100, fp);
     fgets(buf, 4, fp);
@@ -69,10 +66,6 @@ IRF read_IRF(FILE * fp)
     fgets(buf, 100, fp);
     fgets(buf, 4, fp);
     fscanf(fp, "%lf", &ins.WL);
-    fgets(buf, 100, fp);
-    fgets(buf, 4, fp);
-    fscanf(fp, "%lf", &ins.IL);
-    fgets(buf, 100, fp);
 
     return ins;
 }

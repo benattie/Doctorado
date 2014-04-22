@@ -254,7 +254,7 @@ int main()
     {
         write(ffinten[i], buf_temp, strlen(buf_temp));
         write(ffwhm[i], buf_temp, strlen(buf_temp));
-        write(ffwhm[i], buf_temp, strlen(buf_temp));
+        write(feta[i], buf_temp, strlen(buf_temp));
     }
     //imprime en cada file_peak el \Omega inicial, final y el paso
     sprintf(buf_temp, "Anf., Ende, Schritt-Omega:              %8d%8d%8d\n\n", star_a, end_a, del_a);
@@ -371,7 +371,7 @@ int main()
                 if((c % n_av) == 0)
                 {
                     sprintf(buf_finten, "%8.3lf ", fit_inten[c][d]);
-                    strcat(outfwhm, buf_fwhm);
+                    strcat(outfitinten, buf_finten);
                     sprintf(buf_fwhm, "%8.5lf ", fwhm[c][d]);
                     strcat(outfwhm, buf_fwhm);
                     sprintf(buf_eta, "%8.5lf ", eta[c][d]);
@@ -386,7 +386,6 @@ int main()
                     strcat(outfwhm, "\n");
                     strcat(outeta, "\n");
                 }
-
 
                 if(c == ((end_g - rot_p) + 1))
                 {
