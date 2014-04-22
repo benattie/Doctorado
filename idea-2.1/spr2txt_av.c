@@ -10,11 +10,7 @@
 #include <time.h>
 
 #include "pv.c"
-//#include "read_IRF.c"
 #include "read_files.c"
-
-//#define max(x, y) (((x) > (y)) ? (x) : (y))
-//#define min(x, y) (((x) < (y)) ? (x) : (y))
 
 struct DAT {float old; float nnew;};
 
@@ -163,56 +159,7 @@ int main()
         fscanf(fp, "%d", &ug_l[i]); //bin de bg a la izquierda del pico
         fscanf(fp, "%d", &ug_r[i]); //bin de bg a la derecha del pico
 
-        //genero los archivos en los que se guardan los datos (intens, fwhm, eta), en formato maquina, de cada pico.
-        strcpy(outfile, "");
-        strcat(outfile, path_out);
-        strcat(outfile, filename1);
-        strcat(outfile, "PF_");
-        sprintf(buf,"%d", i + 1);
-        strcat(outfile, buf);
-        strcat(outfile, ".dat");
-
-        strcpy(fit_intenfile, "");
-        strcat(fit_intenfile, path_out);
-        strcat(fit_intenfile, filename1);
-        strcat(fit_intenfile, "INT_PF_");
-        sprintf(buf,"%d", i + 1);
-        strcat(fit_intenfile, buf);
-        strcat(fit_intenfile, ".dat");
-
-        strcpy(fwhmfile, "");
-        strcat(fwhmfile, path_out);
-        strcat(fwhmfile, filename1);
-        strcat(fwhmfile, "FWHM_PF_");
-        sprintf(buf,"%d", i + 1);
-        strcat(fwhmfile, buf);
-        strcat(fwhmfile, ".dat");
-
-        strcpy(etafile, "");
-        strcat(etafile, path_out);
-        strcat(etafile, filename1);
-        strcat(etafile, "ETA_PF_");
-        sprintf(buf,"%d", i + 1);
-        strcat(etafile, buf);
-        strcat(etafile, ".dat");
-        
-        if((fd[i] = open(outfile, O_CREAT|O_TRUNC|O_RDWR,S_IREAD|S_IWRITE)) < 0)
-        {
-            printf("Cannot open INTENS OUTPUT file.(for %d ring)", i + 1); exit(1);
-        }
-        if((ffinten[i] = open(fit_intenfile, O_CREAT|O_TRUNC|O_RDWR,S_IREAD|S_IWRITE)) < 0)
-        {
-            printf("Cannot open FIT INTENS OUTPUT file.(for %d ring)", i + 1); exit(1);
-        }
-        if((ffwhm[i] = open(fwhmfile, O_CREAT|O_TRUNC|O_RDWR,S_IREAD|S_IWRITE)) < 0)
-        {
-            printf("Cannot open FWHM OUTPUT file.(for %d ring)", i + 1); exit(1);
-        }
-        if((feta[i] = open(etafile, O_CREAT|O_TRUNC|O_RDWR,S_IREAD|S_IWRITE)) < 0)
-        {
-            printf("Cannot open ETA OUTPUT file.(for %d ring)", i + 1); exit(1);
-        }
-    }// End of reading the parameter file and End of generation of Output-files for(i=0;i<numrings;i++)
+    }// End of reading the parameter file for(i=0;i<numrings;i++)
 
     //Reading of intrumental width files
     FILE *fp_IRF = fopen("IRF.dat", "r");
@@ -238,32 +185,6 @@ int main()
     //imprime en pantalla los datos relevantes de cada pico 
     for(i = 0; i < numrings; i++)
         printf("Position of [%d]ring = Theta:%6.3f  %8d%8d%8d%8d\n", i + 1, theta[i], posring_l[i], posring_r[i], ug_l[i], ug_r[i]);
-    //INTENSIDAD
-    //imprime en cada file_peak el \gamma inicial, final
-    sprintf(buf_temp, "Anf., Ende, Schritt-Gamma:              %8d%8d       1\n", rot_p, end_g);
-    for(i = 0; i < numrings; i++)
-        write(fd[i], buf_temp, strlen(buf_temp));
-    //imprime en cada file_peak el \Omega inicial, final y el paso
-    sprintf(buf_temp, "Anf., Ende, Schritt-Omega:              %8d%8d%8d\n\n", star_a, end_a, del_a);
-    for(i = 0; i < numrings; i++)
-        write(fd[i], buf_temp, strlen(buf_temp));
-    //FITTED INTENSITY
-    //imprime en cada file_peak el \gamma inicial, final y el paso para la figura de polos de intensidad
-    sprintf(buf_temp, "Anf., Ende, Schritt-Gamma:              %8d%8d       %d\n", rot_p, end_g, n_av);
-    for(i = 0; i < numrings; i++)
-    {
-        write(ffinten[i], buf_temp, strlen(buf_temp));
-        write(ffwhm[i], buf_temp, strlen(buf_temp));
-        write(ffwhm[i], buf_temp, strlen(buf_temp));
-    }
-    //imprime en cada file_peak el \Omega inicial, final y el paso
-    sprintf(buf_temp, "Anf., Ende, Schritt-Omega:              %8d%8d%8d\n\n", star_a, end_a, del_a);
-    for(i = 0; i < numrings; i++)
-    {
-        write(ffinten[i], buf_temp, strlen(buf_temp));
-        write(ffwhm[i], buf_temp, strlen(buf_temp));
-        write(feta[i], buf_temp, strlen(buf_temp));
-    }
 
     k = star_d + 1;  // file index number : star_d to end_d
     do //Iteracion sobre todos los spr  
@@ -341,7 +262,7 @@ int main()
                 exp_data sync_data = {dist, pixel, pixel_number, ins};
                 //structure holding difractograms information
                 peak_data difra = {numrings, bg_size, k, y, data1, bg_seed, fit_inten, fwhm, eta};
-                //fwhm & eta fitting
+                //Int, fwhm & eta fitting
                 pv_fitting(exists, &sync_data, &difra, peak_intens_av, seeds);
                 memset(intens_av, 0, 1800 * sizeof(float));
                 memset(peak_intens_av, 0, 10 * sizeof(float));
