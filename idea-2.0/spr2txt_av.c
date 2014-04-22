@@ -401,8 +401,8 @@ int main()
             write(ffwhm[d], outfwhm, strlen(outfwhm));
             write(feta[d], outeta, strlen(outeta));            
 	    
-            if(count_minus >= 1)//te avisa que tuviste picos con intensidades negativas
-                printf("\n!!Number of MINUS intensity in the [%d]th pole figure = %d !!! \n", d + 1, count_minus);
+//            if(count_minus >= 1)//te avisa que tuviste picos con intensidades negativas
+//                printf("\n!!Number of MINUS intensity in the [%d]th pole figure = %d !!! \n", d + 1, count_minus);
         }//end of for routine for(d = 0; d < numrings; d++)
         fclose(fp1);
         k += del_d; //paso al siguiente spr
