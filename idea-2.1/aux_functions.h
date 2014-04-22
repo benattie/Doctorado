@@ -33,9 +33,9 @@ typedef struct peak_data
     int gamma;
     float * intensity;
     double ** bg;
-    double ** intens;
-    double ** fwhm;
-    double ** eta;
+    double *** intens;
+    double *** fwhm;
+    double *** eta;
 } peak_data;
 
 //datos basicos del fiteo

@@ -253,35 +253,35 @@ int results_print(int all_seeds_size, double ** peak_seeds, int * zero_peak_inde
             if(I < 0)
             {
                 bad_fit = 1;
-                (*difra).intens[(*difra).gamma][k] = -1.0;
-                (*difra).fwhm[(*difra).gamma][k] = -1.0;
-                (*difra).eta[(*difra).gamma][k] = -1.0;
+                (*difra).intens[(*difra).spr][(*difra).gamma][k] = -1.0;
+                (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = -1.0;
+                (*difra).eta[(*difra).spr][(*difra).gamma][k] = -1.0;
             }
             else
             {
                 if(*H < 0 || *H > 1)
                 {
                     bad_fit = 1;
-                    (*difra).intens[(*difra).gamma][k] = I;
-                    (*difra).fwhm[(*difra).gamma][k] = -1.0;
-                    (*difra).eta[(*difra).gamma][k] = -1.0;
+                    (*difra).intens[(*difra).spr][(*difra).gamma][k] = I;
+                    (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = -1.0;
+                    (*difra).eta[(*difra).spr][(*difra).gamma][k] = -1.0;
                 }
                 else
                 {
                      if(*eta < 0 || *eta > 1)
                     {
                         bad_fit = 1;
-                        (*difra).intens[(*difra).gamma][k] = I;
-                        (*difra).fwhm[(*difra).gamma][k] = *H;
-                        (*difra).eta[(*difra).gamma][k] = -1.0;
+                        (*difra).intens[(*difra).spr][(*difra).gamma][k] = I;
+                        (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = *H;
+                        (*difra).eta[(*difra).spr][(*difra).gamma][k] = -1.0;
                     }
                     else
                     {
                         double theta = peak_seeds[1][j] / 2.; //necesito theta y NO 2theta para poder ahcer la correccion por ancho instrumental
                         ins_correction(H, eta, (*sync_data).ins, theta);
-                        (*difra).intens[(*difra).gamma][k] = I;
-                        (*difra).fwhm[(*difra).gamma][k] = *H;
-                        (*difra).eta[(*difra).gamma][k] = *eta;
+                        (*difra).intens[(*difra).spr][(*difra).gamma][k] = I;
+                        (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = *H;
+                        (*difra).eta[(*difra).spr][(*difra).gamma][k] = *eta;
                     }
                 }
             }
@@ -289,9 +289,9 @@ int results_print(int all_seeds_size, double ** peak_seeds, int * zero_peak_inde
         }
         else
         {
-            (*difra).intens[(*difra).gamma][k] = 0.0;
-            (*difra).fwhm[(*difra).gamma][k] = 0.0;
-            (*difra).eta[(*difra).gamma][k] = 0.0;
+            (*difra).intens[(*difra).spr][(*difra).gamma][k] = 0.0;
+            (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = 0.0;
+            (*difra).eta[(*difra).spr][(*difra).gamma][k] = 0.0;
         }
         k++;
     }
