@@ -361,9 +361,9 @@ int main()
                     alpha = alpha;
                         
                 //imprimo las intensidades en formato figura de polos, asi como el grid
-                fprintf(fp_fitinten_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.3f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fit_inten[n][j + 5][m]);
-                fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fwhm[n][j + 5][m]);
-                fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5f\n", k + 1, 2 * theta[m], theta[m], alpha, beta, eta[n][j + 5][m]);
+                fprintf(fp_fitinten_pf, "%10d%10.4f%10.4f%10.4f%10.4f%12.3lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fit_inten[n][j + 5][m]);
+                fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fwhm[n][j + 5][m]);
+                fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, eta[n][j + 5][m]);
                 fprintf(fp3, "%11d%10.1f%10.1f%10.4f%10.4f\n", k + 1, neu_ome, neu_gam, alpha, beta); 
                 k++;
             }//end for routine for(j = anf_gam; j <= ende_gam; j += del_gam)
@@ -380,10 +380,9 @@ int main()
     }/* End for(m = 0; m < numrings; m++)*/
  }/*End of for(Z = 1; Z <= NrSample; Z++) */
  fclose(fp);
- free_r3_tensor_double(fit_inten, 500, 10);
- free_r3_tensor_double(fwhm, 500, 10);
- free_r3_tensor_double(eta, 500, 10);
-
+ free_r3_tensor_double(fit_inten, 40, 500);
+ free_r3_tensor_double(fwhm, 40, 500);
+ free_r3_tensor_double(eta, 40, 500);
  printf("Rock'n'rolla\n");
  return 0;
 } /*End of Main()*/
