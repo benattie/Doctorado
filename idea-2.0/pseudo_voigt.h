@@ -10,13 +10,14 @@
 
 typedef struct IRF
 {
-    double U;
-    double V;
-    double W;
+    double UG;
+    double VG;
+    double WG;
     double IG;
-    double X;
-    double Y;
-    double Z;
+    double UL;
+    double VL;
+    double WL;
+    double IL;
 } IRF;
 
 //FUNCION BACKGROUND (INTERPOLACION LINEAL)
@@ -30,9 +31,9 @@ double HG_ins2(IRF ins, double theta);
 //FUNCION PARA CALCULAR EL ANCHO INSTRUMENTAL LORENZIANO(CAGLIOTI)
 double HL_ins(IRF ins, double theta);
 //PSEUDO-VOIGT ---> VOIGT
-void convolution(double * HG2, double * HL, double H, double eta);
+void deconvolution(double * HG2, double * HL, double H, double eta);
 //VOIGT ---> PSEUDO-VOIGT
-void deconvolution(double * H, double * eta, double HG, double HL);
+void convolution(double * H, double * eta, double HG, double HL);
 //CORRECCION POR ANCHO DE PICO INSTRUMENTAL
 void ins_correction(double * H, double * eta, IRF ins, double theta);
 

@@ -366,7 +366,7 @@ int main()
                     count_minus++;  
                 }
                 //escribo la intensidad integrada al archivo correspondiente en formato de diez columnas, separando por bloques los datos de cada pico
-                sprintf(buf, "%8.1f", intens[c][d]);
+                sprintf(buf, "%8.3f", intens[c][d]);
                 strcat(outinten, buf);
                 if((c % n_av) == 0)
                 {

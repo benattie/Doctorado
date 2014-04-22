@@ -4,3 +4,5 @@ Mejoras para el programa spr2txt
 2. Ordenar un poco el programa original
 3. Agregar ajuste de Williamson-Hall
 4. Corregir las funciones para restar el ancho de pico
+5. Revisar que pasa con el acero (demora mucho y empeora alrededor del difractograma 60)
+6. Eliminar la escritura intermedia de los datos para ahorrat tiempo en el programa

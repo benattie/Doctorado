@@ -46,52 +46,43 @@ double search_nu(char * buf, char * search)
 
 IRF read_IRF(FILE * fp)
 { 
-    char buf[20];
-    char *search = " ";
+    char buf[100];
     IRF ins;
 
-    if(fgets(buf, 20, fp) == NULL)
-        exit(1);
-    else
-        ins.U = search_nu(buf, search);
-    
-    if(fgets(buf, 20, fp) == NULL)
-        exit(1);
-    else
-        ins.V = search_nu(buf, search);
-    
-    if(fgets(buf, 20, fp) == NULL)
-        exit(1);
-    else
-        ins.W = search_nu(buf, search);
-    
-    if(fgets(buf, 20, fp) == NULL)
-        exit(1);
-    else
-        ins.IG = search_nu(buf, search);
-    
-    if(fgets(buf, 20, fp) == NULL)
-        exit(1);
-    else
-        ins.X = search_nu(buf, search);
-    
-    if(fgets(buf, 20, fp) == NULL)
-        exit(1);
-    else
-        ins.Y = search_nu(buf, search);
-    
-    if(fgets(buf, 20, fp) == NULL)
-        exit(1);
-    else
-        ins.Z = search_nu(buf, search);
+    fgets(buf, 4, fp);
+    fscanf(fp, "%lf", &ins.UG);
+    fgets(buf, 100, fp);
+    fgets(buf, 4, fp);
+    fscanf(fp, "%lf", &ins.VG);
+    fgets(buf, 100, fp);
+    fgets(buf, 4, fp);
+    fscanf(fp, "%lf", &ins.WG);
+    fgets(buf, 100, fp);
+    fgets(buf, 4, fp);
+    fscanf(fp, "%lf", &ins.IG);
+    fgets(buf, 100, fp);
+    fgets(buf, 4, fp);
+    fscanf(fp, "%lf", &ins.UL);
+    fgets(buf, 100, fp);
+    fgets(buf, 4, fp);
+    fscanf(fp, "%lf", &ins.VL);
+    fgets(buf, 100, fp);
+    fgets(buf, 4, fp);
+    fscanf(fp, "%lf", &ins.WL);
+    fgets(buf, 100, fp);
+    fgets(buf, 4, fp);
+    fscanf(fp, "%lf", &ins.IL);
+    fgets(buf, 100, fp);
 
     return ins;
 }
-
 /*
 int main()
 {
-    FILE * fit_fp;
+    FILE * fit_fp = fopen("IRF.dat", "r");
+    IRF ins = read_IRF(fit_fp);
+    printf("%lf  %lf  %lf  %lf\n%lf  %lf  %lf  %lf\n", ins.UG, ins.VG, ins.WG, ins.IG, ins.UL, ins.VL, ins.WL, ins.IL);
+//
     char buf[250];
     int i, seeds_size, bg_size, n_peaks;
     double ** seed, ** bg_seed; 
@@ -121,6 +112,7 @@ int main()
     free_double_matrix(seed, 2);
     free_double_matrix(bg_seed, 2);
     fclose(fit_fp);
+
     return 0;
 }
 */

@@ -56,24 +56,24 @@ double pseudo_voigt(double ttheta, int numrings, double I0[numrings], double t0[
 //FUNCION PARA CALCULAR EL ANCHO INSTRUMENTAL GAUSSIANO(CAGLIOTI)
 double HG_ins2(IRF ins, double theta)
 {
-    double result = ins.U * pow(tan(theta), 2.0) + ins.V * tan(theta) + ins.W + ins.IG / cos(theta);
+    double result = ins.UG * pow(tan(theta), 2.0) + ins.VG * tan(theta) + ins.WG + ins.IG / cos(theta);
     return result;
 }
 //FUNCION PARA CALCULAR EL ANCHO INSTRUMENTAL LORENZIANO
 double HL_ins(IRF ins, double theta)
 {
-    double result = ins.X * tan(theta) + ins.Y / cos(theta) + ins.Z;
+    double result = ins.UL * pow(tan(theta), 2.0) + ins.VL * tan(theta) + ins.WL + ins.IL / cos(theta);
     return result;
 }
 //PSEUDO-VOIGT ---> VOIGT
-void convolution(double * HG2, double * HL, double H, double eta)
+void deconvolution(double * HG2, double * HL, double H, double eta)
 {
     double H2 = pow(H, 2.0);
     HG2[0] = H2 * (0.997379 - 0.719402 * eta - 0.294812 * pow(eta, 2.0) + 0.0172915 * pow(eta, 3.0));
     HL[0] = H * (0.72928 * eta + 0.19289 * pow(eta, 2.0) + 0.07783 * pow(eta, 3.0));
 }
 //VOIGT ---> PSEUDO-VOIGT
-void deconvolution(double * H, double * eta, double HG2, double HL)
+void convolution(double * H, double * eta, double HG2, double HL)
 {
     double HG = sqrt(HG2);
     double H5 = pow(HG, 5.0) + 2.69269 *  pow(HG, 4.0) * HL + 2.42843 * pow(HG, 3.0) * pow(HL, 2.0) + 
@@ -87,12 +87,12 @@ void ins_correction(double * H, double * eta, IRF ins, double theta)
 {
     double * HG2 = vector_double_alloc(1);
     double * HL = vector_double_alloc(1);
-    convolution(HG2, HL, H[0], eta[0]);
+    deconvolution(HG2, HL, H[0], eta[0]);
     HG2[0] -= HG_ins2(ins, theta);
     if(*HG2 <= 0) *HG2 = 0;
     HL[0] -= HL_ins(ins, theta);
     if(*HL <= 0) *HL = 0;
-    deconvolution(H, eta, HG2[0], HL[0]);
+    convolution(H, eta, HG2[0], HL[0]);
     free(HG2);
     free(HL);
 }
