@@ -264,7 +264,7 @@ int main()
     }
     while(k <= end_d); //end of spr iteration
     /*End pole figure data in Machine coordinates*/
-    printf("Finish extracting pole figure data in Machine coordinates\n");
+    printf("\nFinish extracting pole figure data in Machine coordinates\n");
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
     /**** Angular Transformation to Pole figure coordinate***/
     /**** LIN2GKSS-ROUTINE **********************************/
@@ -378,11 +378,12 @@ int main()
         fclose(fp_fwhm_pf);
         fclose(fp_eta_pf);
     }/* End for(m = 0; m < numrings; m++)*/
+    printf("\n====== End angular transformation ====== \n");
  }/*End of for(Z = 1; Z <= NrSample; Z++) */
  fclose(fp);
  free_r3_tensor_double(fit_inten, 40, 500);
  free_r3_tensor_double(fwhm, 40, 500);
  free_r3_tensor_double(eta, 40, 500);
- printf("Rock'n'rolla\n");
+ printf("\nSólo un sujeto consciente de las fuerzas sociales que guían su práctica puede aspirar a controlar su destino\n");
  return 0;
 } /*End of Main()*/
