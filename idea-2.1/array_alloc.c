@@ -49,9 +49,7 @@ void free_double_matrix(double ** matrix, int nrow)
 {
     int i;
     for(i = 0; i < nrow; i++)
-    {
         free(matrix[i]);
-    }
     free(matrix);
 }
 
@@ -80,9 +78,7 @@ void free_int_matrix(int ** matrix, int nrow)
 {
     int i;
     for(i = 0; i < nrow; i++)
-    {
         free(matrix[i]);
-    }
     free(matrix);
 }
 
@@ -105,7 +101,7 @@ double *** r3_tensor_double_alloc(int d1, int d2, int d3)
         }
         for(j = 0; j < d2; j++)
         {
-            tensor[i][j] = (double *) malloc(d2 * sizeof(double));
+            tensor[i][j] = (double *) malloc(d3 * sizeof(double));
             if(tensor[i][j] == NULL)
             {   
                 printf("Out of memory\n");
@@ -116,17 +112,14 @@ double *** r3_tensor_double_alloc(int d1, int d2, int d3)
     return tensor;
 }
 
-void free_r3_tensor_double(double *** tensor, int d2, int d3)
+void free_r3_tensor_double(double *** tensor, int d1, int d2)
 {
     int i, j;
-    for(i = 0; i < d2; i++)
+    for(i = 0; i < d1; i++)
     {
-        for(j = 0; j < d3; j++)
-        {
+        for(j = 0; j < d2; j++)
             free(tensor[i][j]);
-        }
         free(tensor[i]);
     }
     free(tensor);
 }
-

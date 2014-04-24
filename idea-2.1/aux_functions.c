@@ -253,27 +253,27 @@ int results_print(int all_seeds_size, double ** peak_seeds, int * zero_peak_inde
             if(I < 0)
             {
                 bad_fit = 1;
-                (*difra).intens[(*difra).gamma][k] = -1.0;
-                (*difra).fwhm[(*difra).gamma][k] = -1.0;
-                (*difra).eta[(*difra).gamma][k] = -1.0;
+                (*difra).intens[(*difra).spr][(*difra).gamma][k] = -1.0;
+                (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = -1.0;
+                (*difra).eta[(*difra).spr][(*difra).gamma][k] = -1.0;
             }
             else
             {
                 if(*H < 0 || *H > 1)
                 {
                     bad_fit = 1;
-                    (*difra).intens[(*difra).gamma][k] = I;
-                    (*difra).fwhm[(*difra).gamma][k] = -1.0;
-                    (*difra).eta[(*difra).gamma][k] = -1.0;
+                    (*difra).intens[(*difra).spr][(*difra).gamma][k] = I;
+                    (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = -1.0;
+                    (*difra).eta[(*difra).spr][(*difra).gamma][k] = -1.0;
                 }
                 else
                 {
                      if(*eta < 0 || *eta > 1)
                     {
                         bad_fit = 1;
-                        (*difra).intens[(*difra).gamma][k] = I;
-                        (*difra).fwhm[(*difra).gamma][k] = *H;
-                        (*difra).eta[(*difra).gamma][k] = -1.0;
+                        (*difra).intens[(*difra).spr][(*difra).gamma][k] = I;
+                        (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = *H;
+                        (*difra).eta[(*difra).spr][(*difra).gamma][k] = -1.0;
                     }
                     else
                     {
@@ -289,9 +289,9 @@ int results_print(int all_seeds_size, double ** peak_seeds, int * zero_peak_inde
         }
         else
         {
-            (*difra).intens[(*difra).gamma][k] = 0.0;
-            (*difra).fwhm[(*difra).gamma][k] = 0.0;
-            (*difra).eta[(*difra).gamma][k] = 0.0;
+            (*difra).intens[(*difra).spr][(*difra).gamma][k] = 0.0;
+            (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = 0.0;
+            (*difra).eta[(*difra).spr][(*difra).gamma][k] = 0.0;
         }
         k++;
     }
