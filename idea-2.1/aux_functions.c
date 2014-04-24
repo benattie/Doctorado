@@ -279,9 +279,9 @@ int results_print(int all_seeds_size, double ** peak_seeds, int * zero_peak_inde
                     {
                         double theta_rad = (peak_seeds[1][j] / 2.) * M_PI / 180.; //2theta en grados -> THETA en RADIANES
                         ins_correction(H, eta, (*sync_data).ins, theta_rad);
-                        (*difra).intens[(*difra).gamma][k] = I;
-                        (*difra).fwhm[(*difra).gamma][k] = *H;
-                        (*difra).eta[(*difra).gamma][k] = *eta;
+                        (*difra).intens[(*difra).spr][(*difra).gamma][k] = I;
+                        (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = *H;
+                        (*difra).eta[(*difra).spr][(*difra).gamma][k] = *eta;
                     }
                 }
             }
