@@ -20,40 +20,38 @@ int main()
  int BG_l, BG_r;
  int NrSample, star_d, end_d, del_d, numrings;
  int posring_l[15], posring_r[15], ug_l[15], ug_r[15];
-
  int pixel_number, gamma;
+ int seeds_size, bg_size, n_peaks;
  int data[2500], intensity;
+ float intens_av[1800], peak_intens_av[10];
+ float data1[2500], BG_m, intens[500][10];
+ float theta[20], neu_ome, neu_ome1, neu_gam1, neu_gam, alpha, beta;
  double pixel, dist;
  double *** fit_inten = r3_tensor_double_alloc(40, 500, 10);
  double *** fwhm = r3_tensor_double_alloc(40, 500, 10);
  double *** eta = r3_tensor_double_alloc(40, 500, 10);
- float intens_av[1800], peak_intens_av[10];
- float data1[2500], BG_m, intens[500][10];
- 
+ double ** seeds, ** bg_seed; 
  char buf_temp[100], buf[100], buf1[100];
  char path_out[150], path [150], filename1[100], inform[10], path1[150], inform1[10];
  char fit_intenfile[100], fwhmfile[100], etafile[100];
  char marfile[150];
  char minus_zero; 
  char logfile_yn, logfile_yn_temp;
- 
- FILE *fp, *fp1, *fp3;
+ FILE *fp, *fp1, *fp3, *fp_IRF, *fp_fit;
  FILE *fp_fitinten_pf, *fp_fwhm_pf, *fp_eta_pf;
-
+ IRF ins;
  struct DAT intensss;
-
- float theta[20], neu_ome, neu_ome1, neu_gam1, neu_gam, alpha, beta;
-
  time_t timer;
  struct tm *zeit;
 
  puts("\n***************************************************************************");
  puts("\nPROGRAM: FIT2D_DATA.EXE, Ver. 04.14");
  puts("\nProgram for generating the pole figures from Fit2D data.\nCoodinate-transformation to MTEX-Format.");
- puts("Pole figure data xxx_Nr.dat Pole figure in MTEX-readable format xxx_Nr.mtex.");
+ puts("Pole figure in MTEX-readable format xxx_Nr.mtex.");
  puts("\nThe angular values of Omega and Gamma, from the parameter file\n");
  puts("Options: \n 1. Replacement negative intensity values to ZERO\n 2. Intensity correction with LogFile.txt\n");
  puts("Error or suggestion to sangbong.yi@hzg.de");
+ puts("Error or suggestion with respect to generalized pole figure routin to benatti@ifir-conicer.gov.ar");
  puts("\n****************************************************************************");
  //LECTURA DEL ARCHIVO para_fit2d.dat
  if((fp = fopen("para_fit2d.dat", "r")) == NULL )
@@ -150,28 +148,29 @@ int main()
         fscanf(fp, "%d", &ug_r[i]); //bin de bg a la derecha del pico
 
     }// End of reading the parameter file for(i=0;i<numrings;i++)
-
+    fgets(buf_temp, 2, fp); //skip line
     //Reading of intrumental width files
-    FILE *fp_IRF = fopen("IRF.dat", "r");
-    IRF ins; //anchos instrumentales
+    if((fp_IRF = fopen("IRF.dat", "r")) == NULL )
+    {
+        fprintf(stderr, "Error opening file IRF.dat"); exit(1);
+    }
     ins = read_IRF(fp_IRF);
     fclose(fp_IRF);
     //Reading of initial parameters
-    FILE * fit_fp;
-    int seeds_size, bg_size, n_peaks;
-    double ** seeds, ** bg_seed; 
-    fit_fp = fopen("fit_ini.dat", "r");
-    fgets(buf, 250, fit_fp);//leo el titulo
-    fgets(buf, 250, fit_fp);//leo el encabezado
-    fscanf(fit_fp, "%d", &n_peaks);
-    fscanf(fit_fp, "%d", &bg_size);
+    if((fp_fit = fopen("fit_ini.dat", "r")) == NULL )
+    {
+        fprintf(stderr, "Error opening file fit_ini.dat"); exit(1);
+    }
+    fgets(buf, 250, fp_fit);//leo el titulo
+    fgets(buf, 250, fp_fit);//leo el encabezado
+    fscanf(fp_fit, "%d", &n_peaks);
+    fscanf(fp_fit, "%d", &bg_size);
     seeds_size = 4 * numrings + 2;
     seeds = matrix_double_alloc(2, seeds_size);
     bg_seed = matrix_double_alloc(2, bg_size);
-    fgets(buf, 250, fit_fp);//skip line
-    read_file(fit_fp, seeds, seeds_size, bg_seed, bg_size);
+    fgets(buf, 250, fp_fit);//skip line
+    read_file(fp_fit, seeds, seeds_size, bg_seed, bg_size);
     //print_seeds(seeds[0], seeds_size, bg_seed, bg_size);
-    fgets(buf_temp, 2, fp); //skip line
     //imprime en pantalla los datos relevantes de cada pico 
     for(i = 0; i < numrings; i++)
         printf("Position of [%d]ring = Theta:%6.3f  %8d%8d%8d%8d\n", i + 1, theta[i], posring_l[i], posring_r[i], ug_l[i], ug_r[i]);
@@ -220,7 +219,8 @@ int main()
             n = 0; //numero de pico del difractograma
             do //itero sobre todos los picos del difractograma
             {
-                intensity = 0; count = 0;
+                intensity = 0;
+                count = 0;
                 //los bin en donde se encuentra la informacion del bg para el pico n del difractograma
                 a = ug_l[n]; 
                 b = ug_r[n];
@@ -246,7 +246,7 @@ int main()
             if((y % del_gam) == 0)
             {
                 int exists = 1;
-                if(y == 5) exists = 0; //pregunto si este es el primer archivo con el que estoy trabajando
+                if(y == del_gam) exists = 0; //pregunto si este es el primer archivo con el que estoy trabajando
                 average(intens_av, peak_intens_av, del_gam, pixel_number, numrings);
                 //structure holding syncrotron's information
                 exp_data sync_data = {dist, pixel, pixel_number, ins};
@@ -361,9 +361,9 @@ int main()
                     alpha = alpha;
                         
                 //imprimo las intensidades en formato figura de polos, asi como el grid
-                fprintf(fp_fitinten_pf, "%10d%10.4f%10.4f%10.4f%10.4f%12.3lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fit_inten[n][j + 5][m]);
-                fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fwhm[n][j + 5][m]);
-                fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, eta[n][j + 5][m]);
+                fprintf(fp_fitinten_pf, "%10d%10.4f%10.4f%10.4f%10.4f%12.3lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fit_inten[n][j + del_gam][m]);
+                fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fwhm[n][j + del_gam][m]);
+                fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, eta[n][j + del_gam][m]);
                 fprintf(fp3, "%11d%10.1f%10.1f%10.4f%10.4f\n", k + 1, neu_ome, neu_gam, alpha, beta); 
                 k++;
             }//end for routine for(j = anf_gam; j <= ende_gam; j += del_gam)
