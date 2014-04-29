@@ -255,7 +255,7 @@ void solver_iterator(int * status, gsl_multifit_fdfsolver * s, const gsl_multifi
 {
     int iter = 0, max_iter = 500;
     double err_abs = 1e-4, err_rel = 1e-4;
-    //print_state (iter, s);
+    print_state (iter, s);
     do
     {
         iter++;

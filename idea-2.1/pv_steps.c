@@ -21,7 +21,7 @@ void pv_step1(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     double * shift_H = vector_double_alloc((*d).numrings);
     double * shift_eta = vector_double_alloc((*d).numrings);
     //variables del solver
-    int status;
+    int status = 0;
     const gsl_multifit_fdfsolver_type * T;
     gsl_multifit_fdfsolver * s;
     gsl_multifit_function_fdf pv; //funcion a fitear
@@ -92,7 +92,7 @@ void pv_step2(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     double H, eta;
     double * shift_eta = vector_double_alloc((*d).numrings);
     //variables del solver
-    int status;
+    int status = 0;
     const gsl_multifit_fdfsolver_type * T;
     gsl_multifit_fdfsolver * s;
     gsl_multifit_function_fdf pv; //funcion a fitear
@@ -161,7 +161,7 @@ void pv_step3(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     double * shift_H = vector_double_alloc((*d).numrings);
     double * shift_eta = vector_double_alloc((*d).numrings);
     //variables del solver
-    int status;
+    int status = 0;
     const gsl_multifit_fdfsolver_type * T;
     gsl_multifit_fdfsolver * s;
     gsl_multifit_function_fdf pv; //funcion a fitear
@@ -231,7 +231,7 @@ void pv_step4(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     int i, j;
     double H, eta;
     //variables del solver
-    int status;
+    int status = 0;
     const gsl_multifit_fdfsolver_type * T;
     gsl_multifit_fdfsolver * s;
     gsl_multifit_function_fdf pv; //funcion a fitear
