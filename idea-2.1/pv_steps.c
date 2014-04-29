@@ -82,6 +82,7 @@ void pv_step1(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     }
     free(x_init);
     gsl_multifit_fdfsolver_free (s);
+    //printf("Final del paso 1\n");
 }
 
 void pv_step2(int exists, double ** seeds, int seeds_size, double ** bg, struct data * d, int n_param)
@@ -118,8 +119,7 @@ void pv_step2(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     j = 0;
     for(i = 2; i < seeds_size; i += 4)
     {
-        shift_eta[j] = seeds[exists][i + 3];
-        j++;
+        shift_eta[j] = seeds[exists][i + 3]; j++;
     }
     data_s2 d2 = {*d, H, eta, shift_eta};
 
@@ -151,6 +151,7 @@ void pv_step2(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     }
     free(x_init);
     gsl_multifit_fdfsolver_free (s);
+        //printf("Final del paso 2\n");
 }
 
 void pv_step3(int exists, double ** seeds, int seeds_size, double ** bg, struct data * d, int n_param)
@@ -221,6 +222,7 @@ void pv_step3(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     }
     free(x_init);
     gsl_multifit_fdfsolver_free (s);
+    //printf("Final del paso 3\n");
 }
 
 void pv_step4(int exists, double ** seeds, int seeds_size, double ** bg, struct data * d, int n_param)
@@ -284,4 +286,5 @@ void pv_step4(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     }
     free(x_init);
     gsl_multifit_fdfsolver_free (s);
+    //printf("Final del paso 4\n");
 }

@@ -93,6 +93,8 @@ void print_state (int iter, gsl_multifit_fdfsolver * s);
 
 void print_seeds(double * seeds, int seeds_size, double ** bg, int bg_size);
 
+void print_seeds2file(FILE * fp, double * seeds, int seeds_size, double ** bg, int bg_size);
+
 void reset_single_seed(double ** seeds, int index);
 
 void reset_global_seeds(double ** seeds);
@@ -109,7 +111,7 @@ int check_for_null_peaks (float treshold, int numrings, int * zero_peak_index, f
 
 void set_seeds(int size, int * zero_peak_index, int exists, double ** seeds, double ** peak_seeds);
 
-//void reset_seeds(int size, double * peak_seeds, int * zero_peak_index, double ** seeds);
+void set_seeds_back(int size, int * zero_peak_index, int exists, double ** seeds, double ** peak_seeds);
 
 void average(float * intens_av, float * peak_intens_av, int n_av, int size, int numrings);
 

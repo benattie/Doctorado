@@ -105,6 +105,21 @@ void print_seeds(double * seeds, int seeds_size, double ** bg, int bg_size)
     getchar();
 }
 
+void print_seeds2file(FILE * fp, double * seeds, int seeds_size, double ** bg, int bg_size)
+{
+    int i;
+    fprintf(fp, "%3.5lf  %3.5lf\n", seeds[0], seeds[1]);
+    for(i = 2; i < seeds_size; i += 4)
+        fprintf(fp, "%3.5lf  %3.5lf  %3.5lf  %3.5lf\n", seeds[i], seeds[i + 1], seeds[i + 2], seeds[i + 3]);
+    for(i = 0; i < bg_size; i++)
+        fprintf(fp, "%3.3lf ", bg[0][i]);
+    fprintf(fp, "\n");
+    for(i = 0; i < bg_size; i++)
+        fprintf(fp, "%3.3lf ", bg[1][i]);
+    fprintf(fp, "\n---------------------------\n");
+
+}
+
 void reset_single_seed(double ** seeds, int index)
 {
     seeds[1][index] = seeds[0][index];
@@ -139,7 +154,7 @@ void reset_all_seeds(gsl_vector * y, double ** seeds, int seeds_size, int n_peak
     reset_bg_seeds(y, bg, bg_size);
 }
 
-void check (gsl_vector * y, double ** seeds, int seeds_size, int n_peaks, double ** bg, int bg_size)
+void check(gsl_vector * y, double ** seeds, int seeds_size, int n_peaks, double ** bg, int bg_size)
 {
     int i;
     double H_global = seeds[1][0];
@@ -166,7 +181,7 @@ void check (gsl_vector * y, double ** seeds, int seeds_size, int n_peaks, double
 }
 
 //Esta funcion revisa si hay elementos de intens que esten por debajo de treshold y devuelve el numero de picos que efectivamente tiene el difractograma.
-int check_for_null_peaks (float treshold, int numrings, int * zero_peak_index, float * intens)
+int check_for_null_peaks(float treshold, int numrings, int * zero_peak_index, float * intens)
 {
     int i;
     int n_zero = 0, n_peaks;
@@ -208,6 +223,24 @@ void set_seeds(int size, int * zero_peak_index, int exists, double ** seeds, dou
     }
 }
 
+void set_seeds_back(int size, int * zero_peak_index, int exists, double ** seeds, double ** peak_seeds)
+{
+    int i, j = 2, k, l = 0;
+    seeds[1][0] = peak_seeds[1][0];
+    seeds[1][1] = peak_seeds[1][1];
+
+    for(i = 2; i < size; i += 4)
+    {
+        if(zero_peak_index[l] == 0)
+        {
+            for(k = 0; k < 4; k++)
+                seeds[1][i + k] = peak_seeds[1][j + k];
+            j += 4;
+        }
+        l++;
+    }
+}
+
 void average(float * intens_av, float * peak_intens_av, int n_av, int size, int numrings)
 {
     int i;
@@ -228,13 +261,13 @@ void solver_iterator(int * status, gsl_multifit_fdfsolver * s, const gsl_multifi
         iter++;
         *status = gsl_multifit_fdfsolver_iterate (s);
         //printf ("status = %s\n", gsl_strerror (*status));
-        //print_state (iter, s);
+        print_state (iter, s);
         if (*status)
             break;
         *status = gsl_multifit_test_delta (s -> dx, s -> x, err_abs, err_rel);
     }
     while (*status == GSL_CONTINUE && iter < max_iter);
-    //printf ("status = %s\n", gsl_strerror (*status));
+    printf ("status = %s\n", gsl_strerror (*status));
     //print_state (iter, s);
 }
 

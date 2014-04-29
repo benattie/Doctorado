@@ -10,7 +10,7 @@
 
 void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * intens, double ** seeds)
 {
-    //printf("Inicio pv_fitting\n");
+    printf("Inicio pv_fitting\n");
     //variables auxiliares del programa
     int i, bad_fit, zero_peak_index[(*difra).numrings];
     float treshold = 3.0;
@@ -29,7 +29,7 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     gsl_vector * sigma = gsl_vector_alloc(net_size); //error de las intensidades del difractograma
     gsl_vector * bg_pos = gsl_vector_alloc((*difra).n_bg); //error de las intensidades del difractograma
 
-    //printf("Obteniendo datos\n");
+    printf("Obteniendo datos\n");
     for(i = 0; i < net_size; i++)
     {
         gsl_vector_set(ttheta, i, bin2theta(i, (*sync_data).pixel, (*sync_data).dist));//conversion de bin a coordenada angular
@@ -40,31 +40,38 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
         gsl_vector_set(bg_pos, i, (*difra).bg[0][i]);
     struct data d = {net_size, n_peaks, (*difra).n_bg, ttheta, y, sigma, bg_pos}; //estructura que contiene los datos experimentales
     
-    //printf("Inicio de las iteraciones\n");
-    //printf("Paso 1\n");
-    //print_seeds(peak_seeds[0], seeds_size, (*difra).bg, (*difra).n_bg);
+    printf("Inicio de las iteraciones\n");
+    printf("Paso 1\n");
+    print_seeds(peak_seeds[exists], seeds_size, (*difra).bg, (*difra).n_bg);
     pv_step1(exists, peak_seeds, seeds_size, (*difra).bg, &d, n_param[0]);
     //print_seeds(peak_seeds[1], seeds_size, (*difra).bg, (*difra).n_bg);
     check(y, peak_seeds, seeds_size, n_peaks, (*difra).bg, (*difra).n_bg);
-    //printf("Paso 2\n");
+    printf("Paso 2\n");
     //print_seeds(peak_seeds[1], seeds_size, (*difra).bg, (*difra).n_bg);
     pv_step2(exists, peak_seeds, seeds_size, (*difra).bg, &d, n_param[1]);
     //print_seeds(peak_seeds[1], seeds_size, (*difra).bg, (*difra).n_bg);
     check(y, peak_seeds, seeds_size, n_peaks, (*difra).bg, (*difra).n_bg);
-    //printf("Paso 3\n");
+    printf("Paso 3\n");
     //print_seeds(peak_seeds[1], seeds_size, (*difra).bg, (*difra).n_bg);
     pv_step3(exists, peak_seeds, seeds_size, (*difra).bg, &d, n_param[2]);
     //print_seeds(peak_seeds[1], seeds_size, (*difra).bg, (*difra).n_bg);
     check(y, peak_seeds, seeds_size, n_peaks, (*difra).bg, (*difra).n_bg);
-    //printf("Paso 4\n");
+    printf("Paso 4\n");
     //print_seeds(peak_seeds[1], seeds_size, (*difra).bg, (*difra).n_bg);
     pv_step4(exists, peak_seeds, seeds_size, (*difra).bg, &d, n_param[3]);
-    //print_seeds(peak_seeds[1], seeds_size, (*difra).bg, (*difra).n_bg);
-    //printf("Fin de las iteraciones\n");
+    print_seeds(peak_seeds[1], seeds_size, (*difra).bg, (*difra).n_bg);
+    printf("Fin de las iteraciones\n");
     
     //printf("Correccion y salida de los resultados\n");
     bad_fit = results_print(all_seeds_size, peak_seeds, zero_peak_index, sync_data, difra);
+    
+    FILE * fp_logfile = fopen("fit_results.log", "a");
+    print_seeds2file(fp_logfile, peak_seeds[1], seeds_size, (*difra).bg, (*difra).n_bg);
+    fflush(fp_logfile);
+    fclose(fp_logfile);
+    
     if(bad_fit) check(y, peak_seeds, seeds_size, n_peaks, (*difra).bg, (*difra).n_bg);
+    set_seeds_back(all_seeds_size, zero_peak_index, exists, seeds, peak_seeds);
     
     //liberacion de memoria allocada y cierre de archivos
     gsl_vector_free(ttheta);
@@ -72,5 +79,5 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     gsl_vector_free(sigma);
     gsl_vector_free(bg_pos);
     free_double_matrix(peak_seeds, 2);
-    //printf("Fin pv_fitting\n");
+    printf("Fin pv_fitting\n");
 }
