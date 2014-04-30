@@ -286,9 +286,9 @@ int results_print(int all_seeds_size, double ** peak_seeds, int * zero_peak_inde
             if(I < 0)
             {
                 bad_fit = 1;
-                (*difra).intens[(*difra).spr][(*difra).gamma][k] = -1.0;
-                (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = -1.0;
-                (*difra).eta[(*difra).spr][(*difra).gamma][k] = -1.0;
+                (*difra).intens[(*difra).spr][(*difra).gamma][k] = (*difra).intens[(*difra).spr][(*difra).gamma - 1][k];
+                (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = (*difra).fwhm[(*difra).spr][(*difra).gamma - 1][k];
+                (*difra).eta[(*difra).spr][(*difra).gamma][k] = (*difra).eta[(*difra).spr][(*difra).gamma - 1][k];
             }
             else
             {
@@ -296,28 +296,25 @@ int results_print(int all_seeds_size, double ** peak_seeds, int * zero_peak_inde
                 {
                     bad_fit = 1;
                     (*difra).intens[(*difra).spr][(*difra).gamma][k] = I;
-                    (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = -1.0;
-                    (*difra).eta[(*difra).spr][(*difra).gamma][k] = -1.0;
+                    (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = (*difra).fwhm[(*difra).spr][(*difra).gamma - 1][k];
+                    (*difra).eta[(*difra).spr][(*difra).gamma][k] = (*difra).eta[(*difra).spr][(*difra).gamma - 1][k];
                 }
                 else
                 {
-                     if(*eta < 0 || *eta > 1)
+                    if(*eta < 0 || *eta > 1)
                     {
                         bad_fit = 1;
                         (*difra).intens[(*difra).spr][(*difra).gamma][k] = I;
                         (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = *H;
-                        (*difra).eta[(*difra).spr][(*difra).gamma][k] = -1.0;
-                    }
-                    else
-                    {
-                        double theta_rad = (peak_seeds[1][j] / 2.) * M_PI / 180.; //2theta en grados -> THETA en RADIANES
-                        ins_correction(H, eta, (*sync_data).ins, theta_rad);
-                        (*difra).intens[(*difra).spr][(*difra).gamma][k] = I;
-                        (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = *H;
-                        (*difra).eta[(*difra).spr][(*difra).gamma][k] = *eta;
+                        (*difra).eta[(*difra).spr][(*difra).gamma][k] = (*difra).eta[(*difra).spr][(*difra).gamma - 1][k];
                     }
                 }
             }
+            //double theta_rad = (peak_seeds[1][j] / 2.) * M_PI / 180.; //2theta en grados -> THETA en RADIANES
+            //ins_correction(H, eta, (*sync_data).ins, theta_rad);
+            (*difra).intens[(*difra).spr][(*difra).gamma][k] = I;
+            (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = *H;
+            (*difra).eta[(*difra).spr][(*difra).gamma][k] = *eta;
             j += 4;
         }
         else
