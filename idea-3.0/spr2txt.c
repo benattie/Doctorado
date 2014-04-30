@@ -27,18 +27,19 @@ int main()
  float data1[2500], BG_m, intens[500][10];
  float theta[20], neu_ome, neu_ome1, neu_gam1, neu_gam, alpha, beta;
  double pixel, dist;
+ double *** sabo_inten = r3_tensor_double_alloc(40, 500, 10);
  double *** fit_inten = r3_tensor_double_alloc(40, 500, 10);
  double *** fwhm = r3_tensor_double_alloc(40, 500, 10);
  double *** eta = r3_tensor_double_alloc(40, 500, 10);
  double ** seeds, ** bg_seed; 
  char buf_temp[100], buf[100], buf1[100];
  char path_out[150], path [150], filename1[100], inform[10], path1[150], inform1[10];
- char fit_intenfile[100], fwhmfile[100], etafile[100];
+ char sabo_intenfile[200], fit_intenfile[200], fwhmfile[200], etafile[200];
  char marfile[150];
  char minus_zero; 
  char logfile_yn, logfile_yn_temp;
  FILE *fp, *fp1, *fp3, *fp_IRF, *fp_fit;
- FILE *fp_fitinten_pf, *fp_fwhm_pf, *fp_eta_pf;
+ FILE *fp_sabointen_pf, *fp_fitinten_pf, *fp_fwhm_pf, *fp_eta_pf;
  IRF ins;
  struct DAT intensss;
  time_t timer;
@@ -248,6 +249,9 @@ int main()
                 int exists = 1;
                 if(y == del_gam) exists = 0; //pregunto si este es el primer archivo con el que estoy trabajando
                 average(intens_av, peak_intens_av, del_gam, pixel_number, numrings);
+                //guardo las intensidades calculadas a partir del algoritmo de Sang-Bon Yi
+                for(n = 0; n < numrings; n++)
+                    sabo_inten[k][y][n] = peak_intens_av[n];
                 //structure holding syncrotron's information
                 exp_data sync_data = {dist, pixel, pixel_number, ins};
                 //structure holding difractograms information
@@ -273,9 +277,20 @@ int main()
     zeit = localtime(&timer); // save "time in sec" into structure tm
     for(m = 0; m < numrings; m++)//itero sobre todos los picos
     {
-        //INTENSIDADES
-        ////////////////////////////////////////////////////////////////////////////////////////////
-        //genero el string con los datos en formato MTEX
+        //INTENSIDADES (pv_fitting)
+        strcpy(fit_intenfile, "");
+        strcat(fit_intenfile, path_out);
+        strcat(fit_intenfile, filename1);
+        strcat(fit_intenfile, "SB_PF_");
+        sprintf(buf, "%d", m + 1);
+        strcat(fit_intenfile, buf);
+        strcat(fit_intenfile, ".mtex");
+
+        if((fp_sabointen_pf = fopen(sabo_intenfile, "w")) == NULL)
+        {
+            fprintf(stderr, "Error beim oeffnen der Datei(%s).", sabo_intenfile); exit(1);
+        }
+        //INTENSIDADES (pv_fitting)
         strcpy(fit_intenfile, "");
         strcat(fit_intenfile, path_out);
         strcat(fit_intenfile, filename1);
@@ -288,7 +303,6 @@ int main()
         {
             fprintf(stderr, "Error beim oeffnen der Datei(%s).", fit_intenfile); exit(1);
         }
-        ////////////////////////////////////////////////////////////////////////////////////////////
         //FWHM
         strcpy(fwhmfile, "");
         strcat(fwhmfile, path_out);
@@ -302,7 +316,6 @@ int main()
         {
             fprintf(stderr, "Error beim oeffnen der Datei(%s).", fwhmfile); exit(1);
         }
-        ////////////////////////////////////////////////////////////////////////////////////////////
         //ETA
         strcpy(etafile, "");
         strcat(etafile, path_out);
@@ -316,7 +329,6 @@ int main()
         {
             fprintf(stderr, "Error beim oeffnen der Datei(%s).", etafile); exit(1);
         }
-        ////////////////////////////////////////////////////////////////////////////////////////////
         //GRID
         //genero archivo con el grid de la figura de polos
         if((fp3 = fopen("PF_grid.dat", "w")) == NULL)
@@ -325,6 +337,7 @@ int main()
         }
         ////////////////////////////////////////////////////////////////////////////////////////////
         //Imprimo el tiempo de ejecucion del programa en el .mtex
+        fprintf(fp_sabointen_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
         fprintf(fp_fitinten_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
         fprintf(fp_fwhm_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
         fprintf(fp_eta_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec); 
@@ -361,6 +374,11 @@ int main()
                     alpha = alpha;
                         
                 //imprimo las intensidades en formato figura de polos, asi como el grid
+                if((minus_zero == 'Y' || minus_zero == 'y') && sabo_inten[n][j + del_gam][m] < 0)
+                    fprintf(fp_sabointen_pf, "%10d%10.4f%10.4f%10.4f%10.4f%12.3lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, 0.0);
+                else
+                    fprintf(fp_sabointen_pf, "%10d%10.4f%10.4f%10.4f%10.4f%12.3lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fit_inten[n][j + del_gam][m]);
+
                 fprintf(fp_fitinten_pf, "%10d%10.4f%10.4f%10.4f%10.4f%12.3lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fit_inten[n][j + del_gam][m]);
                 fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fwhm[n][j + del_gam][m]);
                 fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, eta[n][j + del_gam][m]);
@@ -370,10 +388,12 @@ int main()
             n++;
         }//end for routine for(i = anf_ome; i <= ende_ome; i += del_ome)
         fflush(fp3);
+        fflush(fp_sabointen_pf);
         fflush(fp_fitinten_pf);
         fflush(fp_fwhm_pf);
         fflush(fp_eta_pf);
         fclose(fp3);
+        fclose(fp_sabointen_pf);
         fclose(fp_fitinten_pf);
         fclose(fp_fwhm_pf);
         fclose(fp_eta_pf);
@@ -381,6 +401,7 @@ int main()
     printf("\n====== End angular transformation ====== \n");
  }/*End of for(Z = 1; Z <= NrSample; Z++) */
  fclose(fp);
+ free_r3_tensor_double(sabo_inten, 40, 500);
  free_r3_tensor_double(fit_inten, 40, 500);
  free_r3_tensor_double(fwhm, 40, 500);
  free_r3_tensor_double(eta, 40, 500);
