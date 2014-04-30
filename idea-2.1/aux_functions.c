@@ -255,19 +255,19 @@ void solver_iterator(int * status, gsl_multifit_fdfsolver * s, const gsl_multifi
 {
     int iter = 0, max_iter = 500;
     double err_abs = 1e-4, err_rel = 1e-4;
-    print_state (iter, s);
+    //print_state (iter, s);
     do
     {
         iter++;
         *status = gsl_multifit_fdfsolver_iterate (s);
         //printf ("status = %s\n", gsl_strerror (*status));
-        print_state (iter, s);
+        //print_state (iter, s);
         if (*status)
             break;
         *status = gsl_multifit_test_delta (s -> dx, s -> x, err_abs, err_rel);
     }
     while (*status == GSL_CONTINUE && iter < max_iter);
-    printf ("status = %s\n", gsl_strerror (*status));
+    //printf ("status = %s\n", gsl_strerror (*status));
     //print_state (iter, s);
 }
 
