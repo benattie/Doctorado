@@ -283,12 +283,12 @@ int results_print(int all_seeds_size, double ** peak_seeds, int * zero_peak_inde
             I = peak_seeds[1][j + 1];
             *H = peak_seeds[1][0] + peak_seeds[1][j + 2];
             *eta = peak_seeds[1][1] + peak_seeds[1][j + 3];
-            if(I < 0)
+            if(I < 0)//voy a informar de los malos ajustes pero voy a pasar los resultados crudos
             {
                 bad_fit = 1;
-                (*difra).intens[(*difra).spr][(*difra).gamma][k] = -1.0;
-                (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = -1.0;
-                (*difra).eta[(*difra).spr][(*difra).gamma][k] = -1.0;
+                (*difra).intens[(*difra).spr][(*difra).gamma][k] = I;
+                (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = *H;
+                (*difra).eta[(*difra).spr][(*difra).gamma][k] = *eta;
             }
             else
             {
@@ -296,8 +296,8 @@ int results_print(int all_seeds_size, double ** peak_seeds, int * zero_peak_inde
                 {
                     bad_fit = 1;
                     (*difra).intens[(*difra).spr][(*difra).gamma][k] = I;
-                    (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = -1.0;
-                    (*difra).eta[(*difra).spr][(*difra).gamma][k] = -1.0;
+                    (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = *H;
+                    (*difra).eta[(*difra).spr][(*difra).gamma][k] = *eta;
                 }
                 else
                 {
@@ -306,12 +306,12 @@ int results_print(int all_seeds_size, double ** peak_seeds, int * zero_peak_inde
                         bad_fit = 1;
                         (*difra).intens[(*difra).spr][(*difra).gamma][k] = I;
                         (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = *H;
-                        (*difra).eta[(*difra).spr][(*difra).gamma][k] = -1.0;
+                        (*difra).eta[(*difra).spr][(*difra).gamma][k] = *eta;
                     }
                     else
                     {
-                        double theta_rad = (peak_seeds[1][j] / 2.) * M_PI / 180.; //2theta en grados -> THETA en RADIANES
-                        ins_correction(H, eta, (*sync_data).ins, theta_rad);
+                        //double theta_rad = (peak_seeds[1][j] / 2.) * M_PI / 180.; //2theta en grados -> THETA en RADIANES
+                        //ins_correction(H, eta, (*sync_data).ins, theta_rad);
                         (*difra).intens[(*difra).spr][(*difra).gamma][k] = I;
                         (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = *H;
                         (*difra).eta[(*difra).spr][(*difra).gamma][k] = *eta;
