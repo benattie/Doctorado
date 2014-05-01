@@ -277,14 +277,14 @@ int main()
     zeit = localtime(&timer); // save "time in sec" into structure tm
     for(m = 0; m < numrings; m++)//itero sobre todos los picos
     {
-        //INTENSIDADES (pv_fitting)
-        strcpy(fit_intenfile, "");
-        strcat(fit_intenfile, path_out);
-        strcat(fit_intenfile, filename1);
-        strcat(fit_intenfile, "SB_PF_");
+        //INTENSIDADES (sabo intensities)
+        strcpy(sabo_intenfile, "");
+        strcat(sabo_intenfile, path_out);
+        strcat(sabo_intenfile, filename1);
+        strcat(sabo_intenfile, "SB_PF_");
         sprintf(buf, "%d", m + 1);
-        strcat(fit_intenfile, buf);
-        strcat(fit_intenfile, ".mtex");
+        strcat(sabo_intenfile, buf);
+        strcat(sabo_intenfile, ".mtex");
 
         if((fp_sabointen_pf = fopen(sabo_intenfile, "w")) == NULL)
         {
