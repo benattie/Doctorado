@@ -277,18 +277,18 @@ int main()
     zeit = localtime(&timer); // save "time in sec" into structure tm
     for(m = 0; m < numrings; m++)//itero sobre todos los picos
     {
-        //INTENSIDADES (pv_fitting)
-        strcpy(fit_intenfile, "");
-        strcat(fit_intenfile, path_out);
-        strcat(fit_intenfile, filename1);
-        strcat(fit_intenfile, "SB_PF_");
+        //INTENSIDADES (sabo intensities)
+        strcpy(sabo_intenfile, "");
+        strcat(sabo_intenfile, path_out);
+        strcat(sabo_intenfile, filename1);
+        strcat(sabo_intenfile, "SB_PF_");
         sprintf(buf, "%d", m + 1);
-        strcat(fit_intenfile, buf);
-        strcat(fit_intenfile, ".mtex");
+        strcat(sabo_intenfile, buf);
+        strcat(sabo_intenfile, ".mtex");
 
         if((fp_sabointen_pf = fopen(sabo_intenfile, "w")) == NULL)
         {
-            fprintf(stderr, "Error beim oeffnen der Datei(%s).", sabo_intenfile); exit(1);
+            fprintf(stderr, "Error beim oeffnen der Datei(%s).\n", sabo_intenfile); exit(1);
         }
         //INTENSIDADES (pv_fitting)
         strcpy(fit_intenfile, "");
@@ -301,7 +301,7 @@ int main()
 
         if((fp_fitinten_pf = fopen(fit_intenfile, "w")) == NULL)
         {
-            fprintf(stderr, "Error beim oeffnen der Datei(%s).", fit_intenfile); exit(1);
+            fprintf(stderr, "Error beim oeffnen der Datei(%s).\n", fit_intenfile); exit(1);
         }
         //FWHM
         strcpy(fwhmfile, "");
@@ -314,7 +314,7 @@ int main()
 
         if((fp_fwhm_pf = fopen(fwhmfile, "w")) == NULL)
         {
-            fprintf(stderr, "Error beim oeffnen der Datei(%s).", fwhmfile); exit(1);
+            fprintf(stderr, "Error beim oeffnen der Datei(%s).\n", fwhmfile); exit(1);
         }
         //ETA
         strcpy(etafile, "");
@@ -327,13 +327,13 @@ int main()
 
         if((fp_eta_pf = fopen(etafile, "w")) == NULL)
         {
-            fprintf(stderr, "Error beim oeffnen der Datei(%s).", etafile); exit(1);
+            fprintf(stderr, "Error beim oeffnen der Datei(%s).\n", etafile); exit(1);
         }
         //GRID
         //genero archivo con el grid de la figura de polos
         if((fp3 = fopen("PF_grid.dat", "w")) == NULL)
         {
-            fprintf(stderr, "Error opening file PF_grid.dat"); exit(1);
+            fprintf(stderr, "Error opening file PF_grid.dat\n"); exit(1);
         }
         ////////////////////////////////////////////////////////////////////////////////////////////
         //Imprimo el tiempo de ejecucion del programa en el .mtex
