@@ -75,7 +75,7 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     //fclose(fp_logfile);
    
     //printf("Correccion y salida de los resultados\n");
-    bad_fit = results_print(all_seeds_size, peak_seeds, zero_peak_index, sync_data, difra);   
+    bad_fit = fit_result(all_seeds_size, peak_seeds, zero_peak_index, sync_data, difra);
     if(bad_fit) check(y, peak_seeds, seeds_size, n_peaks, (*difra).bg, (*difra).n_bg);
     set_seeds_back(all_seeds_size, zero_peak_index, exists, seeds, peak_seeds);
     

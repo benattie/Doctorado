@@ -30,7 +30,9 @@ typedef struct peak_data
     int numrings;
     int n_bg;
     int spr;
+    int start_spr;
     int gamma;
+    int start_gam;
     float * intensity;
     double ** bg;
     double *** intens;
@@ -117,5 +119,7 @@ void average(float * intens_av, float * peak_intens_av, int n_av, int size, int 
 
 void solver_iterator(int * status, gsl_multifit_fdfsolver * s, const gsl_multifit_fdfsolver_type * T);
 
-int results_print(int all_seeds_size, double ** peak_seeds, int * zero_peak_index, exp_data * sync_data, peak_data * difra);
+int fit_result(int all_seeds_size, double ** peak_seeds, int * zero_peak_index, exp_data * sync_data, peak_data * difra);
+
+int results_output(int all_seeds_size, double ** peak_seeds, int * zero_peak_index, exp_data * sync_data, peak_data * difra, int spr, int gamma);
 #endif

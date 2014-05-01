@@ -57,7 +57,7 @@ int main()
  //LECTURA DEL ARCHIVO para_fit2d.dat
  if((fp = fopen("para_fit2d.dat", "r")) == NULL )
  {
-     fprintf(stderr, "Error opening file para_fit2d.txt."); exit(1);
+     fprintf(stderr, "Error opening file para_fit2d.txt\n"); exit(1);
  }
  //path hacia los archivos de salida
  fgets(buf_temp, 22, fp);
@@ -153,14 +153,14 @@ int main()
     //Reading of intrumental width files
     if((fp_IRF = fopen("IRF.dat", "r")) == NULL )
     {
-        fprintf(stderr, "Error opening file IRF.dat"); exit(1);
+        fprintf(stderr, "Error opening file IRF.dat\n"); exit(1);
     }
     ins = read_IRF(fp_IRF);
     fclose(fp_IRF);
     //Reading of initial parameters
     if((fp_fit = fopen("fit_ini.dat", "r")) == NULL )
     {
-        fprintf(stderr, "Error opening file fit_ini.dat"); exit(1);
+        fprintf(stderr, "Error opening file fit_ini.dat\n"); exit(1);
     }
     fgets(buf, 250, fp_fit);//leo el titulo
     fgets(buf, 250, fp_fit);//leo el encabezado
@@ -207,7 +207,15 @@ int main()
         //printf("pixel=%d gamma=%d\n", pixel_number, gamma);
         memset(intens_av, 0, 1800 * sizeof(float));
         memset(peak_intens_av, 0, 10 * sizeof(float));
-        /*Data Read-In */
+        for(n = 0; n < numrings; n++)//error handler para cuando tenga un bad_fit en el caso spr=1 y gamma=1
+        {
+            sabo_inten[0][0][n] = -1;
+            fit_inten[0][0][n] = -1;
+            fwhm[0][0][n] = -1;
+            eta[0][0][n] = -1;
+        }
+        //Data Read-In
+        //printf("Data Read-in\n");
         for(y = 1; y <= gamma; y++) //itero sobre todos los difractogramas (360) (recorro el anillo de Debye)
         {
             for(x = 1; x <= pixel_number; x++) //iteracion dentro de cada uno de los difractogramas (con 1725 puntos) (cada porcion del anillo de Debye)
@@ -255,7 +263,7 @@ int main()
                 //structure holding syncrotron's information
                 exp_data sync_data = {dist, pixel, pixel_number, ins};
                 //structure holding difractograms information
-                peak_data difra = {numrings, bg_size, k, y, data1, bg_seed, fit_inten, fwhm, eta};
+                peak_data difra = {numrings, bg_size, k, star_d, y, del_gam, data1, bg_seed, fit_inten, fwhm, eta};
                 //Int, fwhm & eta fitting
                 pv_fitting(exists, &sync_data, &difra, peak_intens_av, seeds);
                 memset(intens_av, 0, 1800 * sizeof(float));
@@ -288,7 +296,7 @@ int main()
 
         if((fp_sabointen_pf = fopen(sabo_intenfile, "w")) == NULL)
         {
-            fprintf(stderr, "Error beim oeffnen der Datei(%s).", sabo_intenfile); exit(1);
+            fprintf(stderr, "Error beim oeffnen der Datei(%s).\n", sabo_intenfile); exit(1);
         }
         //INTENSIDADES (pv_fitting)
         strcpy(fit_intenfile, "");
@@ -301,7 +309,7 @@ int main()
 
         if((fp_fitinten_pf = fopen(fit_intenfile, "w")) == NULL)
         {
-            fprintf(stderr, "Error beim oeffnen der Datei(%s).", fit_intenfile); exit(1);
+            fprintf(stderr, "Error beim oeffnen der Datei(%s).\n", fit_intenfile); exit(1);
         }
         //FWHM
         strcpy(fwhmfile, "");
@@ -314,7 +322,7 @@ int main()
 
         if((fp_fwhm_pf = fopen(fwhmfile, "w")) == NULL)
         {
-            fprintf(stderr, "Error beim oeffnen der Datei(%s).", fwhmfile); exit(1);
+            fprintf(stderr, "Error beim oeffnen der Datei(%s).\n", fwhmfile); exit(1);
         }
         //ETA
         strcpy(etafile, "");
@@ -327,13 +335,13 @@ int main()
 
         if((fp_eta_pf = fopen(etafile, "w")) == NULL)
         {
-            fprintf(stderr, "Error beim oeffnen der Datei(%s).", etafile); exit(1);
+            fprintf(stderr, "Error beim oeffnen der Datei(%s).\n", etafile); exit(1);
         }
         //GRID
         //genero archivo con el grid de la figura de polos
         if((fp3 = fopen("PF_grid.dat", "w")) == NULL)
         {
-            fprintf(stderr, "Error opening file PF_grid.dat"); exit(1);
+            fprintf(stderr, "Error opening file PF_grid.dat\n"); exit(1);
         }
         ////////////////////////////////////////////////////////////////////////////////////////////
         //Imprimo el tiempo de ejecucion del programa en el .mtex
