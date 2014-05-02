@@ -2,4 +2,3 @@ Mejoras para el programa spr2txt
 
 1. Armar una GUI
 2. Agregar ajuste de Williamson-Hall
-3. Ver que pasa si el ajuste negativo cae justo en el primer gamma.

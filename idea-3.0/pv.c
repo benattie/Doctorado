@@ -43,7 +43,7 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     //creacion de un logfile con la entrada y salida de las semillas, asi no deberia tener que sacarlos resultados a pantalla para hacer un control de como va el fiteo
     //OJO sigue mas abajo!!!
     FILE * fp_logfile = fopen("fit_results.log", "a");
-    fprintf(fp_logfile, "semilla inicial\n");
+    fprintf(fp_logfile, "spr: %d gamma :%d\nsemilla inicial\n", (*difra).spr, (*difra).gamma);
     print_seeds2file(fp_logfile, peak_seeds[exists], seeds_size, (*difra).bg, (*difra).n_bg);
    
     //printf("Inicio de las iteraciones\n");
