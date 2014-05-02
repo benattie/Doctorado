@@ -279,10 +279,10 @@ int fit_result(int all_seeds_size, double ** peak_seeds, int * zero_peak_index, 
         if((*difra).spr == (*difra).start_spr)
             bad_fit = results_output(all_seeds_size, peak_seeds, zero_peak_index, sync_data, difra, 0, 0); //en el indice 0,0 puse un -1
         else
-            bad_fit = results_output(all_seeds_size, peak_seeds, zero_peak_index, sync_data, difra, (*difra).gamma, (*difra).spr - 1);
+            bad_fit = results_output(all_seeds_size, peak_seeds, zero_peak_index, sync_data, difra, (*difra).spr - 1, (*difra).gamma);
     }
     else
-        bad_fit = results_output(all_seeds_size, peak_seeds, zero_peak_index, sync_data, difra, (*difra).gamma - 1, (*difra).spr);
+        bad_fit = results_output(all_seeds_size, peak_seeds, zero_peak_index, sync_data, difra, (*difra).spr, (*difra).gamma - 1);
 
     return bad_fit;
 }
