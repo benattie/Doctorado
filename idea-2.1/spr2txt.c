@@ -57,7 +57,7 @@ int main()
  //LECTURA DEL ARCHIVO para_fit2d.dat
  if((fp = fopen("para_fit2d.dat", "r")) == NULL )
  {
-     fprintf(stderr, "Error opening file para_fit2d.txt."); exit(1);
+     fprintf(stderr, "\nError opening file para_fit2d.txt.\n"); exit(1);
  }
  //path hacia los archivos de salida
  fgets(buf_temp, 22, fp);
@@ -153,14 +153,14 @@ int main()
     //Reading of intrumental width files
     if((fp_IRF = fopen("IRF.dat", "r")) == NULL )
     {
-        fprintf(stderr, "Error opening file IRF.dat"); exit(1);
+        fprintf(stderr, "Error opening file IRF.dat\n"); exit(1);
     }
     ins = read_IRF(fp_IRF);
     fclose(fp_IRF);
     //Reading of initial parameters
     if((fp_fit = fopen("fit_ini.dat", "r")) == NULL )
     {
-        fprintf(stderr, "Error opening file fit_ini.dat"); exit(1);
+        fprintf(stderr, "Error opening file fit_ini.dat\n"); exit(1);
     }
     fgets(buf, 250, fp_fit);//leo el titulo
     fgets(buf, 250, fp_fit);//leo el encabezado
@@ -377,7 +377,7 @@ int main()
                 if((minus_zero == 'Y' || minus_zero == 'y') && sabo_inten[n][j + del_gam][m] < 0)
                     fprintf(fp_sabointen_pf, "%10d%10.4f%10.4f%10.4f%10.4f%12.3lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, 0.0);
                 else
-                    fprintf(fp_sabointen_pf, "%10d%10.4f%10.4f%10.4f%10.4f%12.3lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fit_inten[n][j + del_gam][m]);
+                    fprintf(fp_sabointen_pf, "%10d%10.4f%10.4f%10.4f%10.4f%12.3lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, sabo_inten[n][j + del_gam][m]);
 
                 fprintf(fp_fitinten_pf, "%10d%10.4f%10.4f%10.4f%10.4f%12.3lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fit_inten[n][j + del_gam][m]);
                 fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fwhm[n][j + del_gam][m]);
@@ -398,7 +398,7 @@ int main()
         fclose(fp_fwhm_pf);
         fclose(fp_eta_pf);
     }/* End for(m = 0; m < numrings; m++)*/
-    printf("\n====== End angular transformation ====== \n");
+    printf("\n======= End angular transformation ======= \n");
  }/*End of for(Z = 1; Z <= NrSample; Z++) */
  fclose(fp);
  free_r3_tensor_double(sabo_inten, 40, 500);
