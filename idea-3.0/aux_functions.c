@@ -282,7 +282,7 @@ int fit_result(int all_seeds_size, double ** peak_seeds, int * zero_peak_index, 
             bad_fit = results_output(all_seeds_size, peak_seeds, zero_peak_index, sync_data, difra, (*difra).gamma, (*difra).spr - 1);
     }
     else
-        bad_fit = results_output(all_seeds_size, peak_seeds, zero_peak_index, sync_data, difra, (*difra).gamma - (*difra).gamma, (*difra).spr);
+        bad_fit = results_output(all_seeds_size, peak_seeds, zero_peak_index, sync_data, difra, (*difra).gamma - 1, (*difra).spr);
 
     return bad_fit;
 }
@@ -290,41 +290,48 @@ int fit_result(int all_seeds_size, double ** peak_seeds, int * zero_peak_index, 
 int results_output(int all_seeds_size, double ** peak_seeds, int * zero_peak_index, exp_data * sync_data, peak_data * difra, int spr, int gamma)
 {
     int bad_fit = 0, i, j = 2, k = 0;
-    double H, eta, I;
+    double I, I_aux, H, H_aux, eta, eta_aux;
     for(i = 2; i < all_seeds_size; i += 4)
     {
         if(zero_peak_index[k] == 0)
         {
-            I = peak_seeds[1][j + 1];
-            H = peak_seeds[1][0] + peak_seeds[1][j + 2];
-            eta = peak_seeds[1][1] + peak_seeds[1][j + 3];
-            if(I < 0)
+            I_aux = peak_seeds[1][j + 1];
+            H_aux = peak_seeds[1][0] + peak_seeds[1][j + 2];
+            eta_aux = peak_seeds[1][1] + peak_seeds[1][j + 3];
+            if(I_aux < 0)
             {
                 bad_fit = 1;
-                (*difra).intens[(*difra).spr][(*difra).gamma][k] = (*difra).intens[spr][gamma][k];
-                (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = (*difra).fwhm[spr][gamma][k];
-                (*difra).eta[(*difra).spr][(*difra).gamma][k] = (*difra).eta[spr][gamma][k];
+                I = 0.0;
+                H = (*difra).fwhm[spr][gamma][k];
+                eta = (*difra).eta[spr][gamma][k];
             }
             else
             {
-                if(H < 0 || H > 1)
+                if(H_aux < 0 || H_aux > 1)
                 {
                     bad_fit = 1;
-                    (*difra).intens[(*difra).spr][(*difra).gamma][k] = I;
-                    (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = (*difra).fwhm[spr][gamma][k];
-                    (*difra).eta[(*difra).spr][(*difra).gamma][k] = (*difra).eta[spr][gamma][k];
+                    I = I_aux;
+                    H = (*difra).fwhm[spr][gamma][k];
+                    eta = (*difra).eta[spr][gamma][k];
                 }
                 else
                 {
-                    if(eta < 0 || eta > 1)
+                    if(eta_aux < 0 || eta_aux > 1)
                     {
                         bad_fit = 1;
-                        (*difra).intens[(*difra).spr][(*difra).gamma][k] = I;
-                        (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = H;
-                        (*difra).eta[(*difra).spr][(*difra).gamma][k] = (*difra).eta[spr][gamma][k];
+                        I = I_aux;
+                        H = H_aux;
+                        eta = (*difra).eta[spr][gamma][k];
+                    }
+                    else
+                    {
+                        bad_fit = 0;
+                        I = I_aux;
+                        H = H_aux;
+                        eta = eta_aux;
                     }
                 }
-            }
+            }//end if routine if(I_aux < 0)
             //double theta_rad = (peak_seeds[1][j] / 2.) * M_PI / 180.; //2theta en grados -> THETA en RADIANES
             //ins_correction(&H, &eta, (*sync_data).ins, theta_rad);
             (*difra).intens[(*difra).spr][(*difra).gamma][k] = I;

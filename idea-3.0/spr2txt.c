@@ -385,7 +385,7 @@ int main()
                 if((minus_zero == 'Y' || minus_zero == 'y') && sabo_inten[n][j + del_gam][m] < 0)
                     fprintf(fp_sabointen_pf, "%10d%10.4f%10.4f%10.4f%10.4f%12.3lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, 0.0);
                 else
-                    fprintf(fp_sabointen_pf, "%10d%10.4f%10.4f%10.4f%10.4f%12.3lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fit_inten[n][j + del_gam][m]);
+                    fprintf(fp_sabointen_pf, "%10d%10.4f%10.4f%10.4f%10.4f%12.3lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, sabo_inten[n][j + del_gam][m]);
 
                 fprintf(fp_fitinten_pf, "%10d%10.4f%10.4f%10.4f%10.4f%12.3lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fit_inten[n][j + del_gam][m]);
                 fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fwhm[n][j + del_gam][m]);
@@ -406,7 +406,7 @@ int main()
         fclose(fp_fwhm_pf);
         fclose(fp_eta_pf);
     }/* End for(m = 0; m < numrings; m++)*/
-    printf("\n====== End angular transformation ====== \n");
+    printf("\n======= End angular transformation ======= \n");
  }/*End of for(Z = 1; Z <= NrSample; Z++) */
  fclose(fp);
  free_r3_tensor_double(sabo_inten, 40, 500);
