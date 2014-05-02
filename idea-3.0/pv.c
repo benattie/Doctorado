@@ -42,9 +42,9 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
  
     //creacion de un logfile con la entrada y salida de las semillas, asi no deberia tener que sacarlos resultados a pantalla para hacer un control de como va el fiteo
     //OJO sigue mas abajo!!!
-    //FILE * fp_logfile = fopen("fit_results.log", "a");
-    //fprintf(fp_logfile, "semilla inicial\n");
-    //print_seeds2file(fp_logfile, peak_seeds[exists], seeds_size, (*difra).bg, (*difra).n_bg);
+    FILE * fp_logfile = fopen("fit_results.log", "a");
+    fprintf(fp_logfile, "semilla inicial\n");
+    print_seeds2file(fp_logfile, peak_seeds[exists], seeds_size, (*difra).bg, (*difra).n_bg);
    
     //printf("Inicio de las iteraciones\n");
     //printf("Paso 1\n");
@@ -69,10 +69,10 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     //printf("Fin de las iteraciones\n");
 
     //imprimo en fp_logfile los resultados de las iteraciones
-    //fprintf(fp_logfile, "semilla final\n");
-    //print_seeds2file(fp_logfile, peak_seeds[1], seeds_size, (*difra).bg, (*difra).n_bg);
-    //fflush(fp_logfile);
-    //fclose(fp_logfile);
+    fprintf(fp_logfile, "semilla final\n");
+    print_seeds2file(fp_logfile, peak_seeds[1], seeds_size, (*difra).bg, (*difra).n_bg);
+    fflush(fp_logfile);
+    fclose(fp_logfile);
    
     //printf("Correccion y salida de los resultados\n");
     bad_fit = fit_result(all_seeds_size, peak_seeds, zero_peak_index, sync_data, difra);
