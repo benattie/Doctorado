@@ -255,19 +255,19 @@ void solver_iterator(int * status, gsl_multifit_fdfsolver * s, const gsl_multifi
 {
     int iter = 0, max_iter = 500;
     double err_abs = 1e-4, err_rel = 1e-4;
-    print_state (iter, s);
+    //print_state (iter, s);
     do
     {
         iter++;
         *status = gsl_multifit_fdfsolver_iterate (s);
         //printf ("status = %s\n", gsl_strerror (*status));
-        print_state (iter, s);
+        //print_state (iter, s);
         if (*status)
             break;
         *status = gsl_multifit_test_delta (s -> dx, s -> x, err_abs, err_rel);
     }
     while (*status == GSL_CONTINUE && iter < max_iter);
-    printf ("status = %s\n", gsl_strerror (*status));
+    //printf ("status = %s\n", gsl_strerror (*status));
     //print_state (iter, s);
 }
 
@@ -283,12 +283,12 @@ int results_print(int all_seeds_size, double ** peak_seeds, int * zero_peak_inde
             I = peak_seeds[1][j + 1];
             *H = peak_seeds[1][0] + peak_seeds[1][j + 2];
             *eta = peak_seeds[1][1] + peak_seeds[1][j + 3];
-            if(I < 0)
+            if(I < 0)//voy a informar de los malos ajustes pero voy a pasar los resultados crudos
             {
                 bad_fit = 1;
-                (*difra).intens[(*difra).spr][(*difra).gamma][k] = -1.0;
-                (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = -1.0;
-                (*difra).eta[(*difra).spr][(*difra).gamma][k] = -1.0;
+                (*difra).intens[(*difra).spr][(*difra).gamma][k] = I;
+                (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = *H;
+                (*difra).eta[(*difra).spr][(*difra).gamma][k] = *eta;
             }
             else
             {
@@ -296,8 +296,8 @@ int results_print(int all_seeds_size, double ** peak_seeds, int * zero_peak_inde
                 {
                     bad_fit = 1;
                     (*difra).intens[(*difra).spr][(*difra).gamma][k] = I;
-                    (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = -1.0;
-                    (*difra).eta[(*difra).spr][(*difra).gamma][k] = -1.0;
+                    (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = *H;
+                    (*difra).eta[(*difra).spr][(*difra).gamma][k] = *eta;
                 }
                 else
                 {
@@ -306,12 +306,12 @@ int results_print(int all_seeds_size, double ** peak_seeds, int * zero_peak_inde
                         bad_fit = 1;
                         (*difra).intens[(*difra).spr][(*difra).gamma][k] = I;
                         (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = *H;
-                        (*difra).eta[(*difra).spr][(*difra).gamma][k] = -1.0;
+                        (*difra).eta[(*difra).spr][(*difra).gamma][k] = *eta;
                     }
                     else
                     {
-                        double theta_rad = (peak_seeds[1][j] / 2.) * M_PI / 180.; //2theta en grados -> THETA en RADIANES
-                        ins_correction(H, eta, (*sync_data).ins, theta_rad);
+                        //double theta_rad = (peak_seeds[1][j] / 2.) * M_PI / 180.; //2theta en grados -> THETA en RADIANES
+                        //ins_correction(H, eta, (*sync_data).ins, theta_rad);
                         (*difra).intens[(*difra).spr][(*difra).gamma][k] = I;
                         (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = *H;
                         (*difra).eta[(*difra).spr][(*difra).gamma][k] = *eta;
