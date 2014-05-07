@@ -1,0 +1,34 @@
+1.PathForOutput: D:\Emanuel\Git\Doctorado\tmp\out\
+
+Input Data 
+2.InputFilePath: D:\Emanuel\Git\Doctorado\tmp\out\
+3.InputFileName: New_Al70R-tex_
+4.FileExtension: mtex
+5.IndexNr Start: 1
+6.IndexNr End:   7
+7.Lambda:        1.
+
+Structure Data
+8.Crystal structure:       FCC
+9.Lattice parameter(A):    1.
+10.Burgers vector (h k l): 1 1 0
+11.Nr of peaks:   7
+12.delta_min:     0.005
+13.delta_step:    0.005
+14.delta_max:     0.090
+15.q_min:        -4.000
+16.q_step:        0.010
+17.q_max:         2.000
+18.Ch00_min:      0.100
+19.Ch00_step:     0.050
+20.Ch00_max:      0.300
+
+Peak data
+#     h k l
+1     1 1 1
+2     2 0 0
+3     2 2 0
+4     3 1 1
+5     2 2 2
+6     4 0 0
+7     3 3 1
