@@ -93,7 +93,8 @@ while(m<num)//itero sobre todos los archivos que figuran en el para_inter.dat
     fgets(buf,200,fp1);
     aux = intensitaet; //valor viejo a la variable auxiliar
       
-    if(intens<=0||intens>=1){
+    if(intens<=0||intens>=1)
+    {
         //intensitaet = 0;
         z++;
         continue;
@@ -101,44 +102,43 @@ while(m<num)//itero sobre todos los archivos que figuran en el para_inter.dat
 
     }
     else
-    {
         intensitaet = intens;
-    }
     
-    if(chi>=90) chi=90;
-    if(chi<=0)  chi=0;
+    if(chi >= 90) chi = 90;
+    if(chi <= 0)  chi = 0;
 
-    if(fabs((double)(z_theta/2 - omega)) < 0.1)
+    if(fabs((double)(z_theta / 2 - omega)) < 0.1)
     {
-	alpha = 90-chi;
+	alpha = 90 - chi;
 	beta = phi;
     }
     else
     {
-	alpha=trans_pc_ab_al(phi,chi,omega,z_theta/2,0,90,0);
-        beta=trans_pc_ab_be(phi,chi,omega,z_theta/2,0,90,0);
+	alpha = trans_pc_ab_al(phi,chi,omega,z_theta/2,0,90,0);
+        beta = trans_pc_ab_be(phi,chi,omega,z_theta/2,0,90,0);
     }
 
-    xein_3d=sferical_to_cartesian_x(beta*wandel, alpha*wandel);
-    yein_3d=sferical_to_cartesian_y(beta*wandel, alpha*wandel);
-    zein_3d=sferical_to_cartesian_z(beta*wandel, alpha*wandel);
+    xein_3d = sferical_to_cartesian_x(beta * wandel, alpha * wandel);
+    yein_3d = sferical_to_cartesian_y(beta * wandel, alpha * wandel);
+    zein_3d = sferical_to_cartesian_z(beta * wandel, alpha * wandel);
 
-    fprintf (fp3,"%d  al%7.1f  be%7.1f  x%7.4f y%7.4f z%7.4f schwellenwert%7.4f \n ",z,alpha, beta,xein_3d,yein_3d, zein_3d,schwellenwert);
+    fprintf (fp3,"%d  al%7.1f  be%7.1f  x%7.4f y%7.4f z%7.4f schwellenwert%7.4f \n ",z, alpha, beta, xein_3d, yein_3d, zein_3d, schwellenwert);
 
-  for(i=1;i<=step_be;i++)
-   for(j=1;j<=step_al;j++)
+  for(i = 1; i <= step_be; i++)
+  {
+    for(j = 1; j <= step_al; j++)
     {
-      spatprodukt = fabs((double)((xein_3d*ibmpos[i][j][1]) + yein_3d*ibmpos[i][j][2]
+        spatprodukt = fabs((double)((xein_3d*ibmpos[i][j][1]) + yein_3d*ibmpos[i][j][2]
                          + zein_3d*ibmpos[i][j][3] ));
 
-       if (spatprodukt >= schwellenwert)
+        if (spatprodukt >= schwellenwert)
         { 
 	  weightf = cos ((1-spatprodukt)/(act_cntare/100)*hpi);
 	  ibm_data[i][j] = ibm_data[i][j]+weightf*intensitaet;
 	  ibm_gewichte[i][j] = ibm_gewichte[i][j] + weightf;    
-	}
+        }
     } //for
-
+  }
   z++;
   }//while
 

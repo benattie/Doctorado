@@ -46,6 +46,8 @@ typedef struct aux_data
 } aux_data;
 
 //funciones
+double warren_constants(char * type, int * hkl);
+
 double H2(int * hkl);
 
 double burgers(double a, int * hkl);

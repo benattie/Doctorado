@@ -17,21 +17,20 @@ int main()
     //cargo los datos basicos
     if((fp_in = fopen("para_WH.dat", "r")) == NULL)
     {
-            fprintf(stderr, "\nError opening para_WH.dat.\n");
-            exit(1);
+        fprintf(stderr, "\nError opening para_WH.dat.\n");
+        exit(1);
     }
     read_input(fp_in, fdata, cdata, adata);
     fclose(fp_in);
     //datos de la estructura cristalina
     double h02[cdata->npeaks], wc[cdata->npeaks];
-    double WC_FCC[9] = {sqrt(3) / 4., 1., sqrt(2) / 2., (3 * sqrt(11)) / 22., sqrt(3) / 4., 1.0, 0.0, 0.0, 0.0}; //constantes de Warren para una estructura FCC
     for(i = 0; i < cdata->npeaks; i++)
     {
         h02[i] = H2(cdata->indices[i]);
-        wc[i] = WC_FCC[i]; //crear estructura de control para poner las constantes de warren segun sea FCC, BCC, HCP y segun los indices de Miller
+        wc[i] = warren_constants(cdata->type, cdata->indices[i]);
     }
     cdata -> H2 = h02;
-    cdata -> warrenc = wc; 
+    cdata -> warrenc = wc;
     //flags de control
     //printf_filedata(fdata);
     //printf_crystaldata(cdata);

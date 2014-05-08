@@ -1,5 +1,33 @@
 #include "funciones.h"
 
+double warren_constants(char * type, int * hkl)
+{
+    double h02 = pow(hkl[0], 2) + pow(hkl[1], 2) + pow(hkl[2], 2);
+    if(type == "FCC")
+    {
+        //conjunto de pasos para calcular la constante de warren en la FCC
+    }
+    else
+    {
+        if(type == "BCC")
+        {
+            //conjunto de pasos para calcular la constante de warren en la BCC
+        }
+        else
+        {
+            if(type == "HCP")
+            {
+                //conjunto de pasos para calcular la constante de warren en la HCP
+            }
+            else
+            {
+                printf("Estructura desconocida\nPor favor ingrese una estructura valida (FCC, BCC o HCP\n");
+                exit(1);
+            }
+        }
+    }
+}
+
 double H2(int * hkl)
 {
     double h2 = pow(hkl[0], 2), k2 = pow(hkl[1], 2), l2 = pow(hkl[2], 2);
@@ -122,10 +150,9 @@ void read_input(FILE *fp, file_data *fdata, crystal_data *cdata, aux_data *adata
     //printf("Lectura del cuarto bloque de datos\n");
     fgets(buf, 500, fp);
     fgets(buf, 500, fp);
-    cdata->indices = matrix_int_alloc(cdata -> npeaks, 4);
+    cdata->indices = matrix_int_alloc(cdata -> npeaks, 3);
     while(i < cdata->npeaks)
     {
-        fscanf(fp, "%d", &cdata -> indices[i][0]);
         fscanf(fp, "%d", &cdata -> indices[i][1]);
         fscanf(fp, "%d", &cdata -> indices[i][2]);
         fscanf(fp, "%d", &cdata -> indices[i][3]);
