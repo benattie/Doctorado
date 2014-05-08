@@ -32,10 +32,10 @@ int main()
     }
     cdata -> H2 = h02;
     cdata -> warrenc = wc; 
-
-    printf_filedata(fdata);
-    printf_crystaldata(cdata);
-    printf_auxdata(adata);
+    //flags de control
+    //printf_filedata(fdata);
+    //printf_crystaldata(cdata);
+    //printf_auxdata(adata);
 
     //datos del difractograma
     double dostheta[cdata->npeaks][nlines], theta[cdata->npeaks][nlines], alpha[cdata->npeaks][nlines], beta[cdata->npeaks][nlines];
@@ -110,5 +110,3 @@ int main()
     free(inputFiles);
     return 0;
 }
-
-

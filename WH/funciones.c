@@ -39,10 +39,10 @@ void printf_crystaldata(crystal_data *cdata)
     printf("indices:\nn h k l\n");
     for(i = 0; i < cdata->npeaks; i++)
         printf("%d %d %d %d\n", cdata->indices[i][0], cdata->indices[i][1], cdata->indices[i][2], cdata->indices[i][3]);
-    printf("H^2:\n");
+    printf("\nH^2:\n");
     for(i = 0; i < cdata->npeaks; i++)
         printf("%d %lf\n", i, cdata->H2[i]);
-    printf("warrenc^2:\n");
+    printf("\nwarrenc^2:\n");
     for(i = 0; i < cdata->npeaks; i++)
         printf("%d %lf\n", i, cdata->warrenc[i]);
     getchar();
@@ -71,30 +71,33 @@ void read_input(FILE *fp, file_data *fdata, crystal_data *cdata, aux_data *adata
     fscanf(fp, "%s %s", buf, fdata -> outPath);
     fgets(buf, 500, fp);
     fgets(buf, 500, fp);
+    fgets(buf, 500, fp);
+
+    //printf("Lectura del segundo bloque de datos\n");
     fscanf(fp, "%s %s", buf, fdata -> inputPath);
     fgets(buf, 500, fp);
     fscanf(fp, "%s %s", buf, fdata -> filename);
     fgets(buf, 500, fp);
     fscanf(fp, "%s %s", buf, fdata -> fileext);
     fgets(buf, 500, fp);
-    fscanf(fp, "%s %d", buf, &fdata -> start);
+    fscanf(fp, "%s %s %d", buf, buf, &fdata -> start);
     fgets(buf, 500, fp);
-    fscanf(fp, "%s %d", buf, &fdata -> end);
+    fscanf(fp, "%s %s %d", buf, buf, &fdata -> end);
     fgets(buf, 500, fp);
     fscanf(fp, "%s %lf", buf, &adata -> lambda);
     fgets(buf, 500, fp);
     fgets(buf, 500, fp);
 
-    //printf("Lectura del segundo bloque de datos\n");
+    //printf("Lectura del tercer bloque de datos\n");
     fgets(buf, 500, fp);
-    fscanf(fp, "%s %s", buf, cdata -> type);
+    fscanf(fp, "%s %s %s", buf, buf, cdata -> type);
     fgets(buf, 500, fp);
-    fscanf(fp, "%s %lf", buf, &cdata -> a);
+    fscanf(fp, "%s %s %lf", buf, buf, &cdata -> a);
     fgets(buf, 500, fp);
-    fscanf(fp, "%s %d %d %d", buf, &v[0], &v[1], &v[2]);
+    fscanf(fp, "%s %s %s %s %s %d %d %d", buf, buf, buf, buf, buf, &v[0], &v[1], &v[2]);
     fgets(buf, 500, fp);
     cdata->burgersv = burgers(cdata->a, v);
-    fscanf(fp, "%s %d", buf, &cdata -> npeaks);
+    fscanf(fp, "%s %s %s %d", buf, buf, buf, &cdata -> npeaks);
     fgets(buf, 500, fp);
     fscanf(fp, "%s %lf", buf, &adata -> delta_min);
     fgets(buf, 500, fp);
@@ -116,8 +119,7 @@ void read_input(FILE *fp, file_data *fdata, crystal_data *cdata, aux_data *adata
     fgets(buf, 500, fp);
     fgets(buf, 500, fp);
 
-    //lectura del tercer bloque de datos
-    printf("Lectura del tercer bloque de datos\n");
+    //printf("Lectura del cuarto bloque de datos\n");
     fgets(buf, 500, fp);
     fgets(buf, 500, fp);
     cdata->indices = matrix_int_alloc(cdata -> npeaks, 4);
@@ -127,7 +129,6 @@ void read_input(FILE *fp, file_data *fdata, crystal_data *cdata, aux_data *adata
         fscanf(fp, "%d", &cdata -> indices[i][1]);
         fscanf(fp, "%d", &cdata -> indices[i][2]);
         fscanf(fp, "%d", &cdata -> indices[i][3]);
-        printf("%d\n", i);
         i++;
     }
 }

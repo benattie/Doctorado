@@ -6,12 +6,11 @@ Input Data
 4.FileExtension: mtex
 5.IndexNr Start: 1
 6.IndexNr End:   7
-7.Lambda:        1.
+7.Lambda:        1
 
 Structure Data
 8.Crystal structure:       FCC
-9.Lattice parameter(A):    1.
-10.Burgers vector (h k l): 1 1 0
+9.Lattice parameter(A):    1
 11.Nr of peaks:   7
 12.delta_min:     0.005
 13.delta_step:    0.005
