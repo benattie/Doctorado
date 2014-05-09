@@ -3,13 +3,13 @@
 int main()
 {
     //variables del programa
-    FILE *fp_in, *fp_out;
-    FILE **inputFiles = malloc(sizeof(FILE *) * 15);
+    FILE *fp_in;
+    FILE *fp_out_R, *fp_out_chi2;
     char name[500], buf[500];
-    int i, j, linecount, nlines = 13320;
-    double delta, q, Ch00, radian = M_PI / 360.;
+    int i, j, linecount, nlines = 13320, nparam = 7;
+    double delta, q, Ch00, radian = M_PI / 360., b2;
     double m, h, cov[2][2], chisq, chisq_min = 100, R, R_max = 0;
-    double best_R_val[4], best_chisq_val[4];
+    double best_R_val[nparam], best_chisq_val[nparam], out_values[nparam];
     file_data *fdata = malloc(sizeof(file_data));
     crystal_data *cdata = malloc(sizeof(crystal_data));
     aux_data *adata = malloc(sizeof(aux_data));
@@ -23,7 +23,8 @@ int main()
     read_input(fp_in, fdata, cdata, adata);
     fclose(fp_in);
     //datos de la estructura cristalina
-    double h02[cdata->npeaks], wc[cdata->npeaks];
+    double *h02 = vector_double_alloc(cdata->npeaks);
+    double *wc = vector_double_alloc(cdata->npeaks);
     for(i = 0; i < cdata->npeaks; i++)
     {
         h02[i] = H2(cdata->indices[i]);
@@ -33,48 +34,55 @@ int main()
     cdata -> warrenc = wc;
     //flags de control
     //printf_filedata(fdata);
-    printf("hola mundo\n");
-    printf_crystaldata(cdata);
-    printf("hola mundo2\n");
+    //printf_crystaldata(cdata);
     //printf_auxdata(adata);
 
     //datos del difractograma
-    printf("hola mundo3\n");
-    double dostheta[cdata->npeaks][nlines], theta[cdata->npeaks][nlines], alpha[cdata->npeaks][nlines], beta[cdata->npeaks][nlines];
-    printf("hola mundo4\n");
-    double x[cdata->npeaks], y[cdata->npeaks], y_err[cdata->npeaks];
-    printf("hola mundo5\n");
-    double FWHM[cdata->npeaks][nlines], FWHM_err[cdata->npeaks][nlines], breadth[cdata->npeaks][nlines], breadth_err[cdata->npeaks][nlines];
-    printf("hola mundo6\n");
+    double **dostheta = matrix_double_alloc(cdata->npeaks, nlines);
+    double **theta = matrix_double_alloc(cdata->npeaks, nlines);
+    double **alpha = matrix_double_alloc(cdata->npeaks, nlines);
+    double **beta = matrix_double_alloc(cdata->npeaks, nlines);
+    double **FWHM = matrix_double_alloc(cdata->npeaks, nlines);
+    //double **breadth = matrix_double_alloc(cdata->npeaks, nlines);
+    double *x = vector_double_alloc(cdata->npeaks);
+    double *y = vector_double_alloc(cdata->npeaks);
+    //double y_err[cdata->npeaks], FWHM_err[cdata->npeaks][nlines], breadth_err[cdata->npeaks][nlines];
     //leo las figuras de polos
     for(i = fdata->start - 1; i < fdata->end - 1; i++)
     {
         sprintf(name, "%s%s%d.%s", fdata->outPath, fdata->filename, i + 1, fdata->fileext);
-        if((inputFiles[i] = fopen(name, "r")) == NULL)
+        printf("Reading file %s\n", name);
+        if((fp_in = fopen(name, "r")) == NULL)
         {
             fprintf(stderr, "\nError opening %s.\n", name);
             exit(1);
         }
-        fgets(buf, 500, inputFiles[i]);//skip line
-        fgets(buf, 500, inputFiles[i]);//skip line
-        while(fscanf(inputFiles[i], "%d", &linecount) != EOF)
+        fgets(buf, 500, fp_in);//skip line
+        fgets(buf, 500, fp_in);//skip line
+        while(fscanf(fp_in, "%d", &linecount) != EOF)
         {
-            fscanf(inputFiles[i], "%lf", &dostheta[i][linecount - 1]);
-            fscanf(inputFiles[i], "%lf", &theta[i][linecount - 1]);
-            fscanf(inputFiles[i], "%lf", &alpha[i][linecount - 1]);
-            fscanf(inputFiles[i], "%lf", &beta[i][linecount - 1]);
-            fscanf(inputFiles[i], "%lf", &FWHM[i][linecount - 1]);
-            //fscanf(inputFiles[i], "%lf", &FWHM_err[i][linecount - 1]);
+            fscanf(fp_in, "%lf", &dostheta[i][linecount - 1]);
+            fscanf(fp_in, "%lf", &theta[i][linecount - 1]);
+            fscanf(fp_in, "%lf", &alpha[i][linecount - 1]);
+            fscanf(fp_in, "%lf", &beta[i][linecount - 1]);
+            fscanf(fp_in, "%lf", &FWHM[i][linecount - 1]);
+            //fscanf(fp_in, "%lf", &FWHM_err[i][linecount - 1]);
             theta[i][linecount - 1] *= radian; //paso el angulo a radianes
+            //printf("%d %.5lf %.5lf %.5lf %.5lf %.5lf\n", linecount, dostheta[i][linecount - 1], theta[i][linecount - 1], alpha[i][linecount - 1], beta[i][linecount - 1], FWHM[i][linecount - 1]);
+            //getchar();
+            //podria agregar aca la rutina para restar anchos instrumentales (opcional)
             //para trabajar con el breadth en vez del FWHM tengo que realizar un procedimiento parecido al que uso cuando
             //resto anchos intrumentales
         }
+        fclose(fp_in);
     }
     nlines = linecount;
     
-    //rutina de calculo de factores de contraste y ajuste de Williamson-Hall
+    printf("Iniciando el ajuste de Williamson-Hall\n");
     for(j = 0; j < nlines; j++)
     {
+        if((j % 100) == 0) printf("Completado en un %d %%\n", (j * 100) / nlines);
+
         for(delta = adata->delta_min; delta < adata->delta_max; delta += adata->delta_step)
         {
             for(q = adata->q_min; q < adata->q_max; q += adata->q_step)
@@ -93,24 +101,69 @@ int main()
                     if(fabs(R) > R_max && h > 0 && m > 0)
                     {
                         R_max = R;
-                        best_R_val[0] = h;
-                        best_R_val[1] = m;
-                        best_R_val[2] = R;
-                        best_R_val[3] = chisq;
+                        best_R_val[0] = delta;
+                        best_R_val[1] = q;
+                        best_R_val[2] = Ch00;
+                        best_R_val[3] = h;
+                        best_R_val[4] = m;
+                        best_R_val[5] = R;
+                        best_R_val[6] = chisq;
+
                     }
                     if(chisq < chisq_min && h > 0 && m > 0)
                     {
                         chisq_min = chisq;
-                        best_chisq_val[0] = h;
-                        best_chisq_val[1] = m;
-                        best_chisq_val[2] = R;
-                        best_chisq_val[3] = chisq;
+                        best_chisq_val[0] = delta;
+                        best_chisq_val[1] = q;
+                        best_chisq_val[2] = Ch00;
+                        best_chisq_val[3] = h;
+                        best_chisq_val[4] = m;
+                        best_chisq_val[5] = R;
+                        best_chisq_val[6] = chisq;
                     }
                 }
             }
         }
-        //imprimo los resultados
+        //salida de los valores para el mejor ajuste segun R
+        sprintf(name, "%s%s_WH_R.dat", fdata->outPath, fdata->filename);
+        fp_out_R = fopen(name, "w");
+
+        //obtencion de los valores a imprimir a partir de los resultados del ajuste
+        out_values[0] = best_R_val[0]; //delta
+        out_values[1] = best_R_val[1]; //q
+        out_values[2] = best_R_val[2]; //Ch00
+        out_values[3] = 0.9 / best_R_val[3]; //h = 0.9 / D (ver la expresion correcta)
+        b2 = pow(cdata->burgersv, 2);
+        out_values[4] = pow( (2 * best_R_val[4]) / (M_PI * b2), 2); //m = (\pi * M^2 * b^2) / 2 * sqrt(ro)
+        out_values[5] = best_R_val[5]; //R
+        out_values[6] = best_R_val[6]; //chisq
+        fprintf(fp_out_R, "#alpha    beta    delta    q    Ch00    D    (M^4 * \\ro)    R    chi2\n");
+        fprintf(fp_out_R, "%lf    %lf    ", alpha[0][j], beta[0][j]);
+        for(i = 0; i < 7; i++)
+            fprintf(fp_out_R, "%.5lf    ", out_values[i]);
+        fprintf(fp_out_R, "\n");
+        fclose(fp_out_R);
+
+        //salida de los valores para el mejor ajuste segun chi^2
+        sprintf(name, "%s%s_WH_chi2.dat", fdata->outPath, fdata->filename);
+        fp_out_chi2 = fopen(name, "w");      
+
+        //obtencion de los valores a imprimir a partir de los resultados del ajuste
+        out_values[0] = best_chisq_val[0]; //delta
+        out_values[1] = best_chisq_val[1]; //q
+        out_values[2] = best_chisq_val[2]; //Ch00
+        out_values[3] = 0.9 / best_chisq_val[3]; //h = 0.9 / D (ver la expresion correcta)
+        b2 = pow(cdata->burgersv, 2);
+        out_values[4] = pow( (2 * best_chisq_val[4]) / (M_PI * b2), 2); //m = (\pi * M^2 * b^2) / 2 * sqrt(ro)
+        out_values[5] = best_chisq_val[5]; //R
+        out_values[6] = best_chisq_val[6]; //chisq
+        fprintf(fp_out_chi2, "#alpha    beta    delta    q    Ch00    D    (M^4 * \\ro)    R    chi2\n");
+        fprintf(fp_out_chi2, "%lf    %lf    ", alpha[0][j], beta[0][j]);
+        for(i = 0; i < 7; i++)
+            fprintf(fp_out_chi2, "%.5lf    ", out_values[i]);
+        fprintf(fp_out_chi2, "\n");
+        fclose(fp_out_chi2);
     }
-    free(inputFiles);
+    printf("done!\n");
     return 0;
 }
