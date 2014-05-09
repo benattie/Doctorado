@@ -33,14 +33,19 @@ int main()
     cdata -> warrenc = wc;
     //flags de control
     //printf_filedata(fdata);
-    //printf_crystaldata(cdata);
+    printf("hola mundo\n");
+    printf_crystaldata(cdata);
+    printf("hola mundo2\n");
     //printf_auxdata(adata);
 
     //datos del difractograma
+    printf("hola mundo3\n");
     double dostheta[cdata->npeaks][nlines], theta[cdata->npeaks][nlines], alpha[cdata->npeaks][nlines], beta[cdata->npeaks][nlines];
+    printf("hola mundo4\n");
     double x[cdata->npeaks], y[cdata->npeaks], y_err[cdata->npeaks];
+    printf("hola mundo5\n");
     double FWHM[cdata->npeaks][nlines], FWHM_err[cdata->npeaks][nlines], breadth[cdata->npeaks][nlines], breadth_err[cdata->npeaks][nlines];
-
+    printf("hola mundo6\n");
     //leo las figuras de polos
     for(i = fdata->start - 1; i < fdata->end - 1; i++)
     {

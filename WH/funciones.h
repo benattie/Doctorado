@@ -7,6 +7,8 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_fit.h>
 #include <gsl/gsl_statistics_double.h>
+#include <gsl/gsl_sort_int.h>
+#include <gsl/gsl_sort_vector_int.h>
 #include "array_alloc.h"
 
 //estructuras de datos
@@ -47,6 +49,12 @@ typedef struct aux_data
 
 //funciones
 double warren_constants(char * type, int * hkl);
+
+double WC_FCC(int *hkl);
+
+int count_zeros(int * v, int size);
+
+int count_equal(int * v);
 
 double H2(int * hkl);
 

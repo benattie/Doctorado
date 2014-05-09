@@ -11,6 +11,7 @@ Input Data
 Structure Data
 8.Crystal structure:       FCC
 9.Lattice parameter(A):    1
+10.Burgers vector (h k l): 1 1 0
 11.Nr of peaks:   7
 12.delta_min:     0.005
 13.delta_step:    0.005
