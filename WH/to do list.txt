@@ -1,5 +1,3 @@
-1. Rutina de lectura de los archivos de salida de idea
-2. Rutina de impresion de los datos de salida
 3. Decidir rangos para las diferentes variables (probablemente use los rangos de nati o javier)
 4. Decidir si usar breadth o FWHM -> por ahora voy a usar FWHM
 6. Decidir criterio para seleccionar los datos (armo un montecarlo?)
