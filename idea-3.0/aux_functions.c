@@ -354,18 +354,20 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
                     }
                 }
             }//end if routine if(I_aux < 0)
-            (*difra).intens[(*difra).spr][(*difra).gamma][k] = I;
+            //printf("Salida de datos\n");
+            difra->intens[(*difra).spr][(*difra).gamma][k] = I;
             difra->errors->intens_err[(*difra).spr][(*difra).gamma][k] = I_err;
             
-            //salida sin correccion instrumental
             difra->shapes->fwhm[(*difra).spr][(*difra).gamma][k] = H;
             difra->errors->fwhm_err[(*difra).spr][(*difra).gamma][k] = H_err;
+    
             difra->shapes->eta[(*difra).spr][(*difra).gamma][k] = eta;
             difra->errors->eta_err[(*difra).spr][(*difra).gamma][k] = eta_err;
+    
             difra->shapes->breadth[(*difra).spr][(*difra).gamma][k] = breadth;
             difra->errors->breadth_err[(*difra).spr][(*difra).gamma][k] = breadth_err;
             
-            //salida con correccion instrumental
+            //printf("Correccion instrumental\n");
             double theta_rad = (peak_seeds[1][j] / 2.) * M_PI / 180.; //2theta en grados -> THETA en RADIANES
             ins_correction(&H, &eta, (*sync_data).ins, theta_rad);
             difra->shapes->fwhm_ins[(*difra).spr][(*difra).gamma][k] = H;
@@ -382,6 +384,10 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
             difra->shapes->eta[(*difra).spr][(*difra).gamma][k] = 0.0;
             difra->shapes->eta_ins[(*difra).spr][(*difra).gamma][k] = 0.0;
             difra->errors->eta_err[(*difra).spr][(*difra).gamma][k] = 0.0;
+            difra->shapes->breadth[(*difra).spr][(*difra).gamma][k] = 0.0;
+            difra->shapes->breadth_ins[(*difra).spr][(*difra).gamma][k] = 0.0;
+            difra->errors->breadth_err[(*difra).spr][(*difra).gamma][k] = 0.0;
+
         }//end if routine if(zero_peak_index[k] == 0)
         k++;
     }//end for routine for(i = 2; i < all_seeds_size; i += 4)

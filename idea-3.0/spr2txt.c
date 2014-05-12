@@ -274,7 +274,7 @@ int main()
                 //structure holding syncrotron's information
                 exp_data sync_data = {dist, pixel, pixel_number, ins};
                 //structure holding difractograms and fitting information
-                err_fit_data fit_errors = {fit_inten_err, fwhm_err, eta_err};
+                err_fit_data fit_errors = {fit_inten_err, fwhm_err, eta_err, breadth_err};
                 peak_shape_data shapes = {fwhm, fwhm_ins, eta, eta_ins, breadth, breadth_ins};
                 peak_data difra = {numrings, bg_size, k, star_d, y, del_gam, data1, bg_seed, fit_inten, &shapes, &fit_errors};
                 //Int, fwhm & eta fitting
