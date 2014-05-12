@@ -13,7 +13,7 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     //printf("Inicio pv_fitting\n");
     //variables auxiliares del programa
     int i, bad_fit, zero_peak_index[(*difra).numrings];
-    float treshold = 3.0;
+    float treshold = 5.0;
     //elimino los picos que tienen una intensidad menor que treshold
     int n_peaks = check_for_null_peaks (treshold, (*difra).numrings, zero_peak_index, intens);
     int seeds_size = 4 * n_peaks + 2, all_seeds_size = 4 * (*difra).numrings + 2;
@@ -44,7 +44,7 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     //creacion de un logfile con la entrada y salida de las semillas, asi no deberia tener que sacarlos resultados a pantalla para hacer un control de como va el fiteo
     //OJO sigue mas abajo!!!
     FILE * fp_logfile = fopen("fit_results.log", "a");
-    fprintf(fp_logfile, "spr: %d gamma :%d\nsemilla inicial\n", (*difra).spr, (*difra).gamma);
+    fprintf(fp_logfile, "spr: %d gamma :%d\nsemilla inicial\n", (*difra).spr, (*difra).gamma + 1);
     print_seeds2file(fp_logfile, peak_seeds[exists], fit_errors, seeds_size, (*difra).bg, (*difra).n_bg);
    
     //printf("Inicio de las iteraciones\n");

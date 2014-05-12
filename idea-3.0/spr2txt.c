@@ -55,7 +55,7 @@ int main()
  puts("\nThe angular values of Omega and Gamma, from the parameter file\n");
  puts("Options: \n 1. Replacement negative intensity values to ZERO\n 2. Intensity correction with LogFile.txt\n");
  puts("Error or suggestion to sangbong.yi@hzg.de");
- puts("Error or suggestion with respect to generalized pole figure routin to benatti@ifir-conicer.gov.ar");
+ puts("Error or suggestion with respect to generalized pole figure routin to benatti@ifir-conicet.gov.ar");
  puts("\n****************************************************************************");
  //LECTURA DEL ARCHIVO para_fit2d.dat
  if((fp = fopen("para_fit2d.dat", "r")) == NULL )
@@ -376,8 +376,8 @@ int main()
         fprintf(fp_fwhm_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
         fprintf(fp_eta_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec); 
         fprintf(fp_all, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
-        fprintf(fp_all, "#    2theta      theta      alpha       beta    raw_int     fit_int    fit_int_err    FWHM    FWHM_err    eta     eta_err    breadth    breadth_err");
-        fprintf(fp_all, "    FWHM_ins    FWHM_ins_err    era_ins    eta_ins_err    breadth_ins    breadth_ins_err\n");
+        fprintf(fp_all, "#    2theta    theta      alpha   beta    raw_int     fit_int    fit_int_err    H    H_err    eta     eta_err    B    B_err");
+        fprintf(fp_all, "    H_corr    H_corr_err    eta_ins    eta_ins_err    B_ins    B_ins_err\n");
         
         k = 0;//contador del archvo grid y el de mtex
         n = 1; //indice que me marca el spr
@@ -420,14 +420,14 @@ int main()
                 fprintf(fp_fwhm_pf, "%d%10.4f%10.4f%10.4f%10.4f%12.5lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fwhm[n][j + del_gam][m]);
                 fprintf(fp_eta_pf, "%d%10.4f%10.4f%10.4f%10.4f%12.5lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, eta[n][j + del_gam][m]);
                 //salida del archivo con todos los datos
-                fprintf(fp_all, "%d  %.4f  %.4f  %.4f  %.4f   %.5f    ", k + 1, 2 * theta[m], theta[m], alpha, beta, sabo_inten[n][j + del_gam][m]);
-                fprintf(fp_all, "%.5lf  %.5lf    ", fit_inten[n][j + del_gam][m], fit_inten_err[n][j + del_gam][m]);
-                fprintf(fp_all, "%.5lf  %.5lf    ", fwhm[n][j + del_gam][m], fwhm_err[n][j + del_gam][m]);
-                fprintf(fp_all, "%.5lf  %.5lf    ", eta[n][j + del_gam][m], eta_err[n][j + del_gam][m]);
-                fprintf(fp_all, "%.5lf  %.5lf    ", breadth[n][j + del_gam][m], breadth_err[n][j + del_gam][m]);
-                fprintf(fp_all, "%.5lf  %.5lf    ", fwhm_ins[n][j + del_gam][m], fwhm_err[n][j + del_gam][m]);
-                fprintf(fp_all, "%.5lf  %.5lf    ", eta_ins[n][j + del_gam][m], eta_err[n][j + del_gam][m]);
-                fprintf(fp_all, "%.5lf  %.5lf\n", breadth_ins[n][j + del_gam][m], breadth_err[n][j + del_gam][m]);
+                fprintf(fp_all, "%4d %4.4f %4.4f %4.4f %4.4f %5.5f ", k + 1, 2 * theta[m], theta[m], alpha, beta, sabo_inten[n][j + del_gam][m]);
+                fprintf(fp_all, "%5.5lf  %5.5lf ", fit_inten[n][j + del_gam][m], fit_inten_err[n][j + del_gam][m]);
+                fprintf(fp_all, "%5.5lf  %5.5lf ", fwhm[n][j + del_gam][m], fwhm_err[n][j + del_gam][m]);
+                fprintf(fp_all, "%5.5lf  %5.5lf ", eta[n][j + del_gam][m], eta_err[n][j + del_gam][m]);
+                fprintf(fp_all, "%5.5lf  %5.5lf ", breadth[n][j + del_gam][m], breadth_err[n][j + del_gam][m]);
+                fprintf(fp_all, "%5.5lf  %5.5lf ", fwhm_ins[n][j + del_gam][m], fwhm_err[n][j + del_gam][m]);
+                fprintf(fp_all, "%5.5lf  %5.5lf ", eta_ins[n][j + del_gam][m], eta_err[n][j + del_gam][m]);
+                fprintf(fp_all, "%5.5lf  %5.5lf\n", breadth_ins[n][j + del_gam][m], breadth_err[n][j + del_gam][m]);
                 //////////////////////////////////////////////////////////////////////////////////////////////////
                 fprintf(fp3, "%d%10.1f%10.1f%10.4f%10.4f\n", k + 1, neu_ome, neu_gam, alpha, beta); 
                 k++;

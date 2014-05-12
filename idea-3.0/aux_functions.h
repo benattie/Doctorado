@@ -142,4 +142,6 @@ int fit_result(int all_seeds_size, double ** peak_seeds, double * errors, int * 
 int results_output(int all_seeds_size, double ** peak_seeds, double * errors, int * zero_peak_index, exp_data * sync_data, peak_data * difra, int spr, int gamma);
 
 double delta_breadth(double H, double DH2, double eta, double Deta2);
+
+void print_double_vector(double * v, int size);
 #endif

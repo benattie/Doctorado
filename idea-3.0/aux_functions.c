@@ -108,17 +108,17 @@ void print_seeds(double * seeds, int seeds_size, double ** bg, int bg_size)
 void print_seeds2file(FILE * fp, double * seeds, double * errors, int seeds_size, double ** bg, int bg_size)
 {
     int i;
-    fprintf(fp, "H       DH        eta     Deta\n");
-    fprintf(fp, "%3.5lf  %3.5lf    %3.5lf  %3.5lf\n", seeds[0], errors[0], seeds[1], errors[1]);
-    fprintf(fp, "theta0  the_er    Int     Int_er    Shif_H  S_H_er    Sh_eta  S_eta_er\n");
+    fprintf(fp, "H        DH         eta      Deta\n");
+    fprintf(fp, "%7.5lf  %7.5lf    %7.5lf  %7.5lf\n", seeds[0], errors[0], seeds[1], errors[1]);
+    fprintf(fp, "theta0   the_er     Int      Int_er     Shif_H   S_H_er     Sh_eta  S_eta_er\n");
     for(i = 2; i < seeds_size; i += 4)
-        fprintf(fp, "%3.5lf  %3.5lf    %3.5lf  %3.5lf    %3.5lf  %3.5lf    %3.5lf  %3.5lf\n", seeds[i], errors[i], seeds[i + 1], errors[i + 1],
+        fprintf(fp, "%7.5lf  %7.5lf    %7.5lf  %7.5lf    %7.5lf  %7.5lf    %7.5lf  %7.5lf\n", seeds[i], errors[i], seeds[i + 1], errors[i + 1],
                                                                                             seeds[i + 2], errors[i + 2], seeds[i + 3], errors[i + 3]);
     for(i = 0; i < bg_size; i++)
-        fprintf(fp, "%3.3lf ", bg[0][i]);
+        fprintf(fp, "%5.3lf ", bg[0][i]);
     fprintf(fp, "\n");
     for(i = 0; i < bg_size; i++)
-        fprintf(fp, "%3.3lf ", bg[1][i]);
+        fprintf(fp, "%5.3lf ", bg[1][i]);
     fprintf(fp, "\n---------------------------\n");
 }
 
@@ -318,7 +318,7 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
                 {
                     bad_fit = 1;
                     I = I_aux;
-                    I_err = sqrt(errors[j + 1]);
+                    I_err = errors[j + 1];
                     H = difra->shapes->fwhm[spr][gamma][k];
                     H_err = difra->errors->fwhm_err[spr][gamma][k];
                     eta = difra->shapes->eta[spr][gamma][k];
@@ -332,9 +332,9 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
                     {
                         bad_fit = 1;
                         I = I_aux;
-                        I_err = sqrt(errors[j + 1]);
+                        I_err = errors[j + 1];
                         H = H_aux;
-                        H_err = sqrt(errors[0] + errors[j + 2]);
+                        H_err = sqrt(pow(errors[0], 2.0) + pow(errors[j + 2], 2.0));
                         eta = difra->shapes->eta[spr][gamma][k];
                         eta_err = difra->errors->eta_err[spr][gamma][k];
                         breadth = difra->shapes->breadth[spr][gamma][k];
@@ -344,13 +344,13 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
                     {
                         bad_fit = 0;
                         I = I_aux;
-                        I_err = sqrt(errors[j + 1]);
+                        I_err = errors[j + 1];
                         H = H_aux;
-                        H_err = sqrt(errors[0] + errors[j + 2]);
+                        H_err = sqrt(pow(errors[0], 2.0) + pow(errors[j + 2], 2.0));
                         eta = eta_aux;
-                        eta_err = sqrt(errors[1] + errors[j + 3]);
+                        eta_err = sqrt(pow(errors[1], 2.0) + pow(errors[j + 3], 2.0));
                         breadth = M_PI * (H_aux * 0.5) / (eta_aux + (1 - eta_aux) * sqrt(M_PI * log(2)));
-                        breadth_err = delta_breadth(H, errors[0] + errors[j + 2], eta, errors[1] + errors[j + 3]);
+                        breadth_err = delta_breadth(H, pow(errors[0] + errors[j + 2], 2.0), eta, pow(errors[1] + errors[j + 3], 2.0));
                     }
                 }
             }//end if routine if(I_aux < 0)
@@ -401,4 +401,12 @@ double delta_breadth(double H, double DH2, double eta, double Deta2)
     double c = (M_PI * 0.5) / b;
     double d = (H * (1 - a)) / b;
     return c * sqrt(DH2 + pow(d, 2) * Deta2);
+}
+
+void print_double_vector(double * v, int size)
+{
+    int i;
+    for(i = 0; i < size; i++)
+        printf("v[%d]  %lf\n", i, v[i]);
+    getchar();
 }
