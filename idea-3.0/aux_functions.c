@@ -105,19 +105,21 @@ void print_seeds(double * seeds, int seeds_size, double ** bg, int bg_size)
     getchar();
 }
 
-void print_seeds2file(FILE * fp, double * seeds, int seeds_size, double ** bg, int bg_size)
+void print_seeds2file(FILE * fp, double * seeds, double * errors, int seeds_size, double ** bg, int bg_size)
 {
     int i;
-    fprintf(fp, "%3.5lf  %3.5lf\n", seeds[0], seeds[1]);
+    fprintf(fp, "H       DH        eta     Deta\n");
+    fprintf(fp, "%3.5lf  %3.5lf    %3.5lf  %3.5lf\n", seeds[0], errors[0], seeds[1], errors[1]);
+    fprintf(fp, "theta0  the_er    Int     Int_er    Shif_H  S_H_er    Sh_eta  S_eta_er\n");
     for(i = 2; i < seeds_size; i += 4)
-        fprintf(fp, "%3.5lf  %3.5lf  %3.5lf  %3.5lf\n", seeds[i], seeds[i + 1], seeds[i + 2], seeds[i + 3]);
+        fprintf(fp, "%3.5lf  %3.5lf    %3.5lf  %3.5lf    %3.5lf  %3.5lf    %3.5lf  %3.5lf\n", seeds[i], errors[i], seeds[i + 1], errors[i + 1],
+                                                                                            seeds[i + 2], errors[i + 2], seeds[i + 3], errors[i + 3]);
     for(i = 0; i < bg_size; i++)
         fprintf(fp, "%3.3lf ", bg[0][i]);
     fprintf(fp, "\n");
     for(i = 0; i < bg_size; i++)
         fprintf(fp, "%3.3lf ", bg[1][i]);
     fprintf(fp, "\n---------------------------\n");
-
 }
 
 void reset_single_seed(double ** seeds, int index)
@@ -271,26 +273,26 @@ void solver_iterator(int * status, gsl_multifit_fdfsolver * s, const gsl_multifi
     //print_state (iter, s);
 }
 
-int fit_result(int all_seeds_size, double ** peak_seeds, int * zero_peak_index, exp_data * sync_data, peak_data * difra)
+int fit_result(int all_seeds_size, double ** peak_seeds, double * errors, int * zero_peak_index, exp_data * sync_data, peak_data * difra)
 {//habria que ver si efectivamente le estoy pasando los valores mas proximos
     int bad_fit;
     if((*difra).gamma == (*difra).start_gam)
     {
         if((*difra).spr == (*difra).start_spr)
-            bad_fit = results_output(all_seeds_size, peak_seeds, zero_peak_index, sync_data, difra, 0, 0); //en el indice 0,0 puse un -1
+            bad_fit = results_output(all_seeds_size, peak_seeds, errors, zero_peak_index, sync_data, difra, 0, 0); //en el indice 0,0 puse un -1
         else
-            bad_fit = results_output(all_seeds_size, peak_seeds, zero_peak_index, sync_data, difra, (*difra).spr - 1, (*difra).gamma);
+            bad_fit = results_output(all_seeds_size, peak_seeds, errors, zero_peak_index, sync_data, difra, (*difra).spr - 1, (*difra).gamma);
     }
     else
-        bad_fit = results_output(all_seeds_size, peak_seeds, zero_peak_index, sync_data, difra, (*difra).spr, (*difra).gamma - (*difra).start_gam);
+        bad_fit = results_output(all_seeds_size, peak_seeds, errors, zero_peak_index, sync_data, difra, (*difra).spr, (*difra).gamma - (*difra).start_gam);
 
     return bad_fit;
 }
 
-int results_output(int all_seeds_size, double ** peak_seeds, int * zero_peak_index, exp_data * sync_data, peak_data * difra, int spr, int gamma)
+int results_output(int all_seeds_size, double ** peak_seeds, double * errors, int * zero_peak_index, exp_data * sync_data, peak_data * difra, int spr, int gamma)
 {
     int bad_fit = 0, i, j = 2, k = 0;
-    double I, I_aux, H, H_aux, eta, eta_aux;
+    double I, I_aux, I_err, H, H_aux, H_err, eta, eta_aux, eta_err, breadth, breadth_err;
     for(i = 2; i < all_seeds_size; i += 4)
     {
         if(zero_peak_index[k] == 0)
@@ -302,8 +304,13 @@ int results_output(int all_seeds_size, double ** peak_seeds, int * zero_peak_ind
             {
                 bad_fit = 1;
                 I = 0.0;
-                H = (*difra).fwhm[spr][gamma][k];
-                eta = (*difra).eta[spr][gamma][k];
+                I_err = 0.0;
+                H = difra->shapes->fwhm[spr][gamma][k];
+                H_err = difra->errors->fwhm_err[spr][gamma][k];
+                eta = difra->shapes->eta[spr][gamma][k];
+                eta_err = difra->errors->eta_err[spr][gamma][k];
+                breadth = difra->shapes->breadth[spr][gamma][k];
+                breadth_err = difra->errors->breadth_err[spr][gamma][k];
             }
             else
             {
@@ -311,8 +318,13 @@ int results_output(int all_seeds_size, double ** peak_seeds, int * zero_peak_ind
                 {
                     bad_fit = 1;
                     I = I_aux;
-                    H = (*difra).fwhm[spr][gamma][k];
-                    eta = (*difra).eta[spr][gamma][k];
+                    I_err = sqrt(errors[j + 1]);
+                    H = difra->shapes->fwhm[spr][gamma][k];
+                    H_err = difra->errors->fwhm_err[spr][gamma][k];
+                    eta = difra->shapes->eta[spr][gamma][k];
+                    eta_err = difra->errors->eta_err[spr][gamma][k];
+                    breadth = difra->shapes->breadth[spr][gamma][k];
+                    breadth_err = difra->errors->breadth_err[spr][gamma][k];
                 }
                 else
                 {
@@ -320,32 +332,67 @@ int results_output(int all_seeds_size, double ** peak_seeds, int * zero_peak_ind
                     {
                         bad_fit = 1;
                         I = I_aux;
+                        I_err = sqrt(errors[j + 1]);
                         H = H_aux;
-                        eta = (*difra).eta[spr][gamma][k];
+                        H_err = sqrt(errors[0] + errors[j + 2]);
+                        eta = difra->shapes->eta[spr][gamma][k];
+                        eta_err = difra->errors->eta_err[spr][gamma][k];
+                        breadth = difra->shapes->breadth[spr][gamma][k];
+                        breadth_err = difra->errors->breadth_err[spr][gamma][k];
                     }
                     else
                     {
                         bad_fit = 0;
                         I = I_aux;
+                        I_err = sqrt(errors[j + 1]);
                         H = H_aux;
+                        H_err = sqrt(errors[0] + errors[j + 2]);
                         eta = eta_aux;
+                        eta_err = sqrt(errors[1] + errors[j + 3]);
+                        breadth = M_PI * (H_aux * 0.5) / (eta_aux + (1 - eta_aux) * sqrt(M_PI * log(2)));
+                        breadth_err = delta_breadth(H, errors[0] + errors[j + 2], eta, errors[1] + errors[j + 3]);
                     }
                 }
             }//end if routine if(I_aux < 0)
-            //double theta_rad = (peak_seeds[1][j] / 2.) * M_PI / 180.; //2theta en grados -> THETA en RADIANES
-            //ins_correction(&H, &eta, (*sync_data).ins, theta_rad);
             (*difra).intens[(*difra).spr][(*difra).gamma][k] = I;
-            (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = H;
-            (*difra).eta[(*difra).spr][(*difra).gamma][k] = eta;
+            difra->errors->intens_err[(*difra).spr][(*difra).gamma][k] = I_err;
+            
+            //salida sin correccion instrumental
+            difra->shapes->fwhm[(*difra).spr][(*difra).gamma][k] = H;
+            difra->errors->fwhm_err[(*difra).spr][(*difra).gamma][k] = H_err;
+            difra->shapes->eta[(*difra).spr][(*difra).gamma][k] = eta;
+            difra->errors->eta_err[(*difra).spr][(*difra).gamma][k] = eta_err;
+            difra->shapes->breadth[(*difra).spr][(*difra).gamma][k] = breadth;
+            difra->errors->breadth_err[(*difra).spr][(*difra).gamma][k] = breadth_err;
+            
+            //salida con correccion instrumental
+            double theta_rad = (peak_seeds[1][j] / 2.) * M_PI / 180.; //2theta en grados -> THETA en RADIANES
+            ins_correction(&H, &eta, (*sync_data).ins, theta_rad);
+            difra->shapes->fwhm_ins[(*difra).spr][(*difra).gamma][k] = H;
+            difra->shapes->eta_ins[(*difra).spr][(*difra).gamma][k] = eta;
+            difra->shapes->breadth_ins[(*difra).spr][(*difra).gamma][k] = M_PI * (H * 0.5) / (eta + (1 - eta) * sqrt(M_PI * log(2)));
             j += 4;
         }
         else
         {
             (*difra).intens[(*difra).spr][(*difra).gamma][k] = 0.0;
-            (*difra).fwhm[(*difra).spr][(*difra).gamma][k] = 0.0;
-            (*difra).eta[(*difra).spr][(*difra).gamma][k] = 0.0;
+            difra->shapes->fwhm[(*difra).spr][(*difra).gamma][k] = 0.0;
+            difra->shapes->fwhm_ins[(*difra).spr][(*difra).gamma][k] = 0.0;
+            difra->errors->fwhm_err[(*difra).spr][(*difra).gamma][k] = 0.0;
+            difra->shapes->eta[(*difra).spr][(*difra).gamma][k] = 0.0;
+            difra->shapes->eta_ins[(*difra).spr][(*difra).gamma][k] = 0.0;
+            difra->errors->eta_err[(*difra).spr][(*difra).gamma][k] = 0.0;
         }//end if routine if(zero_peak_index[k] == 0)
         k++;
     }//end for routine for(i = 2; i < all_seeds_size; i += 4)
     return bad_fit;
+}
+
+double delta_breadth(double H, double DH2, double eta, double Deta2)
+{
+    double a = sqrt(M_PI * log(2));
+    double b = eta + (1 - eta) * a;
+    double c = (M_PI * 0.5) / b;
+    double d = (H * (1 - a)) / b;
+    return c * sqrt(DH2 + pow(d, 2) * Deta2);
 }

@@ -27,18 +27,21 @@ int main()
  float data1[2500], BG_m, intens[500][10];
  float theta[20], neu_ome, neu_ome1, neu_gam1, neu_gam, alpha, beta;
  double pixel, dist;
- double *** sabo_inten = r3_tensor_double_alloc(40, 500, 10);
- double *** fit_inten = r3_tensor_double_alloc(40, 500, 10);
- double *** fwhm = r3_tensor_double_alloc(40, 500, 10);
- double *** eta = r3_tensor_double_alloc(40, 500, 10);
- double ** seeds, ** bg_seed; 
+ double ***sabo_inten = r3_tensor_double_alloc(40, 500, 10);
+ double ***fit_inten = r3_tensor_double_alloc(40, 500, 10), ***fit_inten_err = r3_tensor_double_alloc(40, 500, 10);
+ double ***fwhm = r3_tensor_double_alloc(40, 500, 10), ***fwhm_err = r3_tensor_double_alloc(40, 500, 10);
+ double ***eta = r3_tensor_double_alloc(40, 500, 10), ***eta_err = r3_tensor_double_alloc(40, 500, 10);
+ double ***fwhm_ins = r3_tensor_double_alloc(40, 500, 10), ***eta_ins = r3_tensor_double_alloc(40, 500, 10);
+ double ***breadth = r3_tensor_double_alloc(40, 500, 10), ***breadth_ins = r3_tensor_double_alloc(40, 500, 10);
+ double ***breadth_err = r3_tensor_double_alloc(40, 500, 10);
+ double ** seeds, ** bg_seed;
  char buf_temp[100], buf[100], buf1[100];
  char path_out[150], path [150], filename1[100], inform[10], path1[150], inform1[10];
- char sabo_intenfile[200], fit_intenfile[200], fwhmfile[200], etafile[200];
+ char sabo_intenfile[200], fit_intenfile[200], fwhmfile[200], etafile[200], alldatafile[200];
  char marfile[150];
  char minus_zero; 
  char logfile_yn, logfile_yn_temp;
- FILE *fp, *fp1, *fp3, *fp_IRF, *fp_fit;
+ FILE *fp, *fp1, *fp3, *fp_IRF, *fp_fit, *fp_all;
  FILE *fp_sabointen_pf, *fp_fitinten_pf, *fp_fwhm_pf, *fp_eta_pf;
  IRF ins;
  struct DAT intensss;
@@ -213,6 +216,14 @@ int main()
             fit_inten[0][0][n] = -1;
             fwhm[0][0][n] = -1;
             eta[0][0][n] = -1;
+            breadth[0][0][n] = -1;
+            fwhm_ins[0][0][n] = -1;
+            eta_ins[0][0][n] = -1;
+            breadth_ins[0][0][n] = -1;
+            fit_inten_err[0][0][n] = -1;
+            fwhm_err[0][0][n] = -1;
+            eta_err[0][0][n] = -1;
+            breadth_err[0][0][n] = -1;
         }
         //Data Read-In
         //printf("Data Read-in\n");
@@ -262,8 +273,10 @@ int main()
                     sabo_inten[k][y][n] = peak_intens_av[n];
                 //structure holding syncrotron's information
                 exp_data sync_data = {dist, pixel, pixel_number, ins};
-                //structure holding difractograms information
-                peak_data difra = {numrings, bg_size, k, star_d, y, del_gam, data1, bg_seed, fit_inten, fwhm, eta};
+                //structure holding difractograms and fitting information
+                err_fit_data fit_errors = {fit_inten_err, fwhm_err, eta_err};
+                peak_shape_data shapes = {fwhm, fwhm_ins, eta, eta_ins, breadth, breadth_ins};
+                peak_data difra = {numrings, bg_size, k, star_d, y, del_gam, data1, bg_seed, fit_inten, &shapes, &fit_errors};
                 //Int, fwhm & eta fitting
                 pv_fitting(exists, &sync_data, &difra, peak_intens_av, seeds);
                 memset(intens_av, 0, 1800 * sizeof(float));
@@ -343,12 +356,28 @@ int main()
         {
             fprintf(stderr, "Error opening file PF_grid.dat\n"); exit(1);
         }
+        //EN ESTE ARCHIVO VOY A GUARDAR TODOS LOS DATOS JUNTOS
+        strcpy(alldatafile, "");
+        strcat(alldatafile, path_out);
+        strcat(alldatafile, filename1);
+        strcat(alldatafile, "ALL_PF_");
+        sprintf(buf, "%d", m + 1);
+        strcat(alldatafile, buf);
+        strcat(alldatafile, ".mtex");
+
+        if((fp_all = fopen(alldatafile, "w")) == NULL)
+        {
+            fprintf(stderr, "Error beim oeffnen der Datei(%s).\n", alldatafile); exit(1);
+        }
         ////////////////////////////////////////////////////////////////////////////////////////////
         //Imprimo el tiempo de ejecucion del programa en el .mtex
         fprintf(fp_sabointen_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
         fprintf(fp_fitinten_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
         fprintf(fp_fwhm_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
         fprintf(fp_eta_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec); 
+        fprintf(fp_all, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
+        fprintf(fp_all, "#    2theta      theta      alpha       beta    raw_int     fit_int    fit_int_err    FWHM    FWHM_err    eta     eta_err    breadth    breadth_err");
+        fprintf(fp_all, "    FWHM_ins    FWHM_ins_err    era_ins    eta_ins_err    breadth_ins    breadth_ins_err\n");
         
         k = 0;//contador del archvo grid y el de mtex
         n = 1; //indice que me marca el spr
@@ -383,14 +412,24 @@ int main()
                         
                 //imprimo las intensidades en formato figura de polos, asi como el grid
                 if((minus_zero == 'Y' || minus_zero == 'y') && sabo_inten[n][j + del_gam][m] < 0)
-                    fprintf(fp_sabointen_pf, "%10d%10.4f%10.4f%10.4f%10.4f%12.3lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, 0.0);
+                    fprintf(fp_sabointen_pf, "%d%10.4f%10.4f%10.4f%10.4f%12.3lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, 0.0);
                 else
-                    fprintf(fp_sabointen_pf, "%10d%10.4f%10.4f%10.4f%10.4f%12.3lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, sabo_inten[n][j + del_gam][m]);
+                    fprintf(fp_sabointen_pf, "%d%10.4f%10.4f%10.4f%10.4f%12.3lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, sabo_inten[n][j + del_gam][m]);
 
-                fprintf(fp_fitinten_pf, "%10d%10.4f%10.4f%10.4f%10.4f%12.3lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fit_inten[n][j + del_gam][m]);
-                fprintf(fp_fwhm_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fwhm[n][j + del_gam][m]);
-                fprintf(fp_eta_pf, "%11d%10.4f%10.4f%10.4f%10.4f%12.5lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, eta[n][j + del_gam][m]);
-                fprintf(fp3, "%11d%10.1f%10.1f%10.4f%10.4f\n", k + 1, neu_ome, neu_gam, alpha, beta); 
+                fprintf(fp_fitinten_pf, "%d%10.4f%10.4f%10.4f%10.4f%12.3lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fit_inten[n][j + del_gam][m]);
+                fprintf(fp_fwhm_pf, "%d%10.4f%10.4f%10.4f%10.4f%12.5lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fwhm[n][j + del_gam][m]);
+                fprintf(fp_eta_pf, "%d%10.4f%10.4f%10.4f%10.4f%12.5lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, eta[n][j + del_gam][m]);
+                //salida del archivo con todos los datos
+                fprintf(fp_all, "%d  %.4f  %.4f  %.4f  %.4f   %.5f    ", k + 1, 2 * theta[m], theta[m], alpha, beta, sabo_inten[n][j + del_gam][m]);
+                fprintf(fp_all, "%.5lf  %.5lf    ", fit_inten[n][j + del_gam][m], fit_inten_err[n][j + del_gam][m]);
+                fprintf(fp_all, "%.5lf  %.5lf    ", fwhm[n][j + del_gam][m], fwhm_err[n][j + del_gam][m]);
+                fprintf(fp_all, "%.5lf  %.5lf    ", eta[n][j + del_gam][m], eta_err[n][j + del_gam][m]);
+                fprintf(fp_all, "%.5lf  %.5lf    ", breadth[n][j + del_gam][m], breadth_err[n][j + del_gam][m]);
+                fprintf(fp_all, "%.5lf  %.5lf    ", fwhm_ins[n][j + del_gam][m], fwhm_err[n][j + del_gam][m]);
+                fprintf(fp_all, "%.5lf  %.5lf    ", eta_ins[n][j + del_gam][m], eta_err[n][j + del_gam][m]);
+                fprintf(fp_all, "%.5lf  %.5lf\n", breadth_ins[n][j + del_gam][m], breadth_err[n][j + del_gam][m]);
+                //////////////////////////////////////////////////////////////////////////////////////////////////
+                fprintf(fp3, "%d%10.1f%10.1f%10.4f%10.4f\n", k + 1, neu_ome, neu_gam, alpha, beta); 
                 k++;
             }//end for routine for(j = anf_gam; j <= ende_gam; j += del_gam)
             n++;
@@ -400,19 +439,29 @@ int main()
         fflush(fp_fitinten_pf);
         fflush(fp_fwhm_pf);
         fflush(fp_eta_pf);
+        fflush(fp_all);
         fclose(fp3);
         fclose(fp_sabointen_pf);
         fclose(fp_fitinten_pf);
         fclose(fp_fwhm_pf);
         fclose(fp_eta_pf);
+        fclose(fp_all);
     }/* End for(m = 0; m < numrings; m++)*/
     printf("\n======= End angular transformation ======= \n");
  }/*End of for(Z = 1; Z <= NrSample; Z++) */
  fclose(fp);
  free_r3_tensor_double(sabo_inten, 40, 500);
  free_r3_tensor_double(fit_inten, 40, 500);
+ free_r3_tensor_double(fit_inten_err, 40, 500);
  free_r3_tensor_double(fwhm, 40, 500);
+ free_r3_tensor_double(fwhm_ins, 40, 500);
+ free_r3_tensor_double(fwhm_err, 40, 500);
  free_r3_tensor_double(eta, 40, 500);
+ free_r3_tensor_double(eta_ins, 40, 500);
+ free_r3_tensor_double(eta_err, 40, 500);
+ free_r3_tensor_double(breadth, 40, 500);
+ free_r3_tensor_double(breadth_ins, 40, 500);
+ free_r3_tensor_double(breadth_err, 40, 500);
  printf("\nSólo un sujeto consciente de las fuerzas sociales que guían su práctica puede aspirar a controlar su destino\n");
  return 0;
 } /*End of Main()*/

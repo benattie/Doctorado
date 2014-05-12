@@ -154,7 +154,7 @@ void pv_step2(int exists, double ** seeds, int seeds_size, double ** bg, struct 
         //printf("Final del paso 2\n");
 }
 
-void pv_step3(int exists, double ** seeds, int seeds_size, double ** bg, struct data * d, int n_param)
+void pv_step3(int exists, double ** seeds, double * errors, int seeds_size, double ** bg, struct data * d, int n_param)
 {
     //variables generales del programa
     int i, j;
@@ -165,7 +165,7 @@ void pv_step3(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     const gsl_multifit_fdfsolver_type * T;
     gsl_multifit_fdfsolver * s;
     gsl_multifit_function_fdf pv; //funcion a fitear
-    //gsl_matrix * covar = gsl_matrix_alloc (n_param, n_param);//matriz covariante ---> moverlo para el principio de cada paso (o solo para el ultimo, no se)
+    gsl_matrix * covar = gsl_matrix_alloc (n_param, n_param);//matriz covariante
     double * x_init = vector_double_alloc(n_param);
 
     //printf("Inicializando los parametros\n");
@@ -206,15 +206,24 @@ void pv_step3(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     s = gsl_multifit_fdfsolver_alloc (T, (*d).n, n_param);
     gsl_multifit_fdfsolver_set (s, &pv, &x.vector);
     solver_iterator(&status, s, T);
-    
+    gsl_multifit_covar (s->J, 0.0, covar);
+
     //printf("Salida de los resultados del paso 3\n");
     j = 0;
-    seeds[1][0] = gsl_vector_get(s -> x, j); j++;//H
-    seeds[1][1] = gsl_vector_get(s -> x, j); j++;//eta
+    seeds[1][0] = gsl_vector_get(s -> x, j);
+    errors[0] = gsl_matrix_get(covar, j, j);//aca estoy sumando el cuadradro del error de H
+    j++;//H
+    seeds[1][1] = gsl_vector_get(s -> x, j); 
+    errors[1] = gsl_matrix_get(covar, j, j);//aca estoy sumando el cuadradro del error de eta
+    j++;//eta
     for(i = 2; i < seeds_size; i += 4)
     {
-        seeds[1][i] = gsl_vector_get(s -> x, j); j++; //theta_0
-        seeds[1][i + 1] = gsl_vector_get(s -> x, j); j++; //Intensity
+        seeds[1][i] = gsl_vector_get(s -> x, j); 
+        errors[i] = gsl_matrix_get(covar, j, j);//aca estoy sumando el cuadradro del error de theta0
+        j++; //theta_0
+        seeds[1][i + 1] = gsl_vector_get(s -> x, j); 
+        errors[i] = gsl_matrix_get(covar, j, j);//aca estoy sumando el cuadradro del error de la intensidad
+        j++; //Intensity
     }
     for(i = 0; i < (*d).n_bg; i++)
     {
@@ -222,10 +231,11 @@ void pv_step3(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     }
     free(x_init);
     gsl_multifit_fdfsolver_free (s);
+    gsl_matrix_free(covar);
     //printf("Final del paso 3\n");
 }
 
-void pv_step4(int exists, double ** seeds, int seeds_size, double ** bg, struct data * d, int n_param)
+void pv_step4(int exists, double ** seeds, double * errors, int seeds_size, double ** bg, struct data * d, int n_param)
 {
     //variables generales del programa
     int i, j;
@@ -235,7 +245,7 @@ void pv_step4(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     const gsl_multifit_fdfsolver_type * T;
     gsl_multifit_fdfsolver * s;
     gsl_multifit_function_fdf pv; //funcion a fitear
-    //gsl_matrix * covar = gsl_matrix_alloc (n_param, n_param);//matriz covariante
+    gsl_matrix * covar = gsl_matrix_alloc (n_param, n_param);//matriz covariante
     double * x_init = vector_double_alloc(n_param);
 
     //printf("Inicializando los parametros\n");
@@ -270,15 +280,24 @@ void pv_step4(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     s = gsl_multifit_fdfsolver_alloc (T, (*d).n, n_param);
     gsl_multifit_fdfsolver_set (s, &pv, &x.vector);
     solver_iterator(&status, s, T);
+    gsl_multifit_covar (s->J, 0.0, covar);
     
     //printf("Salida de los resultados del paso 4\n");
     j = 0;
     for(i = 2; i < seeds_size; i += 4)
     {
-        seeds[1][i] = gsl_vector_get(s -> x, j); j++; //theta_0
-        seeds[1][i + 1] = gsl_vector_get(s -> x, j); j++; //Intensity
-        seeds[1][i + 2] = gsl_vector_get(s -> x, j); j++; //Shift_H
-        seeds[1][i + 3] = gsl_vector_get(s -> x, j); j++; //Shift_eta
+        seeds[1][i] = gsl_vector_get(s -> x, j);
+        errors[i] = gsl_matrix_get(covar, j, j);//aca estoy sumando el cuadradro del error de theta0
+        j++; //theta_0
+        seeds[1][i + 1] = gsl_vector_get(s -> x, j);
+        errors[i] = gsl_matrix_get(covar, j, j);//aca estoy sumando el cuadradro del error de la intensidad
+        j++; //Intensity
+        seeds[1][i + 2] = gsl_vector_get(s -> x, j);
+        errors[i] = gsl_matrix_get(covar, j, j);//aca estoy sumando el cuadradro del error del corrimiento de FWHM
+        j++; //Shift_H
+        seeds[1][i + 3] = gsl_vector_get(s -> x, j);
+        errors[i] = gsl_matrix_get(covar, j, j);//aca estoy sumando el cuadradro del error del corrimiento del eta
+        j++; //Shift_eta
     }
     for(i = 0; i < (*d).n_bg; i++)
     {
@@ -286,5 +305,6 @@ void pv_step4(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     }
     free(x_init);
     gsl_multifit_fdfsolver_free (s);
+    gsl_matrix_free(covar);
     //printf("Final del paso 4\n");
 }

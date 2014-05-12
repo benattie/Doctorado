@@ -24,6 +24,25 @@ typedef struct exp_data
     int size;
     IRF ins;
 } exp_data;
+//estructura con los errores de los fiteos
+typedef struct err_fit_data
+{
+    double *** intens_err;
+    double *** fwhm_err;
+    double *** eta_err;
+    double *** breadth_err;
+} err_fit_data;
+//parametros que definen la forma del pico
+typedef struct peak_shape_data
+{
+    double *** fwhm;
+    double *** fwhm_ins;
+    double *** eta;
+    double *** eta_ins;
+    double *** breadth;
+    double *** breadth_ins;
+} peak_shape_data;
+
 //datos del difractorgrama
 typedef struct peak_data
 {
@@ -36,10 +55,9 @@ typedef struct peak_data
     float * intensity;
     double ** bg;
     double *** intens;
-    double *** fwhm;
-    double *** eta;
+    peak_shape_data * shapes;
+    err_fit_data * errors;
 } peak_data;
-
 //datos basicos del fiteo
 struct data 
 {
@@ -95,7 +113,7 @@ void print_state (int iter, gsl_multifit_fdfsolver * s);
 
 void print_seeds(double * seeds, int seeds_size, double ** bg, int bg_size);
 
-void print_seeds2file(FILE * fp, double * seeds, int seeds_size, double ** bg, int bg_size);
+void print_seeds2file(FILE * fp, double * seeds, double * errors, int seeds_size, double ** bg, int bg_size);
 
 void reset_single_seed(double ** seeds, int index);
 
@@ -119,7 +137,9 @@ void average(float * intens_av, float * peak_intens_av, int n_av, int size, int 
 
 void solver_iterator(int * status, gsl_multifit_fdfsolver * s, const gsl_multifit_fdfsolver_type * T);
 
-int fit_result(int all_seeds_size, double ** peak_seeds, int * zero_peak_index, exp_data * sync_data, peak_data * difra);
+int fit_result(int all_seeds_size, double ** peak_seeds, double * errors, int * zero_peak_index, exp_data * sync_data, peak_data * difra);
 
-int results_output(int all_seeds_size, double ** peak_seeds, int * zero_peak_index, exp_data * sync_data, peak_data * difra, int spr, int gamma);
+int results_output(int all_seeds_size, double ** peak_seeds, double * errors, int * zero_peak_index, exp_data * sync_data, peak_data * difra, int spr, int gamma);
+
+double delta_breadth(double H, double DH2, double eta, double Deta2);
 #endif
