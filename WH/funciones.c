@@ -289,44 +289,103 @@ void read_input(FILE *fp, file_data *fdata, crystal_data *cdata, aux_data *adata
     }
 }
 
-void print_results_(int model, FILE * fp, double * fit_results, double * wh_results, double ** alpha, double ** beta, crystal_data * cdata)
+void williamson_hall_plot(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values)
 {
-    int i;
-    double b2, c;
+    int i, j;
+    double radian = M_PI / 360., delta, q, Ch00;
+    for(i = 0; i < nlines; i++)
+    {
+        if((i % 200) == 0) printf("Completado en un %d %%\n", (i * 100) / nlines);
+
+        for(delta = adata->delta_min; delta < adata->delta_max; delta += adata->delta_step)
+        {
+            for(q = adata->q_min; q < adata->q_max; q += adata->q_step)
+            {
+                for(Ch00 = adata->Ch00_min; Ch00 < adata->Ch00_max; Ch00 += adata->Ch00_step)
+                {
+                    for (j = 0; j < cdata->npeaks; j++)
+                    {
+                        fit_data->x[j] = 2. * sin(angles->theta_grad[j][i]*radian) / adata->lambda * Chkl(Ch00, q, cdata->indices[j]);
+                        fit_data->y[j] = widths->FWHM[j][i] * cos(angles->theta_grad[j][i]*radian) / adata->lambda - delta * cdata->warrenc[j];
+                        //y_err[j] = widths->FWHM_err[j][i] * cos(angles->theta_grad[j][i]) / adata->lambda - delta * cdata->warrenc[j];
+                    }
+                    gsl_fit_linear(fit_data->x, 1, fit_data->y, 1, cdata -> npeaks, &fit_data->h,  &fit_data->m,
+                            &fit_data->covar[0][0], &fit_data->covar[0][1], &fit_data->covar[1][1], &fit_data->chisq); //fiteo sin peso
+                    //gsl_fit_wlinear(fit_data->x, 1, fit_data->y_err, 1, fit_data->y, 1, c_data->npeaks, &fit_data->h,  &fit_data->m,
+                    //&fit_data->covar[0][0], &fit_data->covar[0][1], &fit_data->covar[1][1], &fit_data->chisq); //fiteo con peso
+                    fit_data->R = gsl_stats_correlation(fit_data->x, 1, fit_data->y, 2, cdata -> npeaks);
+                    if(fabs(fit_data->R) > out_values->R_max && fit_data->h > 0 && fit_data->m > 0)
+                    {
+                        out_values->R_max = fit_data->R;
+                        out_values->best_R_values[0] = delta;
+                        out_values->best_R_values[1] = q;
+                        out_values->best_R_values[2] = Ch00;
+                        out_values->best_R_values[3] = fit_data->h;
+                        out_values->best_R_values[4] = fit_data->m;
+                        out_values->best_R_values[5] = fit_data->R;
+                        out_values->best_R_values[6] = fit_data->chisq;
+                    }
+                    if(fit_data->chisq < out_values->chisq_min && fit_data->h > 0 && fit_data->m > 0)
+                    {
+                        out_values->chisq_min = fit_data->chisq;
+                        out_values->best_chisq_values[0] = delta;
+                        out_values->best_chisq_values[1] = q;
+                        out_values->best_chisq_values[2] = Ch00;
+                        out_values->best_chisq_values[3] = fit_data->h;
+                        out_values->best_chisq_values[4] = fit_data->m;
+                        out_values->best_chisq_values[5] = fit_data->R;
+                        out_values->best_chisq_values[6] = fit_data->chisq;
+                    }
+                }//end for routine for(Ch00 = adata->Ch00_min; Ch00 < adata->Ch00_max; Ch00 += adata->Ch00_step)
+            }//end for routine for(q = adata->q_min; q < adata->q_max; q += adata->q_step)
+        }//end for routine for(delta = adata->delta_min; delta < adata->delta_max; delta += adata->delta_step)
+    }//end for routine for(i = 0; i < nlines; i++)
+}
+
+void print_results_(int model, FILE * fp, double * fit_results, linear_fit * fit_data, int nlines, angles_grad * angles, crystal_data * cdata)
+{
+    int i, j;
+    double b2 = pow(cdata->burgersv, 2);
+    double c = 2 / (M_PI * b2), wh_results[fit_data->n_out_params];
     switch(model)
     {
-        b2 = pow(cdata->burgersv, 2);
-        c = 2 / (M_PI * b2);
         default:
             printf("Modelo inválido. Seleccione un modelo válido.(1 o 2)\n");
             exit(1);
             break;
         case 1:
-            wh_results[0] = fit_results[0]; //delta
-            wh_results[1] = fit_results[1]; //q
-            wh_results[2] = fit_results[2]; //Ch00
-            wh_results[3] = 0.9 / fit_results[3]; //D = 0.9 / h
-            wh_results[4] = c * pow(fit_results[4], 2); //M^2 \ro = alpha * m^2
-            wh_results[5] = fit_results[5]; //R
-            wh_results[6] = fit_results[6]; //chisq
-            fprintf(fp, "#alpha    beta    delta    q    Ch00    D    (M^2 * \\ro)    R    chi2\n");
-            fprintf(fp, "%lf    %lf    ", alpha[0][j], beta[0][j]);
-            for(i = 0; i < 7; i++)
-                fprintf(fp, "%.5lf    ", wh_results[i]);
-            fprintf(fp, "\n");
+            for(i = 0; i < nlines; i++)
+            {
+                wh_results[0] = fit_results[0]; //delta
+                wh_results[1] = fit_results[1]; //q
+                wh_results[2] = fit_results[2]; //Ch00
+                wh_results[3] = 0.9 / fit_results[3]; //D = 0.9 / h
+                wh_results[4] = c * pow(fit_results[4], 2); //M^2 \ro = alpha * m^2
+                wh_results[5] = fit_results[5]; //R
+                wh_results[6] = fit_results[6]; //chisq
+                fprintf(fp, "#alpha    beta    delta    q    Ch00    D    (M^2 * \\ro)    R    chi2\n");
+                fprintf(fp, "%lf    %lf    ", angles->alpha_grad[0][i], angles->beta_grad[0][i]);
+                for(j = 0; j < 7; j++)
+                    fprintf(fp, "%.5lf    ", wh_results[j]);
+                fprintf(fp, "\n");
+            }
             break;
         case 2:
-            wh_results[0] = fit_results[0]; //delta
-            wh_results[1] = fit_results[1]; //q
-            wh_results[2] = fit_results[2]; //Ch00
-            wh_results[3] = 0.9 / sqrt(fit_results[3]); //D = 0.9 /sqrt(h)
-            wh_results[4] = c * fit_results[4]; //M^2 \ro = alpha * m
-            wh_results[5] = fit_results[5]; //R
-            wh_results[6] = fit_results[6]; //chisq
-            fprintf(fp, "#alpha    beta    delta    q    Ch00    D    (M^2 * \\ro)    R    chi2\n");
-            fprintf(fp, "%lf    %lf    ", alpha[0][j], beta[0][j]);
-            for(i = 0; i < 7; i++)
-                fprintf(fp, "%.5lf    ", wh_results[i]);
-            fprintf(fp, "\n");
+            for(i = 0; i < nlines; i++)
+            {
+                wh_results[0] = fit_results[0]; //delta
+                wh_results[1] = fit_results[1]; //q
+                wh_results[2] = fit_results[2]; //Ch00
+                wh_results[3] = 0.9 / sqrt(fit_results[3]); //D = 0.9 /sqrt(h)
+                wh_results[4] = c * fit_results[4]; //M^2 \ro = alpha * m
+                wh_results[5] = fit_results[5]; //R
+                wh_results[6] = fit_results[6]; //chisq
+                fprintf(fp, "#alpha    beta    delta    q    Ch00    D    (M^2 * \\ro)    R    chi2\n");
+                fprintf(fp, "%lf    %lf    ", angles->alpha_grad[0][i], angles->beta_grad[0][i]);
+                for(j = 0; j < 7; j++)
+                    fprintf(fp, "%.5lf    ", wh_results[j]);
+                fprintf(fp, "\n");
+            }
             break;
+    }//end switch(model)
 }

@@ -65,15 +65,24 @@ typedef struct angles_grad
 
 typedef struct linear_fit
 {
+    int n_out_params;
     double m;
     double h;
     double *x;
     double *y;
     double *y_err;
     double R;
-    double chi2;
+    double chisq;
     double **covar;
-} linear_fit
+} linear_fit;
+
+typedef struct best_values
+{
+    double R_max;
+    double * best_R_values;
+    double chisq_min;
+    double *best_chisq_values;
+} best_values;
 
 //funciones
 double warren_constants(char * type, int * hkl);
@@ -98,4 +107,7 @@ void printf_auxdata(aux_data *adata);
 
 void read_input(FILE *fp, file_data *fdata, crystal_data *cdata, aux_data *adata);
 
+void print_results_(int model, FILE * fp, double * fit_results, linear_fit * fit_data, int nlines, angles_grad * angles, crystal_data * cdata);
+
+void williamson_hall_plot(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values);
 #endif
