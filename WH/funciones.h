@@ -47,6 +47,34 @@ typedef struct aux_data
     double Ch00_max;
 } aux_data;
 
+typedef struct shape_params
+{
+    double **FWHM;
+    double **FWHM_err;
+    double **breadth;
+    double **breadth_err;
+} shape_params;
+
+typedef struct angles_grad
+{
+    double **theta_grad;
+    double **dostheta_grad;
+    double **alpha_grad;
+    double **beta_grad;
+} angles_grad;
+
+typedef struct linear_fit
+{
+    double m;
+    double h;
+    double *x;
+    double *y;
+    double *y_err;
+    double R;
+    double chi2;
+    double **covar;
+} linear_fit
+
 //funciones
 double warren_constants(char * type, int * hkl);
 

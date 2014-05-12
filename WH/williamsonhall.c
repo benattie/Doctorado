@@ -7,12 +7,15 @@ int main()
     FILE *fp_out_R, *fp_out_chi2;
     char name[500], buf[500];
     int i, j, linecount, nlines = 13320, nparam = 7;
-    double delta, q, Ch00, radian = M_PI / 360., b2;
+    double delta, q, Ch00, radian = M_PI / 360., b2, dbuf;
     double m, h, cov[2][2], chisq, chisq_min = 100, R, R_max = 0;
     double best_R_val[nparam], best_chisq_val[nparam], out_values[nparam];
     file_data *fdata = malloc(sizeof(file_data));
     crystal_data *cdata = malloc(sizeof(crystal_data));
     aux_data *adata = malloc(sizeof(aux_data));
+    angles_grad *angles = malloc(sizeof(angles_grad));
+    linear_fit *fit_data = malloc(sizeof(linear_fit));
+    shape_params *widths = malloc(sizeof(shape_params));
 
     //cargo los datos basicos
     if((fp_in = fopen("para_WH.dat", "r")) == NULL)
@@ -34,7 +37,7 @@ int main()
     cdata -> warrenc = wc;
     //flags de control
     //printf_filedata(fdata);
-    //printf_crystaldata(cdata);
+    printf_crystaldata(cdata);
     //printf_auxdata(adata);
 
     //datos del difractograma
@@ -43,10 +46,34 @@ int main()
     double **alpha = matrix_double_alloc(cdata->npeaks, nlines);
     double **beta = matrix_double_alloc(cdata->npeaks, nlines);
     double **FWHM = matrix_double_alloc(cdata->npeaks, nlines);
-    //double **breadth = matrix_double_alloc(cdata->npeaks, nlines);
+    double **breadth = matrix_double_alloc(cdata->npeaks, nlines);
     double *x = vector_double_alloc(cdata->npeaks);
     double *y = vector_double_alloc(cdata->npeaks);
-    //double y_err[cdata->npeaks], FWHM_err[cdata->npeaks][nlines], breadth_err[cdata->npeaks][nlines];
+    double y_err[cdata->npeaks], FWHM_err[cdata->npeaks][nlines], breadth_err[cdata->npeaks][nlines];
+    
+    //generacion de las estructuras
+    //estructura que contiene las coordenadas angulares (en grados)
+    angles->theta_grad = theta;
+    angles->dostheta_grad = dostheta;
+    angles->theta_grad = alpha;
+    angles->theta_grad = beta;
+    
+    //datos del ajuste lineal
+    fit_data->m = m;
+    fit_data->h = h;
+    fit_data->x = x;
+    fit_data->y = y;
+    fit_data->y_err = y_err;
+    fit_data->R = R;
+    fit_data->chi2 = chi2;
+    fit_data->covar = cov;
+
+    //datos con los parametros de ensanchamiento del pico
+    widths->FWHM = FWHM;
+    widths->FWHM_err = FWHM_err;
+    widths->breadth = breadth;
+    widths->breadth_err = breadth_err;
+
     //leo las figuras de polos
     for(i = fdata->start - 1; i < fdata->end - 1; i++)
     {
@@ -61,23 +88,17 @@ int main()
         fgets(buf, 500, fp_in);//skip line
         while(fscanf(fp_in, "%d", &linecount) != EOF)
         {
-            fscanf(fp_in, "%lf", &dostheta[i][linecount - 1]);
-            fscanf(fp_in, "%lf", &theta[i][linecount - 1]);
-            fscanf(fp_in, "%lf", &alpha[i][linecount - 1]);
-            fscanf(fp_in, "%lf", &beta[i][linecount - 1]);
+            fscanf(fp_in, "%lf", &angles->dostheta_grad[i][linecount - 1]);
+            fscanf(fp_in, "%lf", &angles->theta_rad[i][linecount - 1]);
+            fscanf(fp_in, "%lf", &angles->alpha_grad[i][linecount - 1]);
+            fscanf(fp_in, "%lf", &angles->beta_grad[i][linecount - 1]);
             fscanf(fp_in, "%lf", &FWHM[i][linecount - 1]);
             //fscanf(fp_in, "%lf", &FWHM_err[i][linecount - 1]);
-            theta[i][linecount - 1] *= radian; //paso el angulo a radianes
-            //printf("%d %.5lf %.5lf %.5lf %.5lf %.5lf\n", linecount, dostheta[i][linecount - 1], theta[i][linecount - 1], alpha[i][linecount - 1], beta[i][linecount - 1], FWHM[i][linecount - 1]);
-            //getchar();
-            //podria agregar aca la rutina para restar anchos instrumentales (opcional)
-            //para trabajar con el breadth en vez del FWHM tengo que realizar un procedimiento parecido al que uso cuando
-            //resto anchos intrumentales
         }
         fclose(fp_in);
-    }
+    }//end for routine for(i = fdata->start - 1; i < fdata->end - 1; i++)
     nlines = linecount;
-    
+
     printf("Iniciando el ajuste de Williamson-Hall\n");
     for(j = 0; j < nlines; j++)
     {
@@ -121,9 +142,9 @@ int main()
                         best_chisq_val[5] = R;
                         best_chisq_val[6] = chisq;
                     }
-                }
-            }
-        }
+                }//end for routine for(Ch00 = adata->Ch00_min; Ch00 < adata->Ch00_max; Ch00 += adata->Ch00_step)
+            }//end for routine for(q = adata->q_min; q < adata->q_max; q += adata->q_step)
+        }//end for routine for(delta = adata->delta_min; delta < adata->delta_max; delta += adata->delta_step)
         //salida de los valores para el mejor ajuste segun R
         sprintf(name, "%s%s_WH_R.dat", fdata->outPath, fdata->filename);
         fp_out_R = fopen(name, "w");
@@ -163,7 +184,7 @@ int main()
             fprintf(fp_out_chi2, "%.5lf    ", out_values[i]);
         fprintf(fp_out_chi2, "\n");
         fclose(fp_out_chi2);
-    }
+    }//end for routine  for(j = 0; j < nlines; j++)
     printf("done!\n");
     return 0;
 }

@@ -288,3 +288,45 @@ void read_input(FILE *fp, file_data *fdata, crystal_data *cdata, aux_data *adata
         i++;
     }
 }
+
+void print_results_(int model, FILE * fp, double * fit_results, double * wh_results, double ** alpha, double ** beta, crystal_data * cdata)
+{
+    int i;
+    double b2, c;
+    switch(model)
+    {
+        b2 = pow(cdata->burgersv, 2);
+        c = 2 / (M_PI * b2);
+        default:
+            printf("Modelo inválido. Seleccione un modelo válido.(1 o 2)\n");
+            exit(1);
+            break;
+        case 1:
+            wh_results[0] = fit_results[0]; //delta
+            wh_results[1] = fit_results[1]; //q
+            wh_results[2] = fit_results[2]; //Ch00
+            wh_results[3] = 0.9 / fit_results[3]; //D = 0.9 / h
+            wh_results[4] = c * pow(fit_results[4], 2); //M^2 \ro = alpha * m^2
+            wh_results[5] = fit_results[5]; //R
+            wh_results[6] = fit_results[6]; //chisq
+            fprintf(fp, "#alpha    beta    delta    q    Ch00    D    (M^2 * \\ro)    R    chi2\n");
+            fprintf(fp, "%lf    %lf    ", alpha[0][j], beta[0][j]);
+            for(i = 0; i < 7; i++)
+                fprintf(fp, "%.5lf    ", wh_results[i]);
+            fprintf(fp, "\n");
+            break;
+        case 2:
+            wh_results[0] = fit_results[0]; //delta
+            wh_results[1] = fit_results[1]; //q
+            wh_results[2] = fit_results[2]; //Ch00
+            wh_results[3] = 0.9 / sqrt(fit_results[3]); //D = 0.9 /sqrt(h)
+            wh_results[4] = c * fit_results[4]; //M^2 \ro = alpha * m
+            wh_results[5] = fit_results[5]; //R
+            wh_results[6] = fit_results[6]; //chisq
+            fprintf(fp, "#alpha    beta    delta    q    Ch00    D    (M^2 * \\ro)    R    chi2\n");
+            fprintf(fp, "%lf    %lf    ", alpha[0][j], beta[0][j]);
+            for(i = 0; i < 7; i++)
+                fprintf(fp, "%.5lf    ", wh_results[i]);
+            fprintf(fp, "\n");
+            break;
+}
