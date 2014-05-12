@@ -20,6 +20,8 @@ typedef struct file_data
     char fileext[500];
     int start;
     int end;
+    char is_corr[3];
+    int model;
 } file_data;
 
 typedef struct crystal_data
@@ -53,6 +55,10 @@ typedef struct shape_params
     double **FWHM_err;
     double **breadth;
     double **breadth_err;
+    double **FWHM_corr;
+    double **FWHM_corr_err;
+    double **breadth_corr;
+    double **breadth_corr_err;
 } shape_params;
 
 typedef struct angles_grad
@@ -107,7 +113,20 @@ void printf_auxdata(aux_data *adata);
 
 void read_input(FILE *fp, file_data *fdata, crystal_data *cdata, aux_data *adata);
 
+int read_pole_figures(file_data * fdata, angles_grad * angles, shape_params * widths);
+
+void williamson_hall_plot_FWHM_1(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values);
+
+void williamson_hall_plot_FWHM_2(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values);
+
+void williamson_hall_plot_FWHM_3(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values);
+
+void williamson_hall_plot_FWHM_4(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values);
+
+void williamson_hall_plot_breadth_5(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values);
+
+void williamson_hall_plot_breadth_6(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values);
+
 void print_results_(int model, FILE * fp, double * fit_results, linear_fit * fit_data, int nlines, angles_grad * angles, crystal_data * cdata);
 
-void williamson_hall_plot(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values);
 #endif

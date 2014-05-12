@@ -241,6 +241,10 @@ void read_input(FILE *fp, file_data *fdata, crystal_data *cdata, aux_data *adata
     fgets(buf, 500, fp);
     fscanf(fp, "%s %s %d", buf, buf, &fdata -> end);
     fgets(buf, 500, fp);
+    fscanf(fp, "%s %s %s", buf, buf, fdata -> is_corr);
+    fgets(buf, 500, fp);
+    fscanf(fp, "%s %s %d", buf, buf, &fdata -> model);
+    fgets(buf, 500, fp);
     fscanf(fp, "%s %lf", buf, &adata -> lambda);
     fgets(buf, 500, fp);
     fgets(buf, 500, fp);
@@ -289,7 +293,52 @@ void read_input(FILE *fp, file_data *fdata, crystal_data *cdata, aux_data *adata
     }
 }
 
-void williamson_hall_plot(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values)
+int read_pole_figures(file_data * fdata, angles_grad * angles, shape_params * widths)
+{
+    FILE * fp_in;
+    char name[500], buf[1000];
+    int i, linecount;
+    double dbuf;
+    for(i = fdata->start - 1; i < fdata->end - 1; i++)
+    {
+        sprintf(name, "%s%s%d.%s", fdata->outPath, fdata->filename, i + 1, fdata->fileext);
+        printf("Reading file %s\n", name);
+        if((fp_in = fopen(name, "r")) == NULL)
+        {
+            fprintf(stderr, "\nError opening %s.\n", name);
+            exit(1);
+        }
+        fgets(buf, 500, fp_in);//skip line
+        fgets(buf, 500, fp_in);//skip line
+        while(fscanf(fp_in, "%d", &linecount) != EOF)
+        {
+            fscanf(fp_in, "%lf", &angles->dostheta_grad[i][linecount - 1]);
+            fscanf(fp_in, "%lf", &angles->theta_grad[i][linecount - 1]);
+            fscanf(fp_in, "%lf", &angles->alpha_grad[i][linecount - 1]);
+            fscanf(fp_in, "%lf", &angles->beta_grad[i][linecount - 1]);
+            fscanf(fp_in, "%lf", &dbuf); //sabo int
+            fscanf(fp_in, "%lf", &dbuf); //int
+            fscanf(fp_in, "%lf", &dbuf); //error int
+            fscanf(fp_in, "%lf", &widths->FWHM[i][linecount - 1]);
+            fscanf(fp_in, "%lf", &widths->FWHM_err[i][linecount - 1]);
+            fscanf(fp_in, "%lf", &dbuf); //eta
+            fscanf(fp_in, "%lf", &dbuf); //error
+            fscanf(fp_in, "%lf", &widths->breadth[i][linecount - 1]);
+            fscanf(fp_in, "%lf", &widths->breadth_err[i][linecount - 1]);
+            fscanf(fp_in, "%lf", &widths->FWHM_corr[i][linecount - 1]);
+            fscanf(fp_in, "%lf", &widths->FWHM_corr_err[i][linecount - 1]);
+            fscanf(fp_in, "%lf", &dbuf); //eta_corr
+            fscanf(fp_in, "%lf", &dbuf); //error
+            fscanf(fp_in, "%lf", &widths->breadth_corr[i][linecount - 1]);
+            fscanf(fp_in, "%lf", &widths->breadth_corr_err[i][linecount - 1]);
+        }
+        fclose(fp_in);
+    }//end for routine for(i = fdata->start - 1; i < fdata->end - 1; i++)
+    printf("Cada figura de polos consta de %d puntos\n", linecount);
+    return linecount;
+}
+
+void williamson_hall_plot_FWHM_1(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values)
 {
     int i, j;
     double radian = M_PI / 360., delta, q, Ch00;
@@ -305,14 +354,279 @@ void williamson_hall_plot(int nlines, aux_data * adata, crystal_data * cdata, sh
                 {
                     for (j = 0; j < cdata->npeaks; j++)
                     {
-                        fit_data->x[j] = 2. * sin(angles->theta_grad[j][i]*radian) / adata->lambda * Chkl(Ch00, q, cdata->indices[j]);
-                        fit_data->y[j] = widths->FWHM[j][i] * cos(angles->theta_grad[j][i]*radian) / adata->lambda - delta * cdata->warrenc[j];
-                        //y_err[j] = widths->FWHM_err[j][i] * cos(angles->theta_grad[j][i]) / adata->lambda - delta * cdata->warrenc[j];
+                        fit_data->x[j] = 2. * sin(angles->theta_grad[j][i]*radian) / adata->lambda * sqrt(Chkl(Ch00, q, cdata->indices[j]));
+                        fit_data->y[j] = widths->FWHM[j][i] - delta * cdata->warrenc[j];
+                        fit_data->y_err[j] = widths->FWHM_err[j][i];
                     }
-                    gsl_fit_linear(fit_data->x, 1, fit_data->y, 1, cdata -> npeaks, &fit_data->h,  &fit_data->m,
-                            &fit_data->covar[0][0], &fit_data->covar[0][1], &fit_data->covar[1][1], &fit_data->chisq); //fiteo sin peso
-                    //gsl_fit_wlinear(fit_data->x, 1, fit_data->y_err, 1, fit_data->y, 1, c_data->npeaks, &fit_data->h,  &fit_data->m,
-                    //&fit_data->covar[0][0], &fit_data->covar[0][1], &fit_data->covar[1][1], &fit_data->chisq); //fiteo con peso
+                    //gsl_fit_linear(fit_data->x, 1, fit_data->y, 1, cdata -> npeaks, &fit_data->h,  &fit_data->m,
+                    //        &fit_data->covar[0][0], &fit_data->covar[0][1], &fit_data->covar[1][1], &fit_data->chisq); //fiteo sin peso
+                    gsl_fit_wlinear(fit_data->x, 1, fit_data->y_err, 1, fit_data->y, 1, cdata->npeaks, &fit_data->h,  &fit_data->m,
+                                    &fit_data->covar[0][0], &fit_data->covar[0][1], &fit_data->covar[1][1], &fit_data->chisq); //fiteo con peso
+                    fit_data->R = gsl_stats_correlation(fit_data->x, 1, fit_data->y, 2, cdata -> npeaks);
+                    if(fabs(fit_data->R) > out_values->R_max && fit_data->h > 0 && fit_data->m > 0)
+                    {
+                        out_values->R_max = fit_data->R;
+                        out_values->best_R_values[0] = delta;
+                        out_values->best_R_values[1] = q;
+                        out_values->best_R_values[2] = Ch00;
+                        out_values->best_R_values[3] = fit_data->h;
+                        out_values->best_R_values[4] = fit_data->m;
+                        out_values->best_R_values[5] = fit_data->R;
+                        out_values->best_R_values[6] = fit_data->chisq;
+                    }
+                    if(fit_data->chisq < out_values->chisq_min && fit_data->h > 0 && fit_data->m > 0)
+                    {
+                        out_values->chisq_min = fit_data->chisq;
+                        out_values->best_chisq_values[0] = delta;
+                        out_values->best_chisq_values[1] = q;
+                        out_values->best_chisq_values[2] = Ch00;
+                        out_values->best_chisq_values[3] = fit_data->h;
+                        out_values->best_chisq_values[4] = fit_data->m;
+                        out_values->best_chisq_values[5] = fit_data->R;
+                        out_values->best_chisq_values[6] = fit_data->chisq;
+                    }
+                }//end for routine for(Ch00 = adata->Ch00_min; Ch00 < adata->Ch00_max; Ch00 += adata->Ch00_step)
+            }//end for routine for(q = adata->q_min; q < adata->q_max; q += adata->q_step)
+        }//end for routine for(delta = adata->delta_min; delta < adata->delta_max; delta += adata->delta_step)
+    }//end for routine for(i = 0; i < nlines; i++)
+}
+
+void williamson_hall_plot_FWHM_2(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values)
+{
+    int i, j;
+    double radian = M_PI / 360., delta, q, Ch00;
+    for(i = 0; i < nlines; i++)
+    {
+        if((i % 200) == 0) printf("Completado en un %d %%\n", (i * 100) / nlines);
+
+        for(delta = adata->delta_min; delta < adata->delta_max; delta += adata->delta_step)
+        {
+            for(q = adata->q_min; q < adata->q_max; q += adata->q_step)
+            {
+                for(Ch00 = adata->Ch00_min; Ch00 < adata->Ch00_max; Ch00 += adata->Ch00_step)
+                {
+                    for (j = 0; j < cdata->npeaks; j++)
+                    {
+                        fit_data->x[j] = 2. * sin(angles->theta_grad[j][i]*radian) / adata->lambda * sqrt(Chkl(Ch00, q, cdata->indices[j]));
+                        fit_data->y[j] = widths->FWHM_corr[j][i] - delta * cdata->warrenc[j];
+                        fit_data->y_err[j] = widths->FWHM_corr_err[j][i];
+                    }
+                    //gsl_fit_linear(fit_data->x, 1, fit_data->y, 1, cdata -> npeaks, &fit_data->h,  &fit_data->m,
+                    //        &fit_data->covar[0][0], &fit_data->covar[0][1], &fit_data->covar[1][1], &fit_data->chisq); //fiteo sin peso
+                    gsl_fit_wlinear(fit_data->x, 1, fit_data->y_err, 1, fit_data->y, 1, cdata->npeaks, &fit_data->h,  &fit_data->m,
+                                    &fit_data->covar[0][0], &fit_data->covar[0][1], &fit_data->covar[1][1], &fit_data->chisq); //fiteo con peso
+                    fit_data->R = gsl_stats_correlation(fit_data->x, 1, fit_data->y, 2, cdata -> npeaks);
+                    if(fabs(fit_data->R) > out_values->R_max && fit_data->h > 0 && fit_data->m > 0)
+                    {
+                        out_values->R_max = fit_data->R;
+                        out_values->best_R_values[0] = delta;
+                        out_values->best_R_values[1] = q;
+                        out_values->best_R_values[2] = Ch00;
+                        out_values->best_R_values[3] = fit_data->h;
+                        out_values->best_R_values[4] = fit_data->m;
+                        out_values->best_R_values[5] = fit_data->R;
+                        out_values->best_R_values[6] = fit_data->chisq;
+                    }
+                    if(fit_data->chisq < out_values->chisq_min && fit_data->h > 0 && fit_data->m > 0)
+                    {
+                        out_values->chisq_min = fit_data->chisq;
+                        out_values->best_chisq_values[0] = delta;
+                        out_values->best_chisq_values[1] = q;
+                        out_values->best_chisq_values[2] = Ch00;
+                        out_values->best_chisq_values[3] = fit_data->h;
+                        out_values->best_chisq_values[4] = fit_data->m;
+                        out_values->best_chisq_values[5] = fit_data->R;
+                        out_values->best_chisq_values[6] = fit_data->chisq;
+                    }
+                }//end for routine for(Ch00 = adata->Ch00_min; Ch00 < adata->Ch00_max; Ch00 += adata->Ch00_step)
+            }//end for routine for(q = adata->q_min; q < adata->q_max; q += adata->q_step)
+        }//end for routine for(delta = adata->delta_min; delta < adata->delta_max; delta += adata->delta_step)
+    }//end for routine for(i = 0; i < nlines; i++)
+}
+
+void williamson_hall_plot_FWHM_3(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values)
+{
+    int i, j;
+    double radian = M_PI / 360., delta, q, Ch00;
+    for(i = 0; i < nlines; i++)
+    {
+        if((i % 200) == 0) printf("Completado en un %d %%\n", (i * 100) / nlines);
+
+        for(delta = adata->delta_min; delta < adata->delta_max; delta += adata->delta_step)
+        {
+            for(q = adata->q_min; q < adata->q_max; q += adata->q_step)
+            {
+                for(Ch00 = adata->Ch00_min; Ch00 < adata->Ch00_max; Ch00 += adata->Ch00_step)
+                {
+                    for (j = 0; j < cdata->npeaks; j++)
+                    {
+                        fit_data->x[j] = pow(2. * sin(angles->theta_grad[j][i]*radian) / adata->lambda, 2.0) * Chkl(Ch00, q, cdata->indices[j]);
+                        fit_data->y[j] = pow(widths->FWHM[j][i], 2.0) - delta * cdata->warrenc[j];
+                        fit_data->y_err[j] = 2 * widths->FWHM[j][i] * widths->FWHM_err[j][i];
+                    }
+                    //gsl_fit_linear(fit_data->x, 1, fit_data->y, 1, cdata -> npeaks, &fit_data->h,  &fit_data->m,
+                    //        &fit_data->covar[0][0], &fit_data->covar[0][1], &fit_data->covar[1][1], &fit_data->chisq); //fiteo sin peso
+                    gsl_fit_wlinear(fit_data->x, 1, fit_data->y_err, 1, fit_data->y, 1, cdata->npeaks, &fit_data->h,  &fit_data->m,
+                                    &fit_data->covar[0][0], &fit_data->covar[0][1], &fit_data->covar[1][1], &fit_data->chisq); //fiteo con peso
+                    fit_data->R = gsl_stats_correlation(fit_data->x, 1, fit_data->y, 2, cdata -> npeaks);
+                    if(fabs(fit_data->R) > out_values->R_max && fit_data->h > 0 && fit_data->m > 0)
+                    {
+                        out_values->R_max = fit_data->R;
+                        out_values->best_R_values[0] = delta;
+                        out_values->best_R_values[1] = q;
+                        out_values->best_R_values[2] = Ch00;
+                        out_values->best_R_values[3] = fit_data->h;
+                        out_values->best_R_values[4] = fit_data->m;
+                        out_values->best_R_values[5] = fit_data->R;
+                        out_values->best_R_values[6] = fit_data->chisq;
+                    }
+                    if(fit_data->chisq < out_values->chisq_min && fit_data->h > 0 && fit_data->m > 0)
+                    {
+                        out_values->chisq_min = fit_data->chisq;
+                        out_values->best_chisq_values[0] = delta;
+                        out_values->best_chisq_values[1] = q;
+                        out_values->best_chisq_values[2] = Ch00;
+                        out_values->best_chisq_values[3] = fit_data->h;
+                        out_values->best_chisq_values[4] = fit_data->m;
+                        out_values->best_chisq_values[5] = fit_data->R;
+                        out_values->best_chisq_values[6] = fit_data->chisq;
+                    }
+                }//end for routine for(Ch00 = adata->Ch00_min; Ch00 < adata->Ch00_max; Ch00 += adata->Ch00_step)
+            }//end for routine for(q = adata->q_min; q < adata->q_max; q += adata->q_step)
+        }//end for routine for(delta = adata->delta_min; delta < adata->delta_max; delta += adata->delta_step)
+    }//end for routine for(i = 0; i < nlines; i++)
+}
+
+void williamson_hall_plot_FWHM_4(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values)
+{
+    int i, j;
+    double radian = M_PI / 360., delta, q, Ch00;
+    for(i = 0; i < nlines; i++)
+    {
+        if((i % 200) == 0) printf("Completado en un %d %%\n", (i * 100) / nlines);
+
+        for(delta = adata->delta_min; delta < adata->delta_max; delta += adata->delta_step)
+        {
+            for(q = adata->q_min; q < adata->q_max; q += adata->q_step)
+            {
+                for(Ch00 = adata->Ch00_min; Ch00 < adata->Ch00_max; Ch00 += adata->Ch00_step)
+                {
+                    for (j = 0; j < cdata->npeaks; j++)
+                    {
+                        fit_data->x[j] = pow(2. * sin(angles->theta_grad[j][i]*radian) / adata->lambda, 2.0) * Chkl(Ch00, q, cdata->indices[j]);
+                        fit_data->y[j] = pow(widths->FWHM_corr[j][i], 2.0) - delta * cdata->warrenc[j];
+                        fit_data->y_err[j] = 2 * widths->FWHM_corr[j][i] * widths->FWHM_corr_err[j][i];
+                    }
+                    //gsl_fit_linear(fit_data->x, 1, fit_data->y, 1, cdata -> npeaks, &fit_data->h,  &fit_data->m,
+                    //        &fit_data->covar[0][0], &fit_data->covar[0][1], &fit_data->covar[1][1], &fit_data->chisq); //fiteo sin peso
+                    gsl_fit_wlinear(fit_data->x, 1, fit_data->y_err, 1, fit_data->y, 1, cdata->npeaks, &fit_data->h,  &fit_data->m,
+                                    &fit_data->covar[0][0], &fit_data->covar[0][1], &fit_data->covar[1][1], &fit_data->chisq); //fiteo con peso
+                    fit_data->R = gsl_stats_correlation(fit_data->x, 1, fit_data->y, 2, cdata -> npeaks);
+                    if(fabs(fit_data->R) > out_values->R_max && fit_data->h > 0 && fit_data->m > 0)
+                    {
+                        out_values->R_max = fit_data->R;
+                        out_values->best_R_values[0] = delta;
+                        out_values->best_R_values[1] = q;
+                        out_values->best_R_values[2] = Ch00;
+                        out_values->best_R_values[3] = fit_data->h;
+                        out_values->best_R_values[4] = fit_data->m;
+                        out_values->best_R_values[5] = fit_data->R;
+                        out_values->best_R_values[6] = fit_data->chisq;
+                    }
+                    if(fit_data->chisq < out_values->chisq_min && fit_data->h > 0 && fit_data->m > 0)
+                    {
+                        out_values->chisq_min = fit_data->chisq;
+                        out_values->best_chisq_values[0] = delta;
+                        out_values->best_chisq_values[1] = q;
+                        out_values->best_chisq_values[2] = Ch00;
+                        out_values->best_chisq_values[3] = fit_data->h;
+                        out_values->best_chisq_values[4] = fit_data->m;
+                        out_values->best_chisq_values[5] = fit_data->R;
+                        out_values->best_chisq_values[6] = fit_data->chisq;
+                    }
+                }//end for routine for(Ch00 = adata->Ch00_min; Ch00 < adata->Ch00_max; Ch00 += adata->Ch00_step)
+            }//end for routine for(q = adata->q_min; q < adata->q_max; q += adata->q_step)
+        }//end for routine for(delta = adata->delta_min; delta < adata->delta_max; delta += adata->delta_step)
+    }//end for routine for(i = 0; i < nlines; i++)
+}
+
+void williamson_hall_plot_breadth_5(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values)
+{
+    int i, j;
+    double radian = M_PI / 360., delta, q, Ch00;
+    for(i = 0; i < nlines; i++)
+    {
+        if((i % 200) == 0) printf("Completado en un %d %%\n", (i * 100) / nlines);
+
+        for(delta = adata->delta_min; delta < adata->delta_max; delta += adata->delta_step)
+        {
+            for(q = adata->q_min; q < adata->q_max; q += adata->q_step)
+            {
+                for(Ch00 = adata->Ch00_min; Ch00 < adata->Ch00_max; Ch00 += adata->Ch00_step)
+                {
+                    for (j = 0; j < cdata->npeaks; j++)
+                    {
+                        fit_data->x[j] = pow(2. * sin(angles->theta_grad[j][i]*radian) / adata->lambda, 2.0) * Chkl(Ch00, q, cdata->indices[j]);
+                        fit_data->y[j] = widths->breadth[j][i] * cos(angles->theta_grad[j][i]*radian) / adata->lambda - delta * cdata->warrenc[j];
+                        fit_data->y_err[j] = widths->breadth_err[j][i] * cos(angles->theta_grad[j][i]) / adata->lambda;
+                    }
+                    //gsl_fit_linear(fit_data->x, 1, fit_data->y, 1, cdata -> npeaks, &fit_data->h,  &fit_data->m,
+                    //        &fit_data->covar[0][0], &fit_data->covar[0][1], &fit_data->covar[1][1], &fit_data->chisq); //fiteo sin peso
+                    gsl_fit_wlinear(fit_data->x, 1, fit_data->y_err, 1, fit_data->y, 1, cdata->npeaks, &fit_data->h,  &fit_data->m,
+                                &fit_data->covar[0][0], &fit_data->covar[0][1], &fit_data->covar[1][1], &fit_data->chisq); //fiteo con peso
+                    fit_data->R = gsl_stats_correlation(fit_data->x, 1, fit_data->y, 2, cdata -> npeaks);
+                    if(fabs(fit_data->R) > out_values->R_max && fit_data->h > 0 && fit_data->m > 0)
+                    {
+                        out_values->R_max = fit_data->R;
+                        out_values->best_R_values[0] = delta;
+                        out_values->best_R_values[1] = q;
+                        out_values->best_R_values[2] = Ch00;
+                        out_values->best_R_values[3] = fit_data->h;
+                        out_values->best_R_values[4] = fit_data->m;
+                        out_values->best_R_values[5] = fit_data->R;
+                        out_values->best_R_values[6] = fit_data->chisq;
+                    }
+                    if(fit_data->chisq < out_values->chisq_min && fit_data->h > 0 && fit_data->m > 0)
+                    {
+                        out_values->chisq_min = fit_data->chisq;
+                        out_values->best_chisq_values[0] = delta;
+                        out_values->best_chisq_values[1] = q;
+                        out_values->best_chisq_values[2] = Ch00;
+                        out_values->best_chisq_values[3] = fit_data->h;
+                        out_values->best_chisq_values[4] = fit_data->m;
+                        out_values->best_chisq_values[5] = fit_data->R;
+                        out_values->best_chisq_values[6] = fit_data->chisq;
+                    }
+                }//end for routine for(Ch00 = adata->Ch00_min; Ch00 < adata->Ch00_max; Ch00 += adata->Ch00_step)
+            }//end for routine for(q = adata->q_min; q < adata->q_max; q += adata->q_step)
+        }//end for routine for(delta = adata->delta_min; delta < adata->delta_max; delta += adata->delta_step)
+    }//end for routine for(i = 0; i < nlines; i++)
+}
+
+void williamson_hall_plot_breadth_6(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values)
+{
+    int i, j;
+    double radian = M_PI / 360., delta, q, Ch00;
+    for(i = 0; i < nlines; i++)
+    {
+        if((i % 200) == 0) printf("Completado en un %d %%\n", (i * 100) / nlines);
+
+        for(delta = adata->delta_min; delta < adata->delta_max; delta += adata->delta_step)
+        {
+            for(q = adata->q_min; q < adata->q_max; q += adata->q_step)
+            {
+                for(Ch00 = adata->Ch00_min; Ch00 < adata->Ch00_max; Ch00 += adata->Ch00_step)
+                {
+                    for (j = 0; j < cdata->npeaks; j++)
+                    {
+                        fit_data->x[j] = pow(2. * sin(angles->theta_grad[j][i]*radian) / adata->lambda, 2.0) * Chkl(Ch00, q, cdata->indices[j]);
+                        fit_data->y[j] = widths->breadth_corr[j][i] * cos(angles->theta_grad[j][i]*radian) / adata->lambda - delta * cdata->warrenc[j];
+                        fit_data->y_err[j] = widths->breadth_corr_err[j][i] * cos(angles->theta_grad[j][i]) / adata->lambda;
+                    }
+                    //gsl_fit_linear(fit_data->x, 1, fit_data->y, 1, cdata -> npeaks, &fit_data->h,  &fit_data->m,
+                    //        &fit_data->covar[0][0], &fit_data->covar[0][1], &fit_data->covar[1][1], &fit_data->chisq); //fiteo sin peso
+                    gsl_fit_wlinear(fit_data->x, 1, fit_data->y_err, 1, fit_data->y, 1, cdata->npeaks, &fit_data->h,  &fit_data->m,
+                                &fit_data->covar[0][0], &fit_data->covar[0][1], &fit_data->covar[1][1], &fit_data->chisq); //fiteo con peso
                     fit_data->R = gsl_stats_correlation(fit_data->x, 1, fit_data->y, 2, cdata -> npeaks);
                     if(fabs(fit_data->R) > out_values->R_max && fit_data->h > 0 && fit_data->m > 0)
                     {

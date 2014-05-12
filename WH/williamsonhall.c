@@ -2,11 +2,11 @@
 
 int main()
 {
+    printf("Programa para realizar figuras de polos generalizadas utilizando el analisis de Williamson-Hall\n");
     //variables del programa
     FILE *fp_in, *fp_out;
-    char name[500], buf[500];
-    int i, linecount, nlines = 13320, nparam = 7;
-    double dbuf;
+    char name[500];
+    int i, nlines = 13320, nparam = 7;
     double m = 0, h = 0, **cov = matrix_double_alloc(2, 2), chisq = 0, R = 0;
     double best_R_val[nparam], best_chisq_val[nparam];
     file_data * fdata = (file_data *) malloc(sizeof(file_data));
@@ -36,18 +36,18 @@ int main()
     cdata -> H2 = h02;
     cdata -> warrenc = wc;
     //flags de control
-    //printf_filedata(fdata);
+    printf_filedata(fdata);
     printf_crystaldata(cdata);
-    //printf_auxdata(adata);
+    printf_auxdata(adata);
 
     //datos del difractograma
     double **dostheta = matrix_double_alloc(cdata->npeaks, nlines), **theta = matrix_double_alloc(cdata->npeaks, nlines);
     double **alpha = matrix_double_alloc(cdata->npeaks, nlines), **beta = matrix_double_alloc(cdata->npeaks, nlines);
-    double **FWHM = matrix_double_alloc(cdata->npeaks, nlines);
-    double **breadth = matrix_double_alloc(cdata->npeaks, nlines);
-    double *x = vector_double_alloc(cdata->npeaks), *y = vector_double_alloc(cdata->npeaks);
-    double *y_err = vector_double_alloc(cdata->npeaks);
-    double **FWHM_err = matrix_double_alloc(cdata->npeaks, nlines), **breadth_err = matrix_double_alloc(cdata->npeaks, nlines);
+    double **FWHM = matrix_double_alloc(cdata->npeaks, nlines), **FWHM_err = matrix_double_alloc(cdata->npeaks, nlines);
+    double **breadth = matrix_double_alloc(cdata->npeaks, nlines), **breadth_err = matrix_double_alloc(cdata->npeaks, nlines);
+    double **FWHM_corr = matrix_double_alloc(cdata->npeaks, nlines), **FWHM_corr_err = matrix_double_alloc(cdata->npeaks, nlines);
+    double **breadth_corr = matrix_double_alloc(cdata->npeaks, nlines), **breadth_corr_err = matrix_double_alloc(cdata->npeaks, nlines);
+    double *x = vector_double_alloc(cdata->npeaks), *y = vector_double_alloc(cdata->npeaks), *y_err = vector_double_alloc(cdata->npeaks);
     
     //generacion de las estructuras
     //estructura que contiene las coordenadas angulares (en grados)
@@ -72,6 +72,10 @@ int main()
     widths->FWHM_err = FWHM_err;
     widths->breadth = breadth;
     widths->breadth_err = breadth_err;
+    widths->FWHM_corr = FWHM_corr;
+    widths->FWHM_corr_err = FWHM_corr_err;
+    widths->breadth_corr = breadth_corr;
+    widths->breadth_corr_err = breadth_corr_err;
 
     //datos con los mejores resultados del ajuste de williamson hall
     out_values->R_max = 0;
@@ -79,34 +83,39 @@ int main()
     out_values->chisq_min = 1000;
     out_values->best_chisq_values = best_chisq_val;
 
-    //leo las figuras de polos
-    for(i = fdata->start - 1; i < fdata->end - 1; i++)
-    {
-        sprintf(name, "%s%s%d.%s", fdata->outPath, fdata->filename, i + 1, fdata->fileext);
-        printf("Reading file %s\n", name);
-        if((fp_in = fopen(name, "r")) == NULL)
-        {
-            fprintf(stderr, "\nError opening %s.\n", name);
-            exit(1);
-        }
-        fgets(buf, 500, fp_in);//skip line
-        fgets(buf, 500, fp_in);//skip line
-        while(fscanf(fp_in, "%d", &linecount) != EOF)
-        {
-            fscanf(fp_in, "%lf", &angles->dostheta_grad[i][linecount - 1]);
-            fscanf(fp_in, "%lf", &angles->theta_grad[i][linecount - 1]);
-            fscanf(fp_in, "%lf", &angles->alpha_grad[i][linecount - 1]);
-            fscanf(fp_in, "%lf", &angles->beta_grad[i][linecount - 1]);
-            fscanf(fp_in, "%lf", &widths->FWHM[i][linecount - 1]);
-            //fscanf(fp_in, "%lf", &widths->FWHM_err[i][linecount - 1]);
-        }
-        fclose(fp_in);
-    }//end for routine for(i = fdata->start - 1; i < fdata->end - 1; i++)
-    nlines = linecount;
+    printf("Inicio lectura figuras de polos\n");
+    nlines = read_pole_figures(fdata, angles, widths);
 
     printf("Iniciando el ajuste de Williamson-Hall\n");
-    williamson_hall_plot(nlines, adata, cdata, widths, angles, fit_data, out_values);
-    printf("Fin del ajuste de Williamson-Hall\n");
+    if(strspn(fdata->is_corr, "nN") == 0)
+        if(fdata->model == 1)
+            williamson_hall_plot_FWHM_1(nlines, adata, cdata, widths, angles, fit_data, out_values);
+        else if (fdata->model == 3)
+            williamson_hall_plot_FWHM_3(nlines, adata, cdata, widths, angles, fit_data, out_values);
+        else if (fdata->model == 5)
+            williamson_hall_plot_breadth_5(nlines, adata, cdata, widths, angles, fit_data, out_values);
+        else
+        {
+            printf("Modelo no aceptado o modelo no compatible con lo ingresado en la opción 7 \n");
+            exit(1);
+        }    
+    else if(strspn(fdata->is_corr, "yY") == 0) 
+        if(fdata->model == 2)
+            williamson_hall_plot_FWHM_2(nlines, adata, cdata, widths, angles, fit_data, out_values);
+        else if(fdata->model == 4)
+            williamson_hall_plot_FWHM_4(nlines, adata, cdata, widths, angles, fit_data, out_values);
+        else if(fdata->model == 6)
+            williamson_hall_plot_breadth_6(nlines, adata, cdata, widths, angles, fit_data, out_values);
+        else
+        {
+            printf("Modelo no aceptado o modelo no compatible con lo ingresado en la opción 7 \n");
+            exit(1);
+        }    
+    else
+        {
+            printf("El texto ingresado en la opción 7 no es válido. Ingrese un caracter valido (y o n)\n");
+            exit(1);
+        }
 
     printf("Imprimiendo los mejores resultados segun R\n");
     sprintf(name, "%s%s_WH_R.dat", fdata->outPath, fdata->filename);
