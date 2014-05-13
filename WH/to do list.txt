@@ -1,6 +1,4 @@
-2. Ver que hacer cuando tengo un valor <= 0 en algun pico
 3. Decidir rangos para las diferentes variables (probablemente use los rangos de nati o javier)
-6. Decidir criterio para seleccionar los datos (armo un montecarlo?)
 7. Estructura de control de los datos de salida (factor de asimetria (A), q(A), Ch00(A)
 8. Robust least squares? (ver ejemplo de la GSL)
 

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <ctype.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_fit.h>
 #include <gsl/gsl_statistics_double.h>
@@ -21,6 +22,7 @@ typedef struct file_data
     int start;
     int end;
     char is_corr[3];
+    char is_H[10];
     int model;
 } file_data;
 
@@ -85,9 +87,9 @@ typedef struct linear_fit
 typedef struct best_values
 {
     double R_max;
-    double * best_R_values;
+    double ** best_R_values;
     double chisq_min;
-    double *best_chisq_values;
+    double ** best_chisq_values;
 } best_values;
 
 //funciones
@@ -115,18 +117,6 @@ void read_input(FILE *fp, file_data *fdata, crystal_data *cdata, aux_data *adata
 
 int read_pole_figures(file_data * fdata, angles_grad * angles, shape_params * widths);
 
-void williamson_hall_plot_FWHM_1(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values);
-
-void williamson_hall_plot_FWHM_2(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values);
-
-void williamson_hall_plot_FWHM_3(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values);
-
-void williamson_hall_plot_FWHM_4(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values);
-
-void williamson_hall_plot_breadth_5(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values);
-
-void williamson_hall_plot_breadth_6(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values);
-
-void print_results_(int model, FILE * fp, double * fit_results, linear_fit * fit_data, int nlines, angles_grad * angles, crystal_data * cdata);
+void print_results(file_data * fdata, FILE * fp, double ** fit_results, linear_fit * fit_data, int nlines, angles_grad * angles, crystal_data * cdata);
 
 #endif
