@@ -6,12 +6,10 @@ int main()
 {
     printf("Programa para realizar figuras de polos generalizadas utilizando el analisis de Williamson-Hall\n");
     printf("Opciones:\n");
-    printf("Modelos 1 y 2:  (H - \\delta * wc) = sqrt(\\alpha * \\ro)  * (K * sqrt(C))\n");
-    printf("Modelos 3 y 4:  (H - \\delta * wc)^2 = (\\alpha * \\ro)^2 * (K^2 * C)\n");
-    printf("Modelos 5 y 6:  (H * cos(\\theta) / \\lambda - \\delta * wc) = \\alpha^2 * sqrt(\\ro) * (K^ 2 * C)\n");
+    printf("Modelos 1 y 2 (opcion 9):  (H * cos(\\theta) / \\lambda - \\delta * wc) = \\alpha^2 * sqrt(\\ro) * (K^2 * C)\n");
     printf("\\alpha = 0.5 * \\pi * M^2 * b^2\nK = 2 * sin(\\theta) / \\lambda\nC == contrast factor\n");
     printf("\\delta * wc = stacking fault broadening correction\n\\ro = dislocation density\n");
-    printf("H = FWHM o BREADTH\nModelos pares trabajan con los anchos corregidos por ancho instrumental\n");
+    printf("H = FWHM o BREADTH (opcion 8)\nModelos pares (opcion 7) trabajan con los anchos corregidos por ancho instrumental\n");
 
     //variables del programa
     FILE *fp_in, *fp_out;
@@ -102,10 +100,6 @@ int main()
         if(strcmp(fdata->is_corr, "N") == 0)
             if(fdata->model == 1)
                 williamson_hall_plot_FWHM_1(nlines, adata, cdata, widths, angles, fit_data, out_values);
-            else if (fdata->model == 3)
-                williamson_hall_plot_FWHM_3(nlines, adata, cdata, widths, angles, fit_data, out_values);
-            else if (fdata->model == 5)
-                williamson_hall_plot_FWHM_5(nlines, adata, cdata, widths, angles, fit_data, out_values);
             else
             {
                 printf("Modelo no aceptado o modelo no compatible con lo ingresado en las opciones 7 y 8\n");
@@ -114,10 +108,6 @@ int main()
         else if(strcmp(fdata->is_corr, "Y") == 0)
             if(fdata->model == 2)
                 williamson_hall_plot_FWHM_2(nlines, adata, cdata, widths, angles, fit_data, out_values);
-            else if(fdata->model == 4)
-                williamson_hall_plot_FWHM_4(nlines, adata, cdata, widths, angles, fit_data, out_values);
-            else if(fdata->model == 6)
-                williamson_hall_plot_FWHM_6(nlines, adata, cdata, widths, angles, fit_data, out_values);
             else
             {
                 printf("Modelo no aceptado o modelo no compatible con lo ingresado en las opciones 7 y 8\n");
@@ -125,17 +115,13 @@ int main()
             }
         else
         {
-            printf("El texto ingresado en la opción 7 no es válido. Ingrese un caracter valido (y o n)\n");
+            printf("El texto ingresado en la opción 7 no es válido. Ingrese un caracter valido (Y o N)\n");
             exit(1);
         }
     else if(strcmp(fdata->is_H, "BREADTH") == 0)
         if(strspn(fdata->is_corr, "N") == 0)
             if(fdata->model == 1)
                 williamson_hall_plot_breadth_1(nlines, adata, cdata, widths, angles, fit_data, out_values);
-            else if (fdata->model == 3)
-                williamson_hall_plot_breadth_3(nlines, adata, cdata, widths, angles, fit_data, out_values);
-            else if (fdata->model == 5)
-                williamson_hall_plot_breadth_5(nlines, adata, cdata, widths, angles, fit_data, out_values);
             else
             {
                 printf("Modelo no aceptado o modelo no compatible con lo ingresado en las opciones 7 y 8\n");
@@ -144,10 +130,6 @@ int main()
         else if(strspn(fdata->is_corr, "Y") == 0)
             if(fdata->model == 2)
                 williamson_hall_plot_breadth_2(nlines, adata, cdata, widths, angles, fit_data, out_values);
-            else if(fdata->model == 4)
-                williamson_hall_plot_breadth_4(nlines, adata, cdata, widths, angles, fit_data, out_values);
-            else if(fdata->model == 6)
-                williamson_hall_plot_breadth_6(nlines, adata, cdata, widths, angles, fit_data, out_values);
             else
             {
                 printf("Modelo no aceptado o modelo no compatible con lo ingresado en las opciones 7 y 8\n");

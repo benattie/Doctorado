@@ -356,122 +356,38 @@ void print_results(file_data * fdata, FILE * fp, double ** fit_results, linear_f
     double c = 2 / (M_PI * b2), wh_results[fit_data->n_out_params][nlines];
     if(strcmp(fdata->is_H, "FWHM") == 0)
     {
-        if(fdata->model == 1 || fdata->model == 2)
+        fprintf(fp, "# alpha        beta          delta     q       Ch00       D    M^4 \\ro    R    chi2\n");
+        for(i = 0; i < nlines; i++)
         {
-            fprintf(fp, "# alpha        beta          delta     q       Ch00       D    M^4 \\ro    R    chi2\n");
-            for(i = 0; i < nlines; i++)
-            {
-                wh_results[0][i] = fit_results[0][i]; //delta
-                wh_results[1][i] = fit_results[1][i]; //q
-                wh_results[2][i] = fit_results[2][i]; //Ch00
-                wh_results[3][i] = 0.9 / fit_results[3][i]; //D = 0.9 / h
-                wh_results[4][i] = c * pow(fit_results[4][i], 2); //M^2 \ro = alpha * m^2
-                wh_results[5][i] = fit_results[5][i]; //R
-                wh_results[6][i] = fit_results[6][i]; //chisq
-                fprintf(fp, "%d %lf    %lf    ", i + 1, angles->alpha_grad[0][i], angles->beta_grad[0][i]);
-                for(j = 0; j < 7; j++)
-                    fprintf(fp, "%7.5lf  ", wh_results[j][i]);
-                fprintf(fp, "\n");
-            }
+            wh_results[0][i] = fit_results[0][i]; //delta
+            wh_results[1][i] = fit_results[1][i]; //q
+            wh_results[2][i] = fit_results[2][i]; //Ch00
+            wh_results[3][i] = 0.9 / fit_results[3][i]; //D = 0.9 / h
+            wh_results[4][i] = c * pow(fit_results[4][i], 2); //M^2 \ro = alpha * m^2
+            wh_results[5][i] = fit_results[5][i]; //R
+            wh_results[6][i] = fit_results[6][i]; //chisq
+            fprintf(fp, "%d %lf    %lf    ", i + 1, angles->alpha_grad[0][i], angles->beta_grad[0][i]);
+            for(j = 0; j < 7; j++)
+                fprintf(fp, "%7.5lf  ", wh_results[j][i]);
+            fprintf(fp, "\n");
         }
-        else
-        {
-            if (fdata->model == 3 || fdata->model == 4)
-            {
-                fprintf(fp, "# alpha        beta          delta     q       Ch00       D    M^4 \\ro    R    chi2\n");
-                for(i = 0; i < nlines; i++)
-                {
-                    wh_results[0][i] = fit_results[0][i]; //delta
-                    wh_results[1][i] = fit_results[1][i]; //q
-                    wh_results[2][i] = fit_results[2][i]; //Ch00
-                    wh_results[3][i] = 0.9 / sqrt(fit_results[3][i]); //D = 0.9 / sqrt(h)
-                    wh_results[4][i] = c * fit_results[4][i]; //M^2 \ro = alpha * m
-                    wh_results[5][i] = fit_results[5][i]; //R
-                    wh_results[6][i] = fit_results[6][i]; //chisq
-                    fprintf(fp, "%d %lf    %lf    ", i + 1, angles->alpha_grad[0][i], angles->beta_grad[0][i]);
-                    for(j = 0; j < 7; j++)
-                        fprintf(fp, "%7.5lf  ", wh_results[j][i]);
-                    fprintf(fp, "\n");
-                }
-            }
-            else
-            {
-                fprintf(fp, "# alpha        beta          delta     q       Ch00       D    M^4 \\ro    R    chi2\n");
-                for(i = 0; i < nlines; i++)
-                {
-                    wh_results[0][i] = fit_results[0][i]; //delta
-                    wh_results[1][i] = fit_results[1][i]; //q
-                    wh_results[2][i] = fit_results[2][i]; //Ch00
-                    wh_results[3][i] = 0.9 / fit_results[3][i]; //D = 0.9 / h
-                    wh_results[4][i] = pow(c * fit_results[4][i], 2.0); //M^4 \ro = (alpha * m) ^ 2
-                    wh_results[5][i] = fit_results[5][i]; //R
-                    wh_results[6][i] = fit_results[6][i]; //chisq
-                    fprintf(fp, "%d %lf    %lf    ", i + 1, angles->alpha_grad[0][i], angles->beta_grad[0][i]);
-                    for(j = 0; j < 7; j++)
-                        fprintf(fp, "%7.5lf  ", wh_results[j][i]);
-                    fprintf(fp, "\n");
-                }
-            }//end if (fdata->model == 3 || fdata->model == 4)
-        }// if(fdata->model == 1 || fdata->model == 2)
     }
     else
     {
-        if(fdata->model == 1 || fdata->model == 2)
+        fprintf(fp, "# alpha        beta          delta     q       Ch00       D    M^4 \\ro    R    chi2\n");
+        for(i = 0; i < nlines; i++)
         {
-            fprintf(fp, "# alpha        beta          delta     q       Ch00       D    M^4 \\ro    R    chi2\n");
-            for(i = 0; i < nlines; i++)
-            {
-                wh_results[0][i] = fit_results[0][i]; //delta
-                wh_results[1][i] = fit_results[1][i]; //q
-                wh_results[2][i] = fit_results[2][i]; //Ch00
-                wh_results[3][i] = 1.0 / fit_results[3][i]; //D = 1.0 / h
-                wh_results[4][i] = c * pow(fit_results[4][i], 2); //M^2 \ro = alpha * m^2
-                wh_results[5][i] = fit_results[5][i]; //R
-                wh_results[6][i] = fit_results[6][i]; //chisq
-                fprintf(fp, "%d %lf    %lf    ", i + 1, angles->alpha_grad[0][i], angles->beta_grad[0][i]);
-                for(j = 0; j < 7; j++)
-                    fprintf(fp, "%7.5lf  ", wh_results[j][i]);
-                fprintf(fp, "\n");
-            }
+            wh_results[0][i] = fit_results[0][i]; //delta
+            wh_results[1][i] = fit_results[1][i]; //q
+            wh_results[2][i] = fit_results[2][i]; //Ch00
+            wh_results[3][i] = 1.0 / fit_results[3][i]; //D = 1.0 / h
+            wh_results[4][i] = c * pow(fit_results[4][i], 2); //M^2 \ro = alpha * m^2
+            wh_results[5][i] = fit_results[5][i]; //R
+            wh_results[6][i] = fit_results[6][i]; //chisq
+            fprintf(fp, "%d %lf    %lf    ", i + 1, angles->alpha_grad[0][i], angles->beta_grad[0][i]);
+            for(j = 0; j < 7; j++)
+                fprintf(fp, "%7.5lf  ", wh_results[j][i]);
+            fprintf(fp, "\n");
         }
-        else
-        {
-            if (fdata->model == 3 || fdata->model == 4)
-            {
-                fprintf(fp, "# alpha        beta          delta     q       Ch00       D    M^4 \\ro    R    chi2\n");
-                for(i = 0; i < nlines; i++)
-                {
-                    wh_results[0][i] = fit_results[0][i]; //delta
-                    wh_results[1][i] = fit_results[1][i]; //q
-                    wh_results[2][i] = fit_results[2][i]; //Ch00
-                    wh_results[3][i] = 1.0 / sqrt(fit_results[3][i]); //D = 1.0 / sqrt(h)
-                    wh_results[4][i] = c * fit_results[4][i]; //M^2 \ro = alpha * m
-                    wh_results[5][i] = fit_results[5][i]; //R
-                    wh_results[6][i] = fit_results[6][i]; //chisq
-                    fprintf(fp, "%d %lf    %lf    ", i + 1, angles->alpha_grad[0][i], angles->beta_grad[0][i]);
-                    for(j = 0; j < 7; j++)
-                       fprintf(fp, "%7.5lf  ", wh_results[j][i]);
-                    fprintf(fp, "\n");
-                }
-            }
-            else
-            {
-                fprintf(fp, "# alpha        beta          delta     q       Ch00       D    M^4 \\ro    R    chi2\n");
-                for(i = 0; i < nlines; i++)
-                {
-                    wh_results[0][i] = fit_results[0][i]; //delta
-                    wh_results[1][i] = fit_results[1][i]; //q
-                    wh_results[2][i] = fit_results[2][i]; //Ch00
-                    wh_results[3][i] = 1.0 / fit_results[3][i]; //D = 1.0 / h
-                    wh_results[4][i] = pow(c * fit_results[4][i], 2.0); //M^4 \ro = (alpha * m) ^ 2
-                    wh_results[5][i] = fit_results[5][i]; //R
-                    wh_results[6][i] = fit_results[6][i]; //chisq
-                    fprintf(fp, "%d %7.5lf %7.5lf", i + 1, angles->alpha_grad[0][i], angles->beta_grad[0][i]);
-                    for(j = 0; j < 7; j++)
-                       fprintf(fp, " %7.5lf", wh_results[j][i]);
-                    fprintf(fp, "\n");
-                }
-            }//end if (fdata->model == 3 || fdata->model == 4)
-        }//end if if(fdata->model == 1 || fdata->model == 2)
     }//end if(strcmp(fdata->is_H, "FWHM") == 0)
 }
