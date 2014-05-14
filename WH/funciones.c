@@ -424,7 +424,7 @@ void print_results(file_data * fdata, FILE * fp, double ** fit_results, linear_f
     double c = 2 / (M_PI * b2), wh_results[fit_data->n_out_params][nlines];
     if(strcmp(fdata->is_H, "FWHM") == 0)
     {
-        fprintf(fp, "# alpha        beta          delta     q       Ch00       D    M^4 \\ro    R    chi2\n");
+        fprintf(fp, "# alpha        beta          delta     q       Ch00       D    M^2 \\ro    R    chi2\n");
         for(i = 0; i < nlines; i++)
         {
             wh_results[0][i] = fit_results[0][i]; //delta
@@ -442,7 +442,7 @@ void print_results(file_data * fdata, FILE * fp, double ** fit_results, linear_f
     }
     else
     {
-        fprintf(fp, "# alpha        beta          delta     q       Ch00       D    M^4 \\ro    R    chi2\n");
+        fprintf(fp, "# alpha        beta          delta     q       Ch00       D    M^2 \\ro    R    chi2\n");
         for(i = 0; i < nlines; i++)
         {
             wh_results[0][i] = fit_results[0][i]; //delta
