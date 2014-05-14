@@ -97,6 +97,10 @@ double warren_constants(char * type, int * hkl);
 
 double WC_FCC(int *hkl);
 
+void set_vector(int * v, int v1, int v2, int v3);
+
+double WC_BCC(int *hkl);
+
 int count_zeros(int * v, int size);
 
 int count_equal(int * v);

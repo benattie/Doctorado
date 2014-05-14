@@ -1,5 +1,2 @@
 3. Decidir rangos para las diferentes variables (probablemente use los rangos de nati o javier)
 7. Estructura de control de los datos de salida (factor de asimetria (A), q(A), Ch00(A)
-8. Robust least squares? (ver ejemplo de la GSL)
-
-

@@ -7,10 +7,7 @@ double warren_constants(char * type, int * hkl)
     else
     {
         if(strcmp(type, "BCC") == 0)
-        {
-           printf("Aun no esta imnplementada la rutina para la estructura BCC\n");
-           exit(1);
-        }
+           return WC_BCC(hkl);
         else
         {
             if(strcmp(type, "HCP") == 0)
@@ -127,6 +124,54 @@ double WC_FCC(int *hkl)
         }//end if(nequal == 2)
     }//end if(nequal == 3)]
     return (double)SL0 / (h0 * (double)ub);
+}
+
+void set_vector(int * v, int v1, int v2, int v3)
+{
+    v[0] = v1;
+    v[1] = v2;
+    v[2] = v3;
+}
+
+double WC_BCC(int *hkl)
+{
+    int error = 1;
+    int a[3] = {1, 1, 0}, b[3] = {2, 2, 0}, c[3] = {3, 3, 0};
+    if(! memcmp(hkl, a, 3 * sizeof(int)) || ! memcmp(hkl, b, 3 * sizeof(int)) || ! memcmp(hkl, c, 3 * sizeof(int)))
+        return 2. / (3. * sqrt(2));
+    
+    set_vector(a, 2, 0, 0); set_vector(b, 4, 0, 0); set_vector(c, 6, 0, 0);
+    if(! memcmp(hkl, a, 3 * sizeof(int)) || ! memcmp(hkl, b, 3 * sizeof(int)) || ! memcmp(hkl, c, 3 * sizeof(int)))
+        return 4. / 3.;
+    
+    set_vector(a, 2, 1, 1); set_vector(b, 4, 2, 2); set_vector(c, 6, 3, 3);
+    if(! memcmp(hkl, a, 3 * sizeof(int)) || ! memcmp(hkl, b, 3 * sizeof(int)) || ! memcmp(hkl, c, 3 * sizeof(int)))
+        return 2. / sqrt(6);
+    
+    set_vector(a, 3, 1, 0); set_vector(b, 6, 2, 0); set_vector(c, 9, 3, 0);
+    if(! memcmp(hkl, a, 3 * sizeof(int)) || ! memcmp(hkl, b, 3 * sizeof(int)) || ! memcmp(hkl, c, 3 * sizeof(int)))
+        return 4. / sqrt(10);
+    
+    set_vector(a, 2, 2, 2); set_vector(b, 4, 4, 4); set_vector(c, 6, 6, 6);
+    printf("%d\n", memcmp(hkl, a, 3 * sizeof(int)));
+    printf("%d%d%d\t%d%d%d\n", hkl[0], hkl[1], hkl[2], a[0], a[1], a[2]); 
+    if(! memcmp(hkl, a, 3 * sizeof(int)) || ! memcmp(hkl, b, 3 * sizeof(int)) || ! memcmp(hkl, c, 3 * sizeof(int)))
+        return 2. / sqrt(3);
+    
+    set_vector(a, 3, 2, 1); set_vector(b, 6, 4, 2); set_vector(c, 9, 6, 3);
+    if(! memcmp(hkl, a, 3 * sizeof(int)) || ! memcmp(hkl, b, 3 * sizeof(int)) || ! memcmp(hkl, c, 3 * sizeof(int)))
+        return 5. / (2. * sqrt(14));
+    
+    set_vector(a, 4, 4, 0); set_vector(b, 5, 5, 0); set_vector(c, 6, 6, 0);
+    if(! memcmp(hkl, a, 3 * sizeof(int)) || ! memcmp(hkl, b, 3 * sizeof(int)) || ! memcmp(hkl, c, 3 * sizeof(int)))
+        return 2. / (3. * sqrt(2));
+
+    if(error)
+    {
+        printf("\nLos indices [%d %d %d] no son validos\n", hkl[0], hkl[1], hkl[2]);
+        exit(1);
+    }
+    return 0.0;
 }
 
 int count_zeros(int * v, int size)
