@@ -113,6 +113,10 @@ void printf_crystaldata(crystal_data *cdata);
 
 void printf_auxdata(aux_data *adata);
 
+void print_xy(double * x, double * y, double * y_err, int size);
+
+void print_stats(linear_fit * fit_data, int xsize);
+
 void read_input(FILE *fp, file_data *fdata, crystal_data *cdata, aux_data *adata);
 
 int read_pole_figures(file_data * fdata, angles_grad * angles, shape_params * widths);

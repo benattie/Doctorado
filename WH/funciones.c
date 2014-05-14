@@ -223,6 +223,29 @@ void printf_auxdata(aux_data *adata)
     getchar();
 }
 
+void print_xy(double * x, double * y, double * y_err, int size)
+{
+    int i;
+    printf("\nx    y    y_err\n");
+    for(i = 0; i < size; i++)
+        printf("%lf   %lf   %lf\n", x[i], y[i], y_err[i]);
+    getchar();
+}
+
+void print_stats(linear_fit * fit_data, int xsize)
+{
+    int i;
+    printf("\nn_out_params: %d\n", fit_data->n_out_params);
+    printf("m = %lf\th = %lf\n", fit_data->m, fit_data->h);
+    printf("\nx    y    y_err\n");
+    for(i = 0; i < xsize; i++)
+        printf("%lf   %lf   %lf\n", fit_data->x[i], fit_data->y[i], fit_data->y_err[i]);
+    printf("R = %lf\tchisq = %lf\n", fit_data->R, fit_data->chisq);
+    printf ("# covariance matrix:\n");
+    printf ("# [ %g, %g\n#   %g, %g]\n", fit_data->covar[0][0], fit_data->covar[0][1], fit_data->covar[0][1], fit_data->covar[1][1]);
+    getchar();
+}
+
 void read_input(FILE *fp, file_data *fdata, crystal_data *cdata, aux_data *adata)
 {
     char buf[500];

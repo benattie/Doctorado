@@ -3,11 +3,12 @@
 void williamson_hall_plot_breadth_1(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values)
 {
     int i, j, k;
-    double radian = M_PI / 360., delta, q, Ch00;
+    double radian = M_PI / 180., delta, q, Ch00;
     for(i = 0; i < nlines; i++)
     {
-        if((i % 200) == 0) printf("\nCompletado en un %d %%", (i * 100) / nlines);
-
+        if((i % 400) == 0) printf("\nCompletado en un %d %%", (i * 100) / nlines);
+        out_values->R_max = 0;
+        out_values->chisq_min = 1000;
         for(delta = adata->delta_min; delta < adata->delta_max; delta += adata->delta_step)
         {
             for(q = adata->q_min; q < adata->q_max; q += adata->q_step)
@@ -59,11 +60,12 @@ void williamson_hall_plot_breadth_1(int nlines, aux_data * adata, crystal_data *
 void williamson_hall_plot_breadth_2(int nlines, aux_data * adata, crystal_data * cdata, shape_params * widths, angles_grad * angles, linear_fit * fit_data, best_values * out_values)
 {
     int i, j, k;
-    double radian = M_PI / 360., delta, q, Ch00;
+    double radian = M_PI / 180., delta, q, Ch00;
     for(i = 0; i < nlines; i++)
     {
-        if((i % 200) == 0) printf("\nCompletado en un %d %%", (i * 100) / nlines);
-
+        if((i % 400) == 0) printf("\nCompletado en un %d %%", (i * 100) / nlines);
+        out_values->R_max = 0;
+        out_values->chisq_min = 1000;
         for(delta = adata->delta_min; delta < adata->delta_max; delta += adata->delta_step)
         {
             for(q = adata->q_min; q < adata->q_max; q += adata->q_step)
