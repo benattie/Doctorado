@@ -17,14 +17,14 @@ Structure Data
 13.Burgers vector (h k l): 1 1 0
 14.Nr of peaks:   7
 15.delta_min:     0.005
-16.delta_step:    0.005
+16.delta_step:    0.001
 17.delta_max:     0.090
 18.q_min:        -4.000
 19.q_step:        0.010
-20.q_max:         2.000
+20.q_max:         2.500
 21.Ch00_min:      0.100
-22.Ch00_step:     0.050
-23.Ch00_max:      0.300
+22.Ch00_step:     0.005
+23.Ch00_max:      0.400
 
 Peak data
 h k l
