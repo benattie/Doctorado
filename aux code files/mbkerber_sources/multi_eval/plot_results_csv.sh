@@ -1,94 +1,92 @@
-#!/bin/bash
-#avg(x)=mean
-#mean=1; fit [0:3] [*:*] avg(x) "datafile[0]" using :$datacolumn via mean
-#set arrow 1 from graph 0, first mean to graph 1, first mean nohead
-#FIXME
-#the latex export does not properly rotate the figs and the escapes of the names with \ do not work accurately and we
-should have all labels as variables. bw/.. should be reused maybe two commandline params...
-10
-11 #btw i would prefer to output the plot commands into separate files because i think about writing a script that will plot
-two of them later?! or think about it how to best do this.
-12 #plot multiple: need to check if these are readable files though
-13 #the plot description for multiple data files is identical. maybe make an array
-14 #alternative diff the datafiles and label it after the diff!
-15 #FIXME make a loop over the remaining argument and make it datafiles only if they exist as files!
-16
-17 re="" #replot command empty for first plot then set to "re" and empty afterwards
-18
-19 #run $0 csv output
-20
-21 ########################################
-22 ##initital data #
-23 ########################################
-24
-25 #datafile=$1
-26 configfile="/home/localkerber/svn/kerber/diss/data/kit/kit_pd.csv.plot.ini"
-27
-28 output=png
-29
-30 samplename=""
-31 shortname=""
-32 xaxislabel="Engineering strain"
-33
-34 declare -a datasetnames #array of datasetnames
-35
-36 ##########################################################
-37 #define the number of contrast fit parameters a
-38 #1 for cub (=q)
-39 #2 for hex
-40 #5 for orthoromb
-41 #we will grep for that after the getopt maybe...
-42 #variables=( ‘grep "#measno" test.csv‘ )
-43 #no_contrast=$(( (${variables[@]}-31)/3 ))
-44 no_contrast=1
-45 ##########################################################
-46
-47 #xrange="1:11"
-48 xrange=":"
-49 #yranges
-50 resrange=":"
-51 drange=":"
-52 Lrange=":"
-53 mrange=":"
-54 sigmarange=":"
-55 rhorange=":"
-56 Mrange=":"
-57 epsrange=":"
-58 stprrange=":"
-59 Rrange=":"
-60 bgrange=":"
-61 asymmrange=":"
-62 latticerange=":"
-63 contrastrange[1]=":"
-64 contrastrange[2]=":"
-65 contrastrange[3]=":"
-66 contrastrange[4]=":"
-67 contrastrange[5]=":"
-68 strainrange=":"
-69 xmaprange=":"
-70
-71 #select what to do (y/n)
-72 do_errorbar=n
-73 do_epsilon=n
-74 do_stpr=n
-75 do_bg_peak=n
-76 do_bg=n
-do_asymm=n
-do_lattice=n
-do_strain=n
-do_xmap=n
-do_fits=n
-do_trendline=n
-do_title=n
-do_average=n #the average of the first data points of the first data file
-trendline="sbezier" #unique | frequency | csplines | acsplines | bezier | sbezier
-do_trend_title="no"
-# "" for trend title in legend
-# "no" for no trend title
-#keep the gnuplot commandfile
-keepgnuplot=y
-#linewidth
-lw=1
+   #!/bin/bash
+   #avg(x)=mean
+   #mean=1; fit [0:3] [*:*] avg(x) "datafile[0]" using :$datacolumn via mean
+   #set arrow 1 from graph 0, first mean to graph 1, first mean nohead
+   #FIXME
+   #the latex export does not properly rotate the figs and the escapes of the names with \ do not work accurately and we should have all labels as variables. bw/.. should be reused maybe two commandline params...
+
+ #btw i would prefer to output the plot commands into separate files because i think about writing a script that will plot two of them later?! or think about it how to best do this.
+ #plot multiple: need to check if these are readable files though
+ #the plot description for multiple data files is identical. maybe make an array
+ #alternative diff the datafiles and label it after the diff!
+ #FIXME make a loop over the remaining argument and make it datafiles only if they exist as files!
+
+re="" #replot command empty for first plot then set to "re" and empty afterwards
+
+ #run $0 csv output
+
+ ########################################
+ ##initital data #
+ ########################################
+
+ #datafile=$1
+ configfile="/home/localkerber/svn/kerber/diss/data/kit/kit_pd.csv.plot.ini"
+
+ output=png
+
+ samplename=""
+ shortname=""
+ xaxislabel="Engineering strain"
+
+ declare -a datasetnames #array of datasetnames
+
+ ##########################################################
+ #define the number of contrast fit parameters a
+ #1 for cub (=q)
+ #2 for hex
+ #5 for orthoromb
+ #we will grep for that after the getopt maybe...
+ #variables=( ‘grep "#measno" test.csv‘ )
+ #no_contrast=$(( (${variables[@]}-31)/3 ))
+ no_contrast=1
+ ##########################################################
+
+ #xrange="1:11"
+ xrange=":"
+ #yranges
+ resrange=":"
+ drange=":"
+ Lrange=":"
+ mrange=":"
+ sigmarange=":"
+ rhorange=":"
+ Mrange=":"
+ epsrange=":"
+ stprrange=":"
+ Rrange=":"
+ bgrange=":"
+ asymmrange=":"
+ latticerange=":"
+ contrastrange[1]=":"
+ contrastrange[2]=":"
+ contrastrange[3]=":"
+ contrastrange[4]=":"
+ contrastrange[5]=":"
+ strainrange=":"
+ xmaprange=":"
+
+ #select what to do (y/n)
+do_errorbar=n
+do_epsilon=n
+do_stpr=n
+do_bg_peak=n
+do_bg=n
+   do_asymm=n
+   do_lattice=n
+   do_strain=n
+   do_xmap=n
+   do_fits=n
+   do_trendline=n
+   do_title=n
+   do_average=n #the average of the first data points of the first data file
+   trendline="sbezier" #unique | frequency | csplines | acsplines | bezier | sbezier
+   do_trend_title="no"
+   # "" for trend title in legend
+   # "no" for no trend title
+   #keep the gnuplot commandfile
+   keepgnuplot=y
+   #linewidth
+   lw=1
 #line type "lt 1" for full lines or "" for gnuplot selection
 lt=""
 #font
@@ -102,9 +100,8 @@ color=y
 # Note that we use ‘"$@"’ to let each command-line parameter expand to a
 # separate word. The quotes around ‘$@’ are essential!
 # We need TEMP as the ‘eval set --’ would nuke the return value of getopt.
-TEMP=‘getopt -o flepsbrxtn:o:N:c:h --long fits,trendline,errorbar,epsilon,stpr,bg,bg_peak,asymm,lattice,strain,xmap,title,
-name:,output:,outname:,config:,help \
--- "$@"‘
+TEMP=‘getopt -o flepsbrxtn:o:N:c:h --long fits,trendline,errorbar,epsilon,stpr,bg,bg_peak,asymm,lattice,strain,xmap,title,name:,output:,outname:,config:,help \
+    -- "$@"‘
 #options
 # f=>fits,l=>trendline,e=>errorbar,p=>epsilon,s=>stpr,b=>bg,r=>strain,x=xmap,t=title
 # n=>name,o=>output (format),N=>output (name)
@@ -163,174 +160,107 @@ shift ;;
 echo "echo -e \"will plot x-axis mapping data\"" >>$tmpfile
 echo "do_xmap=y">>$tmpfile
 shift ;;
-178
 -t|--title)
-179
 echo "echo -e \"will plot plot-titles\"" >>$tmpfile
-180
 echo "do_title=y">>$tmpfile
-181
 shift ;;
-182
 -n|--name)
-183
 echo "echo -e \"using sample name ’$2’\"" >>$tmpfile
-184
 echo "samplename=$2">>$tmpfile
-185
 shift 2 ;;
-186
 -o|--output)
-187
 echo "echo -e \"using $2 output format\"" >>$tmpfile
-188
 echo "output=$2">>$tmpfile
-189
 shift 2 ;;
-190
 -N|--outname)
-191
 echo "echo -e \"using output name $2\"" >>$tmpfile
-192
 echo "filename=$2">>$tmpfile
-193
 shift 2 ;;
-194
 -c|--config)
-195
 echo -e "using config file ’$2’" ;
-196
 configfile=$2
-197 #should be caught by getopt
-198 #
+#should be caught by getopt
+#
 if [[ -n $configfile ]];then
-199
 if [[ -e $configfile ]];then
-200
 source $configfile
-201
 echo -e "$configfile loaded"
-202
 else
-203
 echo -e "error config file ’$configfile’ not found\nexiting..."
-204
 exit 1
-205
 fi
-206 #
+#
 fi
-207
 shift 2 ;;
-208
 -h|--help)
-209
 echo -e "\nusage: ‘basename $0‘ <options> datafile(s)"
-210
 echo -e "\noptions:"
-211
 echo -e "-f | --fits \t do a linear regression of the (first) data"
-212
 echo -e "-f | --fits \t plot a trendline"
-213
 echo -e "-e | --errorbar \t plot errorbars"
-214
 echo -e "-p | --epsilon \t plot the epsilon results"
-215
 echo -e "-s | --stpr \t plot stacking fault results"
-216
 echo -e "-b | --bg_peak \t plot background-peak ratio eval data"
-217
 echo -e "
 --bg \t plot background eval data"
-218
 echo -e "
 --asymm \t plot asymmetry eval data"
-219
 echo -e "
 --lattice \t plot lattice param eval data"
-220
 echo -e "-r | --strain \tplot .strain data"
-221
 echo -e "-x | --xmap \tplot the xmap"
-222
 echo -e "-t | --title \t(plot titles for each curve)"
-223
 echo -e "-n | --name <Name of the plot>"
-224
 echo -e "-o | --output <output format: psbw|pscolor|latexbw|latex|pdf|pdfbw|png>"
-225
 echo -e "-N | --outname <basename of output files>"
-226
 echo -e "-c | --config <config file>"
-227
 echo -e "-h | --help"
-228
-echo -e "This script can plot multiple datafiles from a series eval. Dataset should be identical layout but anything
-might work with errors"
-229
-echo -e "Basically you can have the .csv to be plotted and a config file supplied via -c. if it exists datafile.plot.
-ini is loaded for settings"
-230
+echo -e "This script can plot multiple datafiles from a series eval. Dataset should be identical layout but anything might work with errors"
+
+echo -e "Basically you can have the .csv to be plotted and a config file supplied via -c. if it exists datafile.plot.ini is loaded for settings"
+
 echo -e "to get a ini file get the variables in the script and set them as you like."
-231
+
 echo -e "settings get applied as: config file, overloaded by local .plot.ini then commandline"
-232
-echo -e "to have names in multiple data set be sure to have a shortname=dataset name in the csv.plot.ini’s or a full
-datasetnames=(...) array"
-233
+echo -e "to have names in multiple data set be sure to have a shortname=dataset name in the csv.plot.ini’s or a full datasetnames=(...) array"
 shift;;
-234
 --) shift ; break ;;
-235
 *) echo "Internal error (no agruments?)! $1" ; exit 1 ;;
-236
 esac
-237 done
-238 #The Remaining arguments:
-239 #old
-240 #
+done
+#The Remaining arguments:
+ #old
+ #
 datafile=( $* )
-241
-242 declare -a datafile
-243
-244 for arg do
-245 # echo remains: $arg
-246
+
+ declare -a datafile
+
+ for arg do
+ # echo remains: $arg
 if [[ -f $arg ]];then
-247
 datafile=( "${datafile[@]}" "$arg" )
-248
 else
-249
 echo -e "\t\E[31;47mnot using non-file: \033[0m$arg"
-250
 fi
-251 done
-252 if [[ -z ${datafile[@]} ]];then
-253
+ done
+ if [[ -z ${datafile[@]} ]];then
+
 echo -e "\n\tNothing to do!\n\n"
-254
 exit 1
-255 fi
-256 #echo ${datafile[@]}
-257
-258
-259 ####################################################
-260
-261
-262 ###################START OF PROG##########################
-263
-264 #we will grep for that after the getopt maybe...
-265 variables=( ‘grep "#measno" ${datafile[0]}‘ )
-266 no_contrast=$(( (${#variables[@]}-31)/3 ))
-267
-268 #we like the order: use config,plot.ini,commandline
-269 #only if we have multiple data set we prefer ini over .plot.ini
-270 #thus load plot.ini, config was sourced already we need to re-source it...
-271
-272 #to include this we load per default a datafile.plot.ini
-273 if [[ -e ${datafile[0]}.plot.ini ]];then
+ fi
+ #echo ${datafile[@]}
+ ####################################################
+ ###################START OF PROG##########################
+ #we will grep for that after the getopt maybe...
+ variables=( ‘grep "#measno" ${datafile[0]}‘ )
+ no_contrast=$(( (${#variables[@]}-31)/3 ))
+
+ #we like the order: use config,plot.ini,commandline
+ #only if we have multiple data set we prefer ini over .plot.ini
+ #thus load plot.ini, config was sourced already we need to re-source it...
+
+ #to include this we load per default a datafile.plot.ini
+ if [[ -e ${datafile[0]}.plot.ini ]];then
 echo -e "load local settings"
 source ${datafile[0]}.plot.ini
 fi

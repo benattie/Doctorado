@@ -58,8 +58,7 @@ endif
 endfor
 #write data to file
 # ####################################
-#
-outfname=strrep(data_file,".xy",".centered_norm.xy");
+#outfname=strrep(data_file,".xy",".centered_norm.xy");
 outfname = strcat(data_file,".stat");
 #
 [outfile, msg] = fopen(outfname,’wt’);if outfile == -1 error("error open outfile File:\t %s \n",msg) endif
