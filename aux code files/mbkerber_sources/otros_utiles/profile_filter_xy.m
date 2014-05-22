@@ -1,11 +1,11 @@
-1 #!/usr/bin/octave -q
-2 #f
-3 #filter the profile supplied as commandline arg
-4 #pretty dumb prelim thing does not check ANYTHING
+1  #!/usr/bin/octave -q
+2  #f
+3  #filter the profile supplied as commandline arg
+4  #pretty dumb prelim thing does not check ANYTHING
 5
-6 puts("\n\t WARNING Hope you know what you are doing! \n\t This is an idiotUNproof script!\n\n");
+6  puts("\n\t WARNING Hope you know what you are doing! \n\t This is an idiotUNproof script!\n\n");
 7
-8 source("~/.mbk/octave.defaults");
+8  source("~/.mbk/octave.defaults");
 9
 10 #MBK_edit needed patch to run if string converions error!
 11 implicit_num_to_str_ok=1;

@@ -1,0 +1,7 @@
+#elimina los primeros n - 1 caracteres
+cut -c n- fit2peak-index.m > fit2peak-index.m
+
+#elimina los primeros 2 caracteres
+sed 's ..  ' fit2peak-index.m
+#elimina los primeros 3 caracteres
+sed 's ...  ' fit2peak-index.m
