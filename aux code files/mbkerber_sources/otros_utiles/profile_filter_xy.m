@@ -12,31 +12,30 @@ implicit_num_to_str_ok=1;
 implicit_str_to_num_ok=1;
 
 function max_counts = max_counts(i_value)
-idx =1;
-max_counts = i_value(idx);
-for i=2:length(i_value)
-if (i_value(i) > max_counts)
-max_counts = i_value(i);
-endif
-endfor
+    idx =1;
+    max_counts = i_value(idx);
+    for i=2:length(i_value)
+        if (i_value(i) > max_counts)
+            max_counts = i_value(i);
+        endif
+    endfor
 endfunction
 
 #
 #############################################################
 #
 function i_value_filtered = i_value_chebyfilter(i_value)
+    #make cheby1_filt
+    #good 1024 points
+    # [b,a]=cheby1(2,.000025, 0.02);
+    #testing for arbitrary number of points
+    #works for inel 0.03 up to 0.08 for2nd value
+    [b,a] = cheby1(2, 0.000002, 80/length(i_value));
 
-#make cheby1_filt
-#good 1024 points
-# [b,a]=cheby1(2,.000025, 0.02);
-#testing for arbitrary number of points
-#works for inel 0.03 up to 0.08 for2nd value
-[b,a] = cheby1(2, 0.000002, 80/length(i_value));
-
-i_value_filtered = filtfilt(b,a,i_value);
-# i_value_filtered = filter(b,1,i_value);
-# freqz(b,a);
-# figure
+    i_value_filtered = filtfilt(b,a,i_value);
+    # i_value_filtered = filter(b,1,i_value);
+    # freqz(b,a);
+    # figure
 endfunction
 #
 #############################################################
@@ -53,7 +52,6 @@ data = loadData(data_file);
 counts=data(:,2);
 k=data(:,1);
 
-
 # The Filters
 filteredcounts=i_value_chebyfilter(counts);
 #gset mouse;
@@ -68,10 +66,10 @@ outfname = strcat(data_file,".filt.xy");
 
 [outfile, msg] = fopen(outfname,’wt’);
 if outfile == -1
-error("LoadData - Data File:\t %s \n",msg)
+    error("LoadData - Data File:\t %s \n",msg)
 endif
 for i=1:length(filteredcounts)
-fprintf(outfile,"%E\t%E\n",k(i), filteredcounts(i));
+    fprintf(outfile,"%E\t%E\n",k(i), filteredcounts(i));
 endfor
 fclose(outfile);
 

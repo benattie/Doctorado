@@ -13,25 +13,21 @@ implicit_str_to_num_ok=1;
 
 #this is fixed, not via command line so if you want it another way
 #just edit here
-
 #
 #############################################################
 #
-
-
 #------------------------------------
 # parse command line
 #------------------------------------
 
 if ((nargin)!= 2)
-printf("\n\tInterpolates the profile of a double_column_profile_file");
-printf("\n\tcreating an aequidistant x range of provided spacing");
-
-printf("\n\tUsage: %s", program_name);
-printf("\n\t\tdouble_column_profile_file");
-printf("\n\t\tx-axis_spacing");
-printf("\n\toutput of a datafile with appended .aequi.dat \n");
-exit;
+    printf("\n\tInterpolates the profile of a double_column_profile_file");
+    printf("\n\tcreating an aequidistant x range of provided spacing");
+    printf("\n\tUsage: %s", program_name);
+    printf("\n\t\tdouble_column_profile_file");
+    printf("\n\t\tx-axis_spacing");
+    printf("\n\toutput of a datafile with appended .aequi.dat \n");
+    exit;
 endif
 
 #------------------------------------
@@ -55,15 +51,15 @@ n=1;
 newxvalue=[newxvalue;xvalue(1)];
 newyvalue=[newyvalue;yvalue(1)];
 for i=2:i_max
-if ( (xvalue(n+1) - xvalue(n)) < deltax )
-error("error:\t The interpolation distance is larger than the data spacing (line %i). \n This will not work with this algorithm!",n)
-endif
-if ( (xvalue(n+1) - newxvalue(i-1)) < deltax )
-n=n+1;
-endif
-newxvalue=[newxvalue;newxvalue(i-1)+deltax];
-newyvalue=[newyvalue;(newyvalue(i-1)+deltax*(yvalue(n+1)-newyvalue(i-1))/(xvalue(n+1)-newxvalue(i-1)))];
-#printf("%g\t%g\t\t%g\t%g\n",newxvalue(i),newyvalue(i));
+    if ( (xvalue(n+1) - xvalue(n)) < deltax )
+        error("error:\t The interpolation distance is larger than the data spacing (line %i). \n This will not work with this algorithm!",n)
+    endif
+    if ( (xvalue(n+1) - newxvalue(i-1)) < deltax )
+        n=n+1;
+    endif
+    newxvalue=[newxvalue;newxvalue(i-1)+deltax];
+    newyvalue=[newyvalue;(newyvalue(i-1)+deltax*(yvalue(n+1)-newyvalue(i-1))/(xvalue(n+1)-newxvalue(i-1)))];
+    #printf("%g\t%g\t\t%g\t%g\n",newxvalue(i),newyvalue(i));
 endfor
 
 #write data to file
@@ -73,11 +69,11 @@ outfname = strcat(data_file,".aequi.dat");
 
 [outfile, msg] = fopen(outfname,"wt");
 if outfile == -1
-error("error open outfile File:\t %s \n",msg)
+    error("error open outfile File:\t %s \n",msg)
 endif
 #write the data!
 for i=1:i_max
-fprintf(outfile,"%#.9g\t%#.10g\n",newxvalue(i), newyvalue(i));
+    fprintf(outfile,"%#.9g\t%#.10g\n",newxvalue(i), newyvalue(i));
 endfor
 fclose(outfile);
 #cleanup

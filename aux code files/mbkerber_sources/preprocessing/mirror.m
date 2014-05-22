@@ -20,13 +20,13 @@ implicit_str_to_num_ok=1;
 #------------------------------------
 
 if ((nargin)!= 2)
-printf("\n\ttake a double_column_profile_file mirror it at line number cmdlinearg2");
-printf("\n\tand make average of the two");
-printf("\n\tUsage: %s", program_name);
-printf("\n\t\tdouble_column_profile_file");
-printf("\n\t\tlinenumb");
-printf("\n\toutput of a datafile with appended .mirror \n");
-exit;
+    printf("\n\ttake a double_column_profile_file mirror it at line number cmdlinearg2");
+    printf("\n\tand make average of the two");
+    printf("\n\tUsage: %s", program_name);
+    printf("\n\t\tdouble_column_profile_file");
+    printf("\n\t\tlinenumb");
+    printf("\n\toutput of a datafile with appended .mirror \n");
+    exit;
 endif
 
 #------------------------------------
@@ -44,8 +44,8 @@ lineno=nth(argv,2);
 out_y=[];
 out_x=[];
 for i=1:984
-out_x(i) = xvalue(20+i);
-out_y(i) = ( yvalue(20+i) + yvalue(1005-i) )/2;
+    out_x(i) = xvalue(20+i);
+    out_y(i) = ( yvalue(20+i) + yvalue(1005-i) )/2;
 endfor
 # for i=1:492
 # out_x(i) = xvalue(20+i);
@@ -67,14 +67,13 @@ outfname = strcat(data_file,".mirror.av");
 
 [outfile, msg] = fopen(outfname,’w’);
 if outfile == -1
-error("error open outfile File:\t %s \n",msg)
+    error("error open outfile File:\t %s \n",msg)
 endif
 #write the data!
 for i=1:length(out_x)
-fprintf(outfile,"%#.9g\t%#.10g\n",out_x(i), out_y(i));
+    fprintf(outfile,"%#.9g\t%#.10g\n",out_x(i), out_y(i));
 endfor
 fclose(outfile);
 #cleanup
 clear *;
-
 printf("...done\n\n");

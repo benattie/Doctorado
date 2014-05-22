@@ -5,7 +5,7 @@ fitykfile=$datafile.fit
 
 ###############
 function tofit() {
-echo -e $@ >> $fitykfile
+    echo -e $@ >> $fitykfile
 }
 ##############
 
@@ -13,7 +13,6 @@ echo -e $@ >> $fitykfile
 echo -e "">$fitykfile
 #first load the file
 tofit "@+ < ’${datafile}’"
-
 
 #tofit "s=sqrt(abs(y))"
 tofit "s=sqrt(abs(y-0.9))"

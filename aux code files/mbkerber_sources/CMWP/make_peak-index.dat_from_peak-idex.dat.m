@@ -23,38 +23,35 @@ implicit_str_to_num_ok=1;
 #for a maximum and return its index position
 function max_counts_idx = find_max(x_value,i_value,search_min,search_max)
 
-for i=1:length(i_value)
-if (x_value(i)>search_max)
-break;
-endif
-if(x_value(i)>search_min)
-if (i_value(i) > max_counts)
-max_counts = i_value(i);
-max_counts_idx = i;
-endif
-else
-max_counts_idx = i;
-max_counts = i_value(i);
-endif
-endfor
+    for i=1:length(i_value)
+        if (x_value(i)>search_max)
+            break;
+        endif
+        if(x_value(i)>search_min)
+            if (i_value(i) > max_counts)
+                max_counts = i_value(i);
+                max_counts_idx = i;
+            endif
+        else
+            max_counts_idx = i;
+            max_counts = i_value(i);
+        endif
+    endfor
 endfunction
 #
 #############################################################
 #
-
-
 #------------------------------------
 # parse command line
 #------------------------------------
-
 if ((nargin)!= 2)
-printf("\n\tread please");
+    printf("\n\tread please");
 
-printf("\n\tUsage: %s", program_name);
-printf("\n\t\tpeak-index.dat_file");
-printf("\n\t\tdouble_column_profile_file");
-printf("\n\toutput of double_column_profile_file.peak-index.dat \n");
-exit;
+    printf("\n\tUsage: %s", program_name);
+    printf("\n\t\tpeak-index.dat_file");
+    printf("\n\t\tdouble_column_profile_file");
+    printf("\n\toutput of double_column_profile_file.peak-index.dat \n");
+    exit;
 endif
 
 #------------------------------------
@@ -71,8 +68,8 @@ new_profilebg=strcat(new_profile,".bg-spline.dat");
 
 #now check if we have same input and output files this happens when looping
 if (strcmp(master_profile, new_profile) )
-printf("\nNothing to do!\n");
-exit;
+    printf("\nNothing to do!\n");
+    exit;
 endif
 
 #first the peak points
@@ -106,14 +103,14 @@ profile_search = 0.3;
 outfname=strcat(new_profile,".peak-index.dat");
 [outfile, msg] = fopen(outfname,"wt");
 if outfile == -1
-error("error open outfile File:\t %s \n",msg)
+    error("error open outfile File:\t %s \n",msg)
 endif
 
 for i=1:length(peakpointsx)
-peak_pos=find_max(newprofile_x, newprofile_y, peakpointsx(i)-profile_search, peakpointsx(i)+profile_search);
-# peak_int=newprofile_y(peak_pos)-spline(peakpointsx, peakpointsy, newprofile_x(peak_pos));
-peak_int=newprofile_y(peak_pos);
-fprintf(outfile,"%#.9g\t%#.10g\t%i\n",newprofile_x(peak_pos), peak_int, peakpointshkl(i) );
+    peak_pos=find_max(newprofile_x, newprofile_y, peakpointsx(i)-profile_search, peakpointsx(i)+profile_search);
+    # peak_int=newprofile_y(peak_pos)-spline(peakpointsx, peakpointsy, newprofile_x(peak_pos));
+    peak_int=newprofile_y(peak_pos);
+    fprintf(outfile,"%#.9g\t%#.10g\t%i\n",newprofile_x(peak_pos), peak_int, peakpointshkl(i) );
 endfor
 fclose(outfile);
 

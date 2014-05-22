@@ -16,12 +16,12 @@ implicit_str_to_num_ok=1;
 # parse command line
 #------------------------------------
 if ((nargin)!= 1)
-printf("\n\ttake a sorted_series_results_file");
-printf("\n\tand calculate the ini file with ranges for the averaging");
-printf("\n\tUsage: %s", program_name);
-printf("\n\t\tsorted_series_results_file");
-printf("\n\toutput of a .stat file with the statistical info on the phys results. \n");
-exit;
+    printf("\n\ttake a sorted_series_results_file");
+    printf("\n\tand calculate the ini file with ranges for the averaging");
+    printf("\n\tUsage: %s", program_name);
+    printf("\n\t\tsorted_series_results_file");
+    printf("\n\toutput of a .stat file with the statistical info on the phys results. \n");
+    exit;
 endif
 #------------------------------------
 # Daten laden
@@ -44,17 +44,17 @@ startindex=-1;
 endindex=-1;
 endres=-1;
 for i=1:(length(ydata))
-if (startindex == -1 ) #-1 => no value yet
-if ydata(i)>-1 #if the first real residuum is found
-startindex=i;
-endres=ydata(i)+range*ydata(i);
-endif
-endif
-if ( endres != -1 )
-if (ydata(i) <= endres) #as long as we are smaller than the residuum we need to increase the endindex
-endindex=i;
-endif
-endif
+    if (startindex == -1 ) #-1 => no value yet
+        if ydata(i)>-1 #if the first real residuum is found
+            startindex=i;
+            endres=ydata(i)+range*ydata(i);
+        endif
+    endif
+    if ( endres != -1 )
+        if (ydata(i) <= endres) #as long as we are smaller than the residuum we need to increase the endindex
+            endindex=i;
+        endif
+    endif
 endfor
 #write data to file
 # ####################################
@@ -72,4 +72,3 @@ fclose(outfile);
 #cleanup
 clear *;
 #printf("...done\n\n");
-

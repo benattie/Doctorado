@@ -19,12 +19,12 @@ implicit_str_to_num_ok=1;
 #------------------------------------
 
 if ((nargin)!= 2)
-printf("\n\tInterpolate an xy to achive the number of points given as argument 2");
-printf("\n\tUsage: %s", program_name);
-printf("\n\t\t.xy_file");
-printf("\n\t\tnumber of points for the interpolation");
-# printf("\n\toutput to datafile.interpp.xy\n");
-exit;
+    printf("\n\tInterpolate an xy to achive the number of points given as argument 2");
+    printf("\n\tUsage: %s", program_name);
+    printf("\n\t\t.xy_file");
+    printf("\n\t\tnumber of points for the interpolation");
+    # printf("\n\toutput to datafile.interpp.xy\n");
+    exit;
 endif
 
 #------------------------------------
@@ -54,15 +54,14 @@ outfname = strcat(data_file,".interpp.xy");
 
 [outfile, msg] = fopen(outfname,’wt’);
 if outfile == -1
-error("LoadData - Data File:\t %s \n",msg)
+    error("LoadData - Data File:\t %s \n",msg)
 endif
 for i=1:length(y_new)
-fprintf(outfile,"%E\t%E\n",x_new(i), y_new(i));
+    fprintf(outfile,"%E\t%E\n",x_new(i), y_new(i));
 endfor
 fclose(outfile);
 
 #cleanup
-
 
 clear *;
 printf("...done\n\n");

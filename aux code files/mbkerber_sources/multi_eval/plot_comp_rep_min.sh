@@ -11,7 +11,7 @@ filename=‘basename $1 -rep‘
 plotfile=/tmp/plot$USERNAME‘date +%s%N‘.tmp
 ###############
 function toplot() {
-echo -e $@ >> $plotfile
+    echo -e $@ >> $plotfile
 }
 ###############
 toplot "set logscale y"

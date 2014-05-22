@@ -19,12 +19,11 @@ implicit_str_to_num_ok=1;
 #------------------------------------
 
 if ((nargin)!= 2)
-printf("\n\tDeconvolve the two peaks xy-file1 from xy-file2");
-
-printf("\n\tUsage: %s", program_name);
-printf("\n\t\tdouble_column_profile_file1");
-printf("\n\t\tdouble_column_profile_file2");
-exit;
+    printf("\n\tDeconvolve the two peaks xy-file1 from xy-file2");
+    printf("\n\tUsage: %s", program_name);
+    printf("\n\t\tdouble_column_profile_file1");
+    printf("\n\t\tdouble_column_profile_file2");
+    exit;
 endif
 
 #------------------------------------
@@ -59,7 +58,6 @@ size(r)
 plot(x_all,r);
 pause;
 
-
 #write out results
 
 outfname = strcat(data_file1,".deconv.",data_file2);
@@ -68,13 +66,12 @@ outfname = strcat(data_file1,".deconv.",data_file2);
 
 [outfile, msg] = fopen(outfname,’wt’);
 if outfile == -1
-error("error Saving Data - Data File:\t %s \n",msg)
+    error("error Saving Data - Data File:\t %s \n",msg)
 endif
 for i=1:length(x_all)
-fprintf(outfile,"%E\t%E\n",x_all(i), r(i));
+    fprintf(outfile,"%E\t%E\n",x_all(i), r(i));
 endfor
 fclose(outfile);
-
 
 #cleanup
 clear *;

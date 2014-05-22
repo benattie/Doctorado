@@ -17,14 +17,14 @@ implicit_str_to_num_ok=1;
 # parse command line
 #------------------------------------
 if ((nargin)!= 3)
-printf("\n\ttake a double_column_profile_file");
-printf("\n\tand make a symmetric profile in the given range ov minx and maxx");
-printf("\n\tUsage: %s", program_name);
-printf("\n\t\tdouble_column_profile_file");
-printf("\n\t\tminx");
-printf("\n\t\tmaxx");
-printf("\n\toutput of a xy double column file of name <datafile> appended .symm \n");
-exit;
+    printf("\n\ttake a double_column_profile_file");
+    printf("\n\tand make a symmetric profile in the given range ov minx and maxx");
+    printf("\n\tUsage: %s", program_name);
+    printf("\n\t\tdouble_column_profile_file");
+    printf("\n\t\tminx");
+    printf("\n\t\tmaxx");
+    printf("\n\toutput of a xy double column file of name <datafile> appended .symm \n");
+    exit;
 endif
 #------------------------------------
 # Daten laden
@@ -43,10 +43,10 @@ ydata=(data(:,2)-bgvalue);
 kvalue=[];
 yvalue=[];
 for i=1:length(xdata)
-if ( (xdata(i)<maxx) && (xdata(i)>minx) )
-kvalue=[kvalue;xdata(i)];
-yvalue=[yvalue;ydata(i)];
-endif
+    if ( (xdata(i)<maxx) && (xdata(i)>minx) )
+        kvalue=[kvalue;xdata(i)];
+        yvalue=[yvalue;ydata(i)];
+    endif
 endfor
 #plot(xdaita,ydata,"o",kvalue,yvalue,"-");pause;
 #first we determine the maximum of the vector
@@ -57,13 +57,13 @@ shortpeakmini=0;
 shortpeakmaxi=0;
 #now we check where the profile is cut off this is done by looking the shorter distance to the end of the vector
 if kvalue(maxi) - kvalue(1) > kvalue(length(kvalue))-kvalue(maxi)
-profileside=-1;
-shortpeakmini=maxi-(length(kvalue)-maxi);
-shortpeakmaxi=length(kvalue);
+    profileside=-1;
+    shortpeakmini=maxi-(length(kvalue)-maxi);
+    shortpeakmaxi=length(kvalue);
 else
-profileside=1;
-shortpeakmini=1;
-shortpeakmaxi=maxi+(maxi-1);
+    profileside=1;
+    shortpeakmini=1;
+    shortpeakmaxi=maxi+(maxi-1);
 endif
 shortpeakx=kvalue(shortpeakmini:shortpeakmaxi);
 shortpeaky=yvalue(shortpeakmini:shortpeakmaxi);
@@ -81,14 +81,14 @@ ymax = 0;
 kmax = 0;
 #now we determine the indices and values for com, max in the big profile as we want to symmetrize from there!
 for i=shortpeakmini:shortpeakmaxi
-if yvalue(i) > ymax
-ymax = yvalue(i);
-xmax = kvalue(i);
-maxindex=i;
-endif
-if kvalue(i)<=com
-comindex=i+1;
-endif
+    if yvalue(i) > ymax
+        ymax = yvalue(i);
+        xmax = kvalue(i);
+        maxindex=i;
+    endif
+    if kvalue(i)<=com
+        comindex=i+1;
+    endif
 endfor
 # peakcenteri=comindex;
 peakcenteri=maxindex;
@@ -105,9 +105,9 @@ symmx=[0];
 symmy=[peakcentery];
 #peakcenteri+profileside*i
 for i=1:(max(abs(peakcenteri-1),abs(peakcenteri-length(kvalue))))
-j=peakcenteri+profileside*i;
-symmx=[-1*abs(kvalue(j)),symmx,abs(kvalue(j))];
-symmy=[yvalue(j),symmy,yvalue(j)];
+    j=peakcenteri+profileside*i;
+    symmx=[-1*abs(kvalue(j)),symmx,abs(kvalue(j))];
+    symmy=[yvalue(j),symmy,yvalue(j)];
 endfor
 #now move the peak back
 symmx=symmx+peakcenter;
@@ -126,9 +126,9 @@ puts("Writing Data to file: " outfname "\n");
 [outfile, msg] = fopen(outfname,’wt’);if outfile == -1 error("error open outfile File:\t %s \n",msg) endif
 #write the data!
 for i=1:length(symmx)
-#
-printf("%#.9g\t%#.10g\n",symmx(i),symmy(i));
-fprintf(outfile,"%#.9g\t%#.10g\n",symmx(i),symmy(i));
+    #
+    printf("%#.9g\t%#.10g\n",symmx(i),symmy(i));
+    fprintf(outfile,"%#.9g\t%#.10g\n",symmx(i),symmy(i));
 endfor
 fclose(outfile);
 #cleanup

@@ -15,19 +15,17 @@ implicit_str_to_num_ok=1;
 #
 #############################################################
 #
-
 #------------------------------------
 # parse command line
 #------------------------------------
 
 if ((nargin)!= 3)
-printf("\n\tDetermine the height and scattering of the bg of a double_column_profile_file");
-
-printf("\n\tUsage: %s", program_name);
-printf("\n\t\tdouble_column_profile_file");
-printf("\n\t start line \n");
-printf("\n\t end line \n");
-exit;
+    printf("\n\tDetermine the height and scattering of the bg of a double_column_profile_file");
+    printf("\n\tUsage: %s", program_name);
+    printf("\n\t\tdouble_column_profile_file");
+    printf("\n\t start line \n");
+    printf("\n\t end line \n");
+    exit;
 endif
 
 #------------------------------------

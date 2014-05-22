@@ -45,10 +45,10 @@ printf("Writing Data to file: %s \n",outfname);
 
 [outfile, msg] = fopen(outfname,’wt’);
 if outfile == -1
-error("LoadData - Data File:\t %s \n",msg)
+    error("LoadData - Data File:\t %s \n",msg)
 endif
 for i=1:length(x_diff)
-fprintf(outfile,"%E\t%E\n",x_diff(i), y_diff(i));
+    fprintf(outfile,"%E\t%E\n",x_diff(i), y_diff(i));
 endfor
 fclose(outfile);
 
@@ -67,9 +67,6 @@ fclose(outfile);
 # endfor
 # fclose(outfile);
 
-
 #cleanup
-
-
 clear *;
 printf("...done\n\n");

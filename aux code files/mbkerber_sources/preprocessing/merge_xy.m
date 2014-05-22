@@ -51,17 +51,13 @@ outfname = strcat(data_file1,"_",data_file2,".merged.xy");
 
 [outfile, msg] = fopen(outfname,’wt’);
 if outfile == -1
-error("LoadData - Data File:\t %s \n",msg)
+    error("LoadData - Data File:\t %s \n",msg)
 endif
 fprintf(outfile,"#x-%s\ty1-%s\ty2-%s\n",data_file1,data_file1,data_file2);
 for i=1:length(x)
-fprintf(outfile,"%E\t%E\t%E\n",x(i),y1_interpolate(i),y2_interpolate(i));
+    fprintf(outfile,"%E\t%E\t%E\n",x(i),y1_interpolate(i),y2_interpolate(i));
 endfor
 fclose(outfile);
-
-
 #cleanup
-
-
 clear *;
 printf("...done\n\n");

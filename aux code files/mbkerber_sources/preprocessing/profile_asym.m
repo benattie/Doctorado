@@ -36,13 +36,11 @@ deltax = ( xrange(1) - xrange(length(xrange)) )/length(xrange);
 com=sum(xrange .* yrange * deltax)/sum(yrange*deltax);
 clear deltax;
 
-
 xtemp=x-com; #new profile with mirror axis == 0
 x_mirror_full=sort(-xtemp);
 y_mirror_full=flipud (y);
 
 # [x_diff,y_diff]=profile_add(xtemp,y,x_mirror_full,-y_mirror_full);
-
 # plot(xtemp,y,x_mirror_full,y_mirror_full,x_diff,y_diff);
 # pause
 
@@ -50,9 +48,7 @@ y_mirror_full=flipud (y);
 # xtemp=x-xrange(i); #new profile with mirror axis == 0
 # x_mirror_full=sort(-xtemp);
 # y_mirror_full=flipud (y);
-
 [x_diff_sub1,y_diff_sub1]=profile_add(xtemp,y,x_mirror_full,-y_mirror_full);
-
 # plot(xtemp,y,x_mirror_full,y_mirror_full,x_diff_sub1,(y_diff_sub1));
 # pause
 
@@ -63,12 +59,11 @@ sub1_x_max=x_diff_sub1(sub1_y_max_idx);
 x_sub1_temp=x_diff_sub1-sub1_x_max;
 
 if ( sub1_x_max > 0 )
-x_sub1=sort([x_sub1_temp( find( x_sub1_temp>0 ) ); x_sub1_temp( find( x_sub1_temp==0 ) ); -x_sub1_temp( find(x_sub1_temp>0 ) )]);
-y_sub1=[flipud(y_diff_sub1( find( x_sub1_temp>0 ) )); y_diff_sub1( find( x_sub1_temp==0 ) );y_diff_sub1( find(x_sub1_temp>0 ) )];
+    x_sub1=sort([x_sub1_temp( find( x_sub1_temp>0 ) ); x_sub1_temp( find( x_sub1_temp==0 ) ); -x_sub1_temp( find(x_sub1_temp>0 ) )]);
+    y_sub1=[flipud(y_diff_sub1( find( x_sub1_temp>0 ) )); y_diff_sub1( find( x_sub1_temp==0 ) );y_diff_sub1( find(x_sub1_temp>0 ) )];
 else
-x_sub1=sort([-x_sub1_temp( find( x_sub1_temp<0 ) ); x_sub1_temp( find( x_sub1_temp==0 ) ); x_sub1_temp( find(x_sub1_temp<0 ) )]);
-y_sub1=[(y_diff_sub1( find( x_sub1_temp<0 ) )); y_diff_sub1( find( x_sub1_temp==0 ) );flipud(y_diff_sub1( find(x_sub1_temp<0 ) ))];
-
+    x_sub1=sort([-x_sub1_temp( find( x_sub1_temp<0 ) ); x_sub1_temp( find( x_sub1_temp==0 ) ); x_sub1_temp( find(x_sub1_temp<0 ) )]);
+    y_sub1=[(y_diff_sub1( find( x_sub1_temp<0 ) )); y_diff_sub1( find( x_sub1_temp==0 ) );flipud(y_diff_sub1( find(x_sub1_temp<0 ) ))];
 endif
 x_sub1=x_sub1+sub1_x_max; #to have the sub where it should be in the bigger one x_temp
 # plot(xtemp,y,x_sub1,y_sub1,x_diff_sub1,y_diff_sub1)
@@ -94,42 +89,36 @@ sub2_ymax_x=x_sub2(y_sub2_maxidx)
 
 delta=(sub2_ymax_x-sub1_ymax_x)
 
-
 # semilogy(x,y,x_sub1,y_sub1,x_sub2,y_sub2);
 # sleep(0.2);
- # pause;
- # endfor
+# pause;
+# endfor
+#output
 
- #output
+outfname = strcat(data_file,".asymeval");
+[outfile, msg] = fopen(outfname,’wt’);
+if outfile == -1
+     error("LoadData - Data File:\t %s \n", msg)
+endif
+fprintf(outfile,"sub1_f= %E\nsub2_f= %E\ndelta= %E",area_sub1, area_sub2, delta);
+fclose(outfile);
 
- outfname = strcat(data_file,".asymeval");
- [outfile, msg] = fopen(outfname,’wt’);
- if outfile == -1
- error("LoadData - Data File:\t %s \n",
- msg)
- endif
- fprintf(outfile,"sub1_f= %E\nsub2_f= %E\ndelta= %E",area_sub1, area_sub2, delta);
- fclose(outfile);
+outfname = strcat(data_file,".asymeval.sub1.xy");
+[outfile, msg] = fopen(outfname,’wt’);
+if outfile == -1
+    error("LoadData - Data File:\t %s \n", msg)
+endif
+for i=1:length(y_sub1)
+    fprintf(outfile,"%E\t%E\n",x_sub1(i), y_sub1(i));
+endfor
+fclose(outfile);
 
-
- outfname = strcat(data_file,".asymeval.sub1.xy");
- [outfile, msg] = fopen(outfname,’wt’);
- if outfile == -1
- error("LoadData - Data File:\t %s \n",
- msg)
- endif
- for i=1:length(y_sub1)
- fprintf(outfile,"%E\t%E\n",x_sub1(i), y_sub1(i));
- endfor
- fclose(outfile);
-
- outfname = strcat(data_file,".asymeval.sub2.xy");
- [outfile, msg] = fopen(outfname,’wt’);
- if outfile == -1
- error("LoadData - Data File:\t %s \n",
- msg)
- endif
- for i=1:length(y_sub2)
- fprintf(outfile,"%E\t%E\n",x_sub2(i), y_sub2(i));
- endfor
- fclose(outfile);
+outfname = strcat(data_file,".asymeval.sub2.xy");
+[outfile, msg] = fopen(outfname,’wt’);
+if outfile == -1
+    error("LoadData - Data File:\t %s \n", msg)
+endif
+for i=1:length(y_sub2)
+    fprintf(outfile,"%E\t%E\n",x_sub2(i), y_sub2(i));
+endfor
+fclose(outfile);
