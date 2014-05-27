@@ -4,6 +4,7 @@
 #include <math.h>
 #include "array_alloc.h"
 #include "aux_functions.h"
+#include "stacking.h"
 
 void gen_cmwp_files(exists, &sync_data, &difra, zero_peak_index, peak_intens_av, seeds);
 {
