@@ -37,12 +37,13 @@ int main()
  double ** seeds, ** bg_seed;
  char buf_temp[100], buf[100], buf1[100];
  char path_out[150], path [150], filename1[100], inform[10], path1[150], inform1[10];
- char sabo_intenfile[200], fit_intenfile[200], fwhmfile[200], etafile[200], alldatafile[200];
+ //char sabo_intenfile[200], fit_intenfile[200], fwhmfile[200], etafile[200];
+ char alldatafile[200];
  char marfile[150];
  char minus_zero; 
  char logfile_yn, logfile_yn_temp;
- FILE *fp, *fp1, *fp3, *fp_IRF, *fp_fit, *fp_all;
- FILE *fp_sabointen_pf, *fp_fitinten_pf, *fp_fwhm_pf, *fp_eta_pf;
+ FILE *fp, *fp1, *fp_IRF, *fp_fit, *fp_all;
+ //FILE *fp_sabointen_pf, *fp_fitinten_pf, *fp_fwhm_pf, *fp_eta_pf, *fp3;
  IRF ins;
  struct DAT intensss;
  time_t timer;
@@ -298,6 +299,7 @@ int main()
     zeit = localtime(&timer); // save "time in sec" into structure tm
     for(m = 0; m < numrings; m++)//itero sobre todos los picos
     {
+        /*
         //INTENSIDADES (sabo intensities)
         strcpy(sabo_intenfile, "");
         strcat(sabo_intenfile, path_out);
@@ -356,6 +358,7 @@ int main()
         {
             fprintf(stderr, "Error opening file PF_grid.dat\n"); exit(1);
         }
+        */
         //EN ESTE ARCHIVO VOY A GUARDAR TODOS LOS DATOS JUNTOS
         strcpy(alldatafile, "");
         strcat(alldatafile, path_out);
@@ -371,10 +374,10 @@ int main()
         }
         ////////////////////////////////////////////////////////////////////////////////////////////
         //Imprimo el tiempo de ejecucion del programa en el .mtex
-        fprintf(fp_sabointen_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
-        fprintf(fp_fitinten_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
-        fprintf(fp_fwhm_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
-        fprintf(fp_eta_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec); 
+        //fprintf(fp_sabointen_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
+        //fprintf(fp_fitinten_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
+        //fprintf(fp_fwhm_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
+        //fprintf(fp_eta_pf, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec); 
         fprintf(fp_all, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
         fprintf(fp_all, "#    2theta    theta      alpha   beta    raw_int     fit_int    fit_int_err    H    H_err    eta     eta_err    B    B_err");
         fprintf(fp_all, "    H_corr    H_corr_err    eta_ins    eta_ins_err    B_ins    B_ins_err\n");
@@ -409,7 +412,7 @@ int main()
                 }
                 else
                     alpha = alpha;
-                        
+                /*        
                 //imprimo las intensidades en formato figura de polos, asi como el grid
                 if((minus_zero == 'Y' || minus_zero == 'y') && sabo_inten[n][j + del_gam][m] < 0)
                     fprintf(fp_sabointen_pf, "%d%10.4f%10.4f%10.4f%10.4f%12.3lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, 0.0);
@@ -419,6 +422,7 @@ int main()
                 fprintf(fp_fitinten_pf, "%d%10.4f%10.4f%10.4f%10.4f%12.3lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fit_inten[n][j + del_gam][m]);
                 fprintf(fp_fwhm_pf, "%d%10.4f%10.4f%10.4f%10.4f%12.5lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, fwhm[n][j + del_gam][m]);
                 fprintf(fp_eta_pf, "%d%10.4f%10.4f%10.4f%10.4f%12.5lf\n", k + 1, 2 * theta[m], theta[m], alpha, beta, eta[n][j + del_gam][m]);
+                */
                 //salida del archivo con todos los datos
                 fprintf(fp_all, "%4d %4.4f %4.4f %4.4f %4.4f %5.5f ", k + 1, 2 * theta[m], theta[m], alpha, beta, sabo_inten[n][j + del_gam][m]);
                 fprintf(fp_all, "%5.5lf  %5.5lf ", fit_inten[n][j + del_gam][m], fit_inten_err[n][j + del_gam][m]);
@@ -429,22 +433,26 @@ int main()
                 fprintf(fp_all, "%5.5lf  %5.5lf ", eta_ins[n][j + del_gam][m], eta_err[n][j + del_gam][m]);
                 fprintf(fp_all, "%5.5lf  %5.5lf\n", breadth_ins[n][j + del_gam][m], breadth_err[n][j + del_gam][m]);
                 //////////////////////////////////////////////////////////////////////////////////////////////////
-                fprintf(fp3, "%d%10.1f%10.1f%10.4f%10.4f\n", k + 1, neu_ome, neu_gam, alpha, beta); 
+                //fprintf(fp3, "%d%10.1f%10.1f%10.4f%10.4f\n", k + 1, neu_ome, neu_gam, alpha, beta); 
                 k++;
             }//end for routine for(j = anf_gam; j <= ende_gam; j += del_gam)
             n++;
         }//end for routine for(i = anf_ome; i <= ende_ome; i += del_ome)
+        /*
         fflush(fp3);
         fflush(fp_sabointen_pf);
         fflush(fp_fitinten_pf);
         fflush(fp_fwhm_pf);
         fflush(fp_eta_pf);
+        */
         fflush(fp_all);
+        /*
         fclose(fp3);
         fclose(fp_sabointen_pf);
         fclose(fp_fitinten_pf);
         fclose(fp_fwhm_pf);
         fclose(fp_eta_pf);
+        */
         fclose(fp_all);
     }/* End for(m = 0; m < numrings; m++)*/
     printf("\n======= End angular transformation ======= \n");

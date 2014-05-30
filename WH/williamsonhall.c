@@ -43,10 +43,11 @@ int main()
     cdata -> H2 = h02;
     cdata -> warrenc = wc;
     //flags de control
-    //printf_filedata(fdata);
-    //printf_crystaldata(cdata);
-    //printf_auxdata(adata);
-
+    printf("\n----------------\nDatos de entrada\n----------------\n");
+    printf_filedata(fdata);
+    printf_crystaldata(cdata);
+    printf_auxdata(adata);
+    printf("----------------\nDatos de entrada\n----------------\n\n");
     //datos del difractograma
     double **dostheta = matrix_double_alloc(cdata->npeaks, nlines), **theta = matrix_double_alloc(cdata->npeaks, nlines);
     double **alpha = matrix_double_alloc(cdata->npeaks, nlines), **beta = matrix_double_alloc(cdata->npeaks, nlines);
@@ -119,7 +120,7 @@ int main()
             exit(1);
         }
     else if(strcmp(fdata->is_H, "BREADTH") == 0)
-        if(strspn(fdata->is_corr, "N") == 0)
+        if(strcmp(fdata->is_corr, "N") == 0)
             if(fdata->model == 1)
                 williamson_hall_plot_breadth_1(nlines, adata, cdata, widths, angles, fit_data, out_values);
             else
@@ -127,7 +128,7 @@ int main()
                 printf("Modelo no aceptado o modelo no compatible con lo ingresado en las opciones 7 y 8\n");
                 exit(1);
             }
-        else if(strspn(fdata->is_corr, "Y") == 0)
+        else if(strcmp(fdata->is_corr, "Y") == 0)
             if(fdata->model == 2)
                 williamson_hall_plot_breadth_2(nlines, adata, cdata, widths, angles, fit_data, out_values);
             else

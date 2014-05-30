@@ -231,7 +231,7 @@ void printf_filedata(file_data *fdata)
     printf("is_corr: %s\n", fdata->is_corr);
     printf("is_H: %s\n", fdata->is_H);
     printf("model: %d\n", fdata->model);
-    getchar();
+    //getchar();
 }
 
 void printf_crystaldata(crystal_data *cdata)
@@ -250,7 +250,7 @@ void printf_crystaldata(crystal_data *cdata)
     printf("\nwarrenc^2:\n");
     for(i = 0; i < cdata->npeaks; i++)
         printf("%d %lf\n", i + 1, cdata->warrenc[i]);
-    getchar();
+    //getchar();
 }
 
 void printf_auxdata(aux_data *adata)
@@ -265,7 +265,7 @@ void printf_auxdata(aux_data *adata)
     printf("Ch00_min: %lf\n", adata->Ch00_min);
     printf("Ch00_step: %lf\n", adata->Ch00_step);
     printf("Ch00_max: %lf\n", adata->Ch00_max);
-    getchar();
+    //getchar();
 }
 
 void print_xy(double * x, double * y, double * y_err, int size)
@@ -299,7 +299,7 @@ void read_input(FILE *fp, file_data *fdata, crystal_data *cdata, aux_data *adata
     fscanf(fp, "%s %s", buf, fdata -> outPath);
     fgets(buf, 500, fp);
     fgets(buf, 500, fp);
-    fgets(buf, 500, fp);
+    //fgets(buf, 500, fp);
 
     //printf("Lectura del segundo bloque de datos\n");
     fscanf(fp, "%s %s", buf, fdata -> inputPath);
@@ -376,10 +376,10 @@ int read_pole_figures(file_data * fdata, angles_grad * angles, shape_params * wi
     char name[500], buf[1000];
     int i, linecount;
     double dbuf;
-    for(i = fdata->start - 1; i < fdata->end - 1; i++)
+    for(i = fdata->start - 1; i <= fdata->end - 1; i++)
     {
-        sprintf(name, "%s%s%d.%s", fdata->outPath, fdata->filename, i + 1, fdata->fileext);
-        printf("Reading file %s\n", name);
+        sprintf(name, "%s%s%d.%s", fdata->inputPath, fdata->filename, i + 1, fdata->fileext);
+        printf("\n\nReading file %s\n", name);
         if((fp_in = fopen(name, "r")) == NULL)
         {
             fprintf(stderr, "\nError opening %s.\n", name);
@@ -410,10 +410,15 @@ int read_pole_figures(file_data * fdata, angles_grad * angles, shape_params * wi
             fscanf(fp_in, "%lf", &dbuf); //error
             fscanf(fp_in, "%lf", &widths->breadth_corr[i][linecount - 1]);
             fscanf(fp_in, "%lf", &widths->breadth_corr_err[i][linecount - 1]);
+            //printf("FWHM: %lf +- %lf\n", widths->FWHM[i][linecount -1], widths->FWHM_err[i][linecount - 1]);
+            //printf("Breadth: %lf +- %lf\n", widths->breadth[i][linecount -1], widths->breadth_err[i][linecount - 1]);
+            //printf("FWHM_corr: %lf +- %lf\n", widths->FWHM_corr[i][linecount -1], widths->FWHM_corr_err[i][linecount - 1]);
+            //printf("Breadth_corr: %lf +- %lf\n", widths->breadth_corr[i][linecount -1], widths->breadth_corr_err[i][linecount - 1]);
+            //getchar();
         }
         fclose(fp_in);
+        printf("La figura de polos consta de %d puntos\n", linecount);
     }//end for routine for(i = fdata->start - 1; i < fdata->end - 1; i++)
-    printf("Cada figura de polos consta de %d puntos\n", linecount);
     return linecount;
 }
 

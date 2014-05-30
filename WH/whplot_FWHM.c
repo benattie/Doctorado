@@ -70,8 +70,10 @@ void williamson_hall_plot_FWHM_2(int nlines, aux_data * adata, crystal_data * cd
     for(i = 0; i < nlines; i++)
     {
         if((i % 400) == 0) printf("\nCompletado en un %d %%", (i * 100) / nlines);
-        out_values->R_max = 0;
+        out_values->R_max = -1;
         out_values->chisq_min = 1000;
+        fit_data->R = out_values->R_max;
+        fit_data->chisq = out_values->chisq_min;
         for(delta = adata->delta_min; delta < adata->delta_max; delta += adata->delta_step)
         {
             for(q = adata->q_min; q < adata->q_max; q += adata->q_step)
@@ -83,15 +85,19 @@ void williamson_hall_plot_FWHM_2(int nlines, aux_data * adata, crystal_data * cd
                     {
                         if(widths->FWHM_corr[j][i] > 0)
                         {
-                            fit_data->x[k] = pow(2. * sin(angles->theta_grad[j][i]*radian) / adata->lambda, 2.0) * Chkl(Ch00, q, cdata->indices[j]);
-                            fit_data->y[k] = widths->FWHM_corr[j][i] * cos(angles->theta_grad[j][i]*radian) / adata->lambda - delta * cdata->warrenc[j];
-                            fit_data->y_err[k] = widths->FWHM_corr_err[j][i] * cos(angles->theta_grad[j][i]) / adata->lambda;
+                            fit_data->x[k] = pow(2. * sin(angles->theta_grad[j][i] * radian) / adata->lambda, 2.0) * Chkl(Ch00, q, cdata->indices[j]);
+                            fit_data->y[k] = widths->FWHM_corr[j][i] * cos(angles->theta_grad[j][i] * radian) / adata->lambda - delta * cdata->warrenc[j];
+                            fit_data->y_err[k] = widths->FWHM_corr_err[j][i] * cos(angles->theta_grad[j][i] * radian) / adata->lambda;
                             k++;
                         }
                     }
+                    //print_xy(fit_data->x, fit_data->y, fit_data->y_err, k);
                     gsl_fit_wlinear(fit_data->x, 1, fit_data->y_err, 1, fit_data->y, 1, k, &fit_data->h,  &fit_data->m,
-                                &fit_data->covar[0][0], &fit_data->covar[0][1], &fit_data->covar[1][1], &fit_data->chisq); //fiteo con peso
-                    fit_data->R = gsl_stats_correlation(fit_data->x, 1, fit_data->y, 2, cdata -> npeaks);
+                                    &fit_data->covar[0][0], &fit_data->covar[0][1], &fit_data->covar[1][1], &fit_data->chisq); //fiteo con peso
+                    fit_data->covar[1][0] = fit_data->covar[0][1];
+                    fit_data->R = gsl_stats_correlation(fit_data->x, 1, fit_data->y, 1, k);
+                    //printf("m = %lf, h = %lf\nchisq = %lf R = %lf\n", fit_data->m, fit_data->h, fit_data->chisq, fit_data->R);
+                    //getchar();
                     if(fabs(fit_data->R) > out_values->R_max && fit_data->h > 0 && fit_data->m > 0)
                     {
                         out_values->R_max = fit_data->R;
