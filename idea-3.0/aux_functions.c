@@ -183,7 +183,7 @@ void check(gsl_vector * y, double ** seeds, int seeds_size, int n_peaks, double 
 }
 
 //Esta funcion revisa si hay elementos de intens que esten por debajo de treshold y devuelve el numero de picos que efectivamente tiene el difractograma.
-int check_for_null_peaks(float treshold, int numrings, int * zero_peak_index, float * intens)
+int check_for_null_peaks(double treshold, int numrings, int * zero_peak_index, float * intens)
 {
     int i;
     int n_zero = 0, n_peaks;

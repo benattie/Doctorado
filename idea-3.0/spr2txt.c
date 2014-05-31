@@ -14,7 +14,7 @@
 
 struct DAT {float old; float nnew;};
 
-int main()
+int main(int argc, char ** argv)
 {
  int Z, a, b, i, j, k, m, n, x, y, z, count, anf_gam, ende_gam, del_gam, anf_ome, ende_ome, del_ome;
  int BG_l, BG_r;
@@ -26,7 +26,7 @@ int main()
  float intens_av[1800], peak_intens_av[10];
  float data1[2500], BG_m, intens[500][10];
  float theta[20], neu_ome, neu_ome1, neu_gam1, neu_gam, alpha, beta;
- double pixel, dist;
+ double pixel, dist, th;
  double ***sabo_inten = r3_tensor_double_alloc(40, 500, 10);
  double ***fit_inten = r3_tensor_double_alloc(40, 500, 10), ***fit_inten_err = r3_tensor_double_alloc(40, 500, 10);
  double ***fwhm = r3_tensor_double_alloc(40, 500, 10), ***fwhm_err = r3_tensor_double_alloc(40, 500, 10);
@@ -120,6 +120,9 @@ int main()
     //Distancia que cubre un pixel en el difractograma
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%lf", &pixel); fgets(buf_temp, 2, fp);
+    //umbral que determinal cual es la intensidad minima para que ajusto un pico
+    fgets(buf_temp, 22, fp);
+    fscanf(fp, "%lf", &th); fgets(buf_temp, 2, fp);
     //flag que determina si las cuentas negativas se pasan a 0
     fgets(buf_temp, 22, fp);
     fscanf(fp, "%s", &minus_zero); fgets(buf_temp, 2, fp);    
@@ -179,6 +182,12 @@ int main()
     //imprime en pantalla los datos relevantes de cada pico 
     for(i = 0; i < numrings; i++)
         printf("Position of [%d]ring = Theta:%6.3f  %8d%8d%8d%8d\n", i + 1, theta[i], posring_l[i], posring_r[i], ug_l[i], ug_r[i]);
+
+    //si le paso el valor de treshol por linea de comandos que se olvide de lo que esta en archivo
+    if(argc == 2)
+      th = atof(argv[1]);
+    //printf("\n\n%lf\n\n", th);
+    //getchar();
 
     k = star_d;  // file index number : star_d to end_d
     do //Iteracion sobre todos los spr  
@@ -277,7 +286,7 @@ int main()
                 //structure holding difractograms and fitting information
                 err_fit_data fit_errors = {fit_inten_err, fwhm_err, eta_err, breadth_err};
                 peak_shape_data shapes = {fwhm, fwhm_ins, eta, eta_ins, breadth, breadth_ins};
-                peak_data difra = {numrings, bg_size, k, star_d, y, del_gam, data1, bg_seed, fit_inten, &shapes, &fit_errors};
+                peak_data difra = {numrings, bg_size, k, star_d, y, del_gam, th, data1, bg_seed, fit_inten, &shapes, &fit_errors};
                 //Int, fwhm & eta fitting
                 pv_fitting(exists, &sync_data, &difra, peak_intens_av, seeds);
                 memset(intens_av, 0, 1800 * sizeof(float));

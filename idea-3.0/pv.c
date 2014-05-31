@@ -13,9 +13,8 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     //printf("Inicio pv_fitting\n");
     //variables auxiliares del programa
     int i, bad_fit, zero_peak_index[(*difra).numrings];
-    float treshold = 5.0;
     //elimino los picos que tienen una intensidad menor que treshold
-    int n_peaks = check_for_null_peaks (treshold, (*difra).numrings, zero_peak_index, intens);
+    int n_peaks = check_for_null_peaks (difra->treshold, (*difra).numrings, zero_peak_index, intens);
     int seeds_size = 4 * n_peaks + 2, all_seeds_size = 4 * (*difra).numrings + 2;
     int net_size = theta2bin((*difra).bg[0][(*difra).n_bg - 1], (*sync_data).pixel, (*sync_data).dist);
     //seteo el vector con las semillas

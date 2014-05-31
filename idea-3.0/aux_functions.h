@@ -52,6 +52,7 @@ typedef struct peak_data
     int start_spr;
     int gamma;
     int start_gam;
+    double treshold;
     float * intensity;
     double ** bg;
     double *** intens;
@@ -125,9 +126,9 @@ void reset_bg_seeds(gsl_vector * y, double ** bg, int size);
 
 void reset_all_seeds(gsl_vector * y, double ** seeds, int seeds_size, int n_peaks, double ** bg, int bg_size);
 
-void check (gsl_vector * y, double ** seeds, int seeds_size, int n_peaks, double ** bg, int bg_size);
+void check(gsl_vector * y, double ** seeds, int seeds_size, int n_peaks, double ** bg, int bg_size);
 
-int check_for_null_peaks (float treshold, int numrings, int * zero_peak_index, float * intens);
+int check_for_null_peaks(double treshold, int numrings, int * zero_peak_index, float * intens);
 
 void set_seeds(int size, int * zero_peak_index, int exists, double ** seeds, double ** peak_seeds);
 
