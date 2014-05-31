@@ -40,7 +40,7 @@ void pv_step1(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     {
         x_init[j] = bg[1][i]; j++;
     }
-    gsl_vector_view x = gsl_vector_view_array (x_init, n_param); //inicializo el vector con los datos a fitear
+    gsl_vector_view x = gsl_vector_view_array(x_init, n_param); //inicializo el vector con los datos a fitear
 
     //Estructura con los parametros fijos del fiteo
     eta = seeds[exists][1];
@@ -57,15 +57,15 @@ void pv_step1(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     pv.f = &pv_f_step1; //definicion de la funcion
     pv.df = NULL; //al apuntar la funcion con el jacobiano de la funcion a NULL, hago que la derivada de la funcion se calcule por el metodo de diferencias finitas
     pv.fdf = NULL; //idem anterior
-    pv.n = (*d).n; //numero de puntos experimentales
+    pv.n = d->n; //numero de puntos experimentales
     pv.p = n_param; //variables a fitear (debe cumplir <= pv.n)
     pv.params = &d1; //datos experimentales
  
     //inicializo el solver
-    //printf ("\nInicio del fit en spr #%d y gamma #%d\n", (*difra).spr, (*difra).gamma);
+    //printf ("\nInicio del fit\n");
     T = gsl_multifit_fdfsolver_lmsder;
-    s = gsl_multifit_fdfsolver_alloc (T, (*d).n, n_param);
-    gsl_multifit_fdfsolver_set (s, &pv, &x.vector);
+    s = gsl_multifit_fdfsolver_alloc(T, d->n, n_param);
+    gsl_multifit_fdfsolver_set(s, &pv, &x.vector);
     solver_iterator(&status, s, T);
 
     //printf("Salida de los resultados del paso 1\n");

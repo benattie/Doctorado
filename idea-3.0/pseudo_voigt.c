@@ -18,7 +18,7 @@ double background(int N, double x, gsl_vector * bg_pos, double * bg_int)
             delta = x - gsl_vector_get(bg_pos, i);
             h = bg_int[i];
     	    return m * delta + h;
-	}
+	    }
     }
     return bg_int[N - 1];
 }

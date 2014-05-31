@@ -25,8 +25,8 @@ int main(int argc, char ** argv)
  int data[2500], intensity;
  float intens_av[1800], peak_intens_av[10];
  float data1[2500], BG_m, intens[500][10];
- float theta[20], neu_ome, neu_ome1, neu_gam1, neu_gam, alpha, beta;
- double pixel, dist, th;
+ float theta[20], neu_ome, neu_ome1, neu_gam1, neu_gam, alpha, beta, th;
+ double pixel, dist;
  double ***sabo_inten = r3_tensor_double_alloc(40, 500, 10);
  double ***fit_inten = r3_tensor_double_alloc(40, 500, 10), ***fit_inten_err = r3_tensor_double_alloc(40, 500, 10);
  double ***fwhm = r3_tensor_double_alloc(40, 500, 10), ***fwhm_err = r3_tensor_double_alloc(40, 500, 10);
@@ -40,8 +40,7 @@ int main(int argc, char ** argv)
  //char sabo_intenfile[200], fit_intenfile[200], fwhmfile[200], etafile[200];
  char alldatafile[200];
  char marfile[150];
- char minus_zero; 
- char logfile_yn, logfile_yn_temp;
+ char minus_zero[1], logfile_yn_temp[1];
  FILE *fp, *fp1, *fp_IRF, *fp_fit, *fp_all;
  //FILE *fp_sabointen_pf, *fp_fitinten_pf, *fp_fwhm_pf, *fp_eta_pf, *fp3;
  IRF ins;
@@ -122,30 +121,26 @@ int main(int argc, char ** argv)
     fscanf(fp, "%lf", &pixel); fgets(buf_temp, 2, fp);
     //umbral que determinal cual es la intensidad minima para que ajusto un pico
     fgets(buf_temp, 22, fp);
-    fscanf(fp, "%lf", &th); fgets(buf_temp, 2, fp);
+    fscanf(fp, "%f", &th); fgets(buf_temp, 2, fp);
     //flag que determina si las cuentas negativas se pasan a 0
     fgets(buf_temp, 22, fp);
-    fscanf(fp, "%s", &minus_zero); fgets(buf_temp, 2, fp);    
+    fscanf(fp, "%s", minus_zero); fgets(buf_temp, 2, fp); 
     //flag que determina si se genera el archivo .log?
     fgets(buf_temp, 22, fp);
-    fscanf(fp, "%s", &logfile_yn_temp); fgets(buf_temp, 2, fp);
+    fscanf(fp, "%s", logfile_yn_temp); fgets(buf_temp, 2, fp);
     //skip lines
-    fgets(buf_temp, 2, fp);
-    fgets(buf_temp, 15, fp);
-    fgets(buf_temp, 2, fp);
+    fgets(buf_temp, 20, fp);
+    fgets(buf_temp, 20, fp);
     //numero de picos a analizar 
     fgets(buf_temp, 22, fp);
-    fscanf(fp, "%d", &numrings); fgets(buf_temp, 2, fp); 
+    fscanf(fp, "%d", &numrings); fgets(buf_temp, 2, fp);
     //skip lines
-    fgets(buf_temp, 22, fp); fgets(buf_temp, 2, fp);
-    fgets(buf_temp, 33, fp); fgets(buf_temp, 1, fp);
+    fgets(buf_temp, 50, fp);
+    fgets(buf_temp, 50, fp);
     //le aviso al usuario el valor del flag que activa o desactiva la creacion del .log
-    printf("\n correction log file = %s ", &logfile_yn_temp);
-    logfile_yn = logfile_yn_temp;
+    printf("\nCorrection log file = %s", logfile_yn_temp);
     //le aviso al usuario el valor del flag que activa o desactiva la correccion de cuentas negativas
-    printf("\n correction minus_zero = %s ", &minus_zero);
-    //no se para que esta esto
-    printf("\n log_file minus_zero = %s  \n" ,&logfile_yn);
+    printf("\nCorrection minus_zero = %s\n", minus_zero);
 
     for(i = 0; i < numrings; i++) //itera sobre cada pico (0 a 7) -> (1 a 8)
     {
@@ -480,5 +475,6 @@ int main(int argc, char ** argv)
  free_r3_tensor_double(breadth_ins, 40, 500);
  free_r3_tensor_double(breadth_err, 40, 500);
  printf("\nSólo un sujeto consciente de las fuerzas sociales que guían su práctica puede aspirar a controlar su destino\n");
+ getchar();
  return 0;
 } /*End of Main()*/
