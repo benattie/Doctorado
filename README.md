@@ -5,9 +5,6 @@ status_error_codes.txt --> salidas del programa para hacer ajustes no lineales d
 Makefile --> makefile para compilar en C usando la gsl
 Instructivo.txt --> instructivo para utilizar idea
 IRF.dat --> Archivo con los parametros de Caglioti para sustraer el ancho intrumental en idea
-fit_ini.dat --> valores iniciales de los parametros que fitea idea
-para_fit2d.dat
-parafit2d.xlsx --> tabla de conversion de bin a 2theta
 PARA_LIN2GKSS.dat
 
 aux code files/:
@@ -27,8 +24,11 @@ aux bin files/:
 older versions/:
     código de versiones viejas del software idea
 
-idea-2.1/:
-    version actual de idea
+idea-x.y/:
+    version actual de idea. Software para ajustar difractogramas utilizando funciones pseudo-Voigt para obtener parámetros microestructuras de un material a partir de datos de sincrotrón.
 
+idea-WH/:
+    Programa para hacer ajustes de Williamson Hall con la salida del software IDEA
 
-
+CMWP_pf/:
+    Programa para hacer análisis de difractogramas utilizando la técnica de Convolutional Whole Profile Fitting y realizar figuras de polos a partir de datos de sincrotrón.

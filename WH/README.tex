@@ -1,0 +1,61 @@
+Programa para hacer el ajuste de Williamson Hall IDEA-WH version al 31-05-2014
+Sugerencias y preguntas a benatti@ifir-conicet.gov.ar
+Este programa toma las figuras de polos generadas por IDEA, y usa los datos de ancho de pico (FWHM o breadth integral) para hacer el ajuste de Williamson-Hall.
+El programa da la opción de utilizar los datos corregidos por ancho instrumental o de emplear los datos sin corregir (desde luego se recomienda hacer lo primero).
+IDEA-WH realiza además la corrección de ensanchamiento por fallas de apilamiento, y toma en cuenta la anisotropía debia a los factores de contraste de las dislocaciones.
+El código se escribió de modo tal que se puedan agregar diferentes modelos que relacionen la densidad de defectos con el ensanchamiento de los picos. 
+Actualmente el único modelo implementado es el de Williamson-Hall modificado [referencia]:
+
+(\Delta K - \delta * W(hkl)) = K * C_{h00} * (1 - q * H^2)
+
+Con K = 2 * sin(\theta) / \lambda, W(g) las constantes de warren para el ensanchamiento por fallas de apilamiento, \delta la probabilidad de que ocurran fallas de apilamiento, H^2 un invariante que se calcula a partir de los índices de Miller y  C_{h00}, q, son constantes que permiten estimar el factor de constraste promedio.
+
+Actualmente el programa itera sobre posibles valores que de \delta, C_{h00} y q y se queda con la terna que de un mejor índice de correlación R o menor valor de residuo \chi^2.
+El resultado del procesamiento son figuras de polos de C_{h00}, q, \delta, tamaño de dominio y densidad de dislocaciones de la muestra. En la actualidad esta corrección sólo está disponible para estructuras FCC y BCC.
+
+Los parámetros de entrada se especifican en el archivo para_WH.dat. Se acompaña un ejemplo. Se sugiere nombrar los archivos de entrada de la misma forma que salieron de IDEA, es decir, nombre_#.mtex
+Ejemplo:
+-----------Inicio de para_WH.dat. Esta línea no va en el archivo--------------
+-----------Las lineas que empiezan con % son comentarios y tampoco van en el archivo----------
+1.PathForOutput: /ruta/donde/se/guardan/los/archivos/de/salida
+
+Input Data
+2.InputFilePath: /ruta/a/las/figuras/de/polos/de/IDEA
+3.InputFileName: nombre_
+4.FileExtension: mtex
+5.IndexNr Start:  #de figura de polo inicial
+6.IndexNr End:    #de figura de polo final
+7.Corrected data: Trabajar con los anchos corregidos (y/n)?
+8.FWHM o breadth: FWHM/BREADTH
+9.Model:          1/2
+10.Lambda(nm):    0.014235
+
+Structure Data
+11.Crystal structure:      FCC/BCC
+12.Lattice parameter(nm):  0.4048
+13.Burgers vector (h k l): 1 1 0
+14.Nr of peaks:   7
+15.delta_min:     0.005
+16.delta_step:    0.001
+17.delta_max:     0.090
+18.q_min:        -1.500
+19.q_step:        0.050
+20.q_max:         1.500
+21.Ch00_min:      0.100
+22.Ch00_step:     0.005
+23.Ch00_max:      0.300
+
+Peak data
+h k l
+1 1 1
+2 0 0
+2 2 0
+3 1 1
+2 2 2
+4 0 0
+3 3 1
+---------------------------Fin para_WH.dat---------------------------------------------------
+
+El cálculo de las diferentes constantes requiere el ingreso de ciertos parámetros cristalográficos que caracterizan al material, como ser los índices de miller de los planos que se van a analizar (en el mismo orden que figuran las figuras de polos de las que se extraerán los datos), el parámetro de red, la dirección del vector de Burguers en el que se producen los deslizamientos y el rango en que se considera que pueden variar los factores de contraste.
+Estos datos deben obtenerse a partir del conocimiento que se tenga del material (constantes elásticas, análisis de TEM, SEM, etc.)
+Más detalles acerca de las características del modelo empleado, así como de sus condiciones de validez pueden encontrarse en [referencia].

@@ -78,8 +78,13 @@ equations
 Si no se dispone de la información del ancho instrumental del pico se puede colocar 0 en cada uno de los valores de IRF.dat.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 Iformación adicional
+
 El programa acepta un parámetro opcional que es el valor del treshold. Para ingresarlo correr el programa (se supone que se está en la línea de comandos):
 ./spr2txt.exe treshold (linux)
 sprt2txt.exe treshold (windows)
-
 De ingresarse así se sobreescribe lo que se ingresó en el para_fit2d.dat. Esto puede ser útil para determinar cuál es el nivel óptimo de treshold sin tener que modificar el archvivo para_fit2d.dat cada vez.
+
+Si un ajuste da valores que no tienen sentido físico (anchos de pico negativos, eta > 1, etc.), el programa reemplaza esos valores con los resultados obtenidos del ajuste anterior. En el caso de que esto ocurra en el primer valor, el programa coloca un -1 en el área correspondiente.
+Los valores sin sentido físico ocurren generalmente cuando la intensidad del pico es muy baja, por lo que un valor adecuado de la variable treshold debería evitar que se generen valores espurios muy frecuentemente.
+
+El programa sólo hace ajustes de pseudo-voigt, pero se buscó armarlo de modo tal que sea posible agregar modelos de otras funciones analíticas.
