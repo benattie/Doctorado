@@ -475,6 +475,5 @@ int main(int argc, char ** argv)
  free_r3_tensor_double(breadth_ins, 40, 500);
  free_r3_tensor_double(breadth_err, 40, 500);
  printf("\nSólo un sujeto consciente de las fuerzas sociales que guían su práctica puede aspirar a controlar su destino\n");
- getchar();
  return 0;
 } /*End of Main()*/
