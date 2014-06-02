@@ -148,13 +148,13 @@ int main()
     }
 
     printf("\nImprimiendo los mejores resultados segun R\n");
-    sprintf(name, "%s%s_WH_R.dat", fdata->outPath, fdata->filename);
+    sprintf(name, "%s%s%s_%d_WH_R.dat", fdata->outPath, fdata->filename, fdata->is_H, fdata->model);
     fp_out = fopen(name, "w");
     print_results(fdata, fp_out, out_values->best_R_values, fit_data, nlines, angles, cdata);
     fclose(fp_out);
 
     printf("Imprimiendo los mejores resultados segun chi^2\n");
-    sprintf(name, "%s%s_WH_chi2.dat", fdata->outPath, fdata->filename);
+    sprintf(name, "%s%s%s_%d_WH_chi2.dat", fdata->outPath, fdata->filename, fdata->is_H, fdata->model);
     fp_out = fopen(name, "w");
     print_results(fdata, fp_out, out_values->best_chisq_values, fit_data, nlines, angles, cdata);
     fclose(fp_out);
