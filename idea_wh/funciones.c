@@ -299,7 +299,7 @@ void read_input(FILE *fp, file_data *fdata, crystal_data *cdata, aux_data *adata
     fscanf(fp, "%s %s", buf, fdata -> outPath);
     fgets(buf, 500, fp);
     fgets(buf, 500, fp);
-    //fgets(buf, 500, fp);
+    fgets(buf, 500, fp);
 
     //printf("Lectura del segundo bloque de datos\n");
     fscanf(fp, "%s %s", buf, fdata -> inputPath);
