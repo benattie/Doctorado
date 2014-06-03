@@ -69,7 +69,7 @@ double HL_ins(IRF ins, double theta)
 void deconvolution(double * HG2, double * HL, double H, double eta)
 {
     double H2 = pow(H, 2.0);
-    *HG2 = H2 * (0.997379 - 0.719402 * eta - 0.294812 * pow(eta, 2.0) + 0.0172915 * pow(eta, 3.0));
+    *HG2 = H2 * (1. - 0.74417 * eta - 0.24781 * pow(eta, 2.0) + 0.00810 * pow(eta, 3.0));
     *HL = H * (0.72928 * eta + 0.19289 * pow(eta, 2.0) + 0.07783 * pow(eta, 3.0));
 }
 //VOIGT ---> PSEUDO-VOIGT
@@ -92,7 +92,7 @@ void ins_correction(double * H, double * eta, IRF ins, double theta)
     if(*HG2 < 0) *HG2 = 0;
     *HL -= HL_ins(ins, theta);
     if(*HL < 0) *HL = 0;
-    convolution(H, eta, HG2[0], HL[0]);
+    convolution(H, eta, *HG2, *HL);
     free(HG2);
     free(HL);
 }

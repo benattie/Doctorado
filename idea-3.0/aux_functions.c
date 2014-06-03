@@ -108,17 +108,15 @@ void print_seeds(double * seeds, int seeds_size, double ** bg, int bg_size)
 void print_seeds2file(FILE * fp, double * seeds, double * errors, int seeds_size, double ** bg, int bg_size)
 {
     int i;
-    fprintf(fp, "H        DH         eta      Deta\n");
+    fprintf(fp, "H        err        eta      err\n");
     fprintf(fp, "%7.5lf  %7.5lf    %7.5lf  %7.5lf\n", seeds[0], errors[0], seeds[1], errors[1]);
-    fprintf(fp, "theta0   the_er     Int      Int_er     Shif_H   S_H_er     Sh_eta  S_eta_er\n");
+    fprintf(fp, "theta0   err        Int      err        Shif_H   err        Sh_eta  err\n");
     for(i = 2; i < seeds_size; i += 4)
         fprintf(fp, "%7.5lf  %7.5lf    %7.5lf  %7.5lf    %7.5lf  %7.5lf    %7.5lf  %7.5lf\n", seeds[i], errors[i], seeds[i + 1], errors[i + 1],
                                                                                             seeds[i + 2], errors[i + 2], seeds[i + 3], errors[i + 3]);
+    fprintf(fp, "bg_pos(2theta) bg_int\n");
     for(i = 0; i < bg_size; i++)
-        fprintf(fp, "%5.3lf ", bg[0][i]);
-    fprintf(fp, "\n");
-    for(i = 0; i < bg_size; i++)
-        fprintf(fp, "%5.3lf ", bg[1][i]);
+        fprintf(fp, "%5.3lf %5.3lf\n", bg[0][i], bg[1][i]);
     fprintf(fp, "\n---------------------------\n");
 }
 
@@ -292,17 +290,20 @@ int fit_result(int all_seeds_size, double ** peak_seeds, double * errors, int * 
 int results_output(int all_seeds_size, double ** peak_seeds, double * errors, int * zero_peak_index, exp_data * sync_data, peak_data * difra, int spr, int gamma)
 {
     int bad_fit = 0, i, j = 2, k = 0;
-    double I, I_aux, I_err, H, H_aux, H_err, eta, eta_aux, eta_err, breadth, breadth_err;
+    double dtheta, dtheta_aux, I, I_aux, I_err, H, H_aux, H_err, eta, eta_aux, eta_err, breadth, breadth_err;
+    double theta_rad, radian = M_PI / 180;
     for(i = 2; i < all_seeds_size; i += 4)
     {
         if(zero_peak_index[k] == 0)
         {
+            dtheta_aux = peak_seeds[1][j];
             I_aux = peak_seeds[1][j + 1];
             H_aux = peak_seeds[1][0] + peak_seeds[1][j + 2];
             eta_aux = peak_seeds[1][1] + peak_seeds[1][j + 3];
             if(I_aux < 0)
             {
                 bad_fit = 1;
+                dtheta = peak_seeds[0][j];
                 I = 0.0;
                 I_err = 0.0;
                 H = difra->shapes->fwhm[spr][gamma][k];
@@ -317,6 +318,7 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
                 if(H_aux < 0 || H_aux > 1)
                 {
                     bad_fit = 1;
+                    dtheta = peak_seeds[0][j];
                     I = I_aux;
                     I_err = errors[j + 1];
                     H = difra->shapes->fwhm[spr][gamma][k];
@@ -331,6 +333,7 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
                     if(eta_aux < 0 || eta_aux > 1)
                     {
                         bad_fit = 1;
+                        dtheta = theta_aux;
                         I = I_aux;
                         I_err = errors[j + 1];
                         H = H_aux;
@@ -343,6 +346,7 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
                     else
                     {
                         bad_fit = 0;
+                        dtheta = theta_aux;
                         I = I_aux;
                         I_err = errors[j + 1];
                         H = H_aux;
@@ -368,8 +372,8 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
             difra->errors->breadth_err[(*difra).spr][(*difra).gamma][k] = breadth_err;
             
             //printf("Correccion instrumental\n");
-            double theta_rad = (peak_seeds[1][j] / 2.) * M_PI / 180.; //2theta en grados -> THETA en RADIANES
-            ins_correction(&H, &eta, (*sync_data).ins, theta_rad);
+            double theta_rad = (dtheta * 0.5) * radian; //2theta en grados -> THETA en RADIANES
+            ins_correction(&H, &eta, sync_data->ins, theta_rad);
             difra->shapes->fwhm_ins[(*difra).spr][(*difra).gamma][k] = H;
             difra->shapes->eta_ins[(*difra).spr][(*difra).gamma][k] = eta;
             difra->shapes->breadth_ins[(*difra).spr][(*difra).gamma][k] = M_PI * (H * 0.5) / (eta + (1 - eta) * sqrt(M_PI * log(2)));
@@ -387,7 +391,6 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
             difra->shapes->breadth[(*difra).spr][(*difra).gamma][k] = 0.0;
             difra->shapes->breadth_ins[(*difra).spr][(*difra).gamma][k] = 0.0;
             difra->errors->breadth_err[(*difra).spr][(*difra).gamma][k] = 0.0;
-
         }//end if routine if(zero_peak_index[k] == 0)
         k++;
     }//end for routine for(i = 2; i < all_seeds_size; i += 4)
