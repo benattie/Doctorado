@@ -8,7 +8,7 @@ CFLAGS = -Wall -O3 -I/usr/include
 LIBS = -lgsl -lgslcblas -lm
 CC = gcc
 
-%: %.c
+williamsonhall: williamsonhall.c
 	$(CC) $(CFLAGS) -c $(FILE1).c -o $(FILE1).o
 	$(CC) $(CFLAGS) -c $(FILE2).c -o $(FILE2).o
 	$(CC) $(CFLAGS) -c $(FILE3).c -o $(FILE3).o

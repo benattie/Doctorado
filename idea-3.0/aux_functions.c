@@ -333,7 +333,7 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
                     if(eta_aux < 0 || eta_aux > 1)
                     {
                         bad_fit = 1;
-                        dtheta = theta_aux;
+                        dtheta = dtheta_aux;
                         I = I_aux;
                         I_err = errors[j + 1];
                         H = H_aux;
@@ -346,7 +346,7 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
                     else
                     {
                         bad_fit = 0;
-                        dtheta = theta_aux;
+                        dtheta = dtheta_aux;
                         I = I_aux;
                         I_err = errors[j + 1];
                         H = H_aux;
@@ -372,7 +372,7 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
             difra->errors->breadth_err[(*difra).spr][(*difra).gamma][k] = breadth_err;
             
             //printf("Correccion instrumental\n");
-            double theta_rad = (dtheta * 0.5) * radian; //2theta en grados -> THETA en RADIANES
+            theta_rad = (dtheta * 0.5) * radian; //2theta en grados -> THETA en RADIANES
             ins_correction(&H, &eta, sync_data->ins, theta_rad);
             difra->shapes->fwhm_ins[(*difra).spr][(*difra).gamma][k] = H;
             difra->shapes->eta_ins[(*difra).spr][(*difra).gamma][k] = eta;

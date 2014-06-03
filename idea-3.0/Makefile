@@ -9,7 +9,7 @@ LIBS = -L/usr/lib -lgsl -lgslcblas -lm
 #LIBS = -lgsl -lgslcblas -lm
 CC = gcc
 
-%: %.c
+spr2txt: spr2txt.c
 	$(CC) $(CFLAGS) -c $(FILE1).c -o $(FILE1).o
 	$(CC) $(CFLAGS) -c $(FILE2).c -o $(FILE2).o
 	$(CC) $(CFLAGS) -c $(FILE3).c -o $(FILE3).o
