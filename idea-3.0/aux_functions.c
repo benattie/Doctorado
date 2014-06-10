@@ -382,15 +382,15 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
         else
         {
             (*difra).intens[(*difra).spr][(*difra).gamma][k] = 0.0;
-            difra->shapes->fwhm[(*difra).spr][(*difra).gamma][k] = 0.0;
-            difra->shapes->fwhm_ins[(*difra).spr][(*difra).gamma][k] = 0.0;
-            difra->errors->fwhm_err[(*difra).spr][(*difra).gamma][k] = 0.0;
-            difra->shapes->eta[(*difra).spr][(*difra).gamma][k] = 0.0;
-            difra->shapes->eta_ins[(*difra).spr][(*difra).gamma][k] = 0.0;
-            difra->errors->eta_err[(*difra).spr][(*difra).gamma][k] = 0.0;
-            difra->shapes->breadth[(*difra).spr][(*difra).gamma][k] = 0.0;
-            difra->shapes->breadth_ins[(*difra).spr][(*difra).gamma][k] = 0.0;
-            difra->errors->breadth_err[(*difra).spr][(*difra).gamma][k] = 0.0;
+            difra->shapes->fwhm[(*difra).spr][(*difra).gamma][k] = -2.0;
+            difra->shapes->fwhm_ins[(*difra).spr][(*difra).gamma][k] = -2.0;
+            difra->errors->fwhm_err[(*difra).spr][(*difra).gamma][k] = -2.0;
+            difra->shapes->eta[(*difra).spr][(*difra).gamma][k] = -2.0;
+            difra->shapes->eta_ins[(*difra).spr][(*difra).gamma][k] = -2.0;
+            difra->errors->eta_err[(*difra).spr][(*difra).gamma][k] = -2.0;
+            difra->shapes->breadth[(*difra).spr][(*difra).gamma][k] = -2.0;
+            difra->shapes->breadth_ins[(*difra).spr][(*difra).gamma][k] = -2.0;
+            difra->errors->breadth_err[(*difra).spr][(*difra).gamma][k] = -2.0;
         }//end if routine if(zero_peak_index[k] == 0)
         k++;
     }//end for routine for(i = 2; i < all_seeds_size; i += 4)
