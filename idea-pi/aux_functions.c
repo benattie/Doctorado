@@ -306,12 +306,12 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
                 dtheta = peak_seeds[0][j];
                 I = 0.0;
                 I_err = 0.0;
-                H = difra->shapes->fwhm[spr][gamma][k];
-                H_err = difra->errors->fwhm_err[spr][gamma][k];
-                eta = difra->shapes->eta[spr][gamma][k];
-                eta_err = difra->errors->eta_err[spr][gamma][k];
-                breadth = difra->shapes->breadth[spr][gamma][k];
-                breadth_err = difra->errors->breadth_err[spr][gamma][k];
+                H = -1.0;
+                H_err = -1.0;
+                eta = -1.0;
+                eta_err = -1.0;
+                breadth = -1.0;
+                breadth_err = -1.0;
             }
             else
             {
@@ -321,12 +321,12 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
                     dtheta = peak_seeds[0][j];
                     I = I_aux;
                     I_err = errors[j + 1];
-                    H = difra->shapes->fwhm[spr][gamma][k];
-                    H_err = difra->errors->fwhm_err[spr][gamma][k];
-                    eta = difra->shapes->eta[spr][gamma][k];
-                    eta_err = difra->errors->eta_err[spr][gamma][k];
-                    breadth = difra->shapes->breadth[spr][gamma][k];
-                    breadth_err = difra->errors->breadth_err[spr][gamma][k];
+                    H = -1.0;
+                    H_err = -1.0;
+                    eta = -1.0;
+                    eta_err = -1.0;
+                    breadth = -1.0;
+                    breadth_err = -1.0;
                 }
                 else
                 {
@@ -338,10 +338,10 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
                         I_err = errors[j + 1];
                         H = H_aux;
                         H_err = sqrt(pow(errors[0], 2.0) + pow(errors[j + 2], 2.0));
-                        eta = difra->shapes->eta[spr][gamma][k];
-                        eta_err = difra->errors->eta_err[spr][gamma][k];
-                        breadth = difra->shapes->breadth[spr][gamma][k];
-                        breadth_err = difra->errors->breadth_err[spr][gamma][k];
+                        eta = -1.0;
+                        eta_err = -1.0;
+                        breadth = -1.0;
+                        breadth_err = -1.0;
                     }
                     else
                     {
@@ -381,36 +381,102 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
         }
         else
         {
-            dtheta = peak_seeds[0][j];
-            I = 0.0;
-            I_err = 0.0;
-            H = difra->shapes->fwhm[spr][gamma][k];
-            H_err = difra->errors->fwhm_err[spr][gamma][k];
-            eta = difra->shapes->eta[spr][gamma][k];
-            eta_err = difra->errors->eta_err[spr][gamma][k];
-            breadth = difra->shapes->breadth[spr][gamma][k];
-            breadth_err = difra->errors->breadth_err[spr][gamma][k];
-            
-            //printf("Salida de datos\n");
-            difra->intens[(*difra).spr][(*difra).gamma][k] = I;
-            difra->errors->intens_err[(*difra).spr][(*difra).gamma][k] = I_err;
-            difra->shapes->fwhm[(*difra).spr][(*difra).gamma][k] = H;
-            difra->errors->fwhm_err[(*difra).spr][(*difra).gamma][k] = H_err;
-            difra->shapes->eta[(*difra).spr][(*difra).gamma][k] = eta;
-            difra->errors->eta_err[(*difra).spr][(*difra).gamma][k] = eta_err;
-            difra->shapes->breadth[(*difra).spr][(*difra).gamma][k] = breadth;
-            difra->errors->breadth_err[(*difra).spr][(*difra).gamma][k] = breadth_err;
-
-            //printf("Correccion instrumental\n");
-            theta_rad = (dtheta * 0.5) * radian; //2theta en grados -> THETA en RADIANES
-            ins_correction(&H, &eta, sync_data->ins, theta_rad);
-            difra->shapes->fwhm_ins[(*difra).spr][(*difra).gamma][k] = H;
-            difra->shapes->eta_ins[(*difra).spr][(*difra).gamma][k] = eta;
-            difra->shapes->breadth_ins[(*difra).spr][(*difra).gamma][k] = M_PI * (H * 0.5) / (eta + (1 - eta) * sqrt(M_PI * log(2)));
+            (*difra).intens[(*difra).spr][(*difra).gamma][k] = 0.0;
+            difra->shapes->fwhm[(*difra).spr][(*difra).gamma][k] = -2.0;
+            difra->shapes->fwhm_ins[(*difra).spr][(*difra).gamma][k] = -2.0;
+            difra->errors->fwhm_err[(*difra).spr][(*difra).gamma][k] = -2.0;
+            difra->shapes->eta[(*difra).spr][(*difra).gamma][k] = -2.0;
+            difra->shapes->eta_ins[(*difra).spr][(*difra).gamma][k] = -2.0;
+            difra->errors->eta_err[(*difra).spr][(*difra).gamma][k] = -2.0;
+            difra->shapes->breadth[(*difra).spr][(*difra).gamma][k] = -2.0;
+            difra->shapes->breadth_ins[(*difra).spr][(*difra).gamma][k] = -2.0;
+            difra->errors->breadth_err[(*difra).spr][(*difra).gamma][k] = -2.0;
         }//end if routine if(zero_peak_index[k] == 0)
         k++;
     }//end for routine for(i = 2; i < all_seeds_size; i += 4)
     return bad_fit;
+}
+
+void smooth(double *** v, int i, int j, int k, int di, int dj, int end_i, int end_j)
+{
+  double sum = 0, avg;
+  int n = 0;
+  
+  if(v[index_gamma(i - di, end_i, end_j)][index_omega(j - dj, end_i, end_j)][k] != -2.0 && v[index_gamma(i - di, end_i, end_j)][index_omega(j - dj, end_i, end_j)][k] != -1.0)
+  {
+    sum += sum;
+    n++;
+  }
+  if(v[index_gamma(i, end_i, end_j)][index_omega(j - dj, end_i, end_j)][k] != -2.0 && v[index_gamma(i, end_i, end_j)][index_omega(j - dj, end_i, end_j)][k] != -1.0)
+  {
+    sum += sum;
+    n++;
+  }
+  if(v[index_gamma(i + di, end_i, end_j)][index_omega(j - dj, end_i, end_j)][k] != -2.0 && v[index_gamma(i + di, end_i, end_j)][index_omega(j - dj, end_i, end_j)][k] != -1.0)
+  {
+    sum += sum;
+    n++;
+  }
+  
+  if(v[index_gamma(i - di, end_i, end_j)][index_gamma(j, end_i, end_j)][k] != -2.0 && v[index_gamma(i - di, end_i, end_j)][index_gamma(j, end_i, end_j)][k] != -1.0)
+  {
+    sum += sum;
+    n++;
+  }
+  if(v[index_gamma(i + di, end_i, end_j)][index_omega(j, end_i, end_j)][k] != -2.0 && v[index_gamma(i - di, end_i, end_j)][index_omega(j, end_i, end_j)][k] != -1.0)
+  {
+    sum += sum;
+    n++;
+  }
+
+  if(v[index_gamma(i - di, end_i, end_j)][index_omega(j + dj, end_i, end_j)][k] != -2.0 && v[index_gamma(i - di, end_i, end_j)][index_omega(j + dj, end_i, end_j)][k] != -1.0)
+  {
+    sum += sum;
+    n++;
+  }
+  if(v[index_gamma(i, end_i, end_j)][index_omega(j + dj, end_i, end_j)][k] != -2.0 && v[index_gamma(i, end_i, end_j)][index_omega(j + dj, end_i, end_j)][k] != -1.0)
+  {
+    sum += sum;
+    n++;
+  }
+  if(v[index_gamma(i + di, end_i, end_j)][index_omega(j + dj, end_i, end_j)][k] != -2.0 && v[index_gamma(i + di, end_i, end_j)][index_omega(j + dj, end_i, end_j)][k] != -1.0)
+  {
+    sum += sum;
+    n++;
+  }
+  if(n)
+  {
+    avg = sum / n;
+    v[i][j][k] = avg;
+  }
+  else
+    v[i][j][k] = 0.0;
+}
+
+int index_gamma(int i, int gamma_ini, int gamma_end)
+{
+  if(i < gamma_ini)
+    return gamma_end;
+  else
+    if(i >= gamma_end)
+      return gamma_ini;
+    else
+      return i;
+
+  //return i;
+}
+
+int index_omega(int i, int omega_ini, int omega_end)
+{
+  if(i < omega_ini)
+    return omega_end;
+  else
+    if(i >= omega_end)
+      return omega_ini;
+    else
+      return i;
+
+  //return i;
 }
 
 double delta_breadth(double H, double DH2, double eta, double Deta2)
