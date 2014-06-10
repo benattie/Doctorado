@@ -6,7 +6,7 @@ int main()
 {
     printf("Programa para realizar figuras de polos generalizadas utilizando el analisis de Williamson-Hall\n");
     printf("Opciones:\n");
-    printf("Modelos 1 y 2 (opcion 9):  (H * cos(\\theta) / \\lambda - \\delta * wc) = \\alpha^2 * sqrt(\\ro) * (K^2 * C)\n");
+    printf("Modelos 1 y 2 (opcion 9):  (H * cos(\\theta) / \\lambda - \\delta * wc) = sqrt(\\alpha * \\ro) * [K * sqrt(C)]\n");
     printf("\\alpha = 0.5 * \\pi * M^2 * b^2\nK = 2 * sin(\\theta) / \\lambda\nC == contrast factor\n");
     printf("\\delta * wc = stacking fault broadening correction\n\\ro = dislocation density\n");
     printf("H = FWHM o BREADTH (opcion 8)\nModelos pares (opcion 7) trabajan con los anchos corregidos por ancho instrumental\n");

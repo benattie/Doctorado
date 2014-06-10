@@ -429,14 +429,14 @@ void print_results(file_data * fdata, FILE * fp, double ** fit_results, linear_f
     double c = 2 / (M_PI * b2), wh_results[fit_data->n_out_params][nlines];
     if(strcmp(fdata->is_H, "FWHM") == 0)
     {
-        fprintf(fp, "# alpha        beta          delta     q       Ch00       D    M^2 \\ro    R    chi2\n");
+        fprintf(fp, "# alpha        beta          delta     q       Ch00       D(nm)    M^4 \\ro(1/nm^2)    R    chi2\n");
         for(i = 0; i < nlines; i++)
         {
             wh_results[0][i] = fit_results[0][i]; //delta
             wh_results[1][i] = fit_results[1][i]; //q
             wh_results[2][i] = fit_results[2][i]; //Ch00
             wh_results[3][i] = 0.9 / fit_results[3][i]; //D = 0.9 / h
-            wh_results[4][i] = c * pow(fit_results[4][i], 2); //M^2 \ro = alpha * m^2
+            wh_results[4][i] = c * pow(fit_results[4][i], 2); //M^2 \ro = m^2 / alpha
             wh_results[5][i] = fit_results[5][i]; //R
             wh_results[6][i] = fit_results[6][i]; //chisq
             fprintf(fp, "%d %lf    %lf    ", i + 1, angles->alpha_grad[0][i], angles->beta_grad[0][i]);
@@ -447,14 +447,14 @@ void print_results(file_data * fdata, FILE * fp, double ** fit_results, linear_f
     }
     else
     {
-        fprintf(fp, "# alpha        beta          delta     q       Ch00       D    M^2 \\ro    R    chi2\n");
+        fprintf(fp, "# alpha        beta          delta     q       Ch00       D(nm)    M^2 \\ro(1/nm^2)    R    chi2\n");
         for(i = 0; i < nlines; i++)
         {
             wh_results[0][i] = fit_results[0][i]; //delta
             wh_results[1][i] = fit_results[1][i]; //q
             wh_results[2][i] = fit_results[2][i]; //Ch00
             wh_results[3][i] = 1.0 / fit_results[3][i]; //D = 1.0 / h
-            wh_results[4][i] = c * pow(fit_results[4][i], 2); //M^2 \ro = alpha * m^2
+            wh_results[4][i] = c * pow(fit_results[4][i], 2); //M^2 \ro = m^2 / alpha
             wh_results[5][i] = fit_results[5][i]; //R
             wh_results[6][i] = fit_results[6][i]; //chisq
             fprintf(fp, "%d %lf    %lf    ", i + 1, angles->alpha_grad[0][i], angles->beta_grad[0][i]);
