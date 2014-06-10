@@ -142,6 +142,12 @@ int fit_result(int all_seeds_size, double ** peak_seeds, double * errors, int * 
 
 int results_output(int all_seeds_size, double ** peak_seeds, double * errors, int * zero_peak_index, exp_data * sync_data, peak_data * difra, int spr, int gamma);
 
+void smooth(double *** v, int i, int j, int k, int di, int dj, int end_i, int end_j);
+
+int index_gamma(int i, int gamma_ini, int gamma_end);
+
+int index_omega(int i, int omega_ini, int omega_end);
+
 double delta_breadth(double H, double DH2, double eta, double Deta2);
 
 void print_double_vector(double * v, int size);
