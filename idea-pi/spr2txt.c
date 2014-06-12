@@ -352,35 +352,48 @@ int main(int argc, char ** argv)
                 }
                 else
                     alpha = alpha;
-///////////////////////////////////////////////////////RUTINA DE CORRECCION DE DATOS
-/*                
+///////////////////////////////////////////////////////RUTINA DE CORRECCION DE DATOS//////////////////////////////////////////////////////////
                 if(fit_inten[n][j + del_gam][m] == 0.0)
                 {
-                  //proceso los datos
-                  //salida del archivo
+                    smooth(fwhm, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                    smooth(fwhm_err, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                    smooth(eta, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                    smooth(eta_err, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                    smooth(breadth, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                    smooth(breadth_err, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                    smooth(fwhm_ins, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                    smooth(eta_ins, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                    smooth(breadth_ins, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
                 }
                 else
                 {
-                  if(fwhm[n][j + del_gam][m] == -1.0)
-                  {
-                    //proceso los datos
-                    //salida de datos
-                  }
-                  else
-                  {
-                    if(eta[n][j + del_gam][m] == -1.0)
+                    if(fwhm[n][j + del_gam][m] <= 0.0)
                     {
-                      //proceso los datos
-                      //salida de datos
+                        smooth(fwhm, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                        smooth(fwhm_err, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                        smooth(eta, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                        smooth(eta_err, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                        smooth(breadth, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                        smooth(breadth_err, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                        smooth(fwhm_ins, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                        smooth(eta_ins, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                        smooth(breadth_ins, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
                     }
                     else
                     {
-                      //salida de datos
+                        if(eta[n][j + del_gam][m] <= 0.0)
+                        {
+                            smooth(eta, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                            smooth(eta_err, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                            smooth(breadth, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                            smooth(breadth_err, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                            smooth(fwhm_ins, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                            smooth(eta_ins, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                            smooth(breadth_ins, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                        }
                     }
-                  }
                 }
-*/
-////////////////////////////////////////////////////////RUTINA DE CORRECCION DE DATOS
+////////////////////////////////////////////////////////RUTINA DE CORRECCION DE DATOS////////////////////////////////////////////////////////
                 //salida del archivo con todos los datos
                 fprintf(fp_all, "%12d %12.4f %12.4f %12.4f %12.4f %13.5f ", k + 1, 2 * theta[m], theta[m], alpha, beta, sabo_inten[n][j + del_gam][m]);
                 fprintf(fp_all, "%13.5lf  %13.5lf ", fit_inten[n][j + del_gam][m], fit_inten_err[n][j + del_gam][m]);

@@ -397,49 +397,49 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
     return bad_fit;
 }
 
-void smooth(double *** v, int i, int j, int k, int di, int dj, int end_i, int end_j)
+void smooth(double *** v, int i, int j, int k, int start_i,  int di, int end_i, int start_j, int dj, int end_j)
 {
   double sum = 0, avg;
   int n = 0;
   
-  if(v[index_gamma(i - di, end_i, end_j)][index_omega(j - dj, end_i, end_j)][k] != -2.0 && v[index_gamma(i - di, end_i, end_j)][index_omega(j - dj, end_i, end_j)][k] != -1.0)
+  if(v[periodic_index(i - di, start_i, end_i)][periodic_index(j - dj, start_j, end_j)][k] >= 0.0)
   {
     sum += sum;
     n++;
   }
-  if(v[index_gamma(i, end_i, end_j)][index_omega(j - dj, end_i, end_j)][k] != -2.0 && v[index_gamma(i, end_i, end_j)][index_omega(j - dj, end_i, end_j)][k] != -1.0)
+  if(v[periodic_index(i, start_i, end_i)][periodic_index(j - dj, start_j, end_j)][k] >= 0.0)
   {
     sum += sum;
     n++;
   }
-  if(v[index_gamma(i + di, end_i, end_j)][index_omega(j - dj, end_i, end_j)][k] != -2.0 && v[index_gamma(i + di, end_i, end_j)][index_omega(j - dj, end_i, end_j)][k] != -1.0)
+  if(v[periodic_index(i + di, start_i, end_i)][periodic_index(j - dj, start_j, end_j)][k] >= 0.0)
   {
     sum += sum;
     n++;
   }
   
-  if(v[index_gamma(i - di, end_i, end_j)][index_gamma(j, end_i, end_j)][k] != -2.0 && v[index_gamma(i - di, end_i, end_j)][index_gamma(j, end_i, end_j)][k] != -1.0)
+  if(v[periodic_index(i - di, start_i, end_i)][periodic_index(j, start_j, end_j)][k] >= 0.0)
   {
     sum += sum;
     n++;
   }
-  if(v[index_gamma(i + di, end_i, end_j)][index_omega(j, end_i, end_j)][k] != -2.0 && v[index_gamma(i - di, end_i, end_j)][index_omega(j, end_i, end_j)][k] != -1.0)
+  if(v[periodic_index(i + di, start_i, end_i)][periodic_index(j, start_j, end_j)][k] >= 0.0)
   {
     sum += sum;
     n++;
   }
 
-  if(v[index_gamma(i - di, end_i, end_j)][index_omega(j + dj, end_i, end_j)][k] != -2.0 && v[index_gamma(i - di, end_i, end_j)][index_omega(j + dj, end_i, end_j)][k] != -1.0)
+  if(v[periodic_index(i - di, start_i, end_i)][periodic_index(j + dj, start_j, end_j)][k] >= 0.0)
   {
     sum += sum;
     n++;
   }
-  if(v[index_gamma(i, end_i, end_j)][index_omega(j + dj, end_i, end_j)][k] != -2.0 && v[index_gamma(i, end_i, end_j)][index_omega(j + dj, end_i, end_j)][k] != -1.0)
+  if(v[periodic_index(i, start_i, end_i)][periodic_index(j + dj, start_j, end_j)][k] >= 0.0)
   {
     sum += sum;
     n++;
   }
-  if(v[index_gamma(i + di, end_i, end_j)][index_omega(j + dj, end_i, end_j)][k] != -2.0 && v[index_gamma(i + di, end_i, end_j)][index_omega(j + dj, end_i, end_j)][k] != -1.0)
+  if(v[periodic_index(i + di, start_i, end_i)][periodic_index(j + dj, start_j, end_j)][k] >= 0.0)
   {
     sum += sum;
     n++;
@@ -453,26 +453,13 @@ void smooth(double *** v, int i, int j, int k, int di, int dj, int end_i, int en
     v[i][j][k] = 0.0;
 }
 
-int index_gamma(int i, int gamma_ini, int gamma_end)
+int periodic_index(int i, int ini, int end)
 {
-  if(i < gamma_ini)
-    return gamma_end;
+  if(i < ini)
+    return end;
   else
-    if(i >= gamma_end)
-      return gamma_ini;
-    else
-      return i;
-
-  //return i;
-}
-
-int index_omega(int i, int omega_ini, int omega_end)
-{
-  if(i < omega_ini)
-    return omega_end;
-  else
-    if(i >= omega_end)
-      return omega_ini;
+    if(i > end)
+      return ini;
     else
       return i;
 
