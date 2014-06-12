@@ -29,8 +29,8 @@ FILE   *fp,*fp1,*fp2, *fp3;
  puts("\n****************************************************************************");
 
 
-  if((fp=fopen("para_inter.dat","r"))== NULL )
-    {fprintf(stderr,"Error opening file(para_inter_m.dat)."); exit(1);}
+  if((fp=fopen("PARA_INTER.dat","r"))== NULL )
+    {fprintf(stderr,"Error opening file(PARA_INTER.dat).\n"); exit(1);}
 
   fgets(buf,200,fp);
   fscanf(fp,"%d",&num);
@@ -38,6 +38,7 @@ FILE   *fp,*fp1,*fp2, *fp3;
   printf("\nNumber of the interpolating files = %d\n\n",num);
 
   fgets(buf,2,fp);
+  fgets(buf,200,fp);
   fgets(buf,200,fp);
   fgets(buf,200,fp);
   fgets(buf,200,fp);
