@@ -2,6 +2,7 @@
 #include<stdio.h>
 #include <math.h>
 #include <ctype.h>
+#include <gsl/gsl_math.h>
 
 double sferical_to_cartesian_x(double alfx, double btax);
 double sferical_to_cartesian_y(double alfy, double btay);
@@ -11,12 +12,11 @@ double trans_pc_ab_be(double ph_b, double ch_b, double ome2_b, double th2_b, dou
 
 int main()
 {
-  int    i, j, ipunkt, num, m, k,  count, z, points, step_al, step_be, step_al1, step_be1;
-  double  act_cntare, schwellenwert, pi, wandel, hpi, bt, al, spatprodukt, weightf;
+  int    i, j, num, m, k,  count, z, points, step_al, step_be, step_al1, step_be1;
+  double  act_cntare, schwellenwert, wandel, hpi, bt, al, spatprodukt, weightf;
   double  ibm_data[370][100], ibm_gewichte[370][100], ibmpos[370][100][3];
   double  intens, intensitaet, zw, xein_3d, yein_3d, zein_3d;
-  double  z_theta, omega, phi, chi, alpha, beta;
-  double  polar, azi;
+  double  z_theta, omega, phi, chi, alpha, beta, intens_err;
   char   filename[60], filename1[60], buf[300];
   FILE   *fp, *fp1, *fp2, *fp3;
 
@@ -29,7 +29,7 @@ int main()
 
   if((fp = fopen("para_inter.dat", "r")) == NULL )
   {
-      fprintf(stderr, "Error opening file(para_inter_m.dat).");
+      fprintf(stderr, "Error opening file(para_inter.dat).\n");
       exit(1);
   }
 
@@ -42,8 +42,8 @@ int main()
   fgets(buf, 200, fp);//skip line
   fgets(buf, 200, fp);//skip line
   fgets(buf, 200, fp);//skip line
+  fgets(buf, 200, fp);//skip line
 
-  //printf("buf=%s",buf);
   if((fp3 = fopen("running_result.txt", "w")) == NULL )
   {
         fprintf(stderr, "Error beim oeffnen der Datei(running_result).");
@@ -53,8 +53,8 @@ int main()
   m = 0;
   while(m < num)//itero sobre todos los archivos que figuran en el para_inter.dat
   {
-    fscanf(fp, "%s%f%d%d%d%s", &filename, &act_cntare, &step_al1, &step_be1, &points, &filename1);
-    //printf("%s %f %d %d %d %s\n", filename, act_cntare, step_al1, step_be1, points, filename1);
+    fscanf(fp, "%s%lf%d%d%d%s", filename, &act_cntare, &step_al1, &step_be1, &points, filename1);
+    //printf("%s %lf %d %d %d %s\n", filename, act_cntare, step_al1, step_be1, points, filename1);
     if((fp1 = fopen(filename, "r")) == NULL)//abro el archivo mtex
     {
         fprintf(stderr, "Error beim oeffnen der Datei(%s).", filename);
@@ -62,12 +62,9 @@ int main()
     }
     fgets(buf, 200, fp1);//skip line
 
-    ipunkt = 0;
     schwellenwert = 1 - act_cntare / 100;
-    //estas deberia definirnlas como variables globales
-    pi = 3.141592654;
-    wandel = pi / 180;//radian
-    hpi = pi / 2;
+    wandel = M_PI / 180;//radian
+    hpi = M_PI / 2;
  
     step_be = (int) 360 / step_be1;
     step_al = (int) (90 / step_al1) + 1;
@@ -81,16 +78,16 @@ int main()
             ibm_gewichte[i][j] = 0;
             bt = (i - 1) * step_be1;
             al = (j - 1) * step_al1;
-            ibmpos[i][j][1] = sferical_to_cartesian_x(bt * wandel, al * wandel);
-            ibmpos[i][j][2] = sferical_to_cartesian_y(bt * wandel, al * wandel);
-            ibmpos[i][j][3] = sferical_to_cartesian_z(bt * wandel, al * wandel);
+            ibmpos[i][j][0] = sferical_to_cartesian_x(bt * wandel, al * wandel);
+            ibmpos[i][j][1] = sferical_to_cartesian_y(bt * wandel, al * wandel);
+            ibmpos[i][j][2] = sferical_to_cartesian_z(bt * wandel, al * wandel);
         }
     
     z = 1;
     intensitaet = 0;
     while(z <= points)//itero sobre todos los puntos del archivo mtex
     {
-        fscanf(fp1, "%d%f%f%f%f%f", &count, &z_theta, &omega, &chi, &phi, &intens);//modificar la entrada de datos para poder trabajar con los datos de idea
+        fscanf(fp1, "%d%lf%lf%lf%lf%lf%lf", &count, &z_theta, &omega, &chi, &phi, &intens, &intens_err);
         fgets(buf, 200, fp1);//skip line
 
         if(intens <= 0)
@@ -108,8 +105,8 @@ int main()
         }
         else
         {
-            alpha = trans_pc_ab_al(phi, chi, omega, z_theta/2, 0, 90, 0);
-            beta = trans_pc_ab_be(phi, chi, omega, z_theta/2, 0, 90, 0);
+            alpha = trans_pc_ab_al(phi, chi, omega, z_theta / 2, 0, 90, 0);
+            beta = trans_pc_ab_be(phi, chi, omega, z_theta / 2, 0, 90, 0);
         }
 
         xein_3d = sferical_to_cartesian_x(beta * wandel, alpha * wandel);
@@ -121,7 +118,7 @@ int main()
         for(i = 1; i <= step_be; i++)
            for(j = 1; j <= step_al; j++)
            {
-              spatprodukt = fabs((double)((xein_3d * ibmpos[i][j][1]) + yein_3d * ibmpos[i][j][2] + zein_3d * ibmpos[i][j][3]));
+              spatprodukt = fabs((double)((xein_3d * ibmpos[i][j][0]) + yein_3d * ibmpos[i][j][1] + zein_3d * ibmpos[i][j][2]));
 
               if (spatprodukt >= schwellenwert)
               { 
@@ -172,7 +169,7 @@ int main()
     fclose(fp1);
     fclose(fp2);
     m++;
-  }//end while routine while(m < num)OB
+  }//end while routine while(m < num)
   fclose(fp);
   return 0;
 }//end main
@@ -197,19 +194,16 @@ double sferical_to_cartesian_z(double btaz, double alfz)
 {
     double zv;
     zv = cos((double)alfz);
-    //printf("function %7.1f%7.1f,%7.4f",alfz/(3.141592654/180),btaz/(3.141592654/180),zv);
 
     return (zv);
 }
 
 double trans_pc_ab_al(double ph, double ch, double ome2, double th2, double bt_korr, double chii, double chia)
 {
-   double   dwandel, dpi;
-   double   dch, dal, dbt, dth, dchn, dchii, dchia, dpih, dom;
-   double   bta2, alf2;
-   dpi      = 3.141592654;
-   dpih     = dpi / 2;
-   dwandel  = dpi / 180;
+   double   dwandel;
+   double   dch, dal, dth, dchn, dchii, dchia, dom;
+   double   alf2;
+   dwandel  = M_PI / 180;
    dchii = (double) chii;
    dchia = (double) chia;
    dch = (double) ch;
@@ -219,7 +213,7 @@ double trans_pc_ab_al(double ph, double ch, double ome2, double th2, double bt_k
    if(dchia > dchii)
        dchn = dch-dchia;
    else
-       dchn = 90 - (dch - dchia);
+       dchn = 90-(dch-dchia);
 
    dal = cos((dth - dom) * dwandel) * cos(dchn * dwandel);
    alf2 = (double) acos(dal) / dwandel;
@@ -229,12 +223,11 @@ double trans_pc_ab_al(double ph, double ch, double ome2, double th2, double bt_k
 
 double trans_pc_ab_be(double ph_b, double ch_b, double ome2_b, double th2_b, double bt_korr_b, double chii_b, double chia_b)
 {
-    double   dwandel_b, dpi_b;
+    double   dwandel_b;
     double   dch_b, dal_b, dbt_b, dth_b, dchn_b, dchii_b, dchia_b, dpih_b, dom_b;
-    double    bta2_b,alf2_b;
-    dpi_b = 3.141592654;
-    dpih_b = dpi_b / 2;
-    dwandel_b = dpi_b / 180;
+    double   bta2_b;
+    dpih_b = M_PI / 2;
+    dwandel_b = M_PI / 180;
     dchii_b = (double) chii_b;
     dchia_b = (double) chia_b;
     dch_b = (double) ch_b;
@@ -246,7 +239,8 @@ double trans_pc_ab_be(double ph_b, double ch_b, double ome2_b, double th2_b, dou
     else              
        dchn_b = 90 - (dch_b - dchia_b);
 
-    dbt_b = asin((cos((dth_b - dom_b) * dwandel_b) * sin(dchn_b * dwandel_b) / sin(dal_b + dpih_b))) / dwandel_b;
+    //dbt_b = asin((cos((dth_b - dom_b) * dwandel_b) * sin(dchn_b * dwandel_b) / sin(dal_b + dpih_b))) / dwandel_b;
+    dbt_b = asin((cos((dth_b - dom_b) * dwandel_b) * sin(dchn_b * dwandel_b) / sin(dpih_b))) / dwandel_b;
     bta2_b = (double) dbt_b + ph_b + bt_korr_b;
 
     if (bta2_b > 360)
