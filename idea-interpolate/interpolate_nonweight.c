@@ -13,7 +13,7 @@ double trans_pc_ab_be(double ph_b, double ch_b, double ome2_b, double th2_b, dou
 int main()
 {
   int    q = 0, i, j, num, m, k,  count, z, points, step_al, step_be, step_al1, step_be1;
-  double act_cntare, schwellenwert, wandel, hpi, bt, al, spatprodukt, weightf;
+  double act_cntare, schwellenwert, wandel, bt, al, spatprodukt, weightf;
   double ibm_data[370][100], ibm_gewichte[370][100], ibmpos[370][100][3];
   double intens, intensitaet, zw, xein_3d, yein_3d, zein_3d;
   double z_theta, omega, phi, chi, alpha, beta, intens_err;
@@ -63,14 +63,14 @@ int main()
     }
     fgets(buf, 200, fp1);//skip line
 
-    schwellenwert = 1 - act_cntare / 100;
     wandel = M_PI / 180;//radian
-    hpi = M_PI / 2;
- 
+    //si voy a trabajar sin pesos solo tengo que incluir los valores que caen dentro de la celda
+    schwellenwert = 0.5 * (cos(step_be1 * wandel) * (cos(step_al1 * wandel) - cos(step_al1 * wandel)) + cos(step_al1 * wandel) + cos(step_al1 * wandel));
+
     step_be = (int) 360 / step_be1;
     step_al = (int) (90 / step_al1) + 1;
 
-    printf("Input = %s, Alpha= %d degree * %d steps, Beta= %d degree* %d steps, Interpolation level= %4.2lf, Points= %5d, Output = %s\n", filename, step_al1, step_al, step_be1, step_be, schwellenwert, points, filename1);
+    printf("Input = %s, Alpha= %d degree * %d steps, Beta= %d degree* %d steps, Interpolation level= %7.5lf, Points= %5d, Output = %s\n", filename, step_al1, step_al, step_be1, step_be, schwellenwert, points, filename1);
 
     for(i = 1; i <= step_be; i++)//inicializo las matrices de datos y posicion
     {
@@ -95,7 +95,7 @@ int main()
         if(intens < 0)
             intensitaet = 0;
         else
-            intensitaet = intens;
+            intensitaet = 1e5 * intens;//multiplico las intensidades por un factor para que los anchos de pico me queden enteros
       
         if(chi >= 90) chi = 90;
         if(chi <= 0)  chi = 0;
@@ -113,7 +113,7 @@ int main()
         yein_3d = sferical_to_cartesian_y(beta * wandel, alpha * wandel);
         zein_3d = sferical_to_cartesian_z(beta * wandel, alpha * wandel);
 
-        fprintf(fp3,"%d  al%7.1lf  be%7.1lf  x%7.4lf y%7.4lf z%7.4lf schwellenwert%7.4lf \n ", z, alpha, beta, xein_3d, yein_3d, zein_3d, schwellenwert);
+        fprintf(fp3,"%d  al%7.1lf  be%7.1lf  x%7.4lf y%7.4lf z%7.4lf schwellenwert%8.5lf \n ", z, alpha, beta, xein_3d, yein_3d, zein_3d, schwellenwert);
 
         for(i = 1; i <= step_be; i++)
         {
@@ -122,7 +122,7 @@ int main()
               spatprodukt = fabs(xein_3d * ibmpos[i][j][0] + yein_3d * ibmpos[i][j][1] + zein_3d * ibmpos[i][j][2]);
               if (spatprodukt >= schwellenwert)
               { 
-                weightf = cos(((1 - spatprodukt) / (act_cntare / 100)) * hpi);
+                weightf = 1;
                 ibm_data[i][j] = ibm_data[i][j] + weightf * intensitaet;
                 ibm_gewichte[i][j] = ibm_gewichte[i][j] + weightf;    
               }
@@ -159,7 +159,7 @@ int main()
     {
         for(i = 1; i <= step_be; i++)
         {
-           fprintf(fp2, "%7.0lf", ibm_data[i][j]);
+           fprintf(fp2, "%7.0lf ", ibm_data[i][j]);
 
             if((k % 10) == 0)
                 fprintf(fp2, "\n");
