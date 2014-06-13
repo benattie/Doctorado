@@ -11,6 +11,7 @@
 
 #include "pv.c"
 #include "read_files.c"
+#include "interpolate.c"
 
 struct DAT {float old; float nnew;};
 
@@ -40,7 +41,7 @@ int main(int argc, char ** argv)
  char alldatafile[200];
  char marfile[150];
  char minus_zero[1], logfile_yn_temp[1];
- FILE *fp, *fp1, *fp_IRF, *fp_fit, *fp_all;
+ FILE *fp, *fp1, *fp_IRF, *fp_fit, *fp_all, *fp_reg;
  IRF ins;
  struct DAT intensss;
  time_t timer;
@@ -291,11 +292,11 @@ int main(int argc, char ** argv)
         k += del_d; //paso al siguiente spr
     }
     while(k <= end_d); //end of spr iteration
-    /*End pole figure data in Machine coordinates*/
+    //End pole figure data in Machine coordinates//
     printf("\nFinish extracting pole figure data in Machine coordinates\n");
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
-    /**** Angular Transformation to Pole figure coordinate***/
-    /**** LIN2GKSS-ROUTINE **********************************/
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
+    ///// Angular Transformation to Pole figure coordinate ///
+    ///// LIN2GKSS-ROUTINE ///////////////////////////////////
     printf("\n====== Begin angular transformation ====== \n");
     timer = time(NULL); // present time in sec
     zeit = localtime(&timer); // save "time in sec" into structure tm
@@ -322,7 +323,7 @@ int main(int argc, char ** argv)
         fprintf(fp_all, "       H_corr             err      eta_corr            err     Breadth_corr         err");
         fprintf(fp_all, "\n");
         
-        k = 0;//contador del archvo grid y el de mtex
+        k = 0;//contador del archivo mtex
         n = 1; //indice que me marca el spr
         //tranformacion angular (gamma, omega)-->(alpha,beta)
         for(i = anf_ome; i <= ende_ome; i += del_ome)//itero sobre \omega
@@ -352,6 +353,33 @@ int main(int argc, char ** argv)
                 }
                 else
                     alpha = alpha;
+
+                //correccion de los datos mal ajustados
+                if(fwhm[n][j + del_gam][m] == -1.0)
+                {
+                    smooth(fwhm, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                    smooth(fwhm_err, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                    smooth(eta, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                    smooth(eta_err, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                    smooth(breadth, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                    smooth(breadth_err, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                    smooth(fwhm_ins, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                    smooth(eta_ins, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                    smooth(breadth_ins, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                }
+                else
+                {
+                    if(eta[n][j + del_gam][m] == -1.0)
+                    {
+                        smooth(eta, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                        smooth(eta_err, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                        smooth(breadth, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                        smooth(breadth_err, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                        smooth(eta_ins, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                        smooth(breadth_ins, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                    }
+                }
+                
                 //salida del archivo con todos los datos
                 fprintf(fp_all, "%12d %12.4f %12.4f %12.4f %12.4f %13.5f ", k + 1, 2 * theta[m], theta[m], alpha, beta, sabo_inten[n][j + del_gam][m]);
                 fprintf(fp_all, "%13.5lf  %13.5lf ", fit_inten[n][j + del_gam][m], fit_inten_err[n][j + del_gam][m]);
@@ -368,9 +396,46 @@ int main(int argc, char ** argv)
         }//end for routine for(i = anf_ome; i <= ende_ome; i += del_ome)
         fflush(fp_all);
         fclose(fp_all);
-    }/* End for(m = 0; m < numrings; m++)*/
+    }// End for(m = 0; m < numrings; m++)
     printf("\n======= End angular transformation ======= \n");
- }/*End of for(Z = 1; Z <= NrSample; Z++) */
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
+    printf("\n======= Setting regular grid =======\n");
+    for(m = 0; m < numrings; m++)
+    {
+        //ARCHIVO CON LOS DATOS EN LA GRILLA IRREGULAR
+        strcpy(alldatafile, "");
+        strcat(alldatafile, path_out);
+        strcat(alldatafile, filename1);
+        strcat(alldatafile, "ALL_PF_");
+        sprintf(buf, "%d", m + 1);
+        strcat(alldatafile, buf);
+        strcat(alldatafile, ".mtex");
+        if((fp_all = fopen(alldatafile, "r")) == NULL)
+        {
+            fprintf(stderr, "Error beim oeffnen der Datei(%s).\n", alldatafile);
+            exit(1);
+        }
+        //ARCHIVO CON LOS DATOS EN UNA GRILLA REGULAR
+        strcpy(alldatafile, "");
+        strcat(alldatafile, path_out);
+        strcat(alldatafile, filename1);
+        strcat(alldatafile, "REG_PF_");
+        sprintf(buf, "%d", m + 1);
+        strcat(alldatafile, buf);
+        strcat(alldatafile, ".mtex");
+        if((fp_reg = fopen(alldatafile, "w")) == NULL)
+        {
+            fprintf(stderr, "Error beim oeffnen der Datei(%s).\n", alldatafile);
+            exit(1);
+        }
+        interpolate(fp_all, fp_reg, 1, 5, 5, k);
+    }
+    //end for routine for(m = 0; m < numrings; m++)
+    printf("\n======= Finished writting regular grid =======\n");
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
+    free_double_matrix(seeds, 2);
+    free_double_matrix(bg_seed, 2);
+ }//End of for(Z = 1; Z <= NrSample; Z++)
  fclose(fp);
  free_r3_tensor_double(sabo_inten, 40, 500);
  free_r3_tensor_double(fit_inten, 40, 500);
@@ -386,4 +451,4 @@ int main(int argc, char ** argv)
  free_r3_tensor_double(breadth_err, 40, 500);
  printf("\nSólo un sujeto consciente de las fuerzas sociales que guían su práctica puede aspirar a controlar su destino\n");
  return 0;
-} /*End of Main()*/
+} //End of Main()

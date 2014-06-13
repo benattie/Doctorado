@@ -404,44 +404,44 @@ void smooth(double *** v, int i, int j, int k, int start_i,  int di, int end_i, 
   
   if(v[periodic_index(i - di, start_i, end_i)][periodic_index(j - dj, start_j, end_j)][k] >= 0.0)
   {
-    sum += sum;
+    sum += v[periodic_index(i - di, start_i, end_i)][periodic_index(j - dj, start_j, end_j)][k];
     n++;
   }
   if(v[periodic_index(i, start_i, end_i)][periodic_index(j - dj, start_j, end_j)][k] >= 0.0)
   {
-    sum += sum;
+    sum += v[periodic_index(i, start_i, end_i)][periodic_index(j - dj, start_j, end_j)][k];
     n++;
   }
   if(v[periodic_index(i + di, start_i, end_i)][periodic_index(j - dj, start_j, end_j)][k] >= 0.0)
   {
-    sum += sum;
+    sum += v[periodic_index(i + di, start_i, end_i)][periodic_index(j - dj, start_j, end_j)][k];
     n++;
   }
   
   if(v[periodic_index(i - di, start_i, end_i)][periodic_index(j, start_j, end_j)][k] >= 0.0)
   {
-    sum += sum;
+    sum += v[periodic_index(i - di, start_i, end_i)][periodic_index(j, start_j, end_j)][k];
     n++;
   }
   if(v[periodic_index(i + di, start_i, end_i)][periodic_index(j, start_j, end_j)][k] >= 0.0)
   {
-    sum += sum;
+    sum += v[periodic_index(i + di, start_i, end_i)][periodic_index(j, start_j, end_j)][k];
     n++;
   }
 
   if(v[periodic_index(i - di, start_i, end_i)][periodic_index(j + dj, start_j, end_j)][k] >= 0.0)
   {
-    sum += sum;
+    sum += v[periodic_index(i - di, start_i, end_i)][periodic_index(j + dj, start_j, end_j)][k];
     n++;
   }
   if(v[periodic_index(i, start_i, end_i)][periodic_index(j + dj, start_j, end_j)][k] >= 0.0)
   {
-    sum += sum;
+    sum += v[periodic_index(i, start_i, end_i)][periodic_index(j + dj, start_j, end_j)][k];
     n++;
   }
   if(v[periodic_index(i + di, start_i, end_i)][periodic_index(j + dj, start_j, end_j)][k] >= 0.0)
   {
-    sum += sum;
+    sum += v[periodic_index(i + di, start_i, end_i)][periodic_index(j + dj, start_j, end_j)][k];
     n++;
   }
   if(n)
@@ -457,13 +457,11 @@ int periodic_index(int i, int ini, int end)
 {
   if(i < ini)
     return end;
-  else
-    if(i > end)
-      return ini;
-    else
-      return i;
-
-  //return i;
+  
+  if(i > end)
+    return ini;
+  
+  return i;
 }
 
 double delta_breadth(double H, double DH2, double eta, double Deta2)

@@ -306,12 +306,12 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
                 dtheta = peak_seeds[0][j];
                 I = 0.0;
                 I_err = 0.0;
-                H = difra->shapes->fwhm[spr][gamma][k];
-                H_err = difra->errors->fwhm_err[spr][gamma][k];
-                eta = difra->shapes->eta[spr][gamma][k];
-                eta_err = difra->errors->eta_err[spr][gamma][k];
-                breadth = difra->shapes->breadth[spr][gamma][k];
-                breadth_err = difra->errors->breadth_err[spr][gamma][k];
+                H = -1.0;
+                H_err = -1.0;
+                eta = -1.0;
+                eta_err = -1.0;
+                breadth = -1.0;
+                breadth_err = -1.0;
             }
             else
             {
@@ -321,12 +321,12 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
                     dtheta = peak_seeds[0][j];
                     I = I_aux;
                     I_err = errors[j + 1];
-                    H = difra->shapes->fwhm[spr][gamma][k];
-                    H_err = difra->errors->fwhm_err[spr][gamma][k];
-                    eta = difra->shapes->eta[spr][gamma][k];
-                    eta_err = difra->errors->eta_err[spr][gamma][k];
-                    breadth = difra->shapes->breadth[spr][gamma][k];
-                    breadth_err = difra->errors->breadth_err[spr][gamma][k];
+                    H = -1.0;
+                    H_err = -1.0;
+                    eta = -1.0;
+                    eta_err = -1.0;
+                    breadth = -1.0;
+                    breadth_err = -1.0;
                 }
                 else
                 {
@@ -338,10 +338,10 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
                         I_err = errors[j + 1];
                         H = H_aux;
                         H_err = sqrt(pow(errors[0], 2.0) + pow(errors[j + 2], 2.0));
-                        eta = difra->shapes->eta[spr][gamma][k];
-                        eta_err = difra->errors->eta_err[spr][gamma][k];
-                        breadth = difra->shapes->breadth[spr][gamma][k];
-                        breadth_err = difra->errors->breadth_err[spr][gamma][k];
+                        eta = -1.0;
+                        eta_err = -1.0;
+                        breadth = -1.0;
+                        breadth_err = -1.0;
                     }
                     else
                     {
@@ -395,6 +395,73 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
         k++;
     }//end for routine for(i = 2; i < all_seeds_size; i += 4)
     return bad_fit;
+}
+
+void smooth(double *** v, int i, int j, int k, int start_i,  int di, int end_i, int start_j, int dj, int end_j)
+{
+  double sum = 0, avg;
+  int n = 0;
+  
+  if(v[periodic_index(i - di, start_i, end_i)][periodic_index(j - dj, start_j, end_j)][k] >= 0.0)
+  {
+    sum += v[periodic_index(i - di, start_i, end_i)][periodic_index(j - dj, start_j, end_j)][k];
+    n++;
+  }
+  if(v[periodic_index(i, start_i, end_i)][periodic_index(j - dj, start_j, end_j)][k] >= 0.0)
+  {
+    sum += v[periodic_index(i, start_i, end_i)][periodic_index(j - dj, start_j, end_j)][k];
+    n++;
+  }
+  if(v[periodic_index(i + di, start_i, end_i)][periodic_index(j - dj, start_j, end_j)][k] >= 0.0)
+  {
+    sum += v[periodic_index(i + di, start_i, end_i)][periodic_index(j - dj, start_j, end_j)][k];
+    n++;
+  }
+  
+  if(v[periodic_index(i - di, start_i, end_i)][periodic_index(j, start_j, end_j)][k] >= 0.0)
+  {
+    sum += v[periodic_index(i - di, start_i, end_i)][periodic_index(j, start_j, end_j)][k];
+    n++;
+  }
+  if(v[periodic_index(i + di, start_i, end_i)][periodic_index(j, start_j, end_j)][k] >= 0.0)
+  {
+    sum += v[periodic_index(i + di, start_i, end_i)][periodic_index(j, start_j, end_j)][k];
+    n++;
+  }
+
+  if(v[periodic_index(i - di, start_i, end_i)][periodic_index(j + dj, start_j, end_j)][k] >= 0.0)
+  {
+    sum += v[periodic_index(i - di, start_i, end_i)][periodic_index(j + dj, start_j, end_j)][k];
+    n++;
+  }
+  if(v[periodic_index(i, start_i, end_i)][periodic_index(j + dj, start_j, end_j)][k] >= 0.0)
+  {
+    sum += v[periodic_index(i, start_i, end_i)][periodic_index(j + dj, start_j, end_j)][k];
+    n++;
+  }
+  if(v[periodic_index(i + di, start_i, end_i)][periodic_index(j + dj, start_j, end_j)][k] >= 0.0)
+  {
+    sum += v[periodic_index(i + di, start_i, end_i)][periodic_index(j + dj, start_j, end_j)][k];
+    n++;
+  }
+  if(n)
+  {
+    avg = sum / n;
+    v[i][j][k] = avg;
+  }
+  else
+    v[i][j][k] = 0.0;
+}
+
+int periodic_index(int i, int ini, int end)
+{
+  if(i < ini)
+    return end;
+  
+  if(i > end)
+    return ini;
+  
+  return i;
 }
 
 double delta_breadth(double H, double DH2, double eta, double Deta2)
