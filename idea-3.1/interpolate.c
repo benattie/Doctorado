@@ -15,11 +15,12 @@ void average_top(double ** ibm, int step_be);
 void interpolate(FILE * fp1, FILE *fp2, double act_cntare, int step_al1, int step_be1, int points)
 {
   char   buf[1024];
-  int    i, j, n, k,  count, z, step_al, step_be;
+  int    i, j, n, k, count, z, step_al, step_be;
   double schwellenwert, grid_width, wandel, hpi, bt, al, spatprodukt, weightf;
   double **ibm_rint = matrix_double_alloc(370, 100), ***ibm_fint = r3_tensor_double_alloc(2, 370, 100);
   double ***ibm_shapes = r3_tensor_double_alloc(6, 370, 100), ***ibm_corr_shapes = r3_tensor_double_alloc(6, 370, 100);
-  double ibm_n[370][100], ibm_gewichte[370][100], ibmpos[370][100][3];
+  double **ibm_n = matrix_double_alloc(370, 100), **ibm_gewichte = matrix_double_alloc(370, 100);
+  double ***ibmpos = r3_tensor_double_alloc(370, 100, 3);
   double xein_3d, yein_3d, zein_3d;
   double z_theta, omega, phi, chi, alpha, beta;
   double raw_int, fintens[2], shapes[6], corr_shapes[6];
@@ -27,8 +28,6 @@ void interpolate(FILE * fp1, FILE *fp2, double act_cntare, int step_al1, int ste
   fgets(buf, 1024, fp1);//skip line
   fgets(buf, 1024, fp1);//skip line
   fgets(buf, 1024, fp1);//skip line
-  printf("%s\n", buf);
-  getchar();
   
   wandel = M_PI / 180;//radian
   hpi = M_PI / 2;
@@ -37,26 +36,30 @@ void interpolate(FILE * fp1, FILE *fp2, double act_cntare, int step_al1, int ste
   step_be = (int) 360 / step_be1;
   step_al = (int) (90 / step_al1) + 1;
   
-  //inicializo las matrices de posicion
-  memset(ibm_rint, 0, 370 * 100 * sizeof(ibm_rint[0][0]));
-  memset(ibm_fint, 0, 2 * 370 * 100 * sizeof(ibm_rint[0][0]));
-  memset(ibm_shapes, 0, 6 * 370 * 100 * sizeof(ibm_rint[0][0]));
-  memset(ibm_corr_shapes, 0, 6 * 370 * 100 * sizeof(ibm_rint[0][0]));
-  memset(ibm_n, 0, 370 * 100 * sizeof(ibm_rint[0][0]));
-  memset(ibm_gewichte, 0, 370 * 100 * sizeof(ibm_rint[0][0]));
+  //printf("Inicializando las matrices\n");
   for(i = 1; i <= step_be; i++)
   {
       for(j = 1; j <= step_al; j++)
       {
           bt = (i - 1) * step_be1;
           al = (j - 1) * step_al1;
+          ibm_gewichte[i][j] = 0;
+          ibm_n[i][j] = 0;
+          ibm_rint[i][j] = 0;
+          ibm_fint[0][i][j] = 0;
+          ibm_fint[1][i][j] = 0;
+          for(n = 0; n < 6; n++)
+          {
+            ibm_shapes[n][i][j] = 0;
+            ibm_corr_shapes[n][i][j] = 0;
+          }
           ibmpos[i][j][0] = sferical_to_cartesian_x(bt * wandel, al * wandel);
           ibmpos[i][j][1] = sferical_to_cartesian_y(bt * wandel, al * wandel);
           ibmpos[i][j][2] = sferical_to_cartesian_z(bt * wandel, al * wandel);
       }
   }
 
-  //lectura de los dato de la grilla irregular
+  //printf("Leyendo archivo con grilla irregular");
   z = 1;
   while(z <= points)//itero sobre todos los puntos del archivo mtex
   {
@@ -64,8 +67,6 @@ void interpolate(FILE * fp1, FILE *fp2, double act_cntare, int step_al1, int ste
                                         &count, &z_theta, &omega, &chi, &phi, &raw_int, &fintens[0], &fintens[1],
                                         &shapes[0], &shapes[1], &shapes[2], &shapes[3], &shapes[4], &shapes[5], &shapes[0],
                                         &corr_shapes[1], &corr_shapes[2], &corr_shapes[3], &corr_shapes[4], &corr_shapes[5]);
-      fgets(buf, 1024, fp1);//skip line
-
       if(chi >= 90) chi = 90;
       if(chi <= 0)  chi = 0;
       alpha = chi;
@@ -104,7 +105,7 @@ void interpolate(FILE * fp1, FILE *fp2, double act_cntare, int step_al1, int ste
       z++;
   }//end while routine while(z <= points)
   
-  //promediado de los datos en la grilla regular
+  //printf("Promediando en la grilla regular\n");
   for(i = 1; i <= step_be; i++)
   {
       for(j = 1; j <= step_al; j++)
@@ -141,7 +142,7 @@ void interpolate(FILE * fp1, FILE *fp2, double act_cntare, int step_al1, int ste
       }//end for routine for(j = 1; j <= step_al; j++)
   }//end for routine for(i = 1; i <= step_be; i++)
 
-  //promediado del punto de la cupula
+  //printf("Promediando la cupula\n");
   average_top(ibm_rint, step_be);
   average_top(ibm_fint[0], step_be);
   average_top(ibm_fint[1], step_be);
@@ -151,7 +152,7 @@ void interpolate(FILE * fp1, FILE *fp2, double act_cntare, int step_al1, int ste
     average_top(ibm_corr_shapes[n], step_be);
   }
   
-  //Salida de los datos a la grilla regular
+  //printf("Salida de datos a la grilla regular\n");
   //Imprimo el tiempo de ejecucion del programa en el .mtex
   fprintf(fp2, "#        Row       2theta        theta        alpha         beta       raw_int       fit_int            err");
   fprintf(fp2, "             H            err           eta            err       Breadth            err");
@@ -175,10 +176,15 @@ void interpolate(FILE * fp1, FILE *fp2, double act_cntare, int step_al1, int ste
         k++;
       }
   }
+  //printf("Liberando memoria\n");
   free_r3_tensor_double(ibm_fint, 2, 370);
   free_r3_tensor_double(ibm_shapes, 6, 370);
   free_r3_tensor_double(ibm_corr_shapes, 6, 370);
+  free_r3_tensor_double(ibmpos, 370, 100);
   free_double_matrix(ibm_rint, 370);
+  free_double_matrix(ibm_n, 370);
+  free_double_matrix(ibm_gewichte, 370);
+  //printf("Fin interpolate\n");
 }//end interpolate
 
 double sferical_to_cartesian_x(double btax, double alfx)

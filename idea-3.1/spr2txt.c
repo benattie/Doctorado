@@ -429,6 +429,8 @@ int main(int argc, char ** argv)
             exit(1);
         }
         interpolate(fp_all, fp_reg, 1, 5, 5, k);
+        fclose(fp_all);
+        fclose(fp_reg);
     }
     //end for routine for(m = 0; m < numrings; m++)
     printf("\n======= Finished writting regular grid =======\n");
