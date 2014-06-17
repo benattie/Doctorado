@@ -42,11 +42,11 @@ int main()
   fgets(buf, 200, fp);//skip line
   fgets(buf, 200, fp);//skip line
   fgets(buf, 200, fp);//skip line
-  fgets(buf, 200, fp);//skip line
+  //fgets(buf, 200, fp);//skip line
 
   if((fp3 = fopen("running_result.txt", "w")) == NULL )
   {
-        fprintf(stderr, "Error beim oeffnen der Datei(running_result).");
+        fprintf(stderr, "Error beim oeffnen der Datei(running_result).\n");
         exit(1);
   }
 
@@ -58,7 +58,7 @@ int main()
     //printf("%s %lf %d %d %d %s\n", filename, act_cntare, step_al1, step_be1, points, filename1);
     if((fp1 = fopen(filename, "r")) == NULL)//abro el archivo mtex
     {
-        fprintf(stderr, "Error beim oeffnen der Datei(%s).", filename);
+        fprintf(stderr, "Error beim oeffnen der Datei(%s).\n", filename);
         exit(1);
     }
     fgets(buf, 200, fp1);//skip line

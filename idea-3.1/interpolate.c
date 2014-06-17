@@ -19,7 +19,7 @@ void interpolate(FILE * fp1, FILE *fp2, double act_cntare, int step_al1, int ste
   double schwellenwert, grid_width, wandel, hpi, bt, al, spatprodukt, weightf;
   double **ibm_rint = matrix_double_alloc(370, 100), ***ibm_fint = r3_tensor_double_alloc(2, 370, 100);
   double ***ibm_shapes = r3_tensor_double_alloc(6, 370, 100), ***ibm_corr_shapes = r3_tensor_double_alloc(6, 370, 100);
-  double **ibm_n = matrix_double_alloc(370, 100), **ibm_gewichte = matrix_double_alloc(370, 100);
+  double ***ibm_n = r3_tensor_double_alloc(6, 370, 100), **ibm_gewichte = matrix_double_alloc(370, 100);
   double ***ibmpos = r3_tensor_double_alloc(370, 100, 3);
   double xein_3d, yein_3d, zein_3d;
   double z_theta, omega, phi, chi, alpha, beta;
@@ -44,7 +44,6 @@ void interpolate(FILE * fp1, FILE *fp2, double act_cntare, int step_al1, int ste
           bt = (i - 1) * step_be1;
           al = (j - 1) * step_al1;
           ibm_gewichte[i][j] = 0;
-          ibm_n[i][j] = 0;
           ibm_rint[i][j] = 0;
           ibm_fint[0][i][j] = 0;
           ibm_fint[1][i][j] = 0;
@@ -52,6 +51,7 @@ void interpolate(FILE * fp1, FILE *fp2, double act_cntare, int step_al1, int ste
           {
             ibm_shapes[n][i][j] = 0;
             ibm_corr_shapes[n][i][j] = 0;
+            ibm_n[n][i][j] = 0;
           }
           ibmpos[i][j][0] = sferical_to_cartesian_x(bt * wandel, al * wandel);
           ibmpos[i][j][1] = sferical_to_cartesian_y(bt * wandel, al * wandel);
@@ -92,12 +92,15 @@ void interpolate(FILE * fp1, FILE *fp2, double act_cntare, int step_al1, int ste
 
             if (spatprodukt >= grid_width)
             {
-              ibm_n[i][j]++;
               //sumo sin peso las cosas que hay que sumar sin peso
               for(n = 0; n < 6; n++)
               {
-                ibm_shapes[n][i][j] += shapes[n];
-                ibm_corr_shapes[n][i][j] += corr_shapes[n];
+                if(shapes[n] > 0.0)
+                {
+                  ibm_shapes[n][i][j] += shapes[n];
+                  ibm_corr_shapes[n][i][j] += corr_shapes[n];
+                  ibm_n[n][i][j]++;
+                }
               }
             }
           }
@@ -122,22 +125,18 @@ void interpolate(FILE * fp1, FILE *fp2, double act_cntare, int step_al1, int ste
             ibm_fint[0][i][j] /= ibm_gewichte[i][j];
             ibm_fint[1][i][j] /= ibm_gewichte[i][j];
           }
-
-          if(ibm_n[i][j] == 0)
+          for(n = 0; n < 6; n++)
           {
-              for(n = 0; n < 6; n++)
-              {
+            if(ibm_n[n][i][j] == 0)
+            {
                 ibm_shapes[n][i][j] = 0;
                 ibm_corr_shapes[n][i][j] = 0;
-              }
-          }
-          else
-          {
-              for(n = 0; n < 6; n++)
-              {
-                ibm_shapes[n][i][j] /= ibm_n[i][j];
-                ibm_corr_shapes[n][i][j] /= ibm_n[i][j];
-              }
+            }
+            else
+            {
+                ibm_shapes[n][i][j] /= ibm_n[n][i][j];
+                ibm_corr_shapes[n][i][j] /= ibm_n[n][i][j];
+            }
           }
       }//end for routine for(j = 1; j <= step_al; j++)
   }//end for routine for(i = 1; i <= step_be; i++)
@@ -181,8 +180,8 @@ void interpolate(FILE * fp1, FILE *fp2, double act_cntare, int step_al1, int ste
   free_r3_tensor_double(ibm_shapes, 6, 370);
   free_r3_tensor_double(ibm_corr_shapes, 6, 370);
   free_r3_tensor_double(ibmpos, 370, 100);
+  free_r3_tensor_double(ibm_n, 6, 370);
   free_double_matrix(ibm_rint, 370);
-  free_double_matrix(ibm_n, 370);
   free_double_matrix(ibm_gewichte, 370);
   //printf("Fin interpolate\n");
 }//end interpolate
