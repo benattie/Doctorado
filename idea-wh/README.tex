@@ -3,15 +3,16 @@ Sugerencias y preguntas a benatti@ifir-conicet.gov.ar
 Este programa toma las figuras de polos generadas por IDEA, y usa los datos de ancho de pico (FWHM o breadth integral) para hacer el ajuste de Williamson-Hall.
 El programa da la opción de utilizar los datos corregidos por ancho instrumental o de emplear los datos sin corregir (desde luego se recomienda hacer lo primero).
 IDEA-WH realiza además la corrección de ensanchamiento por fallas de apilamiento, y toma en cuenta la anisotropía debia a los factores de contraste de las dislocaciones.
-El código se escribió de modo tal que se puedan agregar diferentes modelos que relacionen la densidad de defectos con el ensanchamiento de los picos. 
-Actualmente el único modelo implementado es el de Williamson-Hall modificado [referencia]:
+El código se escribió de modo tal que se puedan agregar diferentes modelos que relacionen la densidad de defectos con el ensanchamiento de los picos.
+Actualmente el único modelo implementado es el de Williamson-Hall modificado [1-2]:
 
 (\Delta K - \delta * W(hkl)) = K * C_{h00} * (1 - q * H^2)
 
-Con K = 2 * sin(\theta) / \lambda, W(g) las constantes de warren para el ensanchamiento por fallas de apilamiento, \delta la probabilidad de que ocurran fallas de apilamiento, H^2 un invariante que se calcula a partir de los índices de Miller y  C_{h00}, q, son constantes que permiten estimar el factor de constraste promedio.
+Con K = 2 * sin(\theta) / \lambda, W(g) las constantes de warren para el ensanchamiento por fallas de apilamiento, \delta la probabilidad de que ocurran fallas de apilamiento[3],
+H^2 un invariante que se calcula a partir de los índices de Miller y  C_{h00}, q, son constantes que permiten estimar el factor de constraste promedio[1-3].
 
-Actualmente el programa itera sobre posibles valores que de \delta, C_{h00} y q y se queda con la terna que de un mejor índice de correlación R o menor valor de residuo \chi^2.
-El resultado del procesamiento son figuras de polos de C_{h00}, q, \delta, tamaño de dominio y densidad de dislocaciones de la muestra. En la actualidad esta corrección sólo está disponible para estructuras FCC y BCC.
+Actualmente el programa itera sobre posibles valores de \delta, C_{h00} y q y se queda con la terna que de un mejor índice de correlación R o menor valor de residuo \chi^2.
+El resultado del procesamiento son figuras de polos de C_{h00}, q, \delta, tamaño de dominio y densidad de dislocaciones de la muestra. En la actualidad el programa sólo trabaja con estructuras FCC y BCC.
 
 Los parámetros de entrada se especifican en el archivo para_WH.dat. Se acompaña un ejemplo. Se sugiere nombrar los archivos de entrada de la misma forma que salieron de IDEA, es decir, nombre_#.mtex
 Ejemplo:
@@ -58,4 +59,8 @@ h k l
 
 El cálculo de las diferentes constantes requiere el ingreso de ciertos parámetros cristalográficos que caracterizan al material, como ser los índices de miller de los planos que se van a analizar (en el mismo orden que figuran las figuras de polos de las que se extraerán los datos), el parámetro de red, la dirección del vector de Burguers en el que se producen los deslizamientos y el rango en que se considera que pueden variar los factores de contraste.
 Estos datos deben obtenerse a partir del conocimiento que se tenga del material (constantes elásticas, análisis de TEM, SEM, etc.)
-Más detalles acerca de las características del modelo empleado, así como de sus condiciones de validez pueden encontrarse en [referencia].
+Más detalles acerca de las características del modelo empleado, así como de sus condiciones de validez pueden encontrarse en [1-2].
+
+1 - Materials Science and Engineering, A319-321 (2001) p 274-278.
+2 - Journal of Applied Crystalography (1999) Vol 32, p 992-1002.
+3 - Progress In metal physics, Cap 3 (X-Ray studies in deformed metals), p 168-181(FCC), p 181-187(HCP), p 187-195(BCC).

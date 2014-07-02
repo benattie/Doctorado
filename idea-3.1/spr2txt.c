@@ -315,6 +315,7 @@ int main(int argc, char ** argv)
         {
             fprintf(stderr, "Error beim oeffnen der Datei(%s).\n", alldatafile); exit(1);
         }
+        printf("Printing irregular grid file %s\n", alldatafile);
         ////////////////////////////////////////////////////////////////////////////////////////////
         //Imprimo el tiempo de ejecucion del programa en el .mtex
         fprintf(fp_all, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
@@ -428,7 +429,8 @@ int main(int argc, char ** argv)
             fprintf(stderr, "Error beim oeffnen der Datei(%s).\n", alldatafile);
             exit(1);
         }
-        interpolate(fp_all, fp_reg, 1, 5, 5, k);
+        printf("Printing regular grid file %s with %d points\n", alldatafile, k);
+        interpolate(fp_all, fp_reg, 0.3827, 5, 5, k);
         fclose(fp_all);
         fclose(fp_reg);
     }
