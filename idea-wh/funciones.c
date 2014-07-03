@@ -277,6 +277,16 @@ void print_xy(double * x, double * y, double * y_err, int size)
     getchar();
 }
 
+void print_stats2file(FILE * fp, double * x, double * y, double * y_err, int size, double m, double h)
+{
+    int i;
+    fprintf(fp, "#m = %lf  h = %lf\n#x    y    y_err\n", m, h);
+    for(i = 0; i < size; i++)
+        fprintf(fp, "%lf   %lf   %lf\n", x[i], y[i], y_err[i]);
+    fprintf(fp, "\n\n");
+}
+
+
 void print_stats(linear_fit * fit_data, int xsize)
 {
     int i;
@@ -426,7 +436,7 @@ void print_results(file_data * fdata, FILE * fp, double ** fit_results, linear_f
 {
     int i, j;
     double b2 = pow(cdata->burgersv, 2);
-    double c = 2 / (M_PI * b2), wh_results[fit_data->n_out_params][nlines];
+    double c = 2. / (M_PI * b2), wh_results[fit_data->n_out_params][nlines];
     if(strcmp(fdata->is_H, "FWHM") == 0)
     {
         fprintf(fp, "# alpha        beta          delta     q       Ch00       D(nm)    M^4 \\ro(1/nm^2)    R    chi2\n");
@@ -463,4 +473,20 @@ void print_results(file_data * fdata, FILE * fp, double ** fit_results, linear_f
             fprintf(fp, "\n");
         }
     }//end if(strcmp(fdata->is_H, "FWHM") == 0)
+}
+
+void print_double_vector(double * v, int size)
+{
+  int i;
+  for(i = 0; i < size; i++)
+    printf("v[%d] = %.5lf\n", i, v[i]);
+  getchar();
+}
+
+void print_int_vector(size_t * v, int size)
+{
+    int i;
+      for(i = 0; i < size; i++)
+            printf("v[%d] = %zd\n", i, v[i]);
+        getchar();
 }

@@ -8,8 +8,9 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_fit.h>
 #include <gsl/gsl_statistics_double.h>
-#include <gsl/gsl_sort_int.h>
-#include <gsl/gsl_sort_vector_int.h>
+//#include <gsl/gsl_sort_int.h>
+//#include <gsl/gsl_sort_vector_int.h>
+#include <gsl/gsl_sort.h>
 #include "array_alloc.h"
 
 //estructuras de datos
@@ -119,6 +120,8 @@ void printf_auxdata(aux_data *adata);
 
 void print_xy(double * x, double * y, double * y_err, int size);
 
+void print_stats2file(FILE * fp, double * x, double * y, double * y_err, int size, double m, double h);
+
 void print_stats(linear_fit * fit_data, int xsize);
 
 void read_input(FILE *fp, file_data *fdata, crystal_data *cdata, aux_data *adata);
@@ -127,4 +130,7 @@ int read_pole_figures(file_data * fdata, angles_grad * angles, shape_params * wi
 
 void print_results(file_data * fdata, FILE * fp, double ** fit_results, linear_fit * fit_data, int nlines, angles_grad * angles, crystal_data * cdata);
 
+void print_double_vector(double * v, int size);
+
+void print_int_vector(size_t * v, int size);
 #endif
