@@ -128,6 +128,12 @@ void read_input(FILE *fp, file_data *fdata, crystal_data *cdata, aux_data *adata
 
 int read_pole_figures(file_data * fdata, angles_grad * angles, shape_params * widths);
 
+void williamson_hall_plot(int nlines, aux_data * adata, crystal_data * cdata, double **H, double **H_err, angles_grad * angles, linear_fit * fit_data, best_values * out_values);
+
+void print_best_R_indices(double ** out_params, size_t * best_R_indices, int R_size, int params_size);
+
+void print_best_R_indices2file(FILE * fp, double ** out_params, size_t * best_R_indices, int R_size, int params_size);
+
 void print_results(file_data * fdata, FILE * fp, double ** fit_results, linear_fit * fit_data, int nlines, angles_grad * angles, crystal_data * cdata);
 
 void print_double_vector(double * v, int size);
