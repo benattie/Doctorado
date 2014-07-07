@@ -1,6 +1,4 @@
 #include "funciones.h"
-#include "whplot_FWHM.h"
-#include "whplot_breadth.h"
 
 int main()
 {
@@ -100,7 +98,7 @@ int main()
     if(strcmp(fdata->is_H, "FWHM") == 0)
         if(strcmp(fdata->is_corr, "N") == 0)
             if(fdata->model == 1)
-                williamson_hall_plot_FWHM_1(nlines, adata, cdata, widths, angles, fit_data, out_values);
+                williamson_hall_plot(nlines, adata, cdata, widths->FWHM, widths->FWHM_err, angles, fit_data, out_values);
             else
             {
                 printf("Modelo no aceptado o modelo no compatible con lo ingresado en las opciones 7 y 8\n");
@@ -108,7 +106,7 @@ int main()
             }
         else if(strcmp(fdata->is_corr, "Y") == 0)
             if(fdata->model == 2)
-                williamson_hall_plot_FWHM_2(nlines, adata, cdata, widths, angles, fit_data, out_values);
+                williamson_hall_plot(nlines, adata, cdata, widths->FWHM_corr, widths->FWHM_corr_err, angles, fit_data, out_values);
             else
             {
                 printf("Modelo no aceptado o modelo no compatible con lo ingresado en las opciones 7 y 8\n");
@@ -122,7 +120,7 @@ int main()
     else if(strcmp(fdata->is_H, "BREADTH") == 0)
         if(strcmp(fdata->is_corr, "N") == 0)
             if(fdata->model == 1)
-                williamson_hall_plot_breadth_1(nlines, adata, cdata, widths, angles, fit_data, out_values);
+                williamson_hall_plot(nlines, adata, cdata, widths->breadth, widths->breadth_err, angles, fit_data, out_values);
             else
             {
                 printf("Modelo no aceptado o modelo no compatible con lo ingresado en las opciones 7 y 8\n");
@@ -130,7 +128,7 @@ int main()
             }
         else if(strcmp(fdata->is_corr, "Y") == 0)
             if(fdata->model == 2)
-                williamson_hall_plot_breadth_2(nlines, adata, cdata, widths, angles, fit_data, out_values);
+                williamson_hall_plot(nlines, adata, cdata, widths->breadth_corr, widths->breadth_corr_err, angles, fit_data, out_values);
             else
             {
                 printf("Modelo no aceptado o modelo no compatible con lo ingresado en las opciones 7 y 8\n");
@@ -152,13 +150,13 @@ int main()
     fp_out = fopen(name, "w");
     print_results(fdata, fp_out, out_values->best_R_values, fit_data, nlines, angles, cdata);
     fclose(fp_out);
-
+    /*
     printf("Imprimiendo los mejores resultados segun chi^2\n");
     sprintf(name, "%s%s%s_%d_WH_chi2.dat", fdata->outPath, fdata->filename, fdata->is_H, fdata->model);
     fp_out = fopen(name, "w");
     print_results(fdata, fp_out, out_values->best_chisq_values, fit_data, nlines, angles, cdata);
     fclose(fp_out);
-
+    */
     printf("Liberando memoria\n");
     free_double_matrix(out_values->best_R_values, fit_data->n_out_params);
     free_double_matrix(out_values->best_chisq_values, fit_data->n_out_params);
