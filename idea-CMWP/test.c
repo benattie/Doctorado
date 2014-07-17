@@ -2,6 +2,12 @@
 #include "array_alloc.h"
 int main()
 {
+  int i;
+  char a[100] = "python hola.py hola";
+  i = system(a);
+  sprintf(a, "python hola.py mundo");
+  i = system(a);
+  /*
     int i = 0;
     char a = {'y'};
     if((a == 'y'  || a == 'Y') && i < 0)
@@ -12,7 +18,7 @@ int main()
     sprintf(&a, "Y");
     if((a == 'y'  || a == 'Y') && i < 0)
         printf("tampoco deberías ver el tercer if\n");
-
+*/
 
     return 0;
 }

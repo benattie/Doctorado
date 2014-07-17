@@ -2,7 +2,7 @@
 //Funciones de transformacion angular. De coordenadas de maquina (omega, gamma) a coordenadas de figura de polos (alpha, beta)
 float winkel_al(float th, float om, float ga)
 {
-    float   al,rad,chi,phi;
+    float   al, rad, chi, phi;
     double  omr, gar, thr, phir, chir;
     double  COSAL;
 
@@ -16,8 +16,8 @@ float winkel_al(float th, float om, float ga)
     chir = chi * rad;
 
     /***the multiplication of matrix G and s */
-     COSAL=(  ( (-1 * cos(omr) * sin(phir)) - (sin(omr) * cos(phir) * cos(chir)) ) * (-1 * sin(thr)) )
-           + ( (-1 * sin(omr) * sin(phir)) + (cos(omr) * cos(phir) * cos(chir)) ) * (cos(thr) * cos(gar));
+     COSAL=(((-1 * cos(omr) * sin(phir)) - (sin(omr) * cos(phir) * cos(chir))) * (-1 * sin(thr)))
+       + ((-1 * sin(omr) * sin(phir)) + (cos(omr) * cos(phir) * cos(chir))) * (cos(thr) * cos(gar));
 
      al = (float)(acos(COSAL)) / rad;
      return (al);
@@ -25,9 +25,9 @@ float winkel_al(float th, float om, float ga)
 
 float winkel_be(float thb, float omb, float gab, float alb)
 {
-    float   be,rad_be,chi_be,phi_be;
+    float   be, rad_be, chi_be, phi_be;
     double  thbr, ombr, gabr, albr, phibr, chibr;
-    double  SINALCOSBE,COSBE,SINALSINBE,SINBE;
+    double  SINALCOSBE, COSBE, SINALSINBE, SINBE;
     
     rad_be = pi / 180;
     chi_be = 0.0;
@@ -41,8 +41,7 @@ float winkel_be(float thb, float omb, float gab, float alb)
 
     /*** the multiplication of matrix G and s */
 
-    SINALCOSBE
-    = ( cos(ombr)*(-1 * sin(thbr)) ) + ( ( (sin(ombr) * cos(phibr)) + (cos(ombr) * sin(phibr) * cos(chibr)) ) * (cos(thbr) * cos(gabr)) );
+    SINALCOSBE = (cos(ombr)*(-1 * sin(thbr))) + (((sin(ombr) * cos(phibr)) + (cos(ombr) * sin(phibr) * cos(chibr))) * (cos(thbr) * cos(gabr)));
 
     COSBE = SINALCOSBE / sin(albr);
 
@@ -62,7 +61,7 @@ float winkel_be(float thb, float omb, float gab, float alb)
     }
 
     if(SINBE < 0)
-        be = (float) 360 - ( acos(COSBE) / rad_be );
+        be = (float) 360 - (acos(COSBE) / rad_be);
     else
         be = (float) acos(COSBE) / rad_be;
 
@@ -108,17 +107,15 @@ void print_seeds(double * seeds, int seeds_size, double ** bg, int bg_size)
 void print_seeds2file(FILE * fp, double * seeds, double * errors, int seeds_size, double ** bg, int bg_size)
 {
     int i;
-    fprintf(fp, "H        DH         eta      Deta\n");
+    fprintf(fp, "H        err        eta      err\n");
     fprintf(fp, "%7.5lf  %7.5lf    %7.5lf  %7.5lf\n", seeds[0], errors[0], seeds[1], errors[1]);
-    fprintf(fp, "theta0   the_er     Int      Int_er     Shif_H   S_H_er     Sh_eta  S_eta_er\n");
+    fprintf(fp, "theta0   err        Int      err        Shif_H   err        Sh_eta  err\n");
     for(i = 2; i < seeds_size; i += 4)
         fprintf(fp, "%7.5lf  %7.5lf    %7.5lf  %7.5lf    %7.5lf  %7.5lf    %7.5lf  %7.5lf\n", seeds[i], errors[i], seeds[i + 1], errors[i + 1],
                                                                                             seeds[i + 2], errors[i + 2], seeds[i + 3], errors[i + 3]);
+    fprintf(fp, "bg_pos(2theta) bg_int\n");
     for(i = 0; i < bg_size; i++)
-        fprintf(fp, "%5.3lf ", bg[0][i]);
-    fprintf(fp, "\n");
-    for(i = 0; i < bg_size; i++)
-        fprintf(fp, "%5.3lf ", bg[1][i]);
+        fprintf(fp, "%5.3lf %5.3lf\n", bg[0][i], bg[1][i]);
     fprintf(fp, "\n---------------------------\n");
 }
 
@@ -292,57 +289,63 @@ int fit_result(int all_seeds_size, double ** peak_seeds, double * errors, int * 
 int results_output(int all_seeds_size, double ** peak_seeds, double * errors, int * zero_peak_index, exp_data * sync_data, peak_data * difra, int spr, int gamma)
 {
     int bad_fit = 0, i, j = 2, k = 0;
-    double I, I_aux, I_err, H, H_aux, H_err, eta, eta_aux, eta_err, breadth, breadth_err;
+    double dtheta, dtheta_aux, I, I_aux, I_err, H, H_aux, H_err, eta, eta_aux, eta_err, breadth, breadth_err;
+    double theta_rad, radian = M_PI / 180;
     for(i = 2; i < all_seeds_size; i += 4)
     {
         if(zero_peak_index[k] == 0)
         {
+            dtheta_aux = peak_seeds[1][j];
             I_aux = peak_seeds[1][j + 1];
             H_aux = peak_seeds[1][0] + peak_seeds[1][j + 2];
             eta_aux = peak_seeds[1][1] + peak_seeds[1][j + 3];
             if(I_aux < 0)
             {
                 bad_fit = 1;
+                dtheta = peak_seeds[0][j];
                 I = 0.0;
                 I_err = 0.0;
-                H = difra->shapes->fwhm[spr][gamma][k];
-                H_err = difra->errors->fwhm_err[spr][gamma][k];
-                eta = difra->shapes->eta[spr][gamma][k];
-                eta_err = difra->errors->eta_err[spr][gamma][k];
-                breadth = difra->shapes->breadth[spr][gamma][k];
-                breadth_err = difra->errors->breadth_err[spr][gamma][k];
+                H = -1.0;
+                H_err = -1.0;
+                eta = -1.0;
+                eta_err = -1.0;
+                breadth = -1.0;
+                breadth_err = -1.0;
             }
             else
             {
                 if(H_aux < 0 || H_aux > 1)
                 {
                     bad_fit = 1;
+                    dtheta = peak_seeds[0][j];
                     I = I_aux;
                     I_err = errors[j + 1];
-                    H = difra->shapes->fwhm[spr][gamma][k];
-                    H_err = difra->errors->fwhm_err[spr][gamma][k];
-                    eta = difra->shapes->eta[spr][gamma][k];
-                    eta_err = difra->errors->eta_err[spr][gamma][k];
-                    breadth = difra->shapes->breadth[spr][gamma][k];
-                    breadth_err = difra->errors->breadth_err[spr][gamma][k];
+                    H = -1.0;
+                    H_err = -1.0;
+                    eta = -1.0;
+                    eta_err = -1.0;
+                    breadth = -1.0;
+                    breadth_err = -1.0;
                 }
                 else
                 {
                     if(eta_aux < 0 || eta_aux > 1)
                     {
                         bad_fit = 1;
+                        dtheta = dtheta_aux;
                         I = I_aux;
                         I_err = errors[j + 1];
                         H = H_aux;
                         H_err = sqrt(pow(errors[0], 2.0) + pow(errors[j + 2], 2.0));
-                        eta = difra->shapes->eta[spr][gamma][k];
-                        eta_err = difra->errors->eta_err[spr][gamma][k];
-                        breadth = difra->shapes->breadth[spr][gamma][k];
-                        breadth_err = difra->errors->breadth_err[spr][gamma][k];
+                        eta = -1.0;
+                        eta_err = -1.0;
+                        breadth = -1.0;
+                        breadth_err = -1.0;
                     }
                     else
                     {
                         bad_fit = 0;
+                        dtheta = dtheta_aux;
                         I = I_aux;
                         I_err = errors[j + 1];
                         H = H_aux;
@@ -367,31 +370,88 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
             difra->shapes->breadth[(*difra).spr][(*difra).gamma][k] = breadth;
             difra->errors->breadth_err[(*difra).spr][(*difra).gamma][k] = breadth_err;
             
-            //printf("Correccion instrumental\n");
-            double theta_rad = (peak_seeds[1][j] / 2.) * M_PI / 180.; //2theta en grados -> THETA en RADIANES
-            ins_correction(&H, &eta, (*sync_data).ins, theta_rad);
-            difra->shapes->fwhm_ins[(*difra).spr][(*difra).gamma][k] = H;
-            difra->shapes->eta_ins[(*difra).spr][(*difra).gamma][k] = eta;
-            difra->shapes->breadth_ins[(*difra).spr][(*difra).gamma][k] = M_PI * (H * 0.5) / (eta + (1 - eta) * sqrt(M_PI * log(2)));
             j += 4;
         }
         else
         {
-            (*difra).intens[(*difra).spr][(*difra).gamma][k] = 0.0;
-            difra->shapes->fwhm[(*difra).spr][(*difra).gamma][k] = 0.0;
-            difra->shapes->fwhm_ins[(*difra).spr][(*difra).gamma][k] = 0.0;
-            difra->errors->fwhm_err[(*difra).spr][(*difra).gamma][k] = 0.0;
-            difra->shapes->eta[(*difra).spr][(*difra).gamma][k] = 0.0;
-            difra->shapes->eta_ins[(*difra).spr][(*difra).gamma][k] = 0.0;
-            difra->errors->eta_err[(*difra).spr][(*difra).gamma][k] = 0.0;
-            difra->shapes->breadth[(*difra).spr][(*difra).gamma][k] = 0.0;
-            difra->shapes->breadth_ins[(*difra).spr][(*difra).gamma][k] = 0.0;
-            difra->errors->breadth_err[(*difra).spr][(*difra).gamma][k] = 0.0;
-
+            difra->intens[(*difra).spr][(*difra).gamma][k] =  0.0;
+            difra->shapes->fwhm[(*difra).spr][(*difra).gamma][k] = -2.0;
+            difra->errors->fwhm_err[(*difra).spr][(*difra).gamma][k] = -2.0;
+            difra->shapes->eta[(*difra).spr][(*difra).gamma][k] = -2.0;
+            difra->errors->eta_err[(*difra).spr][(*difra).gamma][k] = -2.0;
+            difra->shapes->breadth[(*difra).spr][(*difra).gamma][k] = -2.0;
+            difra->errors->breadth_err[(*difra).spr][(*difra).gamma][k] = -2.0;
         }//end if routine if(zero_peak_index[k] == 0)
         k++;
     }//end for routine for(i = 2; i < all_seeds_size; i += 4)
     return bad_fit;
+}
+
+void smooth(double *** v, int i, int j, int k, int start_i,  int di, int end_i, int start_j, int dj, int end_j)
+{
+  double sum = 0, avg;
+  int n = 0;
+  
+  if(v[periodic_index(i - di, start_i, end_i)][periodic_index(j - dj, start_j, end_j)][k] >= 0.0)
+  {
+    sum += v[periodic_index(i - di, start_i, end_i)][periodic_index(j - dj, start_j, end_j)][k];
+    n++;
+  }
+  if(v[periodic_index(i, start_i, end_i)][periodic_index(j - dj, start_j, end_j)][k] >= 0.0)
+  {
+    sum += v[periodic_index(i, start_i, end_i)][periodic_index(j - dj, start_j, end_j)][k];
+    n++;
+  }
+  if(v[periodic_index(i + di, start_i, end_i)][periodic_index(j - dj, start_j, end_j)][k] >= 0.0)
+  {
+    sum += v[periodic_index(i + di, start_i, end_i)][periodic_index(j - dj, start_j, end_j)][k];
+    n++;
+  }
+  
+  if(v[periodic_index(i - di, start_i, end_i)][periodic_index(j, start_j, end_j)][k] >= 0.0)
+  {
+    sum += v[periodic_index(i - di, start_i, end_i)][periodic_index(j, start_j, end_j)][k];
+    n++;
+  }
+  if(v[periodic_index(i + di, start_i, end_i)][periodic_index(j, start_j, end_j)][k] >= 0.0)
+  {
+    sum += v[periodic_index(i + di, start_i, end_i)][periodic_index(j, start_j, end_j)][k];
+    n++;
+  }
+
+  if(v[periodic_index(i - di, start_i, end_i)][periodic_index(j + dj, start_j, end_j)][k] >= 0.0)
+  {
+    sum += v[periodic_index(i - di, start_i, end_i)][periodic_index(j + dj, start_j, end_j)][k];
+    n++;
+  }
+  if(v[periodic_index(i, start_i, end_i)][periodic_index(j + dj, start_j, end_j)][k] >= 0.0)
+  {
+    sum += v[periodic_index(i, start_i, end_i)][periodic_index(j + dj, start_j, end_j)][k];
+    n++;
+  }
+  if(v[periodic_index(i + di, start_i, end_i)][periodic_index(j + dj, start_j, end_j)][k] >= 0.0)
+  {
+    sum += v[periodic_index(i + di, start_i, end_i)][periodic_index(j + dj, start_j, end_j)][k];
+    n++;
+  }
+  if(n)
+  {
+    avg = sum / n;
+    v[i][j][k] = avg;
+  }
+  else
+    v[i][j][k] = 0.0;
+}
+
+int periodic_index(int i, int ini, int end)
+{
+  if(i < ini)
+    return end;
+  
+  if(i > end)
+    return ini;
+  
+  return i;
 }
 
 double delta_breadth(double H, double DH2, double eta, double Deta2)

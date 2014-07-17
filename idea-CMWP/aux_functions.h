@@ -6,6 +6,7 @@
 #include <math.h>
 #include <string.h>
 
+#include <gsl/gsl_math.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_multifit_nlin.h>
 
@@ -19,10 +20,11 @@
 //datos del equipo
 typedef struct exp_data
 {
+    char *path_out;
+    char *root_name;
     double dist;
     double pixel;
     int size;
-    IRF ins;
 } exp_data;
 //estructura con los errores de los fiteos
 typedef struct err_fit_data
@@ -36,30 +38,30 @@ typedef struct err_fit_data
 typedef struct peak_shape_data
 {
     double *** fwhm;
-    double *** fwhm_ins;
     double *** eta;
-    double *** eta_ins;
     double *** breadth;
-    double *** breadth_ins;
 } peak_shape_data;
 
 //datos del difractorgrama
 typedef struct peak_data
 {
     int numrings;
-    int ** hkl;
     int n_bg;
     int spr;
     int start_spr;
     int gamma;
     int start_gam;
+    float treshold;
+    int *hkl;
+    double *dostheta;
     float * intensity;
     double ** bg;
-    double *** ttheta;
     double *** intens;
     peak_shape_data * shapes;
     err_fit_data * errors;
 } peak_data;
+
+
 //datos basicos del fiteo
 struct data 
 {
@@ -127,9 +129,9 @@ void reset_bg_seeds(gsl_vector * y, double ** bg, int size);
 
 void reset_all_seeds(gsl_vector * y, double ** seeds, int seeds_size, int n_peaks, double ** bg, int bg_size);
 
-void check (gsl_vector * y, double ** seeds, int seeds_size, int n_peaks, double ** bg, int bg_size);
+void check(gsl_vector * y, double ** seeds, int seeds_size, int n_peaks, double ** bg, int bg_size);
 
-int check_for_null_peaks (float treshold, int numrings, int * zero_peak_index, float * intens);
+int check_for_null_peaks(float treshold, int numrings, int * zero_peak_index, float * intens);
 
 void set_seeds(int size, int * zero_peak_index, int exists, double ** seeds, double ** peak_seeds);
 
@@ -142,6 +144,10 @@ void solver_iterator(int * status, gsl_multifit_fdfsolver * s, const gsl_multifi
 int fit_result(int all_seeds_size, double ** peak_seeds, double * errors, int * zero_peak_index, exp_data * sync_data, peak_data * difra);
 
 int results_output(int all_seeds_size, double ** peak_seeds, double * errors, int * zero_peak_index, exp_data * sync_data, peak_data * difra, int spr, int gamma);
+
+void smooth(double *** v, int i, int j, int k, int start_i,  int di, int end_i, int start_j, int dj, int end_j);
+
+int periodic_index(int i, int ini, int end);
 
 double delta_breadth(double H, double DH2, double eta, double Deta2);
 

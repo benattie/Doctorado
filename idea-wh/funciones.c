@@ -435,27 +435,32 @@ int read_pole_figures(file_data * fdata, angles_grad * angles, shape_params * wi
 void williamson_hall_plot(int nlines, aux_data * adata, crystal_data * cdata, double **H, double **H_err, angles_grad * angles, linear_fit * fit_data, best_values * out_values)
 {
     double beta_min = adata->delta_min / cdata->a, beta_max = adata->delta_max / cdata->a, beta_step = adata->delta_step / cdata->a;
-    double radian = M_PI / 180., delta, q, Ch00, weight[cdata->npeaks];
+    double radian = M_PI / 180., delta, q, Ch00, *weight = vector_double_alloc(cdata->npeaks);
     int i, j, k = 0, l = 0, n = 10, m, nparams = 7;
     int ndelta = (beta_max - beta_min) / beta_step + 1, nq = (adata->q_max - adata->q_min) / adata->q_step + 1, nC = (adata->Ch00_max - adata->Ch00_min) / adata->Ch00_step + 1;
     int results_size = ndelta * nq * nC;
     size_t best_R_indices[n];
-    double **out_params = matrix_double_alloc(nparams, results_size), tmp[nparams];
+    double **out_params = matrix_double_alloc(nparams, results_size), *tmp = vector_double_alloc(nparams);
     FILE *fp_fit = fopen("fit_results.log", "w"), *fp_best = fopen("best_R_results.log", "w");
-
     for(i = 0; i < nlines; i++)
     {
         l = 0;
         for(j = 0; j < nparams; j++)
-          memset(out_params[j], 0, sizeof(double) * results_size);
-
-        if((i % 400) == 0) printf("\nCompletado en un %d %%", (i * 100) / nlines);
-        for(delta = beta_max; delta > beta_min; delta -= beta_step)
         {
+          //printf("\ninicio %d\n", j);
+          memset(out_params[j], 0, sizeof(double) * results_size);
+          //printf("\nfin %d\n", j);
+        }
+        if((i % 400) == 0) printf("\nCompletado en un %d %%", (i * 100) / nlines);
+        for(delta = beta_min; delta < beta_max; delta += beta_step)
+        {
+            //printf("delta = %lf\n", delta);
             for(q = adata->q_min; q < adata->q_max; q += adata->q_step)
             {
+                //printf("q = %lf\n", q);
                 for(Ch00 = adata->Ch00_min; Ch00 < adata->Ch00_max; Ch00 += adata->Ch00_step)
                 {
+                    //printf("Ch00 = %lf\n", Ch00);
                     k = 0;
                     for(j = 0; j < cdata->npeaks; j++)
                     {
@@ -512,6 +517,7 @@ void williamson_hall_plot(int nlines, aux_data * adata, crystal_data * cdata, do
         }
     }//end for routine for(i = 0; i < nlines; i++)
     free_double_matrix(out_params, nparams);
+    free(tmp); free(weight);
     fclose(fp_fit);
     fclose(fp_best);
 }//end function

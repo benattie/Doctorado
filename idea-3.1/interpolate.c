@@ -100,6 +100,7 @@ void interpolate(FILE * fp1, FILE *fp2, double act_cntare, int step_al1, int ste
         chi = 0;
       }
       alpha = chi;
+      //alpha = 90 - chi;
       beta = phi;
       xein_3d = sferical_to_cartesian_x(beta * wandel, alpha * wandel);
       yein_3d = sferical_to_cartesian_y(beta * wandel, alpha * wandel);

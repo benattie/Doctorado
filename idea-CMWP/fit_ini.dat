@@ -1,0 +1,13 @@
+#FIT_INI: archivo con las estimaciones de los valores iniciales para el ajuste
+#Global_H:
+0.04500   
+#Global_eta:
+0.4400     
+#2theta0    I0    shift_H    shift_eta
+3.4840     2.0   0.0000     0.00000 
+4.0240    64.0   0.0000     0.00000
+5.6959    25.0   0.0000     0.00000
+6.6794    17.0   0.0000     0.00000
+6.9757     1.0   0.0000     0.00000
+8.0569     6.0   0.0000     0.20000
+8.7843     1.0   0.0000     0.50000

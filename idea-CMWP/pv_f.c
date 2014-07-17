@@ -7,7 +7,7 @@
 
 //INICIO DE LA FUNCION DEL PASO 1
 int pv_f_step1 (const gsl_vector * x, void * data, gsl_vector * f)
-{   
+{  
     //parametros fijos del fiteo (salen de los datos experimentales así como del para_fit2d.dat)
     struct data d_int = ((data_s1 *)data) -> d;
     int n = d_int.n, i, j = 0;
