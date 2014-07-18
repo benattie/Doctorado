@@ -14,16 +14,18 @@ def winkel_al(th, om, ga):
     chir = chi * rad
 
     # the multiplication of matrix G and s
+    COSAL = ((((-1 * cos(omr) * sin(phir)) - (sin(omr) * cos(phir)
+                                              * cos(chir))) * (-1 * sin(thr)))
+             + ((-1 * sin(omr) * sin(phir)) + (cos(omr) * cos(phir)
+                                               * cos(chir)))
+             * (cos(thr) * cos(gar)))
 
-    COSAL = (((-1*cos(omr)*sin(phir)) - (sin(omr)*cos(phir)*cos(chir)))*(-1*sin(thr))) + ((-1*sin(omr)*sin(phir)) + (cos(omr)*cos(phir)*cos(chir))) * (cos(thr)*cos(gar))
-
-    al = (acos(COSAL))/rad
-
+    al = (acos(COSAL)) / rad
     return (al)
 
 
 def winkel_be(thb, omb, gab, alb):
-    rad_be = pi / 180
+    rad_be = pi / 180.
     chi_be = 0.0
     phi_be = 0.0
 
@@ -35,7 +37,6 @@ def winkel_be(thb, omb, gab, alb):
     phibr = phi_be * rad_be
 
     # the multiplication of matrix G and s
-
     SINALCOSBE = (cos(ombr) * (-1 * sin(thbr))) + (((sin(ombr) * cos(phibr)) +
                                                     (cos(ombr) * sin(phibr) *
                                                      cos(chibr))) *
@@ -58,7 +59,6 @@ def winkel_be(thb, omb, gab, alb):
 
     if ((omb == 0) & (be > 270.0)):
         be = 360 - be
-
     if ((omb == 0) & (be <= 80.0)):
         be = 360 - be
 

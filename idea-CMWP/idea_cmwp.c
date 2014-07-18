@@ -11,115 +11,92 @@
 
 #include "pv.c"
 #include "read_files.c"
-#include "interpolate.c"
+//#include "interpolate.c"
 
 struct DAT {float old; float nnew;};
 
 int main(int argc, char ** argv)
 {
- index_data peak_index;
- struct DAT intensss;
- FILE *fp, *fp1, *fp_fit;
- char buf_temp[100], buf[100], buf1[100], path_out[150], filename1[100], inform[10], path1[150], inform1[10], marfile[150], minus_zero[1];
- int Z, a, b, i, j, k, m, n, x, y, z, count, anf_gam, ende_gam, del_gam, anf_ome, ende_ome, del_ome;
- int BG_l, BG_r, NrSample, star_d, end_d, del_d, numrings, posring_l[15], posring_r[15], ug_l[15], ug_r[15];
- int pixel_number, gamma, seeds_size, bg_size, n_peaks, data[2500], intensity, miller[15];
- float intens_av[1800], peak_intens_av[10];
- float data1[2500], BG_m, intens[500][10];
- float theta[20], neu_ome, neu_ome1, neu_gam1, neu_gam, alpha, beta, th;
- double pixel, dist, ** seeds, ** bg_seed, *dostheta = vector_double_alloc(15);
- double ***sabo_inten = r3_tensor_double_alloc(40, 500, 10);
- double ***fit_inten = r3_tensor_double_alloc(40, 500, 10), ***fit_inten_err = r3_tensor_double_alloc(40, 500, 10);
- double ***fwhm = r3_tensor_double_alloc(40, 500, 10), ***fwhm_err = r3_tensor_double_alloc(40, 500, 10);
- double ***eta = r3_tensor_double_alloc(40, 500, 10), ***eta_err = r3_tensor_double_alloc(40, 500, 10);
- double ***breadth = r3_tensor_double_alloc(40, 500, 10), ***breadth_err = r3_tensor_double_alloc(40, 500, 10);
+    struct DAT intensss;
+    FILE *fp, *fp1, *fp_fit;
+    char buf_temp[100], buf[100], buf1[100], path_out[150], filename1[100], inform[10], path1[150], inform1[10], marfile[150], minus_zero[1];
+    int Z, a, b, i, j, k, m, n, x, y, z, count, anf_gam, ende_gam, del_gam, anf_ome, ende_ome, del_ome;
+    int BG_l, BG_r, star_d, end_d, del_d, numrings, posring_l[15], posring_r[15], ug_l[15], ug_r[15];
+    int pixel_number, gamma, seeds_size, bg_size, n_peaks, data[2500], intensity, miller[15];
+    float intens_av[1800], peak_intens_av[10], data1[2500], BG_m, intens[500][10];
+    float theta[20], neu_ome, neu_ome1, neu_gam1, neu_gam, alpha, beta, th;
+    double pixel, dist, ** seeds, ** bg_seed, *dostheta = vector_double_alloc(15);
+    double ***sabo_inten = r3_tensor_double_alloc(40, 500, 10);
+    double ***fit_inten = r3_tensor_double_alloc(40, 500, 10), ***fit_inten_err = r3_tensor_double_alloc(40, 500, 10);
+    double ***fwhm = r3_tensor_double_alloc(40, 500, 10), ***fwhm_err = r3_tensor_double_alloc(40, 500, 10);
+    double ***eta = r3_tensor_double_alloc(40, 500, 10), ***eta_err = r3_tensor_double_alloc(40, 500, 10);
+    double ***breadth = r3_tensor_double_alloc(40, 500, 10), ***breadth_err = r3_tensor_double_alloc(40, 500, 10);
 
- puts("\n***************************************************************************");
- puts("\nPROGRAM: IDEA_CMWP.EXE, Ver. XX.XX");
- puts("\nProgram for generating the pole figures from CMWP data.\nCoordinate-transformation to MTEX-Format.");
- puts("Pole figures in MTEX-readable format xxx_Nr.mtex.");
- puts("\nThe angular values of Omega and Gamma, from the parameter file\n");
- puts("Options: \n 1. Replacement negative intensity values to ZERO\n");
- puts("Error or suggestions to benatti@ifir-conicet.gov.ar");
- puts("\n****************************************************************************");
- //LECTURA DEL ARCHIVO para_fit2d.dat
- if((fp = fopen("para_fit2d.dat", "r")) == NULL)
- {
-     fprintf(stderr, "Error opening file para_fit2d.txt\n");
-     exit(1);
- }
- //path hacia los archivos de salida
- fgets(buf_temp, 22, fp);
- fscanf(fp, "%s", path_out);   fgets(buf_temp, 2, fp);
- //numero de muestras a trabajar (1)
- fgets(buf_temp, 22, fp);
- fscanf(fp, "%d", &NrSample);   fgets(buf_temp, 2, fp);
+    puts("\n***************************************************************************");
+    puts("\nPROGRAM: IDEA_CMWP.EXE, Ver. XX.XX");
+    puts("\nProgram for generating the pole figures from CMWP data.\nCoordinate-transformation to MTEX-Format.");
+    puts("\nPole figures in MTEX-readable format xxx_Nr.mtex.");
+    puts("\nThe angular values of Omega and Gamma, from the parameter file");
+    puts("\nIn order to work this executable must be placed in CMWP instalation folder along with cmwp.py");
+    puts("\nError or suggestions to benatti@ifir-conicet.gov.ar");
+    puts("\n****************************************************************************");
+    //////////////////////////////////////////////////////////////////////////
+    //LECTURA DEL ARCHIVO para_fit2d.dat
+    if((fp = fopen("para_cmwp.dat", "r")) == NULL)
+    {
+        fprintf(stderr, "Error opening file para_cmwp.txt\n");
+        exit(1);
+    }
+    fgets(buf_temp, sizeof(buf_temp), fp);
 
- for(Z = 1; Z <= NrSample; Z++) // FOR-routine: whole routines
- {
-    //skip lines
-    fgets(buf_temp, 2, fp);
-    fgets(buf_temp, 60, fp);
-    fgets(buf_temp, 2, fp);
     //path hacia los spr (encabezado + 360 filas x 1725 columnas) (son 37) 
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%s", path1);   fgets(buf_temp, 2, fp);
+    fgets(buf_temp, 22, fp); fscanf(fp, "%s", path1);   fgets(buf_temp, 2, fp);
+    //path hacia los archivos de salida
+    fgets(buf_temp, 22, fp); fscanf(fp, "%s", path_out); fgets(buf_temp, 2, fp);
     //lee raiz de los archivos spr (New_Al70R-tex_)
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%s", filename1); fgets(buf_temp, 2, fp);
+    fgets(buf_temp, 22, fp); fscanf(fp, "%s", filename1); fgets(buf_temp, 2, fp);
+    //skip lines
+    fgets(buf_temp, sizeof(buf_temp), fp);
+    fgets(buf_temp, sizeof(buf_temp), fp);
     //lee la extension de los archivos (spr)
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%s", inform1); fgets(buf_temp, 2, fp);
-    //numero asociado al primer spr (relacionado con omega)
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%d", &star_d); fgets(buf_temp, 2, fp);
-    //angulo (\Omega) inicial 
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%d", &anf_ome); fgets(buf_temp, 2, fp);
-    //numero asociado al ultimo spr
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%d", &end_d); fgets(buf_temp, 2, fp);
-    //angulo (\Omega) final
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%d", &ende_ome); fgets(buf_temp, 2, fp);
+    fgets(buf_temp, 22, fp); fscanf(fp, "%s", inform1); fgets(buf_temp, 2, fp);
+    //numero del primer spr
+    fgets(buf_temp, 22, fp); fscanf(fp, "%d", &star_d); fgets(buf_temp, 2, fp);
     //delta en los spr
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%d", &del_d); fgets(buf_temp, 2, fp);
+    fgets(buf_temp, 22, fp); fscanf(fp, "%d", &del_d); fgets(buf_temp, 2, fp);
+    //numero del ultimo spr
+    fgets(buf_temp, 22, fp); fscanf(fp, "%d", &end_d); fgets(buf_temp, 2, fp);
+    //angulo (\Omega) inicial 
+    fgets(buf_temp, 22, fp); fscanf(fp, "%d", &anf_ome); fgets(buf_temp, 2, fp);
     //delta en el angulo \omega
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%d", &del_ome); fgets(buf_temp, 2, fp);
+    fgets(buf_temp, 22, fp); fscanf(fp, "%d", &del_ome); fgets(buf_temp, 2, fp);
+    //angulo (\Omega) final
+    fgets(buf_temp, 22, fp); fscanf(fp, "%d", &ende_ome); fgets(buf_temp, 2, fp);
     //gamma inicial
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%d", &anf_gam); fgets(buf_temp, 2, fp);
-    //gamma final
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%d", &ende_gam); fgets(buf_temp, 2, fp);
+    fgets(buf_temp, 22, fp); fscanf(fp, "%d", &anf_gam); fgets(buf_temp, 2, fp);
     //delta gamma
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%d", &del_gam); fgets(buf_temp, 2, fp);
+    fgets(buf_temp, 22, fp); fscanf(fp, "%d", &del_gam); fgets(buf_temp, 2, fp);
+    //gamma final
+    fgets(buf_temp, 22, fp); fscanf(fp, "%d", &ende_gam); fgets(buf_temp, 2, fp);
+    //skip lines
+    fgets(buf_temp, sizeof(buf_temp), fp);
+    fgets(buf_temp, sizeof(buf_temp), fp);
     //Distancia de la muestra al detector
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%lf", &dist); fgets(buf_temp, 2, fp);
+    fgets(buf_temp, 22, fp); fscanf(fp, "%lf", &dist); fgets(buf_temp, 2, fp);
     //Distancia que cubre un pixel en el difractograma
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%lf", &pixel); fgets(buf_temp, 2, fp);
+    fgets(buf_temp, 22, fp); fscanf(fp, "%lf", &pixel); fgets(buf_temp, 2, fp);
     //umbral que determinal cual es la intensidad minima para que ajusto un pico
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%f", &th); fgets(buf_temp, 2, fp);
+    fgets(buf_temp, 22, fp); fscanf(fp, "%f", &th); fgets(buf_temp, 2, fp);
     //flag que determina si las cuentas negativas se pasan a 0
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%s", minus_zero); fgets(buf_temp, 2, fp); 
+    fgets(buf_temp, 22, fp); fscanf(fp, "%s", minus_zero); fgets(buf_temp, 2, fp); 
     //skip lines
     fgets(buf_temp, 20, fp);
     fgets(buf_temp, 20, fp);
     //numero de picos a analizar 
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%d", &numrings); fgets(buf_temp, 2, fp);
+    fgets(buf_temp, 22, fp); fscanf(fp, "%d", &numrings); fgets(buf_temp, 2, fp);
     //skip lines
     fgets(buf_temp, 50, fp);
     fgets(buf_temp, 50, fp);
-    //le aviso al usuario el valor del flag que activa o desactiva la correccion de cuentas negativas
-    printf("\nCorrection minus_zero = %s\n", minus_zero);
 
     for(i = 0; i < numrings; i++) //itera sobre cada pico (0 a 7) -> (1 a 8)
     {
@@ -129,9 +106,11 @@ int main(int argc, char ** argv)
       fscanf(fp, "%d", &posring_r[i]); //bin a la derecha del pico
       fscanf(fp, "%d", &ug_l[i]); //bin de bg a la izquierda del pico
       fscanf(fp, "%d", &ug_r[i]); //bin de bg a la derecha del pico
-    }// End of reading the parameter file for(i=0;i<numrings;i++)
-    fgets(buf_temp, 2, fp); //skip line
+    }    fgets(buf_temp, 2, fp); //skip line
 
+    fclose(fp);
+    // End of reading the parameter file
+    //////////////////////////////////////////////////////////////////////////
     //Reading of initial parameters
     if((fp_fit = fopen("fit_ini.dat", "r")) == NULL)
     {
@@ -152,9 +131,9 @@ int main(int argc, char ** argv)
     }
     //cuento cuantlas lineas tiene el archvio i.e. el numero de puntos de background
     n = 0;
-    while(fscanf(fp_fit, "%lf", bg_seed[0][0]) == NULL)
+    while(fscanf(fp_fit, "%lf", &bg_seed[0][0]) != EOF)
     {
-      fscanf(fp_fit, "%lf", bg_seed[1][0]);
+      fscanf(fp_fit, "%lf", &bg_seed[1][0]);
       n++;
     }
     bg_size = n;
@@ -163,9 +142,9 @@ int main(int argc, char ** argv)
     bg_seed = matrix_double_alloc(2, bg_size);
     rewind(fp_fit);
     n = 0;
-    while(fscanf(fp_fit, "%lf", bg_seed[0][n]) == NULL)
+    while(fscanf(fp_fit, "%lf", &bg_seed[0][n]) != EOF)
     {
-      fscanf(fp_fit, "%lf", bg_seed[1][n]);
+      fscanf(fp_fit, "%lf", &bg_seed[1][n]);
       n++;
     }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -281,27 +260,27 @@ int main(int argc, char ** argv)
     while(k <= end_d); //end of spr iteration
     //End pole figure data in Machine coordinates//
     printf("\nFinish extracting pole figure data\n");
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     printf("\nBegin CMWP routine\n");
     printf("Go ahead and have a cup of tea, this is gonna take a while\n");
-    
-    
+    int rv;
+    char cmd[100] = "python cmwp.py";
+    rv = system(cmd);
     printf("\nEnd CMWP routine\n");
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    printf("Free allocated memory\n");
     free_double_matrix(seeds, 2);
     free_double_matrix(bg_seed, 2);
- }//End of for(Z = 1; Z <= NrSample; Z++)
- fclose(fp);
- free(dostheta);
- free_r3_tensor_double(sabo_inten, 40, 500);
- free_r3_tensor_double(fit_inten, 40, 500);
- free_r3_tensor_double(fit_inten_err, 40, 500);
- free_r3_tensor_double(fwhm, 40, 500);
- free_r3_tensor_double(fwhm_err, 40, 500);
- free_r3_tensor_double(eta, 40, 500);
- free_r3_tensor_double(eta_err, 40, 500);
- free_r3_tensor_double(breadth, 40, 500);
- free_r3_tensor_double(breadth_err, 40, 500);
- printf("\nSólo un sujeto consciente de las fuerzas sociales que guían su práctica puede aspirar a controlar su destino\n");
- return 0;
+    free(dostheta);
+    free_r3_tensor_double(sabo_inten, 40, 500);
+    free_r3_tensor_double(fit_inten, 40, 500);
+    free_r3_tensor_double(fit_inten_err, 40, 500);
+    free_r3_tensor_double(fwhm, 40, 500);
+    free_r3_tensor_double(fwhm_err, 40, 500);
+    free_r3_tensor_double(eta, 40, 500);
+    free_r3_tensor_double(eta_err, 40, 500);
+    free_r3_tensor_double(breadth, 40, 500);
+    free_r3_tensor_double(breadth_err, 40, 500);
+    printf("\nNo importa la realidad, sólo la verosimilitud\n");
+    return 0;
 } //End of Main()

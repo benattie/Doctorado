@@ -12,6 +12,8 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
 {
     //printf("Inicio pv_fitting\n");
     //variables auxiliares del programa
+    char filename[500];
+    FILE *fp;
     int i, bad_fit, zero_peak_index[(*difra).numrings];
     //elimino los picos que tienen una intensidad menor que treshold
     int n_peaks = check_for_null_peaks(difra->treshold, (*difra).numrings, zero_peak_index, intens);
@@ -75,24 +77,23 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     fclose(fp_logfile);
    
     //printf("Correccion y salida de los resultados\n");
-    char filename[500];
     //imprimo el pattern
     sprintf(filename, "%s%sspr_%d_pattern_%d.dat", sync_data->path_out, sync_data->root_name, difra->spr, difra->gamma);
-    FILE *fp = fopen(filename, "w");
+    fp = fopen(filename, "w");
     for(i = 0; i < net_size; i++)
       fprintf(fp, "%.5lf %.5lf\n", gsl_vector_get(ttheta, i), gsl_vector_get(y, i));
     fflush(fp);
     fclose(fp);
     //imprimo las posiciones de los picos y sus intensidades
     sprintf(filename, "%s%sspr_%d_pattern_%d.peak-index.dat", sync_data->path_out, sync_data->root_name, difra->spr, difra->gamma);
-    FILE *fp = fopen(filename, "w");
+    fp = fopen(filename, "w");
     for(i = 0; i < difra->numrings; i++)
       fprintf(fp, "%.5lf %.5lf %d 0\n", difra->dostheta[i], peak_seeds[1][4 + 4 * i], difra->hkl[i]);
     fflush(fp);
     fclose(fp);
     //imprimo las posiciones y las intensidades de los puntos de background
     sprintf(filename, "%s%sspr_%d_pattern_%d.bg-spline.dat", sync_data->path_out, sync_data->root_name, difra->spr, difra->gamma);
-    FILE *fp = fopen(filename, "w");
+    fp = fopen(filename, "w");
     for(i = 0; i < difra->numrings; i++)
       fprintf(fp, "%.5lf %.5lf", difra->bg[0][i], difra->bg[1][i]);
     fflush(fp);
