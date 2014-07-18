@@ -32,19 +32,20 @@ int main(int argc, char ** argv)
     double ***eta = r3_tensor_double_alloc(40, 500, 10), ***eta_err = r3_tensor_double_alloc(40, 500, 10);
     double ***breadth = r3_tensor_double_alloc(40, 500, 10), ***breadth_err = r3_tensor_double_alloc(40, 500, 10);
 
-    puts("\n***************************************************************************");
+    puts("\n****************************************************************************");
     puts("\nPROGRAM: IDEA_CMWP.EXE, Ver. XX.XX");
     puts("\nProgram for generating the pole figures from CMWP data.\nCoordinate-transformation to MTEX-Format.");
     puts("\nPole figures in MTEX-readable format xxx_Nr.mtex.");
     puts("\nThe angular values of Omega and Gamma, from the parameter file");
-    puts("\nIn order to work this executable must be placed in CMWP instalation folder along with cmwp.py");
+    puts("\nIn order to work this executable must be placed in CMWP instalation folder along with the python folder");
+    puts("\nPython 2.7 required");
     puts("\nError or suggestions to benatti@ifir-conicet.gov.ar");
     puts("\n****************************************************************************");
     //////////////////////////////////////////////////////////////////////////
     //LECTURA DEL ARCHIVO para_fit2d.dat
     if((fp = fopen("para_cmwp.dat", "r")) == NULL)
     {
-        fprintf(stderr, "Error opening file para_cmwp.txt\n");
+        fprintf(stderr, "Error opening file para_cmwp.dat\n");
         exit(1);
     }
     fgets(buf_temp, sizeof(buf_temp), fp);
@@ -106,8 +107,8 @@ int main(int argc, char ** argv)
       fscanf(fp, "%d", &posring_r[i]); //bin a la derecha del pico
       fscanf(fp, "%d", &ug_l[i]); //bin de bg a la izquierda del pico
       fscanf(fp, "%d", &ug_r[i]); //bin de bg a la derecha del pico
-    }    fgets(buf_temp, 2, fp); //skip line
-
+    }
+    fgets(buf_temp, 2, fp); //skip line
     fclose(fp);
     // End of reading the parameter file
     //////////////////////////////////////////////////////////////////////////
@@ -264,7 +265,7 @@ int main(int argc, char ** argv)
     printf("\nBegin CMWP routine\n");
     printf("Go ahead and have a cup of tea, this is gonna take a while\n");
     int rv;
-    char cmd[100] = "python cmwp.py";
+    char cmd[100] = "python python/cmwp.py";
     rv = system(cmd);
     printf("\nEnd CMWP routine\n");
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

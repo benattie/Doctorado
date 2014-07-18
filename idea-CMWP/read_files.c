@@ -4,7 +4,7 @@
 #include "array_alloc.h"
 #include "pseudo_voigt.h"
 
-void read_file(FILE * fit_fp, double ** seed, int seeds_size, double ** bg, int bg_size)
+void read_file(FILE * fit_fp, double ** seed, int seeds_size)
 {
     char buf[250];
     int i = 0;

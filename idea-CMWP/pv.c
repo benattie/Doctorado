@@ -104,7 +104,7 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     if(bad_fit) check(y, peak_seeds, seeds_size, n_peaks, (*difra).bg, (*difra).n_bg);
     set_seeds_back(all_seeds_size, zero_peak_index, exists, seeds, peak_seeds);
     
-    //liberacion de memoria allocada y cierre de archivos
+    //liberacion de memoria allocada
     gsl_vector_free(ttheta);
     gsl_vector_free(y);
     gsl_vector_free(sigma);
