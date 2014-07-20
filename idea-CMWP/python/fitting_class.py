@@ -3,7 +3,7 @@ import subprocess
 
 
 class cmwp_fit:
-    def __init__(self, files, rings):
+    def __init__(self, files, rings, flag):
         physsol_name = "%s%s.physsol.csv" % (files.path_base_file, files.base_file)
         fp_physsol = open(physsol_name, "r")
         lines = fp_physsol.readlines()
@@ -43,23 +43,25 @@ class cmwp_fit:
                                                                      spr, pattern,
                                                                      files.ext)
                 subprocess.call(["cp", origin, destination])
-                # correr el cmwp
-                cmd = './evaluate %s%s_spr_%d_pattern_%d%s auto' % (files.pathout,
-                                                                    files.input_file,
-                                                                    spr, pattern,
-                                                                    files.ext)
-                subprocess.call(cmd, shell=True)
-                # leo el physsol.csv y lo guardo en memoria
-                name_solutions = "%s/%s_spr_%d_pattern_%d%s.physsol.csv" % (files.pathout,
-                                                                            files.input_file,
-                                                                            spr,
-                                                                            pattern,
-                                                                            files.ext)
-                fp_solutions = open(name_solutions, "r")
-                lines = fp_solutions.readlines()
-                # guardo todas las soluciones fisicas del fit
-                v = 0
-                self.header = lines[0].split("\t")
-                for x in lines[1].split("\t"):
-                    self.solutions[spr / rings.delta_spr][pattern / rings.delta_pattern][v] = float(x)
-                    v += 1
+
+                if(flag == 1):
+                    # correr el cmwp
+                    cmd = './evaluate %s%s_spr_%d_pattern_%d%s auto' % (files.pathout,
+                                                                        files.input_file,
+                                                                        spr, pattern,
+                                                                        files.ext)
+                    subprocess.call(cmd, shell=True)
+                    # leo el physsol.csv y lo guardo en memoria
+                    name_solutions = "%s/%s_spr_%d_pattern_%d%s.physsol.csv" % (files.pathout,
+                                                                                files.input_file,
+                                                                                spr,
+                                                                                pattern,
+                                                                                files.ext)
+                    fp_solutions = open(name_solutions, "r")
+                    lines = fp_solutions.readlines()
+                    # guardo todas las soluciones fisicas del fit
+                    v = 0
+                    self.header = lines[0].split("\t")
+                    for x in lines[1].split("\t"):
+                        self.solutions[spr / rings.delta_spr][pattern / rings.delta_pattern][v] = float(x)
+                        v += 1

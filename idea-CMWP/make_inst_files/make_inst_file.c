@@ -16,7 +16,7 @@ int main(int argc, char ** argv)
   printf("Para ejecutar ingrese:\n./make_inst_file lambda theta0 eta H\n");
   printf("------------------------------------------------------------\n");
   //tomo los parametros de la linea de commandos
-  FILE *fp = fopen(argv[2], "w");
+  FILE *fp = fopen(argv[2], "w");//el nombre del archivo es la posicion en theta del centro del pico
   double lambda = atof(argv[1]);
   double theta0 = atof(argv[2]);
   double eta = atof(argv[3]);
@@ -37,3 +37,8 @@ int main(int argc, char ** argv)
   printf("done!");
   return 0;
 }
+
+
+    
+
+

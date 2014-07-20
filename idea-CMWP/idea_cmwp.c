@@ -263,9 +263,21 @@ int main(int argc, char ** argv)
     printf("\nFinish extracting pole figure data\n");
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     printf("\nBegin CMWP routine\n");
-    printf("Go ahead and have a cup of tea, this is gonna take a while\n");
+    char do_run[2];
+    int flag = 1;
+    printf("Run CMWP? [(y)/n]\n(If you choose n only configuration and fitting files will be created)\n");
+    scanf("%s", do_run);
+    do_run[0] = tolower((unsigned char) do_run[0]);
+    if(strcmp(do_run, "n") == 0)
+        flag = 0;
+    else
+    {
+        printf("Go ahead and have a cup of tea, this is gonna take a while\n");
+        flag = 1;
+    }
     int rv;
-    char cmd[100] = "python python/cmwp.py";
+    char cmd[100];
+    sprintf(cmd, "python python/cmwp.py %d", flag);
     rv = system(cmd);
     printf("\nEnd CMWP routine\n");
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
