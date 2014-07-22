@@ -19,12 +19,14 @@ int main(int argc, char ** argv)
 {
     struct DAT intensss;
     FILE *fp, *fp1, *fp_fit;
-    char buf_temp[100], buf[100], buf1[100], path_out[150], filename1[100], inform[10], path1[150], inform1[10], marfile[150], minus_zero[1];
-    int Z, a, b, i, j, k, m, n, x, y, z, count, anf_gam, ende_gam, del_gam, anf_ome, ende_ome, del_ome;
-    int BG_l, BG_r, star_d, end_d, del_d, numrings, posring_l[15], posring_r[15], ug_l[15], ug_r[15];
-    int pixel_number, gamma, seeds_size, bg_size, n_peaks, data[2500], intensity, miller[15];
+    char buf_temp[1024], buf[1024], buf1[1024], path_out[1024], filename1[1024], path1[1024], inform1[1024], marfile[1024];
+    char *getval = malloc(sizeof(char) * (250 + 1)), path_base[1024], base_filename[1024], minus_zero[1];
+    static int del_gam, star_d;
+    int a, b, i, k, n, x, y, z, count, anf_gam, ende_gam, anf_ome, ende_ome, del_ome, rv;
+    int BG_l, BG_r, end_d, del_d, numrings, posring_l[15], posring_r[15], ug_l[15], ug_r[15];
+    int pixel_number, gamma, seeds_size, bg_size, data[2500], intensity, miller[15];
     float intens_av[1800], peak_intens_av[10], data1[2500], BG_m, intens[500][10];
-    float theta[20], neu_ome, neu_ome1, neu_gam1, neu_gam, alpha, beta, th;
+    float theta[20], th;
     double pixel, dist, ** seeds, ** bg_seed, *dostheta = vector_double_alloc(15);
     double ***sabo_inten = r3_tensor_double_alloc(40, 500, 10);
     double ***fit_inten = r3_tensor_double_alloc(40, 500, 10), ***fit_inten_err = r3_tensor_double_alloc(40, 500, 10);
@@ -48,67 +50,72 @@ int main(int argc, char ** argv)
         fprintf(stderr, "Error opening file para_cmwp.dat\n");
         exit(1);
     }
-    fgets(buf_temp, sizeof(buf_temp), fp);
+    getval = fgets(buf_temp, sizeof(buf_temp), fp);
 
     //path hacia los spr (encabezado + 360 filas x 1725 columnas) (son 37) 
-    fgets(buf_temp, 22, fp); fscanf(fp, "%s", path1);   fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", path1);   getval = fgets(buf_temp, 2, fp);
     //path hacia los archivos de salida
-    fgets(buf_temp, 22, fp); fscanf(fp, "%s", path_out); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", path_out); getval = fgets(buf_temp, 2, fp);
     //lee raiz de los archivos spr (New_Al70R-tex_)
-    fgets(buf_temp, 22, fp); fscanf(fp, "%s", filename1); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", filename1); getval = fgets(buf_temp, 2, fp);
     //skip lines
-    fgets(buf_temp, sizeof(buf_temp), fp);
-    fgets(buf_temp, sizeof(buf_temp), fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", path_base); getval = fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", base_filename); getval = fgets(buf_temp, 2, fp);
     //lee la extension de los archivos (spr)
-    fgets(buf_temp, 22, fp); fscanf(fp, "%s", inform1); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", inform1); getval = fgets(buf_temp, 2, fp);
     //numero del primer spr
-    fgets(buf_temp, 22, fp); fscanf(fp, "%d", &star_d); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &star_d); getval = fgets(buf_temp, 2, fp);
     //delta en los spr
-    fgets(buf_temp, 22, fp); fscanf(fp, "%d", &del_d); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &del_d); getval = fgets(buf_temp, 2, fp);
     //numero del ultimo spr
-    fgets(buf_temp, 22, fp); fscanf(fp, "%d", &end_d); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &end_d); getval = fgets(buf_temp, 2, fp);
     //angulo (\Omega) inicial 
-    fgets(buf_temp, 22, fp); fscanf(fp, "%d", &anf_ome); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &anf_ome); getval = fgets(buf_temp, 2, fp);
     //delta en el angulo \omega
-    fgets(buf_temp, 22, fp); fscanf(fp, "%d", &del_ome); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &del_ome); getval = fgets(buf_temp, 2, fp);
     //angulo (\Omega) final
-    fgets(buf_temp, 22, fp); fscanf(fp, "%d", &ende_ome); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &ende_ome); getval = fgets(buf_temp, 2, fp);
     //gamma inicial
-    fgets(buf_temp, 22, fp); fscanf(fp, "%d", &anf_gam); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &anf_gam); getval = fgets(buf_temp, 2, fp);
     //delta gamma
-    fgets(buf_temp, 22, fp); fscanf(fp, "%d", &del_gam); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &del_gam); getval = fgets(buf_temp, 2, fp);
     //gamma final
-    fgets(buf_temp, 22, fp); fscanf(fp, "%d", &ende_gam); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &ende_gam); getval = fgets(buf_temp, 2, fp);
     //skip lines
-    fgets(buf_temp, sizeof(buf_temp), fp);
-    fgets(buf_temp, sizeof(buf_temp), fp);
+    getval = fgets(buf_temp, sizeof(buf_temp), fp);
+    getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //Distancia de la muestra al detector
-    fgets(buf_temp, 22, fp); fscanf(fp, "%lf", &dist); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%lf", &dist); getval = fgets(buf_temp, 2, fp);
     //Distancia que cubre un pixel en el difractograma
-    fgets(buf_temp, 22, fp); fscanf(fp, "%lf", &pixel); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%lf", &pixel); getval = fgets(buf_temp, 2, fp);
     //umbral que determinal cual es la intensidad minima para que ajusto un pico
-    fgets(buf_temp, 22, fp); fscanf(fp, "%f", &th); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%f", &th); getval = fgets(buf_temp, 2, fp);
     //flag que determina si las cuentas negativas se pasan a 0
-    fgets(buf_temp, 22, fp); fscanf(fp, "%s", minus_zero); fgets(buf_temp, 2, fp); 
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", minus_zero); getval = fgets(buf_temp, 2, fp); 
     //skip lines
-    fgets(buf_temp, 20, fp);
-    fgets(buf_temp, 20, fp);
+    getval = fgets(buf_temp, 20, fp);
+    getval = fgets(buf_temp, 20, fp);
     //numero de picos a analizar 
-    fgets(buf_temp, 22, fp); fscanf(fp, "%d", &numrings); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &numrings); getval = fgets(buf_temp, 2, fp);
     //skip lines
-    fgets(buf_temp, 50, fp);
-    fgets(buf_temp, 50, fp);
+    getval = fgets(buf_temp, 50, fp);
+    getval = fgets(buf_temp, 50, fp);
 
     for(i = 0; i < numrings; i++) //itera sobre cada pico (0 a 7) -> (1 a 8)
     {
-      fscanf(fp, "%d", &miller[i]);
-      fscanf(fp, "%f", &theta[i]); //posicion angular del centro del pico (\theta)
-      fscanf(fp, "%d", &posring_l[i]); //bin a la izquierda del pico
-      fscanf(fp, "%d", &posring_r[i]); //bin a la derecha del pico
-      fscanf(fp, "%d", &ug_l[i]); //bin de bg a la izquierda del pico
-      fscanf(fp, "%d", &ug_r[i]); //bin de bg a la derecha del pico
+      rv = fscanf(fp, "%d", &miller[i]);
+      rv = fscanf(fp, "%f", &theta[i]); //posicion angular del centro del pico (\theta)
+      rv = fscanf(fp, "%d", &posring_l[i]); //bin a la izquierda del pico
+      rv = fscanf(fp, "%d", &posring_r[i]); //bin a la derecha del pico
+      rv = fscanf(fp, "%d", &ug_l[i]); //bin de bg a la izquierda del pico
+      rv = fscanf(fp, "%d", &ug_r[i]); //bin de bg a la derecha del pico
     }
-    fgets(buf_temp, 2, fp); //skip line
+    getval = fgets(buf_temp, 2, fp); //skip line
+    if(getval == NULL) printf("\nWARNING: There were problems while reading para_cmwp.dat\n");
+    if(rv == 0 || rv == EOF) printf("\nWARNING: there were problems reading peal data in para_cmwp.dat (%d)\n", rv);
+    //imprime en pantalla los datos relevantes de cada pico 
+    for(i = 0; i < numrings; i++)
+        printf("Position of [%d]ring = Theta:%6.3f  %8d%8d%8d%8d\n", i + 1, theta[i], posring_l[i], posring_r[i], ug_l[i], ug_r[i]);
     fclose(fp);
     // End of reading the parameter file
     //////////////////////////////////////////////////////////////////////////
@@ -118,40 +125,52 @@ int main(int argc, char ** argv)
         fprintf(stderr, "Error opening file fit_ini.dat\n");
         exit(1);
     }
-    fgets(buf, 250, fp_fit);//leo el titulo
+    getval = fgets(buf, 250, fp_fit);//leo el titulo
     seeds_size = 4 * numrings + 2;
     seeds = matrix_double_alloc(2, seeds_size);
     read_file(fp_fit, seeds, seeds_size);
+    if(getval == NULL) printf("\nWARNING: There were problems while reading fit_ini.dat\n");
     fclose(fp_fit);
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //podria agregar un argumento para que el archivo de con los puntos de ruido lo saque de la linea de comandos
-    if((fp_fit = fopen("bg-spline.dat", "r")) == NULL)
+    strcat(path_base, base_filename);
+    strcat(path_base, ".bg-spline.dat");
+    if((fp_fit = fopen(path_base, "r")) == NULL)
     {
-        fprintf(stderr, "Error opening file bg-spline.dat\n");
+        fprintf(stderr, "Error opening file %s\n", path_base);
         exit(1);
     }
     //cuento cuantlas lineas tiene el archvio i.e. el numero de puntos de background
     n = 0;
-    while(fscanf(fp_fit, "%lf", &bg_seed[0][0]) != EOF)
-    {
-      fscanf(fp_fit, "%lf", &bg_seed[1][0]);
+    while(fgets(buf, sizeof(buf), fp_fit) != NULL)
       n++;
-    }
     bg_size = n;
-    free_double_matrix(bg_seed, 2);
+    //printf("\nbg_size = %d\n", bg_size);
     //ahora lleno la matriz bg_seed con la posicion e intensidad de los puntos de background
     bg_seed = matrix_double_alloc(2, bg_size);
     rewind(fp_fit);
     n = 0;
     while(fscanf(fp_fit, "%lf", &bg_seed[0][n]) != EOF)
     {
-      fscanf(fp_fit, "%lf", &bg_seed[1][n]);
+      rv = fscanf(fp_fit, "%lf", &bg_seed[1][n]);
       n++;
     }
+    if(rv == EOF) printf("\nWARNING: There were problems while reading background data in %s\n", path_base);
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //si le paso el valor de treshold por linea de comandos que se olvide de lo que esta en archivo
+    //si le paso el valor de treshold por linea de comandos que se olvide de lo que esta en archivos
+    int flag = 1;
     if(argc == 2)
-      th = atof(argv[1]);
+        flag = atoi(argv[1]);
+    else
+        if(argc == 3)
+        {
+            flag = atoi(argv[1]);
+            th = atof(argv[2]);
+        }
+        else
+        {
+            printf("Numero incorrecto de argumentos\nUso correcto:\n");
+            printf("./idea_cmwp.exe \n./idea_cmwp flag\n./idea_cmwp flag treshold\n");
+        }
 
     k = star_d;  // file index number : star_d to end_d
     do //Iteracion sobre todos los spr  
@@ -178,9 +197,9 @@ int main(int argc, char ** argv)
             fprintf(stderr, "Error opening READ_file: %s \n", marfile);
             exit(1);
         }
-        fscanf(fp1, "%d", &pixel_number); //pixel number = los bin de los difractogramas
-        fscanf(fp1, "%d", &gamma); //gamma = cantidad de difractogramas (360 en este caso)
-        fgets(buf, 100, fp1); //skip line
+        rv = fscanf(fp1, "%d", &pixel_number); //pixel number = los bin de los difractogramas
+        rv = fscanf(fp1, "%d", &gamma); //gamma = cantidad de difractogramas (360 en este caso)
+        getval = fgets(buf, 100, fp1); //skip line
 
         memset(intens_av, 0, 1800 * sizeof(float));
         memset(peak_intens_av, 0, 10 * sizeof(float));
@@ -203,7 +222,7 @@ int main(int argc, char ** argv)
             for(x = 1; x <= pixel_number; x++) //iteracion dentro de cada uno de los difractogramas (con 1725 puntos) (cada porcion del anillo de Debye)
             {
                 //leo la intensidad de cada bin y la paso a formato de entero
-                fscanf(fp1, "%e", &data1[x]);
+                rv = fscanf(fp1, "%e", &data1[x]);
                 intens_av[x] += data1[x];
                 data[x] = (int)data1[x];
             }
@@ -219,14 +238,14 @@ int main(int argc, char ** argv)
                 BG_l = data[a];
                 BG_r = data[b];
                 //background promedio
-                BG_m = ((BG_l + BG_r) / 2);
+                BG_m = ((BG_l + BG_r) / 2.);
 
                 for(z = posring_l[n]; z <= posring_r[n]; z++) //integro el pico
                 { 
                     count++;
                     intensss.nnew = data[z];
                     intensity += intensss.nnew;
-                }                                       
+                }
                 intens[y][n] = (intensity / count) - BG_m;  // Integral values and BG correction
                 if(intens[y][n] >= 0) 
                     peak_intens_av[n] += intens[y][n];
@@ -263,23 +282,23 @@ int main(int argc, char ** argv)
     printf("\nFinish extracting pole figure data\n");
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     printf("\nBegin CMWP routine\n");
-    char do_run[2];
-    int flag = 1;
-    printf("Run CMWP? [(y)/n]\n(If you choose n only configuration and fitting files will be created)\n");
-    scanf("%s", do_run);
-    do_run[0] = tolower((unsigned char) do_run[0]);
-    if(strcmp(do_run, "n") == 0)
-        flag = 0;
-    else
+    char cmd[100], do_run[2];
+    if(argc < 2)// si no le pase el dato por linea de comandos lo tomo de pantalla
     {
-        printf("Go ahead and have a cup of tea, this is gonna take a while\n");
-        flag = 1;
+        printf("Run CMWP? [(y)/n]\n(If you choose n only configuration and fitting files will be created)\n");
+        rv = scanf("%s", do_run);
+        if(rv == 0 || rv == EOF) printf("Error de lectura\n");
+        do_run[0] = tolower((unsigned char) do_run[0]);
+        if(strcmp(do_run, "n") == 0)
+            flag = 0;
+        else
+            flag = 1;
     }
-    int rv;
-    char cmd[100];
+    if(flag == 1)
+        printf("Go ahead and have a cup of tea, this is gonna take a while\n");
     sprintf(cmd, "python python/cmwp.py %d", flag);
     rv = system(cmd);
-    printf("\nEnd CMWP routine\n");
+    printf("\nEnd CMWP routine with code %d\n", rv);
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     printf("Free allocated memory\n");
     free_double_matrix(seeds, 2);

@@ -14,7 +14,7 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     //variables auxiliares del programa
     char filename[500];
     FILE *fp;
-    int i, bad_fit, zero_peak_index[(*difra).numrings];
+    int i, n, bad_fit, zero_peak_index[(*difra).numrings];
     //elimino los picos que tienen una intensidad menor que treshold
     int n_peaks = check_for_null_peaks(difra->treshold, (*difra).numrings, zero_peak_index, intens);
     int seeds_size = 4 * n_peaks + 2, all_seeds_size = 4 * (*difra).numrings + 2;
@@ -87,15 +87,19 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     //imprimo las posiciones de los picos y sus intensidades
     sprintf(filename, "%s%sspr_%d_pattern_%d.peak-index.dat", sync_data->path_out, sync_data->root_name, difra->spr, difra->gamma);
     fp = fopen(filename, "w");
-    for(i = 0; i < difra->numrings; i++)
-      fprintf(fp, "%.5lf %.5lf %d 0\n", difra->dostheta[i], peak_seeds[1][4 + 4 * i], difra->hkl[i]);
+    n = 0;
+    for(i = 2; i < seeds_size; i += 4)
+    {
+      fprintf(fp, "%7.5lf %7.5lf %d 0\n", peak_seeds[1][i], peak_seeds[1][i + 1], difra->hkl[n]);
+      n++;
+    }
     fflush(fp);
     fclose(fp);
     //imprimo las posiciones y las intensidades de los puntos de background
     sprintf(filename, "%s%sspr_%d_pattern_%d.bg-spline.dat", sync_data->path_out, sync_data->root_name, difra->spr, difra->gamma);
     fp = fopen(filename, "w");
-    for(i = 0; i < difra->numrings; i++)
-      fprintf(fp, "%.5lf %.5lf", difra->bg[0][i], difra->bg[1][i]);
+    for(i = 0; i < difra->n_bg; i++)
+      fprintf(fp, "%.5lf %.5lf\n", difra->bg[0][i], difra->bg[1][i]);
     fflush(fp);
     fclose(fp);
     //se puede analizar la posibilidad de usar una cubic spline en vez de una lineal para este programa

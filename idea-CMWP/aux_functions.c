@@ -289,20 +289,21 @@ int fit_result(int all_seeds_size, double ** peak_seeds, double * errors, int * 
 int results_output(int all_seeds_size, double ** peak_seeds, double * errors, int * zero_peak_index, exp_data * sync_data, peak_data * difra, int spr, int gamma)
 {
     int bad_fit = 0, i, j = 2, k = 0;
-    double dtheta, dtheta_aux, I, I_aux, I_err, H, H_aux, H_err, eta, eta_aux, eta_err, breadth, breadth_err;
-    double theta_rad, radian = M_PI / 180;
+    //double dtheta, dtheta_aux;
+    double I, I_aux, I_err, H, H_aux, H_err, eta, eta_aux, eta_err, breadth, breadth_err;
+    //double theta_rad, radian = M_PI / 180;
     for(i = 2; i < all_seeds_size; i += 4)
     {
         if(zero_peak_index[k] == 0)
         {
-            dtheta_aux = peak_seeds[1][j];
+            //dtheta_aux = peak_seeds[1][j];
             I_aux = peak_seeds[1][j + 1];
             H_aux = peak_seeds[1][0] + peak_seeds[1][j + 2];
             eta_aux = peak_seeds[1][1] + peak_seeds[1][j + 3];
             if(I_aux < 0)
             {
                 bad_fit = 1;
-                dtheta = peak_seeds[0][j];
+//                dtheta = peak_seeds[0][j];
                 I = 0.0;
                 I_err = 0.0;
                 H = -1.0;
@@ -317,7 +318,7 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
                 if(H_aux < 0 || H_aux > 1)
                 {
                     bad_fit = 1;
-                    dtheta = peak_seeds[0][j];
+//                    dtheta = peak_seeds[0][j];
                     I = I_aux;
                     I_err = errors[j + 1];
                     H = -1.0;
@@ -332,7 +333,7 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
                     if(eta_aux < 0 || eta_aux > 1)
                     {
                         bad_fit = 1;
-                        dtheta = dtheta_aux;
+ //                       dtheta = dtheta_aux;
                         I = I_aux;
                         I_err = errors[j + 1];
                         H = H_aux;
@@ -345,7 +346,7 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
                     else
                     {
                         bad_fit = 0;
-                        dtheta = dtheta_aux;
+//                        dtheta = dtheta_aux;
                         I = I_aux;
                         I_err = errors[j + 1];
                         H = H_aux;
