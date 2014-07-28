@@ -16,8 +16,9 @@ float winkel_al(float th, float om, float ga)
     chir = chi * rad;
 
     /***the multiplication of matrix G and s */
-     COSAL=(((-1 * cos(omr) * sin(phir)) - (sin(omr) * cos(phir) * cos(chir))) * (-1 * sin(thr)))
-       + ((-1 * sin(omr) * sin(phir)) + (cos(omr) * cos(phir) * cos(chir))) * (cos(thr) * cos(gar));
+     COSAL = ( (-1 * cos(omr) * sin(phir)) - (sin(omr) * cos(phir) * cos(chir)) ) * (-1 * sin(thr))
+           + ( (-1 * sin(omr) * sin(phir)) + (cos(omr) * cos(phir) * cos(chir)) ) * (cos(thr) * cos(gar))
+           + (cos(phir) * sin(chir)) * (cos(thr) * cos(gar));
 
      al = (float)(acos(COSAL)) / rad;
      return (al);
@@ -40,12 +41,18 @@ float winkel_be(float thb, float omb, float gab, float alb)
     phibr = phi_be * rad_be;
 
     /*** the multiplication of matrix G and s */
+    SINALCOSBE = (cos(ombr) * cos(phibr) - sin(ombr) * sin(phibr) * cos(chibr)) * (-1 * sin(thbr))
+               + (sin(ombr) * cos(phibr) + cos(ombr) * sin(phibr) * cos(chibr)) * (cos(thbr) * cos(gabr))
+               + (sin(phibr) * sin(chibr) * (cos(thbr) * sin(gabr)));
 
-    SINALCOSBE = (cos(ombr)*(-1 * sin(thbr))) + (((sin(ombr) * cos(phibr)) + (cos(ombr) * sin(phibr) * cos(chibr))) * (cos(thbr) * cos(gabr)));
+    //SINALCOSBE = (cos(ombr)*(-1 * sin(thbr))) + (((sin(ombr) * cos(phibr)) + (cos(ombr) * sin(phibr) * cos(chibr))) * (cos(thbr) * cos(gabr)));
 
     COSBE = SINALCOSBE / sin(albr);
 
-    SINALSINBE = cos(thbr) * sin(gabr);
+    SINALSINBE = (sin(ombr) * sin(chibr)) * (-1 * sin(thr))
+               + (-1 * cos(ombr) * sin(chibr)) * (cos(thbr) * cos(gabr))
+               + cos(chibr) * (cos(thbr) * sin(gabr));
+    //SINALSINBE = cos(thbr) * sin(gabr);
 
     SINBE = SINALSINBE / sin(albr);
 

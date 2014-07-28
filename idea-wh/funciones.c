@@ -31,7 +31,7 @@ double WC_FCC(int *hkl)
     int ax_hkl[3] = {abs(hkl[0]), abs(hkl[1]), abs(hkl[2])};
     gsl_sort_int(ax_hkl, 1, 3); //ordeno el vector de menor a mayor
     int nzeros = count_zeros(ax_hkl, 3), nequal = count_equal(ax_hkl);
-    int ub = 0, L0 = 0, SL0 = 0, L0_aux[3]; 
+    int ub = 0, L0 = 0, SL0 = 0, L0_aux[3];
     double h0 = sqrt(pow(ax_hkl[0], 2) + pow(ax_hkl[1], 2) + pow(ax_hkl[2], 2));;
     //6 posibilidades: hhh, 0hh, 00h, hhl, 0hk o hkl
     if(nequal == 3) //hhh
@@ -99,7 +99,7 @@ double WC_FCC(int *hkl)
         else //0hk o hkl
         {
             if(nzeros) //0hk
-            {   
+            {
                 ub = 24;
                 L0_aux[0] = ax_hkl[0] + ax_hkl[1] + ax_hkl[2];// == h + k
                 L0_aux[1] = abs(ax_hkl[0] + ax_hkl[1] - ax_hkl[2]);// == abs(h - k)
@@ -112,7 +112,7 @@ double WC_FCC(int *hkl)
             {
                 ub = 48;
                 L0_aux[0] = ax_hkl[0] + ax_hkl[1] + ax_hkl[2];// == h + k + l
-                L0_aux[1] = abs(ax_hkl[0] + ax_hkl[1] - ax_hkl[2]);// == h + k - l 
+                L0_aux[1] = abs(ax_hkl[0] + ax_hkl[1] - ax_hkl[2]);// == h + k - l
                 L0_aux[2] = abs(ax_hkl[0] - ax_hkl[1] - ax_hkl[2]);// == h - k - l
                 if((L0_aux[0] % 3) != 0)
                     SL0 += 12 * L0_aux[0];
@@ -139,29 +139,29 @@ double WC_BCC(int *hkl)
     int a[3] = {1, 1, 0}, b[3] = {2, 2, 0}, c[3] = {3, 3, 0};
     if(! memcmp(hkl, a, 3 * sizeof(int)) || ! memcmp(hkl, b, 3 * sizeof(int)) || ! memcmp(hkl, c, 3 * sizeof(int)))
         return 2. / (3. * sqrt(2));
-    
+
     set_vector(a, 2, 0, 0); set_vector(b, 4, 0, 0); set_vector(c, 6, 0, 0);
     if(! memcmp(hkl, a, 3 * sizeof(int)) || ! memcmp(hkl, b, 3 * sizeof(int)) || ! memcmp(hkl, c, 3 * sizeof(int)))
         return 4. / 3.;
-    
+
     set_vector(a, 2, 1, 1); set_vector(b, 4, 2, 2); set_vector(c, 6, 3, 3);
     if(! memcmp(hkl, a, 3 * sizeof(int)) || ! memcmp(hkl, b, 3 * sizeof(int)) || ! memcmp(hkl, c, 3 * sizeof(int)))
         return 2. / sqrt(6);
-    
+
     set_vector(a, 3, 1, 0); set_vector(b, 6, 2, 0); set_vector(c, 9, 3, 0);
     if(! memcmp(hkl, a, 3 * sizeof(int)) || ! memcmp(hkl, b, 3 * sizeof(int)) || ! memcmp(hkl, c, 3 * sizeof(int)))
         return 4. / sqrt(10);
-    
+
     set_vector(a, 2, 2, 2); set_vector(b, 4, 4, 4); set_vector(c, 6, 6, 6);
     printf("%d\n", memcmp(hkl, a, 3 * sizeof(int)));
-    printf("%d%d%d\t%d%d%d\n", hkl[0], hkl[1], hkl[2], a[0], a[1], a[2]); 
+    printf("%d%d%d\t%d%d%d\n", hkl[0], hkl[1], hkl[2], a[0], a[1], a[2]);
     if(! memcmp(hkl, a, 3 * sizeof(int)) || ! memcmp(hkl, b, 3 * sizeof(int)) || ! memcmp(hkl, c, 3 * sizeof(int)))
         return 2. / sqrt(3);
-    
+
     set_vector(a, 3, 2, 1); set_vector(b, 6, 4, 2); set_vector(c, 9, 6, 3);
     if(! memcmp(hkl, a, 3 * sizeof(int)) || ! memcmp(hkl, b, 3 * sizeof(int)) || ! memcmp(hkl, c, 3 * sizeof(int)))
         return 5. / (2. * sqrt(14));
-    
+
     set_vector(a, 4, 4, 0); set_vector(b, 5, 5, 0); set_vector(c, 6, 6, 0);
     if(! memcmp(hkl, a, 3 * sizeof(int)) || ! memcmp(hkl, b, 3 * sizeof(int)) || ! memcmp(hkl, c, 3 * sizeof(int)))
         return 2. / (3. * sqrt(2));
@@ -305,79 +305,83 @@ void read_input(FILE *fp, file_data *fdata, crystal_data *cdata, aux_data *adata
 {
     char buf[500];
     int i = 0, j = 0, v[3];
+    char *getval = malloc(sizeof(char) * (250 + 1));
+    int rv = 0;
     //printf("Lectura del primer bloque de datos\n");
-    fscanf(fp, "%s %s", buf, fdata -> outPath);
-    fgets(buf, 500, fp);
-    fgets(buf, 500, fp);
-    fgets(buf, 500, fp);
+    rv = fscanf(fp, "%s %s", buf, fdata -> outPath);
+    getval = fgets(buf, 500, fp);
+    getval = fgets(buf, 500, fp);
+    getval = fgets(buf, 500, fp);
 
     //printf("Lectura del segundo bloque de datos\n");
-    fscanf(fp, "%s %s", buf, fdata -> inputPath);
-    fgets(buf, 500, fp);
-    fscanf(fp, "%s %s", buf, fdata -> filename);
-    fgets(buf, 500, fp);
-    fscanf(fp, "%s %s", buf, fdata -> fileext);
-    fgets(buf, 500, fp);
-    fscanf(fp, "%s %s %d", buf, buf, &fdata -> start);
-    fgets(buf, 500, fp);
-    fscanf(fp, "%s %s %d", buf, buf, &fdata -> end);
-    fgets(buf, 500, fp);
-    fscanf(fp, "%s %s %s", buf, buf, fdata -> is_corr);
+    rv = fscanf(fp, "%s %s", buf, fdata -> inputPath);
+    getval = fgets(buf, 500, fp);
+    rv = fscanf(fp, "%s %s", buf, fdata -> filename);
+    getval = fgets(buf, 500, fp);
+    rv = fscanf(fp, "%s %s", buf, fdata -> fileext);
+    getval = fgets(buf, 500, fp);
+    rv = fscanf(fp, "%s %s %d", buf, buf, &fdata -> start);
+    getval = fgets(buf, 500, fp);
+    rv = fscanf(fp, "%s %s %d", buf, buf, &fdata -> end);
+    getval = fgets(buf, 500, fp);
+    rv = fscanf(fp, "%s %s %s", buf, buf, fdata -> is_corr);
     for(j = 0; fdata->is_corr[j]; j++)
         fdata->is_corr[j] = toupper((unsigned char) fdata->is_corr[j]);//convierto lo que lei a mayusculas
-    fgets(buf, 500, fp);
-    fscanf(fp, "%s %s %s %s", buf, buf, buf, fdata -> is_H);
+    getval = fgets(buf, 500, fp);
+    rv = fscanf(fp, "%s %s %s %s", buf, buf, buf, fdata -> is_H);
     for(j = 0; fdata->is_H[j]; j++)
         fdata->is_H[j] = toupper((unsigned char) fdata->is_H[j]);//convierto lo que lei a mayusculas
-    fgets(buf, 500, fp);
-    fscanf(fp, "%s %d", buf, &fdata -> model);
-    fgets(buf, 500, fp);
-    fscanf(fp, "%s %lf", buf, &adata -> lambda);
-    fgets(buf, 500, fp);
-    fgets(buf, 500, fp);
+    getval = fgets(buf, 500, fp);
+    rv = fscanf(fp, "%s %d", buf, &fdata -> model);
+    getval = fgets(buf, 500, fp);
+    rv = fscanf(fp, "%s %lf", buf, &adata -> lambda);
+    getval = fgets(buf, 500, fp);
+    getval = fgets(buf, 500, fp);
 
     //printf("Lectura del tercer bloque de datos\n");
-    fgets(buf, 500, fp);
-    fscanf(fp, "%s %s %s", buf, buf, cdata -> type);
-    fgets(buf, 500, fp);
-    fscanf(fp, "%s %s %lf", buf, buf, &cdata -> a);
-    fgets(buf, 500, fp);
-    fscanf(fp, "%s %s %s %s %s %d %d %d", buf, buf, buf, buf, buf, &v[0], &v[1], &v[2]);
-    fgets(buf, 500, fp);
+    getval = fgets(buf, 500, fp);
+    rv = fscanf(fp, "%s %s %s", buf, buf, cdata -> type);
+    getval = fgets(buf, 500, fp);
+    rv = fscanf(fp, "%s %s %lf", buf, buf, &cdata -> a);
+    getval = fgets(buf, 500, fp);
+    rv = fscanf(fp, "%s %s %s %s %s %d %d %d", buf, buf, buf, buf, buf, &v[0], &v[1], &v[2]);
+    getval = fgets(buf, 500, fp);
     cdata->burgersv = burgers(cdata->a, v);
-    fscanf(fp, "%s %s %s %d", buf, buf, buf, &cdata -> npeaks);
-    fgets(buf, 500, fp);
-    fscanf(fp, "%s %lf", buf, &adata -> delta_min);
-    fgets(buf, 500, fp);
-    fscanf(fp, "%s %lf", buf, &adata -> delta_step);
-    fgets(buf, 500, fp);
-    fscanf(fp, "%s %lf", buf, &adata -> delta_max);
-    fgets(buf, 500, fp);
-    fscanf(fp, "%s %lf", buf, &adata -> q_min);
-    fgets(buf, 500, fp);
-    fscanf(fp, "%s %lf", buf, &adata -> q_step);
-    fgets(buf, 500, fp);
-    fscanf(fp, "%s %lf", buf, &adata -> q_max);
-    fgets(buf, 500, fp);
-    fscanf(fp, "%s %lf", buf, &adata -> Ch00_min);
-    fgets(buf, 500, fp);
-    fscanf(fp, "%s %lf", buf, &adata -> Ch00_step);
-    fgets(buf, 500, fp);
-    fscanf(fp, "%s %lf", buf, &adata -> Ch00_max);
-    fgets(buf, 500, fp);
-    fgets(buf, 500, fp);
+    rv = fscanf(fp, "%s %s %s %d", buf, buf, buf, &cdata -> npeaks);
+    getval = fgets(buf, 500, fp);
+    rv = fscanf(fp, "%s %lf", buf, &adata -> delta_min);
+    getval = fgets(buf, 500, fp);
+    rv = fscanf(fp, "%s %lf", buf, &adata -> delta_step);
+    getval = fgets(buf, 500, fp);
+    rv = fscanf(fp, "%s %lf", buf, &adata -> delta_max);
+    getval = fgets(buf, 500, fp);
+    rv = fscanf(fp, "%s %lf", buf, &adata -> q_min);
+    getval = fgets(buf, 500, fp);
+    rv = fscanf(fp, "%s %lf", buf, &adata -> q_step);
+    getval = fgets(buf, 500, fp);
+    rv = fscanf(fp, "%s %lf", buf, &adata -> q_max);
+    getval = fgets(buf, 500, fp);
+    rv = fscanf(fp, "%s %lf", buf, &adata -> Ch00_min);
+    getval = fgets(buf, 500, fp);
+    rv = fscanf(fp, "%s %lf", buf, &adata -> Ch00_step);
+    getval = fgets(buf, 500, fp);
+    rv = fscanf(fp, "%s %lf", buf, &adata -> Ch00_max);
+    getval = fgets(buf, 500, fp);
+    getval = fgets(buf, 500, fp);
 
     //printf("Lectura del cuarto bloque de datos\n");
-    fgets(buf, 500, fp);
-    fgets(buf, 500, fp);
+    getval = fgets(buf, 500, fp);
+    getval = fgets(buf, 500, fp);
     cdata->indices = matrix_int_alloc(cdata -> npeaks, 3);
     while(i < cdata->npeaks)
     {
-        fscanf(fp, "%d", &cdata -> indices[i][0]);
-        fscanf(fp, "%d", &cdata -> indices[i][1]);
-        fscanf(fp, "%d", &cdata -> indices[i][2]);
+        rv = fscanf(fp, "%d", &cdata -> indices[i][0]);
+        rv = fscanf(fp, "%d", &cdata -> indices[i][1]);
+        rv = fscanf(fp, "%d", &cdata -> indices[i][2]);
         i++;
     }
+    if(getval == NULL) printf("\nWARNING (fgets): There were problems while reading para_WH.dat\n");
+    if(rv == 0 || rv == EOF) printf("\nWARNING (fscanf): there were problems reading peal data in para_WH.dat (%d)\n", rv);
 }
 
 int read_pole_figures(file_data * fdata, angles_grad * angles, shape_params * widths)
@@ -386,6 +390,9 @@ int read_pole_figures(file_data * fdata, angles_grad * angles, shape_params * wi
     char name[500], buf[1000];
     int i, linecount;
     double dbuf;
+    char *getval = malloc(sizeof(char) * (250 + 1));
+    int rv = 0;
+
     for(i = fdata->start - 1; i <= fdata->end - 1; i++)
     {
         sprintf(name, "%s%s%d.%s", fdata->inputPath, fdata->filename, i + 1, fdata->fileext);
@@ -395,31 +402,31 @@ int read_pole_figures(file_data * fdata, angles_grad * angles, shape_params * wi
             fprintf(stderr, "\nError opening %s.\n", name);
             exit(1);
         }
-        fgets(buf, 500, fp_in);//skip line
-        fgets(buf, 500, fp_in);//skip line
-        fgets(buf, 500, fp_in);//skip line
+        getval = fgets(buf, 500, fp_in);//skip line
+        getval = fgets(buf, 500, fp_in);//skip line
+        getval = fgets(buf, 500, fp_in);//skip line
         while(fscanf(fp_in, "%d", &linecount) != EOF)
         {
             //printf("Leyendo linea %d\n", linecount);
-            fscanf(fp_in, "%lf", &angles->dostheta_grad[i][linecount - 1]);
-            fscanf(fp_in, "%lf", &angles->theta_grad[i][linecount - 1]);
-            fscanf(fp_in, "%lf", &angles->alpha_grad[i][linecount - 1]);
-            fscanf(fp_in, "%lf", &angles->beta_grad[i][linecount - 1]);
-            fscanf(fp_in, "%lf", &dbuf); //sabo int
-            fscanf(fp_in, "%lf", &dbuf); //int
-            fscanf(fp_in, "%lf", &dbuf); //error int
-            fscanf(fp_in, "%lf", &widths->FWHM[i][linecount - 1]);
-            fscanf(fp_in, "%lf", &widths->FWHM_err[i][linecount - 1]);
-            fscanf(fp_in, "%lf", &dbuf); //eta
-            fscanf(fp_in, "%lf", &dbuf); //error
-            fscanf(fp_in, "%lf", &widths->breadth[i][linecount - 1]);
-            fscanf(fp_in, "%lf", &widths->breadth_err[i][linecount - 1]);
-            fscanf(fp_in, "%lf", &widths->FWHM_corr[i][linecount - 1]);
-            fscanf(fp_in, "%lf", &widths->FWHM_corr_err[i][linecount - 1]);
-            fscanf(fp_in, "%lf", &dbuf); //eta_corr
-            fscanf(fp_in, "%lf", &dbuf); //error
-            fscanf(fp_in, "%lf", &widths->breadth_corr[i][linecount - 1]);
-            fscanf(fp_in, "%lf", &widths->breadth_corr_err[i][linecount - 1]);
+            rv = fscanf(fp_in, "%lf", &angles->dostheta_grad[i][linecount - 1]);
+            rv = fscanf(fp_in, "%lf", &angles->theta_grad[i][linecount - 1]);
+            rv = fscanf(fp_in, "%lf", &angles->alpha_grad[i][linecount - 1]);
+            rv = fscanf(fp_in, "%lf", &angles->beta_grad[i][linecount - 1]);
+            rv = fscanf(fp_in, "%lf", &dbuf); //sabo int
+            rv = fscanf(fp_in, "%lf", &dbuf); //int
+            rv = fscanf(fp_in, "%lf", &dbuf); //error int
+            rv = fscanf(fp_in, "%lf", &widths->FWHM[i][linecount - 1]);
+            rv = fscanf(fp_in, "%lf", &widths->FWHM_err[i][linecount - 1]);
+            rv = fscanf(fp_in, "%lf", &dbuf); //eta
+            rv = fscanf(fp_in, "%lf", &dbuf); //error
+            rv = fscanf(fp_in, "%lf", &widths->breadth[i][linecount - 1]);
+            rv = fscanf(fp_in, "%lf", &widths->breadth_err[i][linecount - 1]);
+            rv = fscanf(fp_in, "%lf", &widths->FWHM_corr[i][linecount - 1]);
+            rv = fscanf(fp_in, "%lf", &widths->FWHM_corr_err[i][linecount - 1]);
+            rv = fscanf(fp_in, "%lf", &dbuf); //eta_corr
+            rv = fscanf(fp_in, "%lf", &dbuf); //error
+            rv = fscanf(fp_in, "%lf", &widths->breadth_corr[i][linecount - 1]);
+            rv = fscanf(fp_in, "%lf", &widths->breadth_corr_err[i][linecount - 1]);
             //printf("FWHM: %lf +- %lf\n", widths->FWHM[i][linecount -1], widths->FWHM_err[i][linecount - 1]);
             //printf("Breadth: %lf +- %lf\n", widths->breadth[i][linecount -1], widths->breadth_err[i][linecount - 1]);
             //printf("FWHM_corr: %lf +- %lf\n", widths->FWHM_corr[i][linecount -1], widths->FWHM_corr_err[i][linecount - 1]);
@@ -428,6 +435,8 @@ int read_pole_figures(file_data * fdata, angles_grad * angles, shape_params * wi
         }
         fclose(fp_in);
         printf("La figura de polos consta de %d puntos\n", linecount);
+        if(getval == NULL) printf("\nWARNING (fgets): There were problems while reading %s\n", name);
+        if(rv == 0 || rv == EOF) printf("\nWARNING (fscanf): there were problems reading data in %s (%d)\n", name, rv);
     }//end for routine for(i = fdata->start - 1; i < fdata->end - 1; i++)
     return linecount;
 }
@@ -500,9 +509,9 @@ void williamson_hall_plot(int nlines, aux_data * adata, crystal_data * cdata, do
             }//end for routine for(q = adata->q_min; q < adata->q_max; q += adata->q_step)
         }//end for routine for(delta = adata->delta_min; delta < adata->delta_max; delta += adata->delta_step)
         //printf("\nk = %d\n", k);
-        if(k >= 3)
-          gsl_sort_largest_index(best_R_indices, n, out_params[5], 1, results_size);//obtengo los indices de los 10 mayores R
-        
+        //if(k >= 3)
+        gsl_sort_largest_index(best_R_indices, n, out_params[5], 1, results_size);//obtengo los indices de los 10 mayores R
+
         print_stats2file(fp_fit, fit_data->x, fit_data->y, fit_data->y_err, k, out_params[4][best_R_indices[0]], out_params[3][best_R_indices[0]]);
         print_best_R_indices2file(fp_best, out_params, best_R_indices, n, nparams);
 
@@ -511,7 +520,7 @@ void williamson_hall_plot(int nlines, aux_data * adata, crystal_data * cdata, do
           tmp[l] = 0;
           for(j = 0; j < n; j++)
             tmp[l] += out_params[l][best_R_indices[j]];
-          
+
           tmp[l] /= n;
           out_values->best_R_values[l][i] = tmp[l];
         }
@@ -526,7 +535,7 @@ void print_best_R_indices(double ** out_params, size_t * best_R_indices, int R_s
 {
   int i, j;
   //print_int_vector(best_R_indices, n);
-  printf("\n"); 
+  printf("\n");
   printf("index    delta    Ch00    q    h    m    R    chisq\n");
   for(i = 0; i < R_size; i++)
   {
@@ -541,7 +550,7 @@ void print_best_R_indices(double ** out_params, size_t * best_R_indices, int R_s
 void print_best_R_indices2file(FILE * fp, double ** out_params, size_t * best_R_indices, int R_size, int params_size)
 {
   int i, j;
-  
+
   fprintf(fp, "index    delta    Ch00    q    h    m    R    chisq\n");
   for(i = 0; i < R_size; i++)
   {
@@ -566,7 +575,7 @@ void print_results(file_data * fdata, FILE * fp, double ** fit_results, linear_f
             wh_results[1][i] = fit_results[1][i]; //q
             wh_results[2][i] = fit_results[2][i]; //Ch00
             wh_results[3][i] = 0.9 / fit_results[3][i]; //D = 0.9 / h
-            wh_results[4][i] = c * pow(fit_results[4][i], 2); //M^2 \ro = m^2 / alpha
+            wh_results[4][i] = pow(c * fit_results[4][i], 2); //M^4 \ro = m^2 / alpha^2
             wh_results[5][i] = fit_results[5][i]; //R
             wh_results[6][i] = fit_results[6][i]; //chisq
             fprintf(fp, "%d %lf    %lf    ", i + 1, angles->alpha_grad[0][i], angles->beta_grad[0][i]);
