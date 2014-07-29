@@ -41,6 +41,9 @@ int main(int argc, char ** argv)
     puts("\nThe angular values of Omega and Gamma, from the parameter file");
     puts("\nIn order to work this executable must be placed in CMWP instalation folder along with the python folder");
     puts("\nPython 2.7 required");
+    puts("\nRun with:\n./idea_cmwp.exe\n./idea_cmwp.exe flag\n./idea_cmwp.exe flag th");
+    puts("\nflag = 1 if you want to run CMWP and flag = 0 if you only want to create fitting files");
+    puts("\nth is the minimum peak intensity to be fitted (should be between 0 and 10)");
     puts("\nError or suggestions to benatti@ifir-conicet.gov.ar");
     puts("\n****************************************************************************");
     //////////////////////////////////////////////////////////////////////////
@@ -158,19 +161,21 @@ int main(int argc, char ** argv)
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //si le paso el valor de treshold por linea de comandos que se olvide de lo que esta en archivos
     int flag = 1;
-    if(argc == 2)
-        flag = atoi(argv[1]);
-    else
-        if(argc == 3)
-        {
+    switch(argc)
+    {
+        case 1:
+            break;
+        case 2:
+            flag = atoi(argv[1]);
+            break;
+        case 3:
             flag = atoi(argv[1]);
             th = atof(argv[2]);
-        }
-        else
-        {
+            break;
+        default:
             printf("Numero incorrecto de argumentos\nUso correcto:\n");
             printf("./idea_cmwp.exe \n./idea_cmwp flag\n./idea_cmwp flag treshold\n");
-        }
+    }
 
     k = star_d;  // file index number : star_d to end_d
     do //Iteracion sobre todos los spr  
@@ -298,7 +303,7 @@ int main(int argc, char ** argv)
         printf("Go ahead and have a cup of tea, this is gonna take a while\n");
     sprintf(cmd, "python python/cmwp.py %d", flag);
     rv = system(cmd);
-    printf("\nEnd CMWP routine with code %d\n", rv);
+    printf("End CMWP routine with code %d\n", rv);
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     printf("Free allocated memory\n");
     free_double_matrix(seeds, 2);

@@ -10,7 +10,7 @@ class cmwp_out:
             fp_cmwp = open(outfile, "w")
             fp_cmwp.write("# Row 2theta theta alpha beta ")
             for field in cmwp_results.header:
-                fp_cmwp.write("%s ", field)
+                fp_cmwp.write("%s " % field)
             fp_cmwp.write("\n")
             fp_cmwp.flush()
 
@@ -35,7 +35,7 @@ class cmwp_out:
                         alpha = 180 - alpha
                         beta = 360 - beta
 
-                    fp_cmwp.write("%8d %8.4f %8.4f %8.4f %8.4f %8.5f "
+                    fp_cmwp.write("%8d %8.4f %8.4f %8.4f %8.4f "
                                   % (k + 1, 2 * rings.theta[m], rings.theta[m],
                                      alpha, beta))
                     for i in range(1, cmwp_results.solutions.shape[2]):
