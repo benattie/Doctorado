@@ -15,7 +15,7 @@ class cmwp_fit:
         self.header = ""
 
         for spr in range(rings.spr_i, rings.spr_f + 1, rings.delta_spr):
-            print("Processing spr %d" % spr)
+            # print("Processing spr %d" % spr)
             for pattern in range(rings.pattern_i + rings.delta_pattern, rings.pattern_f + 1, rings.delta_pattern):
                 # copio el archivo ini
                 origin = "%s%s%s.ini" % (files.path_base_file, files.base_file,
@@ -62,6 +62,6 @@ class cmwp_fit:
                     v = 0
                     self.header = lines[0].split("\t")
                     for x in lines[1].split("\t"):
-                        print(spr, pattern, x)
+                        # print(spr, pattern, x)
                         self.solutions[spr / rings.delta_spr - 1][pattern / rings.delta_pattern][v] = float(x)
                         v += 1

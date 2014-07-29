@@ -15,7 +15,7 @@ class cmwp_out:
             fp_cmwp.flush()
 
             k = 0  # contador del archivo mtex
-            spr = rings.spr_i  # indice que me marca el spr
+            spr = rings.spr_i - 1 # indice que me marca el spr
             # tranformacion angular (gamma, omega) -> (alpha, beta)
             for omega in range(rings.omega_i, rings.omega_f + 1,
                                rings.delta_omega):
@@ -38,6 +38,8 @@ class cmwp_out:
                     fp_cmwp.write("%8d %8.4f %8.4f %8.4f %8.4f "
                                   % (k + 1, 2 * rings.theta[m], rings.theta[m],
                                      alpha, beta))
+                    # print(cmwp_results.solutions.shape, spr, rings.delta_spr)
+                    # print(pattern, rings.delta_pattern)
                     for i in range(1, cmwp_results.solutions.shape[2]):
                         fp_cmwp.write("%8.5f " % (cmwp_results.solutions
                                                   [spr / rings.delta_spr]
