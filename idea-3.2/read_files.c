@@ -6,34 +6,38 @@
 
 void read_file(FILE * fit_fp, double ** seed, int seeds_size, double ** bg, int bg_size)
 {
+    char *getval = malloc(sizeof(char) * (250 + 1));
+    int rv = 0;
     char buf[250];
     int i = 0;
-    fgets(buf, 250, fit_fp);//"global H"
-    fscanf(fit_fp,"%lf", &seed[0][i]);//valor de H
-    fgets(buf, 250, fit_fp);
+    getval = fgets(buf, 250, fit_fp);//"global H"
+    rv = fscanf(fit_fp,"%lf", &seed[0][i]);//valor de H
+    getval = fgets(buf, 250, fit_fp);
     seed[1][i] = seed[0][i];
     i++;
     
-    fgets(buf, 250, fit_fp);//"golbal eta"
-    fscanf(fit_fp, "%lf", &seed[0][i]);//valor de eta
+    getval = fgets(buf, 250, fit_fp);//"golbal eta"
+    rv = fscanf(fit_fp, "%lf", &seed[0][i]);//valor de eta
     seed[1][i] = seed[0][i];
-    fgets(buf, 250, fit_fp);
+    getval = fgets(buf, 250, fit_fp);
     i++;
-    fgets(buf, 250, fit_fp);//encabezado
+    getval = fgets(buf, 250, fit_fp);//encabezado
     //leo el resto de los valores a afinar
     while(i < seeds_size)
     {
-        fscanf(fit_fp, "%lf", &seed[0][i]);
+        rv = fscanf(fit_fp, "%lf", &seed[0][i]);
         seed[1][i] = seed[0][i];
         i++;
     }
-    fgets(buf, 250, fit_fp);//encabezado
-    fgets(buf, 250, fit_fp);//encabezado
+    getval = fgets(buf, 250, fit_fp);//encabezado
+    getval = fgets(buf, 250, fit_fp);//encabezado
     for(i = 0; i < bg_size; i++)
     {
-        fscanf(fit_fp, "%lf", &bg[0][i]);
-        fscanf(fit_fp, "%lf", &bg[1][i]);
+        rv = fscanf(fit_fp, "%lf", &bg[0][i]);
+        rv = fscanf(fit_fp, "%lf", &bg[1][i]);
     }
+    if(getval == NULL) printf("\nWARNING (fgets): There were problems while reading fit_ini.dat\n");
+    if(rv == 0 || rv == EOF) printf("\nWARNING (fscanf): there were problems reading param data in fit_ini.dat (%d)\n", rv);
 }
 
 double search_nu(char * buf, char * search)
@@ -46,26 +50,30 @@ double search_nu(char * buf, char * search)
 
 IRF read_IRF(FILE * fp)
 { 
+    char *getval = malloc(sizeof(char) * (250 + 1));
+    int rv = 0;
     char buf[100];
     IRF ins;
 
-    fgets(buf, 4, fp);
-    fscanf(fp, "%lf", &ins.UG);
-    fgets(buf, 100, fp);
-    fgets(buf, 4, fp);
-    fscanf(fp, "%lf", &ins.VG);
-    fgets(buf, 100, fp);
-    fgets(buf, 4, fp);
-    fscanf(fp, "%lf", &ins.WG);
-    fgets(buf, 100, fp);
-    fgets(buf, 4, fp);
-    fscanf(fp, "%lf", &ins.UL);
-    fgets(buf, 100, fp);
-    fgets(buf, 4, fp);
-    fscanf(fp, "%lf", &ins.VL);
-    fgets(buf, 100, fp);
-    fgets(buf, 4, fp);
-    fscanf(fp, "%lf", &ins.WL);
+    getval = fgets(buf, 4, fp);
+    rv = fscanf(fp, "%lf", &ins.UG);
+    getval = fgets(buf, 100, fp);
+    getval = fgets(buf, 4, fp);
+    rv = fscanf(fp, "%lf", &ins.VG);
+    getval = fgets(buf, 100, fp);
+    getval = fgets(buf, 4, fp);
+    rv = fscanf(fp, "%lf", &ins.WG);
+    getval = fgets(buf, 100, fp);
+    getval = fgets(buf, 4, fp);
+    rv = fscanf(fp, "%lf", &ins.UL);
+    getval = fgets(buf, 100, fp);
+    getval = fgets(buf, 4, fp);
+    rv = fscanf(fp, "%lf", &ins.VL);
+    getval = fgets(buf, 100, fp);
+    getval = fgets(buf, 4, fp);
+    rv = fscanf(fp, "%lf", &ins.WL);
+    if(getval == NULL) printf("\nWARNING (fgets): There were problems while reading IRF.dat\n");
+    if(rv == 0 || rv == EOF) printf("\nWARNING (fscanf): there were problems reading param data in IRF.dat (%d)\n", rv);
 
     return ins;
 }

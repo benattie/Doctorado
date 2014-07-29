@@ -305,7 +305,7 @@ void read_input(FILE *fp, file_data *fdata, crystal_data *cdata, aux_data *adata
 {
     char buf[500];
     int i = 0, j = 0, v[3];
-    char *getval = malloc(sizeof(char) * (250 + 1));
+    char *getval = malloc(sizeof(char) * (500 + 1));
     int rv = 0;
     //printf("Lectura del primer bloque de datos\n");
     rv = fscanf(fp, "%s %s", buf, fdata -> outPath);
@@ -381,7 +381,7 @@ void read_input(FILE *fp, file_data *fdata, crystal_data *cdata, aux_data *adata
         i++;
     }
     if(getval == NULL) printf("\nWARNING (fgets): There were problems while reading para_WH.dat\n");
-    if(rv == 0 || rv == EOF) printf("\nWARNING (fscanf): there were problems reading peal data in para_WH.dat (%d)\n", rv);
+    if(rv == 0 || rv == EOF) printf("\nWARNING (fscanf): there were problems reading data in para_WH.dat (%d)\n", rv);
 }
 
 int read_pole_figures(file_data * fdata, angles_grad * angles, shape_params * widths)

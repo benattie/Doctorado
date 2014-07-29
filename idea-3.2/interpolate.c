@@ -15,6 +15,8 @@ double distance(double dx, double dy, double dz);
 
 void interpolate(FILE * fp1, FILE *fp2, double act_cntare, int step_al1, int step_be1, int points)
 {
+  char *getval = malloc(sizeof(char) * (1024 + 1));
+  int rv = 0;
   char   buf[1024];
   int    i, j, n, k, count, z, step_al, step_be;
   double schwellenwert, wandel, hpi, bt, al, spatprodukt, weightf;
@@ -29,9 +31,9 @@ void interpolate(FILE * fp1, FILE *fp2, double act_cntare, int step_al1, int ste
   
   //FILE *fp = fopen("xyx.dat", "w");
 
-  fgets(buf, 1024, fp1);//skip line
-  fgets(buf, 1024, fp1);//skip line
-  fgets(buf, 1024, fp1);//skip line
+  getval = fgets(buf, 1024, fp1);//skip line
+  getval = fgets(buf, 1024, fp1);//skip line
+  getval = fgets(buf, 1024, fp1);//skip line
   
   wandel = M_PI / 180;//radian
   hpi = M_PI / 2;
@@ -59,9 +61,6 @@ void interpolate(FILE * fp1, FILE *fp2, double act_cntare, int step_al1, int ste
                                   sin(alr) * sin(alr + step_alr) * sin(btr) * sin(btr + step_ber) + 
                                   cos(alr) * cos(alr + step_alr));
           //semi-distancia maxima entre dos puntos de la grilla
-          //grid_width[i][j] = 0.5 * distance(sin(alr + step_alr) * cos(btr + step_ber) - sin(alr) * cos(btr), 
-          //                            sin(alr + step_alr) * sin(btr + step_ber) - sin(alr) * sin(btr),
-          //                            cos(alr + step_alr) - cos(alr));
           ibm_gewichte[i][j] = 0;
           ibm_rint[i][j] = 0;
           ibm_fint[0][i][j] = 0;
@@ -85,7 +84,7 @@ void interpolate(FILE * fp1, FILE *fp2, double act_cntare, int step_al1, int ste
   z = 1;
   while(z <= points)//itero sobre todos los puntos del archivo mtex
   {
-      fscanf(fp1, "%d%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf", 
+      rv = fscanf(fp1, "%d%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf", 
                                         &count, &z_theta, &omega, &chi, &phi, &raw_int, &fintens[0], &fintens[1],
                                         &shapes[0], &shapes[1], &shapes[2], &shapes[3], &shapes[4], &shapes[5], &shapes[0],
                                         &corr_shapes[1], &corr_shapes[2], &corr_shapes[3], &corr_shapes[4], &corr_shapes[5]);
@@ -111,29 +110,6 @@ void interpolate(FILE * fp1, FILE *fp2, double act_cntare, int step_al1, int ste
          for(j = 1; j <= step_al; j++)
          {
             spatprodukt = fabs(xein_3d * ibmpos[i][j][0] + yein_3d * ibmpos[i][j][1] + zein_3d * ibmpos[i][j][2]);
-            //spatprodukt = distance(xein_3d - ibmpos[i][j][0], yein_3d - ibmpos[i][j][1], zein_3d - ibmpos[i][j][2]);
-            /*
-            if (spatprodukt >= grid_width[i][j])
-            {
-              //weightf = cos(((1 - spatprodukt) / (act_cntare / 100)) * hpi);
-              weightf = 1.0;
-              ibm_rint[i][j] += weightf * raw_int;
-              ibm_fint[0][i][j] += weightf * fintens[0];
-              ibm_fint[1][i][j] += weightf * fintens[1];
-              ibm_gewichte[i][j] += weightf;
-              //sumo sin peso las cosas que hay que sumar sin peso
-              for(n = 0; n < 6; n++)
-              {
-                if(shapes[n] > 0.0)
-                {
-                  ibm_shapes[n][i][j] += shapes[n];
-                  ibm_corr_shapes[n][i][j] += corr_shapes[n];
-                  ibm_n[n][i][j]++;
-                }
-              }
-            }
-            */
-            
             if (spatprodukt >= schwellenwert)
             {
               weightf = cos(((1 - spatprodukt) / (act_cntare / 100)) * hpi);
@@ -154,7 +130,6 @@ void interpolate(FILE * fp1, FILE *fp2, double act_cntare, int step_al1, int ste
                 }
               }
             }
-
           }
       }
       z++;
@@ -237,6 +212,8 @@ void interpolate(FILE * fp1, FILE *fp2, double act_cntare, int step_al1, int ste
   free_double_matrix(grid_width, 370);
   free_double_matrix(ibm_rint, 370);
   free_double_matrix(ibm_gewichte, 370);
+  if(getval == NULL) printf("\nWARNING (fgets): There were problems while reading irregular grid data files\n");
+  if(rv == 0 || rv == EOF) printf("\nWARNING (fscanf): there were problems reading param data in irregular grid data files (%d)\n", rv);
   //printf("Fin interpolate\n");
 }//end interpolate
 

@@ -17,6 +17,8 @@ struct DAT {float old; float nnew;};
 
 int main(int argc, char ** argv)
 {
+ char *getval = malloc(sizeof(char) * (1024 + 1));
+ int rv = 0;
  int Z, a, b, i, j, k, m, n, x, y, z, count, anf_gam, ende_gam, del_gam, anf_ome, ende_ome, del_ome;
  int BG_l, BG_r;
  int NrSample, star_d, end_d, del_d, numrings;
@@ -36,7 +38,7 @@ int main(int argc, char ** argv)
  double ***breadth = r3_tensor_double_alloc(40, 500, 10), ***breadth_ins = r3_tensor_double_alloc(40, 500, 10);
  double ***breadth_err = r3_tensor_double_alloc(40, 500, 10);
  double ** seeds, ** bg_seed;
- char buf_temp[100], buf[100], buf1[100];
+ char buf_temp[1024], buf[1024], buf1[1024];
  char path_out[150], path [150], filename1[100], inform[10], path1[150], inform1[10];
  char alldatafile[200];
  char marfile[150];
@@ -62,80 +64,80 @@ int main(int argc, char ** argv)
      fprintf(stderr, "Error opening file para_fit2d.txt\n"); exit(1);
  }
  //path hacia los archivos de salida
- fgets(buf_temp, 22, fp);
- fscanf(fp, "%s", path_out);   fgets(buf_temp, 2, fp);
+ getval = fgets(buf_temp, 22, fp);
+ rv = fscanf(fp, "%s", path_out);   getval = fgets(buf_temp, 2, fp);
  //numero de muestras a trabajar (1)
- fgets(buf_temp, 22, fp);
- fscanf(fp, "%d", &NrSample);   fgets(buf_temp, 2, fp);
+ getval = fgets(buf_temp, 22, fp);
+ rv = fscanf(fp, "%d", &NrSample);   getval = fgets(buf_temp, 2, fp);
 
  for(Z = 1; Z <= NrSample; Z++) // FOR-routine: whole routines
  {
     //skip lines
-    fgets(buf_temp, 2, fp);
-    fgets(buf_temp, 60, fp);
-    fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 60, fp);
+    getval = fgets(buf_temp, 2, fp);
     //path hacia los spr (encabezado + 360 filas x 1725 columnas) (son 37) 
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%s", path);   fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp);
+    rv = fscanf(fp, "%s", path);   getval = fgets(buf_temp, 2, fp);
     //lee raiz de los archivos spr (New_Al70R-tex_)
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%s", filename1); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp);
+    rv = fscanf(fp, "%s", filename1); getval = fgets(buf_temp, 2, fp);
     //lee la extension de los archivos (spr)
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%s", inform); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp);
+    rv = fscanf(fp, "%s", inform); getval = fgets(buf_temp, 2, fp);
     //pasa los contenidos de path e inform hacia path1 e inform1 (why?)
     strcpy(path1, path); strcpy(inform1, inform);
     //numero asociado al primer spr (relacionado con omega)
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%d", &star_d); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp);
+    rv = fscanf(fp, "%d", &star_d); getval = fgets(buf_temp, 2, fp);
     //angulo (\Omega) inicial 
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%d", &anf_ome); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp);
+    rv = fscanf(fp, "%d", &anf_ome); getval = fgets(buf_temp, 2, fp);
     //numero asociado al ultimo spr
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%d", &end_d); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp);
+    rv = fscanf(fp, "%d", &end_d); getval = fgets(buf_temp, 2, fp);
     //angulo (\Omega) final
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%d", &ende_ome); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp);
+    rv = fscanf(fp, "%d", &ende_ome); getval = fgets(buf_temp, 2, fp);
     //delta en los spr
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%d", &del_d); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp);
+    rv = fscanf(fp, "%d", &del_d); getval = fgets(buf_temp, 2, fp);
     //delta en el angulo \omega
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%d", &del_ome); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp);
+    rv = fscanf(fp, "%d", &del_ome); getval = fgets(buf_temp, 2, fp);
     //gamma inicial
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%d", &anf_gam); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp);
+    rv = fscanf(fp, "%d", &anf_gam); getval = fgets(buf_temp, 2, fp);
     //gamma final
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%d", &ende_gam); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp);
+    rv = fscanf(fp, "%d", &ende_gam); getval = fgets(buf_temp, 2, fp);
     //delta gamma
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%d", &del_gam); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp);
+    rv = fscanf(fp, "%d", &del_gam); getval = fgets(buf_temp, 2, fp);
     //Distancia de la muestra al detector
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%lf", &dist); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp);
+    rv = fscanf(fp, "%lf", &dist); getval = fgets(buf_temp, 2, fp);
     //Distancia que cubre un pixel en el difractograma
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%lf", &pixel); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp);
+    rv = fscanf(fp, "%lf", &pixel); getval = fgets(buf_temp, 2, fp);
     //umbral que determinal cual es la intensidad minima para que ajusto un pico
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%f", &th); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp);
+    rv = fscanf(fp, "%f", &th); getval = fgets(buf_temp, 2, fp);
     //flag que determina si las cuentas negativas se pasan a 0
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%s", minus_zero); fgets(buf_temp, 2, fp); 
+    getval = fgets(buf_temp, 22, fp);
+    rv = fscanf(fp, "%s", minus_zero); getval = fgets(buf_temp, 2, fp); 
     //flag que determina si se genera el archivo .log?
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%s", logfile_yn_temp); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp);
+    rv = fscanf(fp, "%s", logfile_yn_temp); getval = fgets(buf_temp, 2, fp);
     //skip lines
-    fgets(buf_temp, 20, fp);
-    fgets(buf_temp, 20, fp);
+    getval = fgets(buf_temp, 20, fp);
+    getval = fgets(buf_temp, 20, fp);
     //numero de picos a analizar 
-    fgets(buf_temp, 22, fp);
-    fscanf(fp, "%d", &numrings); fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp);
+    rv = fscanf(fp, "%d", &numrings); getval = fgets(buf_temp, 2, fp);
     //skip lines
-    fgets(buf_temp, 50, fp);
-    fgets(buf_temp, 50, fp);
+    getval = fgets(buf_temp, 50, fp);
+    getval = fgets(buf_temp, 50, fp);
     //le aviso al usuario el valor del flag que activa o desactiva la creacion del .log
     printf("\nCorrection log file = %s", logfile_yn_temp);
     //le aviso al usuario el valor del flag que activa o desactiva la correccion de cuentas negativas
@@ -143,36 +145,45 @@ int main(int argc, char ** argv)
 
     for(i = 0; i < numrings; i++) //itera sobre cada pico (0 a 7) -> (1 a 8)
     {
-        fscanf(fp, "%f", &theta[i]); //posicion angular del centro del pico (\theta)
-        fscanf(fp, "%d", &posring_l[i]); //bin a la izquierda del pico
-        fscanf(fp, "%d", &posring_r[i]); //bin a la derecha del pico
-        fscanf(fp, "%d", &ug_l[i]); //bin de bg a la izquierda del pico
-        fscanf(fp, "%d", &ug_r[i]); //bin de bg a la derecha del pico
+        rv = fscanf(fp, "%f", &theta[i]); //posicion angular del centro del pico (\theta)
+        rv = fscanf(fp, "%d", &posring_l[i]); //bin a la izquierda del pico
+        rv = fscanf(fp, "%d", &posring_r[i]); //bin a la derecha del pico
+        rv = fscanf(fp, "%d", &ug_l[i]); //bin de bg a la izquierda del pico
+        rv = fscanf(fp, "%d", &ug_r[i]); //bin de bg a la derecha del pico
 
     }// End of reading the parameter file for(i=0;i<numrings;i++)
-    fgets(buf_temp, 2, fp); //skip line
+    if(getval == NULL) printf("\nWARNING (fgets): There were problems while reading para_fit2d.dat\n");
+    if(rv == 0 || rv == EOF) printf("\nWARNING (fscanf): there were problems reading param data in para_fit2d.dat (%d)\n", rv);
+
+    getval = fgets(buf_temp, 2, fp); //skip line
     //Reading of intrumental width files
     if((fp_IRF = fopen("IRF.dat", "r")) == NULL )
     {
-        fprintf(stderr, "Error opening file IRF.dat\n"); exit(1);
+        fprintf(stderr, "Error opening file IRF.dat\n");
+        exit(1);
     }
     ins = read_IRF(fp_IRF);
     fclose(fp_IRF);
+    if(getval == NULL) printf("\nWARNING (fgets): There were problems while reading IRF.dat\n");
+
     //Reading of initial parameters
     if((fp_fit = fopen("fit_ini.dat", "r")) == NULL )
     {
-        fprintf(stderr, "Error opening file fit_ini.dat\n"); exit(1);
+        fprintf(stderr, "Error opening file fit_ini.dat\n");
+        exit(1);
     }
-    fgets(buf, 250, fp_fit);//leo el titulo
-    fgets(buf, 250, fp_fit);//leo el encabezado
-    fscanf(fp_fit, "%d", &n_peaks);
-    fscanf(fp_fit, "%d", &bg_size);
+    getval = fgets(buf, 250, fp_fit);//leo el titulo
+    getval = fgets(buf, 250, fp_fit);//leo el encabezado
+    rv = fscanf(fp_fit, "%d", &n_peaks);
+    rv = fscanf(fp_fit, "%d", &bg_size);
     seeds_size = 4 * numrings + 2;
     seeds = matrix_double_alloc(2, seeds_size);
     bg_seed = matrix_double_alloc(2, bg_size);
-    fgets(buf, 250, fp_fit);//skip line
+    getval = fgets(buf, 250, fp_fit);//skip line
     read_file(fp_fit, seeds, seeds_size, bg_seed, bg_size);
     //print_seeds(seeds[0], seeds_size, bg_seed, bg_size);
+    if(getval == NULL) printf("\nWARNING (fgets): There were problems while reading fit_ini.dat\n");
+
     //imprime en pantalla los datos relevantes de cada pico 
     for(i = 0; i < numrings; i++)
         printf("Position of [%d]ring = Theta:%6.3f  %8d%8d%8d%8d\n", i + 1, theta[i], posring_l[i], posring_r[i], ug_l[i], ug_r[i]);
@@ -205,11 +216,14 @@ int main(int argc, char ** argv)
         //abro el archivo spr del que voy a sacar las intensdades de los picos
         if((fp1 = fopen(marfile, "r")) == NULL)
         {
-            fprintf(stderr, "Error opening READ_file: %s \n", marfile); exit(1);
+            fprintf(stderr, "Error opening READ_file: %s \n", marfile);
+            exit(1);
         }
-        fscanf(fp1, "%d", &pixel_number); //pixel number = los bin de los difractogramas
-        fscanf(fp1, "%d", &gamma); //gamma = cantidad de difractogramas (360 en este caso)
-        fgets(buf, 100, fp1); //skip line
+        rv = fscanf(fp1, "%d", &pixel_number); //pixel number = los bin de los difractogramas
+        rv = fscanf(fp1, "%d", &gamma); //gamma = cantidad de difractogramas (360 en este caso)
+        getval = fgets(buf, 100, fp1); //skip line
+        if(getval == NULL) printf("\nWARNING (fgets): There were problems while reading pixel number in %s\n", marfile);
+        if(rv == 0 || rv == EOF) printf("\nWARNING (fscanf): there were problems reading pixel number in %s (%d)\n", marfile, rv);
 
         //printf("pixel=%d gamma=%d\n", pixel_number, gamma);
         memset(intens_av, 0, 1800 * sizeof(float));
@@ -236,9 +250,10 @@ int main(int argc, char ** argv)
             for(x = 1; x <= pixel_number; x++) //iteracion dentro de cada uno de los difractogramas (con 1725 puntos) (cada porcion del anillo de Debye)
             {
                 //leo la intensidad de cada bin y la paso a formato de entero
-                fscanf(fp1, "%e", &data1[x]);
+                rv = fscanf(fp1, "%e", &data1[x]);
                 intens_av[x] += data1[x];
                 data[x] = (int)data1[x];
+                if(rv == 0 || rv == EOF) printf("\nWARNING (fscanf): there were problems reading data in column %d, line %d in %s (%d)\n", x, y, marfile, rv);
             }
             n = 0; //numero de pico del difractograma
             do //itero sobre todos los picos del difractograma
@@ -313,7 +328,8 @@ int main(int argc, char ** argv)
 
         if((fp_all = fopen(alldatafile, "w")) == NULL)
         {
-            fprintf(stderr, "Error beim oeffnen der Datei(%s).\n", alldatafile); exit(1);
+            fprintf(stderr, "Error beim oeffnen der Datei(%s).\n", alldatafile);
+            exit(1);
         }
         printf("Printing irregular grid file %s\n", alldatafile);
         ////////////////////////////////////////////////////////////////////////////////////////////

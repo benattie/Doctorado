@@ -49,7 +49,7 @@ float winkel_be(float thb, float omb, float gab, float alb)
 
     COSBE = SINALCOSBE / sin(albr);
 
-    SINALSINBE = (sin(ombr) * sin(chibr)) * (-1 * sin(thr))
+    SINALSINBE = (sin(ombr) * sin(chibr)) * (-1 * sin(thbr))
                + (-1 * cos(ombr) * sin(chibr)) * (cos(thbr) * cos(gabr))
                + cos(chibr) * (cos(thbr) * sin(gabr));
     //SINALSINBE = cos(thbr) * sin(gabr);
