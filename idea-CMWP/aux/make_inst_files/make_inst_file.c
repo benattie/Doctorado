@@ -22,10 +22,12 @@ int main(int argc, char ** argv)
   double eta = atof(argv[3]);
   double H = atof(argv[4]);
   //parametros del programa
-  int N = 250;
+  int N = 100;
   double radian = M_PI / 180.;
-  double range = 5 * H, step = range / N, K0 = 2 * sin(theta0 * radian) / lambda, K, I_max, theta;
+  double range = 2 * H, step = range / N, K0 = 2 * sin(theta0 * radian) / lambda;
+  double K, I_max, theta;
   I_max = pseudo_voigt_n(0., 0., eta, H);
+  printf("Generando archivo instrumental en theta = %s\n", argv[2]);
   fprintf(fp, "#Lineas informativas\n#Eliminar los comentarios para usar el CMWP!!!\n");
   fprintf(fp, "#\\Delta K I/I0\n");
   for(theta = theta0 - range; theta < theta0 + range; theta += step)
@@ -34,11 +36,6 @@ int main(int argc, char ** argv)
     fprintf(fp, "%.5lf %.5lf\n", K - K0, pseudo_voigt_n(theta, theta0, eta, H) / I_max);
   }
   fclose(fp);
-  printf("done!");
+  printf("done!\n");
   return 0;
 }
-
-
-    
-
-
