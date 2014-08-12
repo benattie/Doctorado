@@ -7,7 +7,7 @@ CFLAGS = -Wall -O3 -I/usr/include
 LIBS = -L/usr/lib -lgsl -lgslcblas -lm
 CC = gcc
 
-spr2txt: spr2txt.c
+idea_cmwp: idea_cmwp.c
 	$(CC) $(CFLAGS) -c $(FILE1).c -o $(FILE1).o
 	$(CC) $(CFLAGS) -c $(FILE2).c -o $(FILE2).o
 	$(CC) $(CFLAGS) -c $(FILE3).c -o $(FILE3).o

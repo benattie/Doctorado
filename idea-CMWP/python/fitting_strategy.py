@@ -1,39 +1,53 @@
+# -*- coding: utf-8 -*
 import subprocess
 import re
 
 
 def update_params(files, rings, spr, pattern, flag, find):
-    if(spr == rings.spr_i and pattern == rings.pattern_i):
-        # copio el archivo ini
-        origin = "%s%s%s.ini" % (files.path_base_file, files.base_file, files.ext)
-        destination = "%s%sspr_%d_pattern_%d%s.ini" % (files.pathout, files.input_file,
-                                                       spr, pattern, files.ext)
-        subprocess.call(["cp", origin, destination])
-        # copio el archivo .q.ini
-        origin = "%s%s%s.q.ini" % (files.path_base_file, files.base_file, files.ext)
-        destination = "%s%sspr_%d_pattern_%d%s.q.ini" % (files.pathout, files.input_file,
-                                                         spr, pattern, files.ext)
-        subprocess.call(["cp", origin, destination])
-        # copio el archivo .fit.ini
-        origin = "%s%s%s.fit.ini" % (files.path_base_file, files.base_file, files.ext)
-        destination = "%s%sspr_%d_pattern_%d%s.fit.ini" % (files.pathout, files.input_file,
+    if(flag == 1):
+        if(spr == rings.spr_i and pattern == rings.pattern_i + rings.delta_pattern):
+            # copio el archivo ini
+            origin = "%s%s%s.ini" % (files.path_base_file, files.base_file, files.ext)
+            destination = "%s%sspr_%d_pattern_%d%s.ini" % (files.pathout, files.input_file,
                                                            spr, pattern, files.ext)
-        subprocess.call(["cp", origin, destination])
-
-        if(flag == 1):
-            # correr el cmwp
-            cmd = './evaluate %s%sspr_%d_pattern_%d%s auto' % (files.pathout, files.input_file,
+            subprocess.call(["cp", origin, destination])
+            # copio el archivo .q.ini
+            origin = "%s%s%s.q.ini" % (files.path_base_file, files.base_file, files.ext)
+            destination = "%s%sspr_%d_pattern_%d%s.q.ini" % (files.pathout, files.input_file,
+                                                             spr, pattern, files.ext)
+            subprocess.call(["cp", origin, destination])
+            # copio el archivo .fit.ini
+            origin = "%s%s%s.fit.ini" % (files.path_base_file, files.base_file, files.ext)
+            destination = "%s%sspr_%d_pattern_%d%s.fit.ini" % (files.pathout, files.input_file,
                                                                spr, pattern, files.ext)
-            subprocess.call(cmd, shell=True)
+            subprocess.call(["cp", origin, destination])
+            # correr el cmwp
+            # cmd = './evaluate %s%sspr_%d_pattern_%d%s auto' % (files.pathout, files.input_file,
+            #                                                   spr, pattern, files.ext)
             # leo el physsol.csv y lo guardo en memoria
-            name_solutions = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file,
-                                                                    spr, pattern)
+            # physsol_file = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file,
+            #                                                      spr, pattern)
+            # subprocess.call(cmd, shell=True)
+            # copio el physsol del archivo base
+            origin = "%s%s.physsol.csv" % (files.path_base_file, files.base_file)
+            destination = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file,
+                                                                 spr, pattern)
+            subprocess.call(["cp", origin, destination])
+            # copio el sol del archivo base
+            origin = "%s%s.sol" % (files.path_base_file, files.base_file)
+            destination = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file,
+                                                         spr, pattern)
+            subprocess.call(["cp", origin, destination])
+            physsol_file = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file,
+                                                                  spr, pattern)
+        else:
+            step_1(files, rings, spr, pattern, flag, find)
+            step_2(files, rings, spr, pattern, flag, find)
+            step_3(files, rings, spr, pattern, flag, find)
+            physsol_file = step_4(files, rings, spr, pattern, flag)
     else:
-        step_1(files, rings, spr, pattern, flag, find)
-        step_2(files, rings, spr, pattern, flag, find)
-        step_3(files, rings, spr, pattern, flag, find)
-        name_solutions = step_4(files, rings, spr, pattern, flag)
-    return name_solutions
+        physsol_file = ""
+    return physsol_file
 
 
 def step_1(files, rings, spr, pattern, flag, find):
@@ -41,7 +55,8 @@ def step_1(files, rings, spr, pattern, flag, find):
     origin = "%s%s%s.ini" % (files.path_base_file, files.base_file, files.ext)
     destination = "%s%sspr_%d_pattern_%d%s.ini" % (files.pathout, files.input_file,
                                                    spr, pattern, files.ext)
-    # copio el archivo .q.ini
+    subprocess.call(["cp", origin, destination])
+    # genero el archivo .q.ini
     origin = "%s%s%s.q.ini" % (files.path_base_file, files.base_file, files.ext)
     fp = open(origin, "r")
     lines = fp.readlines()
@@ -55,11 +70,11 @@ def step_1(files, rings, spr, pattern, flag, find):
     fp.close()
     # defino cual es el archivo anterior
     if(pattern == rings.pattern_i):
-        spr_prev = spr - 1
+        spr_prev = spr - rings.delta_spr
         pattern_prev = rings.pattern_i
     else:
         spr_prev = spr
-        pattern_prev = pattern - 1
+        pattern_prev = pattern - rings.delta_pattern
     # leo los resultados del archivo anterior
     sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file,
                                               spr_prev, pattern_prev)
@@ -79,10 +94,8 @@ def step_1(files, rings, spr, pattern, flag, find):
                                                    spr, pattern, files.ext)
     fp = open(fit_ini, "w")
     string = "a_fixed=y\nb_fixed=y\nc_fixed=y\nd_fixed=y\ne_fixed=y\nepsilon_fixed=y\n"
-    string.append("init_a=%f\ninit_b=%f\ninit_c=%f\ninit_d=%f\ninit_e=%f\ninit_epsilon=1.00\n"
-                  % (a, b, c, d, e))
-    string.append("a_scale=1.0 \nb_scale=1.0\nc_scale=1.0\nd_scale=1.0\ne_scale=1.0")
-
+    string += "init_a=%f\ninit_b=%f\ninit_c=%f\ninit_d=%f\ninit_e=%f\ninit_epsilon=1.00\n" % (a, b, c, d, e)
+    string += "a_scale=1.0 \nb_scale=1.0\nc_scale=1.0\nd_scale=1.0\ne_scale=1.0"
     fp.write(string)
     fp.close()
     if(flag == 1):
@@ -119,10 +132,8 @@ def step_2(files, rings, spr, pattern, flag, find):
                                                    spr, pattern, files.ext)
     fp = open(fit_ini, "w")
     string = "a_fixed=n\nb_fixed=n\nc_fixed=y\nd_fixed=n\ne_fixed=y\nepsilon_fixed=y\n"
-    string.append("init_a=%f\ninit_b=%f\ninit_c=%f\ninit_d=%f\ninit_e=%f\ninit_epsilon=1.00\n"
-                  % (a, b, c, d, e))
-    string.append("a_scale=1.0 \nb_scale=1.0\nc_scale=1.0\nd_scale=1.0\ne_scale=1.0")
-
+    string += "init_a=%f\ninit_b=%f\ninit_c=%f\ninit_d=%f\ninit_e=%f\ninit_epsilon=1.00\n" % (a, b, c, d, e)
+    string += "a_scale=1.0 \nb_scale=1.0\nc_scale=1.0\nd_scale=1.0\ne_scale=1.0"
     fp.write(string)
     fp.close()
     if(flag == 1):
@@ -150,9 +161,8 @@ def step_3(files, rings, spr, pattern, flag, find):
                                                    spr, pattern, files.ext)
     fp = open(fit_ini, "w")
     string = "a_fixed=y\nb_fixed=y\nc_fixed=n\nd_fixed=y\ne_fixed=n\nepsilon_fixed=y\n"
-    string.append("init_a=%f\ninit_b=%f\ninit_c=%f\ninit_d=%f\ninit_e=%f\ninit_epsilon=1.00\n"
-                  % (a, b, c, d, e))
-    string.append("a_scale=1.0 \nb_scale=1.0\nc_scale=1.0\nd_scale=1.0\ne_scale=1.0")
+    string += "init_a=%f\ninit_b=%f\ninit_c=%f\ninit_d=%f\ninit_e=%f\ninit_epsilon=1.00\n" % (a, b, c, d, e)
+    string += "a_scale=1.0 \nb_scale=1.0\nc_scale=1.0\nd_scale=1.0\ne_scale=1.0"
     fp.write(string)
     fp.close()
     if(flag == 1):
@@ -180,9 +190,8 @@ def step_4(files, rings, spr, pattern, flag, find):
                                                    spr, pattern, files.ext)
     fp = open(fit_ini, "w")
     string = "a_fixed=y\nb_fixed=n\nc_fixed=y\nd_fixed=n\ne_fixed=y\nepsilon_fixed=y\n"
-    string.append("init_a=%f\ninit_b=%f\ninit_c=%f\ninit_d=%f\ninit_e=%f\ninit_epsilon=1.00\n"
-                  % (a, b, c, d, e))
-    string.append("a_scale=1.0 \nb_scale=1.0\nc_scale=1.0\nd_scale=1.0\ne_scale=1.0")
+    string += "init_a=%f\ninit_b=%f\ninit_c=%f\ninit_d=%f\ninit_e=%f\ninit_epsilon=1.00\n" % (a, b, c, d, e)
+    string += "a_scale=1.0 \nb_scale=1.0\nc_scale=1.0\nd_scale=1.0\ne_scale=1.0"
     fp.write(string)
     fp.close()
     if(flag == 1):
@@ -191,6 +200,6 @@ def step_4(files, rings, spr, pattern, flag, find):
                                                            spr, pattern, files.ext)
         subprocess.call(cmd, shell=True)
         # leo el physsol.csv y lo guardo en memoria
-        name_solutions = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file,
-                                                                spr, pattern)
-        return name_solutions
+        physsol_file = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file,
+                                                              spr, pattern)
+        return physsol_file

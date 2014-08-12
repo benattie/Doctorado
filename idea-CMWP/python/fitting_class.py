@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*
 import numpy
 import re
 from fitting_strategy import update_params
@@ -25,30 +26,35 @@ class cmwp_fit:
         self.sol = numpy.zeros((n_spr, n_pattern, 5))
         self.physsol = numpy.zeros(shape)
         self.header = ""
+        ptrn_i = rings.pattern_i + rings.delta_pattern
+        ptrn_f = rings.pattern_f + rings.delta_pattern
 
         for spr in range(rings.spr_i, rings.spr_f + 1, rings.delta_spr):
             # print("Processing spr %d" % spr)
-            for pattern in range(rings.pattern_i + rings.delta_pattern, rings.pattern_f + 1, rings.delta_pattern):
-                # soluciones fisicas del problema
-                name_solutions = update_params(files, rings, spr, pattern, flag, find)
-                fp_solutions = open(name_solutions, "r")
-                lines = fp_solutions.readlines()
-                # soluciones matematicas del ajuste
-                sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file,
-                                                          spr, pattern)
-                ln = 0
-                fp = open(sol_file, "r")
-                lines = fp.readlines()
-                while(not(lines[ln].startswith("*** THE SOLUTIONS"))):
-                    ln += 1
-                fp.close()
-                for i in range(0, 5):
-                    x = float(re.findall(find, lines[ln + 3 + i])[0])
-                    self.sol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern][i] = float(x)
-                # guardo todas las soluciones fisicas del fit
-                v = 0
-                self.header = lines[0].split("\t")
-                for x in lines[1].split("\t"):
-                    # print(spr, pattern, x)
-                    self.physsol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern][v] = float(x)
-                    v += 1
+            for pattern in range(ptrn_i, ptrn_f, rings.delta_pattern):
+                # print "%d, %d" % (spr, pattern)
+                if(flag == 1):
+                    # soluciones fisicas del problema
+                    physsol_file = update_params(files, rings, spr, pattern, flag, find)
+                    # soluciones matematicas del ajuste
+                    sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file,
+                                                              spr, pattern)
+                    ln = 0
+                    fp = open(sol_file, "r")
+                    lines = fp.readlines()
+                    while(not(lines[ln].startswith("*** THE SOLUTIONS"))):
+                        ln += 1
+                    fp.close()
+                    for i in range(0, 5):
+                        x = float(re.findall(find, lines[ln + 3 + i])[0])
+                        self.sol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern][i] = float(x)
+                    # guardo todas las soluciones fisicas del fit
+                    fp = open(physsol_file, "r")
+                    lines = fp.readlines()
+                    fp.close()
+                    v = 0
+                    self.header = lines[0].split("\t")
+                    for x in lines[1].split("\t"):
+                        # print(spr, pattern, x)
+                        self.physsol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern][v] = float(x)
+                        v += 1

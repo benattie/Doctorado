@@ -1,4 +1,5 @@
-# importo modulos
+# -*- coding: utf-8 -*
+# - importo modulos
 from input_class import file_data, fit2d_data
 from fitting_class import cmwp_fit
 from print_class import cmwp_out

@@ -90,7 +90,7 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     n = 0;
     for(i = 2; i < seeds_size; i += 4)
     {
-      fprintf(fp, "%7.5lf %7.5lf %d 0\n", peak_seeds[1][i], peak_seeds[1][i + 1] * 10, difra->hkl[n]);
+      fprintf(fp, "%.5lf %.5lf %d 0\n", peak_seeds[1][i], peak_seeds[1][i + 1] * 10, difra->hkl[n]);
       n++;
     }
     fflush(fp);

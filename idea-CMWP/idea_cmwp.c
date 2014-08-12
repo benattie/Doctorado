@@ -34,18 +34,21 @@ int main(int argc, char ** argv)
     double ***eta = r3_tensor_double_alloc(40, 500, 10), ***eta_err = r3_tensor_double_alloc(40, 500, 10);
     double ***breadth = r3_tensor_double_alloc(40, 500, 10), ***breadth_err = r3_tensor_double_alloc(40, 500, 10);
 
-    puts("\n****************************************************************************");
-    puts("\nPROGRAM: IDEA_CMWP.EXE, Ver. XX.XX");
+    puts("****************************************************************************");
+    puts("PROGRAM: IDEA_CMWP.EXE, Ver. XX.XX");
     puts("\nProgram for generating the pole figures from CMWP data.\nCoordinate-transformation to MTEX-Format.");
-    puts("\nPole figures in MTEX-readable format xxx_Nr.mtex.");
-    puts("\nThe angular values of Omega and Gamma, from the parameter file");
+    puts("Pole figures in MTEX-readable format xxx_Nr.mtex.");
+    puts("The angular values of Omega and Gamma, from the parameter file");
     puts("\nIn order to work this executable must be placed in CMWP instalation folder along with the python folder");
-    puts("\nPython 2.7 required");
+    puts("Python 2.7 required");
     puts("\nRun with:\n./idea_cmwp.exe\n./idea_cmwp.exe flag\n./idea_cmwp.exe flag th");
-    puts("\nflag = 1 if you want to run CMWP and flag = 0 if you only want to create fitting files");
-    puts("\nth is the minimum peak intensity to be fitted (should be between 0 and 10)");
+    puts("flag = 1 if you want to run CMWP and flag = 0 if you only want to create fitting files");
+    puts("th is the minimum peak intensity to be fitted (should be between 0 and 10)");
     puts("\nError or suggestions to benatti@ifir-conicet.gov.ar");
-    puts("\n****************************************************************************");
+    puts("****************************************************************************");
+    //imprimir la ayuda y salir
+    if(strcmp(argv[1], "info") == 0 || strcmp(argv[1], "help") == 0)
+        exit(0);
     //////////////////////////////////////////////////////////////////////////
     //LECTURA DEL ARCHIVO para_fit2d.dat
     if((fp = fopen("para_cmwp.dat", "r")) == NULL)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*
 from winkel_fns import winkel_al, winkel_be
 
 
@@ -45,7 +46,7 @@ class cmwp_out:
                         fp_sol.write("%8.5f " % (cmwp_results.sol[spr / rings.delta_spr][pattern / rings.delta_pattern][i]))
                     fp_sol.write("\n")
 
-                    # salida al archivo con las soluciones físicas
+                    # salida al archivo con las soluciones fisicas
                     fp_physsol.write("%8d %8.4f %8.4f %8.4f %8.4f "
                                      % (k + 1, 2 * rings.theta[m], rings.theta[m], alpha, beta))
                     for i in range(0, cmwp_results.physsol.shape[2]):
