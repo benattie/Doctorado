@@ -44,7 +44,7 @@ def update_params(files, rings, spr, pattern, flag, find):
             step_1(files, rings, spr, pattern, flag, find)
             step_2(files, rings, spr, pattern, flag, find)
             step_3(files, rings, spr, pattern, flag, find)
-            physsol_file = step_4(files, rings, spr, pattern, flag)
+            physsol_file = step_4(files, rings, spr, pattern, flag, find)
     else:
         physsol_file = ""
     return physsol_file

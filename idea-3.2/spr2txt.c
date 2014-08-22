@@ -416,43 +416,6 @@ int main(int argc, char ** argv)
     }// End for(m = 0; m < numrings; m++)
     printf("\n======= End angular transformation ======= \n");
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
-    printf("\n======= Setting regular grid =======\n");
-    for(m = 0; m < numrings; m++)
-    {
-        //ARCHIVO CON LOS DATOS EN LA GRILLA IRREGULAR
-        strcpy(alldatafile, "");
-        strcat(alldatafile, path_out);
-        strcat(alldatafile, filename1);
-        strcat(alldatafile, "ALL_PF_");
-        sprintf(buf, "%d", m + 1);
-        strcat(alldatafile, buf);
-        strcat(alldatafile, ".mtex");
-        if((fp_all = fopen(alldatafile, "r")) == NULL)
-        {
-            fprintf(stderr, "Error beim oeffnen der Datei(%s).\n", alldatafile);
-            exit(1);
-        }
-        //ARCHIVO CON LOS DATOS EN UNA GRILLA REGULAR
-        strcpy(alldatafile, "");
-        strcat(alldatafile, path_out);
-        strcat(alldatafile, filename1);
-        strcat(alldatafile, "REG_PF_");
-        sprintf(buf, "%d", m + 1);
-        strcat(alldatafile, buf);
-        strcat(alldatafile, ".mtex");
-        if((fp_reg = fopen(alldatafile, "w")) == NULL)
-        {
-            fprintf(stderr, "Error beim oeffnen der Datei(%s).\n", alldatafile);
-            exit(1);
-        }
-        printf("Printing regular grid file %s with %d points\n", alldatafile, k);
-        interpolate(fp_all, fp_reg, 0.3827, 5, 5, k);
-        fclose(fp_all);
-        fclose(fp_reg);
-    }
-    //end for routine for(m = 0; m < numrings; m++)
-    printf("\n======= Finished writting regular grid =======\n");
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
     free_double_matrix(seeds, 2);
     free_double_matrix(bg_seed, 2);
  }//End of for(Z = 1; Z <= NrSample; Z++)
