@@ -81,15 +81,17 @@ def step_1(files, rings, spr, pattern, flag, find):
     ln = 0
     fp = open(sol_file, "r")
     lines = fp.readlines()
-    while(not(lines[ln].startswith("*** THE SOLUTIONS"))):
+    while(not(lines[ln].startswith("a_scaled"))):
         ln += 1
-    a = float(re.findall(find, lines[ln + 3])[0])
-    b = float(re.findall(find, lines[ln + 4])[0])
-    c = float(re.findall(find, lines[ln + 5])[0])
-    st_pr = floa(re.findall(find, lines[ln + 6])[0])
-    d = float(re.findall(find, lines[ln + 7])[0])
-    e = float(re.findall(find, lines[ln + 8])[0])
-    epsilon = float(re.findall(find, lines[ln + 9])[0])
+    a = float(re.findall(find, lines[ln + 0])[0])
+    b = float(re.findall(find, lines[ln + 1])[0])
+    c = float(re.findall(find, lines[ln + 2])[0])
+    d = float(re.findall(find, lines[ln + 3])[0])
+    e = float(re.findall(find, lines[ln + 4])[0])
+    epsilon = float(re.findall(find, lines[ln + 5])[0])
+    while(not(lines[ln].startswith("The stacking faults probability"))):
+        ln += 1
+    st_pr = float(re.findall(find, lines[ln + 1])[0])
     fp.close()
     # genero el archivo .fit.ini
     fit_ini = "%s%sspr_%d_pattern_%d%s.fit.ini" % (files.pathout, files.input_file,
@@ -127,7 +129,7 @@ def step_2(files, rings, spr, pattern, flag, find):
     a = float(re.findall(find, lines[ln + 3])[0])
     b = float(re.findall(find, lines[ln + 4])[0])
     c = float(re.findall(find, lines[ln + 5])[0])
-    st_pr = floa(re.findall(find, lines[ln + 6])[0])
+    st_pr = float(re.findall(find, lines[ln + 6])[0])
     d = float(re.findall(find, lines[ln + 7])[0])
     e = float(re.findall(find, lines[ln + 8])[0])
     epsilon = float(re.findall(find, lines[ln + 9])[0])
@@ -187,7 +189,7 @@ def step_4(files, rings, spr, pattern, flag, find):
     a = float(re.findall(find, lines[ln + 3])[0])
     b = float(re.findall(find, lines[ln + 4])[0])
     c = float(re.findall(find, lines[ln + 5])[0])
-    st_pr = floa(re.findall(find, lines[ln + 6])[0])
+    st_pr = float(re.findall(find, lines[ln + 6])[0])
     d = float(re.findall(find, lines[ln + 7])[0])
     e = float(re.findall(find, lines[ln + 8])[0])
     epsilon = float(re.findall(find, lines[ln + 9])[0])
