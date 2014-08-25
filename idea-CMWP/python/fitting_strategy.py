@@ -43,7 +43,7 @@ def update_params(files, rings, spr, pattern, flag, find):
         else:
             step_1(files, rings, spr, pattern, flag, find)
             step_2(files, rings, spr, pattern, flag, find)
-            step_3(files, rings, spr, pattern, flag, find)
+#            step_3(files, rings, spr, pattern, flag, find)
             physsol_file = step_4(files, rings, spr, pattern, flag, find)
     else:
         physsol_file = ""
@@ -86,16 +86,18 @@ def step_1(files, rings, spr, pattern, flag, find):
     a = float(re.findall(find, lines[ln + 3])[0])
     b = float(re.findall(find, lines[ln + 4])[0])
     c = float(re.findall(find, lines[ln + 5])[0])
-    d = float(re.findall(find, lines[ln + 6])[0])
-    e = float(re.findall(find, lines[ln + 7])[0])
+    st_pr = floa(re.findall(find, lines[ln + 6])[0])
+    d = float(re.findall(find, lines[ln + 7])[0])
+    e = float(re.findall(find, lines[ln + 8])[0])
+    epsilon = float(re.findall(find, lines[ln + 9])[0])
     fp.close()
     # genero el archivo .fit.ini
     fit_ini = "%s%sspr_%d_pattern_%d%s.fit.ini" % (files.pathout, files.input_file,
                                                    spr, pattern, files.ext)
     fp = open(fit_ini, "w")
-    string = "a_fixed=y\nb_fixed=y\nc_fixed=y\nd_fixed=y\ne_fixed=y\nepsilon_fixed=y\n"
-    string += "init_a=%f\ninit_b=%f\ninit_c=%f\ninit_d=%f\ninit_e=%f\ninit_epsilon=1.00\n" % (a, b, c, d, e)
-    string += "a_scale=1.0 \nb_scale=1.0\nc_scale=1.0\nd_scale=1.0\ne_scale=1.0"
+    string = "init_a=%f\ninit_b=%f\ninit_c=%f\ninit_d=%f\ninit_e=%f\ninit_epsilon=%f\ninit_st_pr=%f\n" % (a, b, c, d, e, epsilon, st_pr)
+    string += "a_fixed=y\nb_fixed=y\nc_fixed=y\nd_fixed=y\ne_fixed=y\nepsilon_fixed=y\nst_pr_fixed=y\n"
+    string += "scale_a=1.0 \nscale_b=1.0\nscale_c=1.0\nscale_d=1.0\nscale_e=1.0"
     fp.write(string)
     fp.close()
     if(flag == 1):
@@ -125,15 +127,17 @@ def step_2(files, rings, spr, pattern, flag, find):
     a = float(re.findall(find, lines[ln + 3])[0])
     b = float(re.findall(find, lines[ln + 4])[0])
     c = float(re.findall(find, lines[ln + 5])[0])
-    d = float(re.findall(find, lines[ln + 6])[0])
-    e = float(re.findall(find, lines[ln + 7])[0])
+    st_pr = floa(re.findall(find, lines[ln + 6])[0])
+    d = float(re.findall(find, lines[ln + 7])[0])
+    e = float(re.findall(find, lines[ln + 8])[0])
+    epsilon = float(re.findall(find, lines[ln + 9])[0])
     # genero el archivo .fit.ini
     fit_ini = "%s%sspr_%d_pattern_%d%s.fit.ini" % (files.pathout, files.input_file,
                                                    spr, pattern, files.ext)
     fp = open(fit_ini, "w")
-    string = "a_fixed=n\nb_fixed=n\nc_fixed=y\nd_fixed=n\ne_fixed=y\nepsilon_fixed=y\n"
-    string += "init_a=%f\ninit_b=%f\ninit_c=%f\ninit_d=%f\ninit_e=%f\ninit_epsilon=1.00\n" % (a, b, c, d, e)
-    string += "a_scale=1.0 \nb_scale=1.0\nc_scale=1.0\nd_scale=1.0\ne_scale=1.0"
+    string = "init_a=%f\ninit_b=%f\ninit_c=%f\ninit_d=%f\ninit_e=%f\ninit_epsilon=%f\ninit_st_pr=%f\n" % (a, b, c, d, e, epsilon, st_pr)
+    string += "a_fixed=y\nb_fixed=y\nc_fixed=y\nd_fixed=y\ne_fixed=y\nepsilon_fixed=y\nst_pr_fixed=y\n"
+    string += "scale_a=1.0 \nscale_b=1.0\nscale_c=1.0\nscale_d=1.0\nscale_e=1.0"
     fp.write(string)
     fp.close()
     if(flag == 1):
@@ -143,33 +147,33 @@ def step_2(files, rings, spr, pattern, flag, find):
         subprocess.call(cmd, shell=True)
 
 
-def step_3(files, rings, spr, pattern, flag, find):
-    # leo los resultados del archivo anterior
-    sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file, spr, pattern)
-    ln = 0
-    fp = open(sol_file, "r+")
-    lines = fp.readlines()
-    while(not(lines[ln].startswith("*** THE SOLUTIONS"))):
-        ln += 1
-    a = float(re.findall(find, lines[ln + 3])[0])
-    b = float(re.findall(find, lines[ln + 4])[0])
-    c = float(re.findall(find, lines[ln + 5])[0])
-    d = float(re.findall(find, lines[ln + 6])[0])
-    e = float(re.findall(find, lines[ln + 7])[0])
-    # genero el archivo .fit.ini
-    fit_ini = "%s%sspr_%d_pattern_%d%s.fit.ini" % (files.pathout, files.input_file,
-                                                   spr, pattern, files.ext)
-    fp = open(fit_ini, "w")
-    string = "a_fixed=y\nb_fixed=y\nc_fixed=n\nd_fixed=y\ne_fixed=n\nepsilon_fixed=y\n"
-    string += "init_a=%f\ninit_b=%f\ninit_c=%f\ninit_d=%f\ninit_e=%f\ninit_epsilon=1.00\n" % (a, b, c, d, e)
-    string += "a_scale=1.0 \nb_scale=1.0\nc_scale=1.0\nd_scale=1.0\ne_scale=1.0"
-    fp.write(string)
-    fp.close()
-    if(flag == 1):
-        # correr el cmwp
-        cmd = './evaluate %s%sspr_%d_pattern_%d%s auto' % (files.pathout, files.input_file,
-                                                           spr, pattern, files.ext)
-        subprocess.call(cmd, shell=True)
+#def step_3(files, rings, spr, pattern, flag, find):
+#    # leo los resultados del archivo anterior
+#    sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file, spr, pattern)
+#    ln = 0
+#    fp = open(sol_file, "r+")
+#    lines = fp.readlines()
+#    while(not(lines[ln].startswith("*** THE SOLUTIONS"))):
+#        ln += 1
+#    a = float(re.findall(find, lines[ln + 3])[0])
+#    b = float(re.findall(find, lines[ln + 4])[0])
+#    c = float(re.findall(find, lines[ln + 5])[0])
+#    d = float(re.findall(find, lines[ln + 6])[0])
+#    e = float(re.findall(find, lines[ln + 7])[0])
+#    # genero el archivo .fit.ini
+#    fit_ini = "%s%sspr_%d_pattern_%d%s.fit.ini" % (files.pathout, files.input_file,
+#                                                   spr, pattern, files.ext)
+#    fp = open(fit_ini, "w")
+#    string = "a_fixed=y\nb_fixed=y\nc_fixed=n\nd_fixed=y\ne_fixed=n\nepsilon_fixed=y\n"
+#    string += "init_a=%f\ninit_b=%f\ninit_c=%f\ninit_d=%f\ninit_e=%f\ninit_epsilon=1.00\n" % (a, b, c, d, e)
+#    string += "a_scale=1.0 \nb_scale=1.0\nc_scale=1.0\nd_scale=1.0\ne_scale=1.0"
+#    fp.write(string)
+#    fp.close()
+#    if(flag == 1):
+#        # correr el cmwp
+#        cmd = './evaluate %s%sspr_%d_pattern_%d%s auto' % (files.pathout, files.input_file,
+#                                                           spr, pattern, files.ext)
+#        subprocess.call(cmd, shell=True)
 
 
 def step_4(files, rings, spr, pattern, flag, find):
@@ -183,15 +187,17 @@ def step_4(files, rings, spr, pattern, flag, find):
     a = float(re.findall(find, lines[ln + 3])[0])
     b = float(re.findall(find, lines[ln + 4])[0])
     c = float(re.findall(find, lines[ln + 5])[0])
-    d = float(re.findall(find, lines[ln + 6])[0])
-    e = float(re.findall(find, lines[ln + 7])[0])
+    st_pr = floa(re.findall(find, lines[ln + 6])[0])
+    d = float(re.findall(find, lines[ln + 7])[0])
+    e = float(re.findall(find, lines[ln + 8])[0])
+    epsilon = float(re.findall(find, lines[ln + 9])[0])
     # genero el archivo .fit.ini
     fit_ini = "%s%sspr_%d_pattern_%d%s.fit.ini" % (files.pathout, files.input_file,
                                                    spr, pattern, files.ext)
     fp = open(fit_ini, "w")
-    string = "a_fixed=y\nb_fixed=n\nc_fixed=y\nd_fixed=n\ne_fixed=y\nepsilon_fixed=y\n"
-    string += "init_a=%f\ninit_b=%f\ninit_c=%f\ninit_d=%f\ninit_e=%f\ninit_epsilon=1.00\n" % (a, b, c, d, e)
-    string += "a_scale=1.0 \nb_scale=1.0\nc_scale=1.0\nd_scale=1.0\ne_scale=1.0"
+    string = "init_a=%f\ninit_b=%f\ninit_c=%f\ninit_d=%f\ninit_e=%f\ninit_epsilon=%f\ninit_st_pr=%f\n" % (a, b, c, d, e, epsilon, st_pr)
+    string += "a_fixed=y\nb_fixed=y\nc_fixed=y\nd_fixed=y\ne_fixed=y\nepsilon_fixed=y\nst_pr_fixed=y\n"
+    string += "scale_a=1.0 \nscale_b=1.0\nscale_c=1.0\nscale_d=1.0\nscale_e=1.0"
     fp.write(string)
     fp.close()
     if(flag == 1):

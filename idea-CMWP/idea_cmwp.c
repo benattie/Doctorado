@@ -47,8 +47,11 @@ int main(int argc, char ** argv)
     puts("\nError or suggestions to benatti@ifir-conicet.gov.ar");
     puts("****************************************************************************");
     //imprimir la ayuda y salir
-    if(strcmp(argv[1], "info") == 0 || strcmp(argv[1], "help") == 0)
-        exit(0);
+    if(argc != 1)
+    {
+        if(strcmp(argv[1], "info") == 0 || strcmp(argv[1], "help") == 0)
+            exit(0);
+    }
     //////////////////////////////////////////////////////////////////////////
     //LECTURA DEL ARCHIVO para_fit2d.dat
     if((fp = fopen("para_cmwp.dat", "r")) == NULL)
@@ -179,7 +182,6 @@ int main(int argc, char ** argv)
             printf("Numero incorrecto de argumentos\nUso correcto:\n");
             printf("./idea_cmwp.exe \n./idea_cmwp flag\n./idea_cmwp flag treshold\n");
     }
-
     k = star_d;  // file index number : star_d to end_d
     do //Iteracion sobre todos los spr  
     {
