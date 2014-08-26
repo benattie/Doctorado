@@ -28,6 +28,8 @@ class cmwp_fit:
         self.header = ""
         ptrn_i = rings.pattern_i + rings.delta_pattern
         ptrn_f = rings.pattern_f + rings.delta_pattern
+        n_bad_fit = 0
+        bad_fit = 0
 
         for spr in range(rings.spr_i, rings.spr_f + 1, rings.delta_spr):
             # print("Processing spr %d" % spr)
@@ -35,7 +37,9 @@ class cmwp_fit:
                 # print "%d, %d" % (spr, pattern)
                 if(flag == 1):
                     # soluciones fisicas del problema
-                    physsol_file = update_params(files, rings, spr, pattern, flag, find)
+                    (physsol_file, bad_fit) = update_params(files, rings, spr, pattern, flag, find, bad_fit)
+                    if(bad_fit):
+                        n_bad_fit += 1
                     # soluciones matematicas del ajuste
                     sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file,
                                                               spr, pattern)
@@ -56,5 +60,10 @@ class cmwp_fit:
                     self.header = lines[0].split("\t")
                     for x in lines[1].split("\t"):
                         # print(spr, pattern, x)
-                        self.physsol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern][v] = float(x)
+                        self.physsol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern - 1][v] = float(x)
                         v += 1
+        print "\n*******************************\n"
+        print "*******************************\n"
+        print "Warning: there were %d bad fits" % n_bad_fit
+        print "\n*******************************\n"
+        print "*******************************\n"

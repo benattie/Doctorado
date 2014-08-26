@@ -33,6 +33,10 @@ int main(int argc, char ** argv)
     double ***fwhm = r3_tensor_double_alloc(40, 500, 10), ***fwhm_err = r3_tensor_double_alloc(40, 500, 10);
     double ***eta = r3_tensor_double_alloc(40, 500, 10), ***eta_err = r3_tensor_double_alloc(40, 500, 10);
     double ***breadth = r3_tensor_double_alloc(40, 500, 10), ***breadth_err = r3_tensor_double_alloc(40, 500, 10);
+    time_t t1, t2, t3, t4;
+    double time_spent;
+    //tomo el tiempo de ejecucion
+    t1 = time(&t1);
 
     puts("****************************************************************************");
     puts("PROGRAM: IDEA_CMWP.EXE, Ver. XX.XX");
@@ -291,6 +295,8 @@ int main(int argc, char ** argv)
     //End pole figure data in Machine coordinates//
     printf("\nFinish extracting pole figure data\n");
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    t2 = time(&t2);
+
     printf("\nBegin CMWP routine\n");
     char cmd[100], do_run[2];
     if(argc < 2)// si no le pase el dato por linea de comandos lo tomo de pantalla
@@ -309,6 +315,7 @@ int main(int argc, char ** argv)
     sprintf(cmd, "python python/cmwp.py %d", flag);
     rv = system(cmd);
     printf("End CMWP routine with code %d\n", rv);
+    t3 = time(&t3);
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     printf("Free allocated memory\n");
     free_double_matrix(seeds, 2);
@@ -323,6 +330,20 @@ int main(int argc, char ** argv)
     free_r3_tensor_double(eta_err, 40, 500);
     free_r3_tensor_double(breadth, 40, 500);
     free_r3_tensor_double(breadth_err, 40, 500);
+    t4 = time(&t4);
+    printf("---------------------------------------------\n");
+    printf("Tiempo de ejecucion total del programa: %lf segundos\n", time_spent);
+    printf("                                      o %lf minutos\n", time_spent / 60.);
+    printf("                                      o %lf horas\n", time_spent / 3600.);
+    printf("---------------------------------------------\n");
+
+    time_spent = difftime(t3, t2);
+    printf("---------------------------------------------\n");
+    printf("Tiempo de ejecucion total de la rutina CMWP: %lf segundos\n", time_spent);
+    printf("                                           o %lf minutos\n", time_spent / 60.);
+    printf("                                           o %lf horas\n", time_spent / 3600.);
+    printf("---------------------------------------------\n");
+
     printf("\nNo importa la realidad, sólo la verosimilitud\n");
     return 0;
 } //End of Main()
