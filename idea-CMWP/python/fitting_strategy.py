@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*
 import subprocess
 import re
+import numpy
 
 
 def update_params(files, rings, spr, pattern, flag, find, bad_fit):
@@ -43,9 +44,21 @@ def update_params(files, rings, spr, pattern, flag, find, bad_fit):
         else:
             if(bad_fit):
                 reset_parameters(files, spr - rings.delta_spr, pattern - rings.delta_pattern)
-            step_1(files, rings, spr, pattern, flag, find)
-            step_2(files, rings, spr, pattern, flag, find)
-            step_3(files, rings, spr, pattern, flag, find)
+            error = 0
+            error = step_1(files, rings, spr, pattern, flag, find)
+            if(error):
+                "Mal ajuste en spr = %d y pattern = %d (paso %d)\n" % (spr, pattern, 1)
+                return "", 1
+            error = step_2(files, rings, spr, pattern, flag, find)
+            if(error):
+                "Mal ajuste en spr = %d y pattern = %d (paso %d)\n" % (spr, pattern, 2)
+                return "", 1
+
+            error = step_3(files, rings, spr, pattern, flag, find)
+            if(error):
+                "Mal ajuste en spr = %d y pattern = %d (paso %d)\n" % (spr, pattern, 3)
+                return "", 1
+
             physsol_file = step_4(files, rings, spr, pattern, flag, find)
             bad_fit = check_fit(files, spr, pattern, find)
     else:
@@ -61,9 +74,9 @@ def check_fit(files, spr, pattern, find):
     lines = fp.readlines()
     while(not(lines[ln].startswith("Final set of parameters"))):
         ln += 1
-    a = float(re.findall(find, lines[ln + 3]))
-    b = float(re.findall(find, lines[ln + 4]))
-    d = float(re.findall(find, lines[ln + 5]))
+    a = numpy.array(map(float, re.findall(find, lines[ln + 3])))
+    b = numpy.array(map(float, re.findall(find, lines[ln + 4])))
+    d = numpy.array(map(float, re.findall(find, lines[ln + 5])))
     fp.close()
     bad_fit = 0
     if(a[2] > 100 or b[2] > 100 or d[2] > 100):
@@ -95,7 +108,10 @@ def step_1(files, rings, spr, pattern, flag, find):
     fp = open(destination, "w")
     ln = 0
     while(not(lines[ln].startswith("peak_pos_fit"))):
-        ln += 1
+        if(ln == len(lines) - 1):
+            return 1
+        else:
+            ln += 1
     lines[ln] = "peak_pos_fit=y\n"
     lines[ln + 1] = "peak_int_fit=y\n"
     fp.writelines(lines)
@@ -160,8 +176,11 @@ def step_2(files, rings, spr, pattern, flag, find):
     fp = open(sol_file, "r+")
     lines = fp.readlines()
     fp.close()
-    while(not(lines[ln].startswith("a_scaled"))):
-        ln += 1
+    while(not(lines[ln].startswith("peak_pos_fit"))):
+        if(ln == len(lines) - 1):
+            return 1
+        else:
+            ln += 1
     a = float(re.findall(find, lines[ln + 0])[0])
     b = float(re.findall(find, lines[ln + 1])[0])
     c = float(re.findall(find, lines[ln + 2])[0])
@@ -194,8 +213,11 @@ def step_3(files, rings, spr, pattern, flag, find):
     fp = open(sol_file, "r")
     lines = fp.readlines()
     fp.close()
-    while(not(lines[ln].startswith("a_scaled"))):
-        ln += 1
+    while(not(lines[ln].startswith("peak_pos_fit"))):
+        if(ln == len(lines) - 1):
+            return 1
+        else:
+            ln += 1
     a = float(re.findall(find, lines[ln + 0])[0])
     b = float(re.findall(find, lines[ln + 1])[0])
     c = float(re.findall(find, lines[ln + 2])[0])
@@ -228,8 +250,11 @@ def step_4(files, rings, spr, pattern, flag, find):
     ln = 0
     fp = open(sol_file, "r")
     lines = fp.readlines()
-    while(not(lines[ln].startswith("a_scaled"))):
-        ln += 1
+    while(not(lines[ln].startswith("peak_pos_fit"))):
+        if(ln == len(lines) - 1):
+            return 1
+        else:
+            ln += 1
     a = float(re.findall(find, lines[ln + 0])[0])
     b = float(re.findall(find, lines[ln + 1])[0])
     c = float(re.findall(find, lines[ln + 2])[0])
@@ -245,7 +270,7 @@ def step_4(files, rings, spr, pattern, flag, find):
                                                    spr, pattern, files.ext)
     fp = open(fit_ini, "w")
     string = "init_a=%f\ninit_b=%f\ninit_c=%f\ninit_d=%f\ninit_e=%f\ninit_epsilon=%f\n" % (a, b, c, d, e, 1.00)
-    string += "a_fixed=n\nb_fixed=n\nc_fixed=y\nd_fixed=n\ne_fixed=y\nepsilon_fixed=y\n"
+    string += "a_fixed=y\nb_fixed=n\nc_fixed=y\nd_fixed=n\ne_fixed=y\nepsilon_fixed=y\n"
     string += "scale_a=1.0 \nscale_b=1.0\nscale_c=1.0\nscale_d=1.0\nscale_e=1.0"
     fp.write(string)
     fp.close()

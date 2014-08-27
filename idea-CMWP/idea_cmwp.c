@@ -331,17 +331,19 @@ int main(int argc, char ** argv)
     free_r3_tensor_double(breadth, 40, 500);
     free_r3_tensor_double(breadth_err, 40, 500);
     t4 = time(&t4);
+    
+    time_spent = difftime(t4, t1);
     printf("---------------------------------------------\n");
-    printf("Tiempo de ejecucion total del programa: %lf segundos\n", time_spent);
-    printf("                                      o %lf minutos\n", time_spent / 60.);
-    printf("                                      o %lf horas\n", time_spent / 3600.);
+    printf("Tiempo de ejecucion total del programa: %.2lf segundos\n", time_spent);
+    printf("                                      o %.2lf minutos\n", time_spent / 60.);
+    printf("                                      o %.2lf horas\n", time_spent / 3600.);
     printf("---------------------------------------------\n");
 
     time_spent = difftime(t3, t2);
     printf("---------------------------------------------\n");
-    printf("Tiempo de ejecucion total de la rutina CMWP: %lf segundos\n", time_spent);
-    printf("                                           o %lf minutos\n", time_spent / 60.);
-    printf("                                           o %lf horas\n", time_spent / 3600.);
+    printf("Tiempo de ejecucion total de la rutina CMWP: %.2lf segundos\n", time_spent);
+    printf("                                           o %.2lf minutos\n", time_spent / 60.);
+    printf("                                           o %.2lf horas\n", time_spent / 3600.);
     printf("---------------------------------------------\n");
 
     printf("\nNo importa la realidad, sólo la verosimilitud\n");
