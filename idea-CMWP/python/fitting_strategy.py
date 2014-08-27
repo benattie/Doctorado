@@ -45,20 +45,22 @@ def update_params(files, rings, spr, pattern, flag, find, bad_fit):
             if(bad_fit):
                 reset_parameters(files, spr - rings.delta_spr, pattern - rings.delta_pattern)
             error = 0
+            print "Paso 1"
             error = step_1(files, rings, spr, pattern, flag, find)
             if(error):
                 "Mal ajuste en spr = %d y pattern = %d (paso %d)\n" % (spr, pattern, 1)
                 return "", 1
+            print "Paso 2"
             error = step_2(files, rings, spr, pattern, flag, find)
             if(error):
                 "Mal ajuste en spr = %d y pattern = %d (paso %d)\n" % (spr, pattern, 2)
                 return "", 1
-
+            print "Paso 3"
             error = step_3(files, rings, spr, pattern, flag, find)
             if(error):
                 "Mal ajuste en spr = %d y pattern = %d (paso %d)\n" % (spr, pattern, 3)
                 return "", 1
-
+            print "Paso 4"
             physsol_file = step_4(files, rings, spr, pattern, flag, find)
             bad_fit = check_fit(files, spr, pattern, find)
     else:
@@ -74,12 +76,11 @@ def check_fit(files, spr, pattern, find):
     lines = fp.readlines()
     while(not(lines[ln].startswith("Final set of parameters"))):
         ln += 1
-    a = numpy.array(map(float, re.findall(find, lines[ln + 3])))
-    b = numpy.array(map(float, re.findall(find, lines[ln + 4])))
-    d = numpy.array(map(float, re.findall(find, lines[ln + 5])))
+    b = numpy.array(map(float, re.findall(find, lines[ln + 3])))
+    d = numpy.array(map(float, re.findall(find, lines[ln + 4])))
     fp.close()
     bad_fit = 0
-    if(a[2] > 100 or b[2] > 100 or d[2] > 100):
+    if(b[2] > 100 or d[2] > 100):
         bad_fit = 1
     return bad_fit
 
@@ -107,6 +108,12 @@ def step_1(files, rings, spr, pattern, flag, find):
                                                      spr, pattern, files.ext)
     fp = open(destination, "w")
     ln = 0
+    while(not(lines[ln].startswith("FIT_LIMIT"))):
+        if(ln == len(lines) - 1):
+            return 1
+        else:
+            ln += 1
+    lines[ln] = "FIT_LIMIT=1e-12\n"
     while(not(lines[ln].startswith("peak_pos_fit"))):
         if(ln == len(lines) - 1):
             return 1
@@ -164,6 +171,13 @@ def step_2(files, rings, spr, pattern, flag, find):
     fp = open(origin, "r+")
     lines = fp.readlines()
     ln = 0
+    while(not(lines[ln].startswith("FIT_LIMIT"))):
+        if(ln == len(lines) - 1):
+            return 1
+        else:
+            ln += 1
+    lines[ln] = "FIT_LIMIT=1e-14\n"
+
     while(not(lines[ln].startswith("peak_pos_fit"))):
         ln += 1
     lines[ln] = "peak_pos_fit=n\n"
@@ -176,7 +190,7 @@ def step_2(files, rings, spr, pattern, flag, find):
     fp = open(sol_file, "r+")
     lines = fp.readlines()
     fp.close()
-    while(not(lines[ln].startswith("peak_pos_fit"))):
+    while(not(lines[ln].startswith("a_scaled"))):
         if(ln == len(lines) - 1):
             return 1
         else:
@@ -213,7 +227,7 @@ def step_3(files, rings, spr, pattern, flag, find):
     fp = open(sol_file, "r")
     lines = fp.readlines()
     fp.close()
-    while(not(lines[ln].startswith("peak_pos_fit"))):
+    while(not(lines[ln].startswith("a_scaled"))):
         if(ln == len(lines) - 1):
             return 1
         else:
@@ -250,7 +264,7 @@ def step_4(files, rings, spr, pattern, flag, find):
     ln = 0
     fp = open(sol_file, "r")
     lines = fp.readlines()
-    while(not(lines[ln].startswith("peak_pos_fit"))):
+    while(not(lines[ln].startswith("a_scaled"))):
         if(ln == len(lines) - 1):
             return 1
         else:

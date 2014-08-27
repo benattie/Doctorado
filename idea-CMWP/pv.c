@@ -88,7 +88,9 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     sprintf(filename, "%s%sspr_%d_pattern_%d.peak-index.dat", sync_data->path_out, sync_data->root_name, difra->spr, difra->gamma);
     fp = fopen(filename, "w");
     n = 0;
-    for(i = 2; i < seeds_size; i += 4)
+    fprintf(fp, "%.5lf %.5lf %d 0\n", peak_seeds[1][2], peak_seeds[1][3] * 13, difra->hkl[n]);
+    n++;
+    for(i = 6; i < seeds_size; i += 4)
     {
       fprintf(fp, "%.5lf %.5lf %d 0\n", peak_seeds[1][i], peak_seeds[1][i + 1] * 10, difra->hkl[n]);
       n++;
