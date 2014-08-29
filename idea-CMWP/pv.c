@@ -95,6 +95,7 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
       I0[n] = peak_seeds[1][i + 1];
       shift_H[n] = peak_seeds[1][i + 2];
       shift_eta[n] = peak_seeds[1][i + 3];
+      n++;
     }
     n = 0;
     for(i = 2; i < seeds_size; i += 4)
