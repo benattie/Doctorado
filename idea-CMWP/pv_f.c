@@ -165,7 +165,8 @@ int pv_f_step4 (const gsl_vector * x, void * data, gsl_vector * f)
     }
     for(i = 0; i < n_bg; i++)
     {
-        bg_int[i] = gsl_vector_get(x, j); j++;
+        bg_int[i] = gsl_vector_get(x, j);
+        j++;
     }
     
     //evaluo la funcion

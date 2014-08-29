@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*
 import numpy
 import re
+import subprocess
 from fitting_strategy import update_params
 
 
@@ -41,9 +42,14 @@ class cmwp_fit:
                 if(flag == 1):
                     # soluciones fisicas del problema
                     (physsol_file, bad_fit) = update_params(files, rings, spr, pattern, flag, find, bad_fit)
-                    if(bad_fit or physsol_file == ""):
+                    # print physsol_file
+                    # print bad_fit
+                    # raw_input("Presione enter")
+                    if(bad_fit == 1 or physsol_file == ""):
+                        # print "bad_fit == 1"
                         n_bad_fit += 1
-                        self.sol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern] = -1 * numpy.ones((1, n_sol_variables))
+                        reset_parameters(files, spr, pattern)
+                        self.sol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern - 1] = -1 * numpy.ones((1, n_sol_variables))
                         self.physsol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern - 1] = -1 * numpy.ones((1, n_variables))
                     else:
                         # soluciones matematicas del ajuste
@@ -56,7 +62,7 @@ class cmwp_fit:
                         fp.close()
                         for i in range(0, 5):
                             x = float(re.findall(find, lines[ln + 3 + i])[0])
-                            self.sol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern][i] = float(x)
+                            self.sol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern - 1][i] = float(x)
                         # guardo todas las soluciones fisicas del fit
                         fp = open(physsol_file, "r")
                         lines = fp.readlines()
@@ -68,8 +74,15 @@ class cmwp_fit:
                             self.physsol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern - 1][v] = float(x)
                             v += 1
         if(flag == 1):
-            print "\n*******************************\n"
+            print "\n*******************************"
             print "*******************************\n"
             print "Warning: there were %d bad fits" % n_bad_fit
-            print "\n*******************************\n"
+            print "\n*******************************"
             print "*******************************\n"
+
+
+def reset_parameters(files, spr, pattern):
+    # copio el archivo .sol
+    origin = "%s%s.sol" % (files.path_base_file, files.base_file)
+    destination = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file, spr, pattern)
+    subprocess.call(["cp", origin, destination])

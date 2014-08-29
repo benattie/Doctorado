@@ -15,6 +15,7 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     char filename[500];
     FILE *fp;
     int i, n, bad_fit, zero_peak_index[(*difra).numrings];
+    double t0[difra->numrings], I0[difra->numrings], shift_H[difra->numrings], shift_eta[difra->numrings];
     //elimino los picos que tienen una intensidad menor que treshold
     int n_peaks = check_for_null_peaks(difra->treshold, (*difra).numrings, zero_peak_index, intens);
     int seeds_size = 4 * n_peaks + 2, all_seeds_size = 4 * (*difra).numrings + 2;
@@ -88,11 +89,19 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     sprintf(filename, "%s%sspr_%d_pattern_%d.peak-index.dat", sync_data->path_out, sync_data->root_name, difra->spr, difra->gamma);
     fp = fopen(filename, "w");
     n = 0;
-    fprintf(fp, "%.5lf %.5lf %d 0\n", peak_seeds[1][2], peak_seeds[1][3] * 13, difra->hkl[n]);
-    n++;
-    for(i = 6; i < seeds_size; i += 4)
+    for(i = 2; i < seeds_size; i += 4)
     {
-      fprintf(fp, "%.5lf %.5lf %d 0\n", peak_seeds[1][i], peak_seeds[1][i + 1] * 10, difra->hkl[n]);
+      t0[n] = peak_seeds[1][i]; 
+      I0[n] = peak_seeds[1][i + 1];
+      shift_H[n] = peak_seeds[1][i + 2];
+      shift_eta[n] = peak_seeds[1][i + 3];
+    }
+    n = 0;
+    for(i = 2; i < seeds_size; i += 4)
+    {
+      double theta = peak_seeds[1][i], H = peak_seeds[1][0], eta = peak_seeds[1][1];
+      double I = pseudo_voigt(theta, difra->numrings, I0, t0, H, eta, shift_H, shift_eta, difra->n_bg, bg_pos, difra->bg[1]);
+      fprintf(fp, "%.5lf %.5lf %d 0\n", peak_seeds[1][i], I, difra->hkl[n]);
       n++;
     }
     fflush(fp);

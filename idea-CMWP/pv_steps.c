@@ -307,7 +307,8 @@ void pv_step4(int exists, double ** seeds, double * errors, int seeds_size, doub
     }
     for(i = 0; i < (*d).n_bg; i++)
     {
-        bg[1][i] = gsl_vector_get(s -> x, j); j++;
+        bg[1][i] = gsl_vector_get(s -> x, j);
+        j++;
     }
     free(x_init);
     gsl_multifit_fdfsolver_free (s);

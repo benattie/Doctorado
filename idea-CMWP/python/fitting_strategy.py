@@ -42,22 +42,20 @@ def update_params(files, rings, spr, pattern, flag, find, bad_fit):
             physsol_file = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file,
                                                                   spr, pattern)
         else:
-            if(bad_fit):
-                reset_parameters(files, spr - rings.delta_spr, pattern - rings.delta_pattern)
             error = 0
             print "Paso 1"
             error = step_1(files, rings, spr, pattern, flag, find)
-            if(error):
+            if(error == 1):
                 "Mal ajuste en spr = %d y pattern = %d (paso %d)\n" % (spr, pattern, 1)
                 return "", 1
             print "Paso 2"
             error = step_2(files, rings, spr, pattern, flag, find)
-            if(error):
+            if(error == 1):
                 "Mal ajuste en spr = %d y pattern = %d (paso %d)\n" % (spr, pattern, 2)
                 return "", 1
             print "Paso 3"
             error = step_3(files, rings, spr, pattern, flag, find)
-            if(error):
+            if(error == 1):
                 "Mal ajuste en spr = %d y pattern = %d (paso %d)\n" % (spr, pattern, 3)
                 return "", 1
             print "Paso 4"
@@ -75,22 +73,20 @@ def check_fit(files, spr, pattern, find):
     fp = open(sol_file, "r")
     lines = fp.readlines()
     while(not(lines[ln].startswith("Final set of parameters"))):
-        ln += 1
+        if(ln == len(lines) - 1):
+            fp.close()
+            return 1
+        else:
+            ln += 1
     b = numpy.array(map(float, re.findall(find, lines[ln + 3])))
     d = numpy.array(map(float, re.findall(find, lines[ln + 4])))
     fp.close()
     bad_fit = 0
     if(b[2] > 100 or d[2] > 100):
         bad_fit = 1
+    print b, d
+    print bad_fit, spr, pattern
     return bad_fit
-
-
-def reset_parameters(files, spr, pattern):
-    # copio el archivo .fit.ini
-    origin = "%s%s.sol" % (files.path_base_file, files.base_file)
-    destination = "%s%sspr_%d_pattern_%d%s.fit.ini" % (files.pathout, files.input_file,
-                                                       spr, pattern, files.ext)
-    subprocess.call(["cp", origin, destination])
 
 
 def step_1(files, rings, spr, pattern, flag, find):
@@ -110,12 +106,15 @@ def step_1(files, rings, spr, pattern, flag, find):
     ln = 0
     while(not(lines[ln].startswith("FIT_LIMIT"))):
         if(ln == len(lines) - 1):
+            fp.close()
             return 1
         else:
             ln += 1
-    lines[ln] = "FIT_LIMIT=1e-12\n"
-    while(not(lines[ln].startswith("peak_pos_fit"))):
+    lines[ln] = "FIT_LIMIT=1e-9\n"
+    ln = 0
+    while(not(lines[ln].startswith("peak_pos_fit") or lines[ln].startswith("peak_int_fit"))):
         if(ln == len(lines) - 1):
+            fp.close()
             return 1
         else:
             ln += 1
@@ -124,7 +123,7 @@ def step_1(files, rings, spr, pattern, flag, find):
     fp.writelines(lines)
     fp.close()
     # defino cual es el archivo anterior
-    if(pattern == rings.pattern_i):
+    if(pattern == rings.pattern_i + rings.delta_pattern):
         spr_prev = spr - rings.delta_spr
         pattern_prev = rings.pattern_i
     else:
@@ -136,8 +135,12 @@ def step_1(files, rings, spr, pattern, flag, find):
     ln = 0
     fp = open(sol_file, "r")
     lines = fp.readlines()
+    fp.close()
     while(not(lines[ln].startswith("a_scaled"))):
-        ln += 1
+        if(ln == len(lines) - 1):
+            return 1
+        else:
+            ln += 1
     a = float(re.findall(find, lines[ln + 0])[0])
     b = float(re.findall(find, lines[ln + 1])[0])
     c = float(re.findall(find, lines[ln + 2])[0])
@@ -147,7 +150,6 @@ def step_1(files, rings, spr, pattern, flag, find):
     # while(not(lines[ln].startswith("The stacking faults probability"))):
     #     ln += 1
     # st_pr = float(re.findall(find, lines[ln + 1])[0])
-    fp.close()
     # genero el archivo .fit.ini
     fit_ini = "%s%sspr_%d_pattern_%d%s.fit.ini" % (files.pathout, files.input_file,
                                                    spr, pattern, files.ext)
@@ -173,12 +175,14 @@ def step_2(files, rings, spr, pattern, flag, find):
     ln = 0
     while(not(lines[ln].startswith("FIT_LIMIT"))):
         if(ln == len(lines) - 1):
+            fp.close()
             return 1
         else:
             ln += 1
-    lines[ln] = "FIT_LIMIT=1e-14\n"
+    lines[ln] = "FIT_LIMIT=1e-12\n"
 
-    while(not(lines[ln].startswith("peak_pos_fit"))):
+    ln = 0
+    while(not(lines[ln].startswith("peak_pos_fit") or lines[ln].startswith("peak_int_fit"))):
         ln += 1
     lines[ln] = "peak_pos_fit=n\n"
     lines[ln + 1] = "peak_int_fit=n\n"
@@ -264,6 +268,7 @@ def step_4(files, rings, spr, pattern, flag, find):
     ln = 0
     fp = open(sol_file, "r")
     lines = fp.readlines()
+    fp.close()
     while(not(lines[ln].startswith("a_scaled"))):
         if(ln == len(lines) - 1):
             return 1
@@ -278,7 +283,6 @@ def step_4(files, rings, spr, pattern, flag, find):
     # while(not(lines[ln].startswith("The stacking faults probability"))):
     #     ln += 1
     # st_pr = float(re.findall(find, lines[ln + 1])[0])
-    fp.close()
     # genero el archivo .fit.ini
     fit_ini = "%s%sspr_%d_pattern_%d%s.fit.ini" % (files.pathout, files.input_file,
                                                    spr, pattern, files.ext)
