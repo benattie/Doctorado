@@ -7,11 +7,11 @@ import sys
 
 # leo el archivo de configuracion
 print("Getting data")
-f = open('para_cmwp.dat', 'r')
-para_data = f.readlines()
+fp = open('para_cmwp.dat', 'r')
+para_data = fp.readlines()
 files = file_data(para_data)
 rings = fit2d_data(para_data)
-f.close()
+fp.close()
 
 # CMWP fitting routine
 flag = int(sys.argv[1])

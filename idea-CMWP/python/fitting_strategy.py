@@ -2,9 +2,10 @@
 import subprocess
 import re
 import numpy
+from math import isnan
 
 
-def update_params(files, rings, spr, pattern, flag, find, bad_fit):
+def update_params(files, rings, spr, pattern, flag, find, bad_fit, fit_result):
     if(flag == 1):
         if(spr == rings.spr_i and pattern == rings.pattern_i + rings.delta_pattern):
             # copio el archivo ini
@@ -43,50 +44,102 @@ def update_params(files, rings, spr, pattern, flag, find, bad_fit):
                                                                   spr, pattern)
         else:
             error = 0
-            print "Paso 1"
+            n_steps = 1
+            print "Paso %d" % n_steps
+            n_steps += 1
             # error = step_1(files, rings, spr, pattern, flag, find)
-            # if(error == 1):
-                # "Mal ajuste en spr = %d y pattern = %d (paso %d)\n" % (spr, pattern, 1)
-                # return "", 1
-            # print "Paso 2"
+            # print "Paso %d" % n_steps
+            # n += 1
             error = step_2(files, rings, spr, pattern, flag, find)
             if(error == 1):
                 "Mal ajuste en spr = %d y pattern = %d (paso %d)\n" % (spr, pattern, 2)
                 return "", 1
-            print "Paso 3"
+            print "Paso %d" % n_steps
+            n_steps += 1
             error = step_3(files, rings, spr, pattern, flag, find)
             if(error == 1):
                 "Mal ajuste en spr = %d y pattern = %d (paso %d)\n" % (spr, pattern, 3)
                 return "", 1
-            print "Paso 4"
+            print "Paso %d" % n_steps
+            n_steps += 1
             physsol_file = step_4(files, rings, spr, pattern, flag, find)
-            bad_fit = check_fit(files, spr, pattern, find)
+            (bad_fit, fit_result) = check_fit(files, spr, pattern, find)
     else:
         physsol_file = ""
-    return (physsol_file, bad_fit)
+        bad_fit = 0
+    return (physsol_file, bad_fit, fit_result)
 
 
 def check_fit(files, spr, pattern, find):
-    # leo los resultados del archivo
-    sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file, spr, pattern)
+    # obtengo los resultados del paso 1
+    file_name = "%sspr_%d_pattern_%d" % (files.input_file, spr, pattern)
+    sol_file = "%s%s%s%s/%s.sol" % (files.results_folder, files.pathout, file_name, files.ext, file_name)
     ln = 0
     fp = open(sol_file, "r")
     lines = fp.readlines()
+    success = 1
     while(not(lines[ln].startswith("Final set of parameters"))):
         if(ln == len(lines) - 1):
             fp.close()
-            return 1
+            a = numpy.array(map(float, ['NaN', 'NaN', 'NaN']))
+            b = numpy.array(map(float, ['NaN', 'NaN', 'NaN']))
+            d = numpy.array(map(float, ['NaN', 'NaN', 'NaN']))
+            success = 0
+            break
         else:
             ln += 1
-    b = numpy.array(map(float, re.findall(find, lines[ln + 3])))
-    d = numpy.array(map(float, re.findall(find, lines[ln + 4])))
+    if(success):
+        a = numpy.array(map(float, re.findall(find, lines[ln + 3])))
+        b = numpy.array(map(float, re.findall(find, lines[ln + 4])))
+        d = numpy.array(map(float, re.findall(find, lines[ln + 5])))
     fp.close()
+    # obtengo los resultados del paso 2
+    n_steps = 1
+    sol_file = "%s%s%s%s-%d/%s.sol" % (files.results_folder, files.pathout, file_name, files.ext, n_steps, file_name)
+    ln = 0
+    fp = open(sol_file, "r")
+    lines = fp.readlines()
+    success = 1
+    while(not(lines[ln].startswith("Final set of parameters"))):
+        if(ln == len(lines) - 1):
+            fp.close()
+            c = numpy.array(map(float, ['NaN', 'NaN', 'NaN']))
+            e = numpy.array(map(float, ['NaN', 'NaN', 'NaN']))
+            success = 0
+            break
+        else:
+            ln += 1
+    if(success):
+        c = numpy.array(map(float, re.findall(find, lines[ln + 3])))
+        e = numpy.array(map(float, re.findall(find, lines[ln + 4])))
+    fp.close()
+    n_steps += 1
+    # obtengo los resultados del paso 3
+    sol_file = "%s%s%s%s-%d/%s.sol" % (files.results_folder, files.pathout, file_name, files.ext, n_steps, file_name)
+    ln = 0
+    fp = open(sol_file, "r")
+    lines = fp.readlines()
+    success = 1
+    while(not(lines[ln].startswith("Final set of parameters"))):
+        if(ln == len(lines) - 1):
+            fp.close()
+            b = numpy.array(map(float, ['NaN', 'NaN', 'NaN']))
+            d = numpy.array(map(float, ['NaN', 'NaN', 'NaN']))
+            success = 0
+            break
+        else:
+            ln += 1
+    if(success):
+        b = numpy.array(map(float, re.findall(find, lines[ln + 3])))
+        d = numpy.array(map(float, re.findall(find, lines[ln + 4])))
+    fp.close()
+    n_steps += 1
+    fit_result = numpy.vstack((a, b, c, d, e))
     bad_fit = 0
-    if(b[2] > 100 or d[2] > 100):
-        bad_fit = 1
-    print b, d
-    print bad_fit, spr, pattern
-    return bad_fit
+    for x in fit_result[:, 2]:
+        if (x > 100 or isnan(x)):
+            bad_fit = 1
+    return (bad_fit, fit_result)
 
 
 def step_1(files, rings, spr, pattern, flag, find):

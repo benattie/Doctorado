@@ -18,9 +18,9 @@ struct DAT {float old; float nnew;};
 int main(int argc, char ** argv)
 {
     struct DAT intensss;
-    FILE *fp, *fp1, *fp_fit;
+    FILE *fp, *fp1, *fp_fit, *fp_log;
     char buf_temp[1024], buf[1024], buf1[1024], path_out[1024], filename1[1024], path1[1024], inform1[1024], marfile[1024];
-    char *getval = malloc(sizeof(char) * (250 + 1)), path_base[1024], base_filename[1024], minus_zero[1];
+    char *getval = malloc(sizeof(char) * (250 + 1)), resultsf[1024], path_base[1024], base_filename[1024], minus_zero[1];
     static int del_gam, star_d;
     int a, b, i, k, n, x, y, z, count, anf_gam, ende_gam, anf_ome, ende_ome, del_ome, rv;
     int BG_l, BG_r, end_d, del_d, numrings, posring_l[15], posring_r[15], ug_l[15], ug_r[15];
@@ -74,6 +74,8 @@ int main(int argc, char ** argv)
     //skip lines
     getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", path_base); getval = fgets(buf_temp, 2, fp);
     getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", base_filename); getval = fgets(buf_temp, 2, fp);
+    //lee la ubicacion de la carpeta de CMWP donde se almacenan todos los resultados
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", resultsf); getval = fgets(buf_temp, 2, fp);
     //lee la extension de los archivos (spr)
     getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", inform1); getval = fgets(buf_temp, 2, fp);
     //numero del primer spr
@@ -204,7 +206,7 @@ int main(int argc, char ** argv)
         strcat(marfile, ".");
         strcat(marfile, "spr");
 
-        printf("\nReading data from <====  %s\n", marfile);
+        printf("\nReading data from ====>  %s\n", marfile);
         //abro el archivo spr del que voy a sacar las intensdades de los picos
         if((fp1 = fopen(marfile, "r")) == NULL)
         {
@@ -331,20 +333,25 @@ int main(int argc, char ** argv)
     free_r3_tensor_double(breadth, 40, 500);
     free_r3_tensor_double(breadth_err, 40, 500);
     t4 = time(&t4);
-    
     time_spent = difftime(t4, t1);
-    printf("---------------------------------------------\n");
-    printf("Tiempo de ejecucion total del programa: %.2lf segundos\n", time_spent);
-    printf("                                      o %.2lf minutos\n", time_spent / 60.);
-    printf("                                      o %.2lf horas\n", time_spent / 3600.);
-    printf("---------------------------------------------\n");
+    fp_log = fopen("error.log", "a");
+    sprintf(buf_temp, "---------------------------------------------\n");
+    sprintf(buf_temp, "Tiempo de ejecucion total del programa: %.2lf segundos\n", time_spent);
+    sprintf(buf_temp, "                                      o %.2lf minutos\n", time_spent / 60.);
+    sprintf(buf_temp, "                                      o %.2lf horas\n", time_spent / 3600.);
+    sprintf(buf_temp, "---------------------------------------------\n");
+    printf("%s", buf_temp);
+    fprintf(fp_log, "%s", buf_temp);
 
     time_spent = difftime(t3, t2);
-    printf("---------------------------------------------\n");
-    printf("Tiempo de ejecucion total de la rutina CMWP: %.2lf segundos\n", time_spent);
-    printf("                                           o %.2lf minutos\n", time_spent / 60.);
-    printf("                                           o %.2lf horas\n", time_spent / 3600.);
-    printf("---------------------------------------------\n");
+    sprintf(buf_temp, "---------------------------------------------\n");
+    sprintf(buf_temp, "Tiempo de ejecucion total de la rutina CMWP: %.2lf segundos\n", time_spent);
+    sprintf(buf_temp, "                                           o %.2lf minutos\n", time_spent / 60.);
+    sprintf(buf_temp, "                                           o %.2lf horas\n", time_spent / 3600.);
+    sprintf(buf_temp, "---------------------------------------------\n");
+    printf("%s", buf_temp);
+    fprintf(fp_log, "%s", buf_temp);
+    fclose(fp_log);
 
     printf("\nNo importa la realidad, sólo la verosimilitud\n");
     return 0;

@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*
 from winkel_fns import winkel_al, winkel_be
+import time
+from os import chdir
+from os import listdir
+from subprocess import call
+from shutil import move
 
 
 class cmwp_out:
@@ -8,12 +13,14 @@ class cmwp_out:
             # archivo con las soluciones del ajuste
             outfile = "%s%s_CMWP_SOL_PF_%d_%d.mtex" % (files.pathout, files.input_file, m + 1, rings.hkl[m])
             fp_sol = open(outfile, "w")
+            fp_sol.write("# IDEA CMWP --- RESULT FILE --- %s\n" % time.strftime("%d/%m/%Y %I:%M:%S"))
             fp_sol.write("# Row 2theta theta alpha beta a b c d e\n")
             fp_sol.flush()
 
             # archivo con las soluciones fisicas
             outfile = "%s%s_CMWP_PHYSSOL_PF_%d_%d.mtex" % (files.pathout, files.input_file, m + 1, rings.hkl[m])
             fp_physsol = open(outfile, "w")
+            fp_physsol.write("# IDEA CMWP --- RESULT FILE --- %s\n" % time.strftime("%d/%m/%Y %I:%M:%S"))
             fp_physsol.write("# Row 2theta theta alpha beta ")
             for field in cmwp_results.header:
                 fp_physsol.write("%s " % field)
@@ -60,4 +67,29 @@ class cmwp_out:
             fp_sol.close()
             fp_physsol.flush()
             fp_physsol.close()
+        organize_files(files)
         self.exit = 0
+
+
+def organize_files(files):
+    # me voy a la carpeta con los datos
+    chdir(files.pathout)
+    folder = "cmwp_idea_pole_figures"
+    call(["mkdir", folder])
+    source = listdir("./")
+    for files in source:
+        if files.endswith(".mtex"):
+            move(files, folder)
+    folder = "cmwp_idea_files"
+    call(["mkdir", folder])
+    for files in source:
+        if files.startswith(files.input_file):
+            move(files, folder)
+    # me voy a la carpeta con todos los resultados del ajuste
+    chdir(files.results_folder)
+    folder = "cmwp_idea_fit_files"
+    call(["mkdir", folder])
+    source = listdir("./")
+    for files in source:
+        if files.startswith(files.input_file):
+            move(files, folder)

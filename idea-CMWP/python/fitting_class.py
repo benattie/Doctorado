@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*
 import numpy
-import re
+import time
 import subprocess
 from fitting_strategy import update_params
 
@@ -28,12 +28,16 @@ class cmwp_fit:
         n_pattern = int((rings.pattern_f - rings.pattern_i + 1) / rings.delta_pattern)
         shape = (n_spr, n_pattern, n_variables)
         self.sol = numpy.zeros((n_spr, n_pattern, n_sol_variables))
+        self.solerr = numpy.zeros((n_spr, n_pattern, n_sol_variables))
         self.physsol = numpy.zeros(shape)
         self.header = ""
         ptrn_i = rings.pattern_i + rings.delta_pattern
         ptrn_f = rings.pattern_f + rings.delta_pattern
         n_bad_fit = 0
         bad_fit = 0
+        result = numpy.zeros((n_sol_variables, 3))
+        fp_log = open("errors.log", "a")
+        fp_log.write("IDEA CMWP\nERROR LOG FILE\n%s\n\n" % time.strftime("%d/%m/%Y %I:%M:%S"))
 
         for spr in range(rings.spr_i, rings.spr_f + 1, rings.delta_spr):
             # print("Processing spr %d" % spr)
@@ -41,28 +45,14 @@ class cmwp_fit:
                 # print "%d, %d" % (spr, pattern)
                 if(flag == 1):
                     # soluciones fisicas del problema
-                    (physsol_file, bad_fit) = update_params(files, rings, spr, pattern, flag, find, bad_fit)
-                    # print physsol_file
-                    # print bad_fit
-                    # raw_input("Presione enter")
+                    (physsol_file, bad_fit, result) = update_params(files, rings, spr, pattern, flag, find, bad_fit, result)
                     if(bad_fit == 1 or physsol_file == ""):
-                        # print "bad_fit == 1"
                         n_bad_fit += 1
                         reset_parameters(files, spr, pattern)
-                        self.sol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern - 1] = -1 * numpy.ones((1, n_sol_variables))
+                        fp_log.write("Bad fit spr = %d, pattern = %d\n" % (spr, pattern))
+                        # self.sol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern - 1] = -1 * numpy.ones((1, n_sol_variables))
                         self.physsol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern - 1] = -1 * numpy.ones((1, n_variables))
                     else:
-                        # soluciones matematicas del ajuste
-                        sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file, spr, pattern)
-                        ln = 0
-                        fp = open(sol_file, "r")
-                        lines = fp.readlines()
-                        while(not(lines[ln].startswith("*** THE SOLUTIONS"))):
-                            ln += 1
-                        fp.close()
-                        for i in range(0, 5):
-                            x = float(re.findall(find, lines[ln + 3 + i])[0])
-                            self.sol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern - 1][i] = float(x)
                         # guardo todas las soluciones fisicas del fit
                         fp = open(physsol_file, "r")
                         lines = fp.readlines()
@@ -73,12 +63,22 @@ class cmwp_fit:
                             # print(spr, pattern, x)
                             self.physsol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern - 1][v] = float(x)
                             v += 1
+                    # soluciones matematicas del ajuste
+                    for i in range(0, n_sol_variables):
+                        self.sol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern - 1][i] = result[i][0]
+                        self.solerr[spr / rings.delta_spr - 1][pattern / rings.delta_pattern - 1][i] = result[i][1]
         if(flag == 1):
             print "\n*******************************"
             print "*******************************\n"
             print "Warning: there were %d bad fits" % n_bad_fit
             print "\n*******************************"
             print "*******************************\n"
+            fp_log.write("\n*******************************\n")
+            fp_log.write("*******************************\n")
+            fp_log.write("There were %d bad fits" % n_bad_fit)
+            fp_log.write("\n*******************************\n")
+            fp_log.write("*******************************\n")
+        fp_log.close()
 
 
 def reset_parameters(files, spr, pattern):

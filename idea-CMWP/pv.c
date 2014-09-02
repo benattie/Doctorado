@@ -102,7 +102,7 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     {
       double theta = peak_seeds[1][i], H = peak_seeds[1][0], eta = peak_seeds[1][1];
       double I = pseudo_voigt(theta, difra->numrings, I0, t0, H, eta, shift_H, shift_eta, difra->n_bg, bg_pos, difra->bg[1]);
-      fprintf(fp, "%.5lf %.5lf %d 0\n", peak_seeds[1][i], I, difra->hkl[n]);
+      fprintf(fp, "%.5lf %.5lf %d 0\n", peak_seeds[1][i], 0.7 * I, difra->hkl[n]);
       n++;
     }
     fflush(fp);
