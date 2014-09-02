@@ -334,7 +334,7 @@ int main(int argc, char ** argv)
     free_r3_tensor_double(breadth_err, 40, 500);
     t4 = time(&t4);
     time_spent = difftime(t4, t1);
-    fp_log = fopen("error.log", "a");
+    fp_log = fopen("errors.log", "a");
     sprintf(buf_temp, "---------------------------------------------\n");
     sprintf(buf_temp, "Tiempo de ejecucion total del programa: %.2lf segundos\n", time_spent);
     sprintf(buf_temp, "                                      o %.2lf minutos\n", time_spent / 60.);
