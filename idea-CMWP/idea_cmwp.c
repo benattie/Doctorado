@@ -19,7 +19,7 @@ int main(int argc, char ** argv)
 {
     struct DAT intensss;
     FILE *fp, *fp1, *fp_fit, *fp_log;
-    char buf_temp[1024], buf[1024], buf1[1024], path_out[1024], filename1[1024], path1[1024], inform1[1024], marfile[1024];
+    char buf_temp[1024], buf[2048], buf1[1024], path_out[1024], filename1[1024], path1[1024], inform1[1024], marfile[1024];
     char *getval = malloc(sizeof(char) * (250 + 1)), resultsf[1024], path_base[1024], base_filename[1024], minus_zero[1];
     static int del_gam, star_d;
     int a, b, i, k, n, x, y, z, count, anf_gam, ende_gam, anf_ome, ende_ome, del_ome, rv;
@@ -335,22 +335,30 @@ int main(int argc, char ** argv)
     t4 = time(&t4);
     time_spent = difftime(t4, t1);
     fp_log = fopen("errors.log", "a");
-    sprintf(buf_temp, "---------------------------------------------\n");
+    sprintf(buf, "---------------------------------------------\n");
     sprintf(buf_temp, "Tiempo de ejecucion total del programa: %.2lf segundos\n", time_spent);
+    strcat(buf, buf_temp);
     sprintf(buf_temp, "                                      o %.2lf minutos\n", time_spent / 60.);
+    strcat(buf, buf_temp);
     sprintf(buf_temp, "                                      o %.2lf horas\n", time_spent / 3600.);
+    strcat(buf, buf_temp);
     sprintf(buf_temp, "---------------------------------------------\n");
-    printf("%s", buf_temp);
-    fprintf(fp_log, "%s", buf_temp);
+    strcat(buf, buf_temp);
+    printf("%s", buf);
+    fprintf(fp_log, "%s", buf);
 
     time_spent = difftime(t3, t2);
-    sprintf(buf_temp, "---------------------------------------------\n");
+    sprintf(buf, "---------------------------------------------\n");
     sprintf(buf_temp, "Tiempo de ejecucion total de la rutina CMWP: %.2lf segundos\n", time_spent);
+    strcat(buf, buf_temp);
     sprintf(buf_temp, "                                           o %.2lf minutos\n", time_spent / 60.);
+    strcat(buf, buf_temp);
     sprintf(buf_temp, "                                           o %.2lf horas\n", time_spent / 3600.);
+    strcat(buf, buf_temp);
     sprintf(buf_temp, "---------------------------------------------\n");
-    printf("%s", buf_temp);
-    fprintf(fp_log, "%s", buf_temp);
+    strcat(buf, buf_temp);
+    printf("%s", buf);
+    fprintf(fp_log, "%s", buf);
     fclose(fp_log);
 
     printf("\nNo importa la realidad, sólo la verosimilitud\n");

@@ -214,8 +214,8 @@ def step_1(files, rings, spr, pattern, flag, find):
     fp.close()
     if(flag == 1):
         # correr el cmwp
-        cmd = './evaluate %s%sspr_%d_pattern_%d%s auto' % (files.pathout, files.input_file,
-                                                           spr, pattern, files.ext)
+        cmd = './evaluate %s%sspr_%d_pattern_%d%s auto' % (files.pathout, files.input_file, spr, pattern, files.ext)
+        cmd = './evaluate %s%sspr_%d_pattern_%d%s auto >> std_output.txt' % (files.pathout, files.input_file, spr, pattern, files.ext)
         subprocess.call(cmd, shell=True)
 
 
@@ -289,8 +289,8 @@ def step_2(files, rings, spr, pattern, flag, find):
     fp.close()
     if(flag == 1):
         # correr el cmwp
-        cmd = './evaluate %s%sspr_%d_pattern_%d%s auto' % (files.pathout, files.input_file,
-                                                           spr, pattern, files.ext)
+        cmd = './evaluate %s%sspr_%d_pattern_%d%s auto' % (files.pathout, files.input_file, spr, pattern, files.ext)
+        cmd = './evaluate %s%sspr_%d_pattern_%d%s auto >> std_output.txt' % (files.pathout, files.input_file, spr, pattern, files.ext)
         subprocess.call(cmd, shell=True)
 
 
@@ -327,8 +327,8 @@ def step_3(files, rings, spr, pattern, flag, find):
 
     if(flag == 1):
         # correr el cmwp
-        cmd = './evaluate %s%sspr_%d_pattern_%d%s auto' % (files.pathout, files.input_file,
-                                                           spr, pattern, files.ext)
+        cmd = './evaluate %s%sspr_%d_pattern_%d%s auto' % (files.pathout, files.input_file, spr, pattern, files.ext)
+        cmd = './evaluate %s%sspr_%d_pattern_%d%s auto >> std_output.txt' % (files.pathout, files.input_file, spr, pattern, files.ext)
         subprocess.call(cmd, shell=True)
 
 
@@ -364,8 +364,8 @@ def step_4(files, rings, spr, pattern, flag, find):
     fp.close()
     if(flag == 1):
         # correr el cmwp
-        cmd = './evaluate %s%sspr_%d_pattern_%d%s auto' % (files.pathout, files.input_file,
-                                                           spr, pattern, files.ext)
+        cmd = './evaluate %s%sspr_%d_pattern_%d%s auto' % (files.pathout, files.input_file, spr, pattern, files.ext)
+        cmd = './evaluate %s%sspr_%d_pattern_%d%s auto >> std_output.txt' % (files.pathout, files.input_file, spr, pattern, files.ext)
         subprocess.call(cmd, shell=True)
         # leo el physsol.csv y lo guardo en memoria
         physsol_file = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file,

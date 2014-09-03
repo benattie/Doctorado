@@ -33,6 +33,7 @@ class cmwp_fit:
         self.header = ""
         ptrn_i = rings.pattern_i + rings.delta_pattern
         ptrn_f = rings.pattern_f + rings.delta_pattern
+        n_ptrn = (ptrn_f - ptrn_i) / rings.delta_pattern
         n_bad_fit = 0
         bad_fit = 0
         result = numpy.zeros((n_sol_variables, 3))
@@ -40,10 +41,15 @@ class cmwp_fit:
         fp_log.write("IDEA CMWP\nERROR LOG FILE\n%s\n\n" % time.strftime("%d/%m/%Y %I:%M:%S"))
 
         for spr in range(rings.spr_i, rings.spr_f + 1, rings.delta_spr):
-            # print("Processing spr %d" % spr)
+            print("Processing spr %d" % spr)
             for pattern in range(ptrn_i, ptrn_f, rings.delta_pattern):
-                # print "%d, %d" % (spr, pattern)
+                n = (pattern - ptrn_i) / rings.delta_pattern
+                if (n % 5 == 0):
+                    print "pattern %d of %d (%f %%)" % (n, n_ptrn, float(n) / n_ptrn)
                 if(flag == 1):
+                    # deshabilitar las graficas durante el fiteo
+                    cmd = "unset DISPLAY"
+                    subprocess.call(cmd, shell=True)
                     # soluciones fisicas del problema
                     (physsol_file, bad_fit, result) = update_params(files, rings, spr, pattern, flag, find, bad_fit, result)
                     if(bad_fit == 1 or physsol_file == ""):

@@ -77,19 +77,19 @@ def organize_files(files):
     folder = "cmwp_idea_pole_figures"
     call(["mkdir", folder])
     source = listdir("./")
-    for files in source:
-        if files.endswith(".mtex"):
-            move(files, folder)
+    for datafile in source:
+        if datafile.endswith(".mtex"):
+            move(datafile, folder)
     folder = "cmwp_idea_files"
     call(["mkdir", folder])
-    for files in source:
-        if files.startswith(files.input_file):
-            move(files, folder)
+    for datafile in source:
+        if datafile.startswith(files.input_file):
+            move(datafile, folder)
     # me voy a la carpeta con todos los resultados del ajuste
     chdir(files.results_folder)
     folder = "cmwp_idea_fit_files"
     call(["mkdir", folder])
     source = listdir("./")
-    for files in source:
-        if files.startswith(files.input_file):
-            move(files, folder)
+    for datafile in source:
+        if datafile.startswith(files.input_file):
+            move(datafile, folder)
