@@ -45,11 +45,8 @@ class cmwp_fit:
             for pattern in range(ptrn_i, ptrn_f, rings.delta_pattern):
                 n = (pattern - ptrn_i) / rings.delta_pattern
                 if (n % 5 == 0):
-                    print "pattern %d of %d (%f %%)" % (n, n_ptrn, float(n) / n_ptrn)
+                    print "pattern %d of %d (%.2f %%)" % (n, n_ptrn, float(n) / n_ptrn)
                 if(flag == 1):
-                    # deshabilitar las graficas durante el fiteo
-                    cmd = "unset DISPLAY"
-                    subprocess.call(cmd, shell=True)
                     # soluciones fisicas del problema
                     (physsol_file, bad_fit, result) = update_params(files, rings, spr, pattern, flag, find, bad_fit, result)
                     if(bad_fit == 1 or physsol_file == ""):

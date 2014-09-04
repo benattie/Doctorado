@@ -11,14 +11,14 @@ class cmwp_out:
     def __init__(self, files, rings, cmwp_results):
         for m in range(0, rings.numrings):  # itero sobre todos los picos
             # archivo con las soluciones del ajuste
-            outfile = "%s%s_CMWP_SOL_PF_%d_%d.mtex" % (files.pathout, files.input_file, m + 1, rings.hkl[m])
+            outfile = "%s%sCMWP_SOL_PF_%d_%d.mtex" % (files.pathout, files.input_file, m + 1, rings.hkl[m])
             fp_sol = open(outfile, "w")
             fp_sol.write("# IDEA CMWP --- RESULT FILE --- %s\n" % time.strftime("%d/%m/%Y %I:%M:%S"))
             fp_sol.write("# Row 2theta theta alpha beta a b c d e\n")
             fp_sol.flush()
 
             # archivo con las soluciones fisicas
-            outfile = "%s%s_CMWP_PHYSSOL_PF_%d_%d.mtex" % (files.pathout, files.input_file, m + 1, rings.hkl[m])
+            outfile = "%s%sCMWP_PHYSSOL_PF_%d_%d.mtex" % (files.pathout, files.input_file, m + 1, rings.hkl[m])
             fp_physsol = open(outfile, "w")
             fp_physsol.write("# IDEA CMWP --- RESULT FILE --- %s\n" % time.strftime("%d/%m/%Y %I:%M:%S"))
             fp_physsol.write("# Row 2theta theta alpha beta ")
@@ -82,6 +82,7 @@ def organize_files(files):
             move(datafile, folder)
     folder = "cmwp_idea_files"
     call(["mkdir", folder])
+    source = listdir("./")
     for datafile in source:
         if datafile.startswith(files.input_file):
             move(datafile, folder)
