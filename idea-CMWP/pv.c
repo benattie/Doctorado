@@ -82,7 +82,11 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     sprintf(filename, "%s%sspr_%d_pattern_%d.dat", sync_data->path_out, sync_data->root_name, difra->spr, difra->gamma);
     fp = fopen(filename, "w");
     for(i = 0; i < net_size; i++)
-      fprintf(fp, "%.5lf %.5lf\n", gsl_vector_get(ttheta, i), gsl_vector_get(y, i));
+        if(gsl_vector_get(y, i))
+            fprintf(fp, "%.5lf %.5lf\n", gsl_vector_get(ttheta, i), gsl_vector_get(y, i));
+        else
+            fprintf(fp, "%.5lf %.5lf\n", gsl_vector_get(ttheta, i), 1.0);
+
     fflush(fp);
     fclose(fp);
     //imprimo las posiciones de los picos y sus intensidades

@@ -361,6 +361,9 @@ int main(int argc, char ** argv)
     fprintf(fp_log, "%s", buf);
     fclose(fp_log);
 
+    sprintf(buf, "cp errors.log fit_results.log %scmwp_idea_files", path_out);
+    rv = system(buf);
+    puts("Programa finalizado.\nConsulte los archivos fit_results.log y errors.log para ver detalles sobre los ajustes");
     printf("\nNo importa la realidad, sólo la verosimilitud\n");
     return 0;
 } //End of Main()

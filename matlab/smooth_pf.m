@@ -11,11 +11,12 @@ function spf = smooth_pf(pf, pf_start, pf_end)
         x = getx(p);
         y = gety(p);
         z = getz(p);
-        X = [x(:) y(:) z(:)];
+        X = {x, y, z};
         % las intensidades de los puntos de la grilla irregular
-        int = get(pf(i),'intensities');
+        pf_int = get(pf(i), 'intensities');
+        int = pf_int;
         % obtengo los puntos interpolados (verificar que ande)
-        f = csapi(X,int);
+        f = csaps(p, int);
         int_smooth = fnval(f, X);
         % ahora genero la figura de polos regular
         aux_h = get(pf(i), 'h'); % obtengo el indice de Miller

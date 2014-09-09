@@ -1,3 +1,0 @@
-Verificar si las intensidades fiteadas por mi programa estan bien.
-Agregar archivos instrumentales
-Agregar correccion por stacking faults (si hay que modificar algo para sacar el resultado de esto)
