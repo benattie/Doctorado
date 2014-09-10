@@ -48,9 +48,8 @@ class cmwp_fit:
             for pattern in range(ptrn_i, ptrn_f, rings.delta_pattern):
                 n = (pattern - ptrn_i) / rings.delta_pattern
                 if (n % 10 == 0):
-                    print("pattern %d of %d" % (n, ptrn_por_spr))
                     n_previos = ptrn_por_spr * (spr - 1)
-                    print("%.2f %% completed" % (float(n_previos + n) / ptrn_total * 100.))
+                    print("pattern %d of %d (%.2f %% completed)" % (n, ptrn_por_spr, float(n_previos + n) / ptrn_total * 100.))
                 if(flag == 1):
                     # soluciones fisicas del problema
                     (physsol_file, bad_fit, result) = update_params(files, rings, spr, pattern, flag, find, bad_fit, result)
