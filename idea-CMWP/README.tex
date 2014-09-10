@@ -1,0 +1,130 @@
+PROGRAM: IDEA_CMWP.EXE, Ver. 1.0
+QUICK REFERENCE
+Program for generating the pole figures from CMWP data. Coordinate-transformation to MTEX-Format.
+Pole figures in MTEX-readable format xxx_Nr.mtex. The angular values of Omega and Gamma, from the parameter file
+In order to work the executable file idea_cmwp.exe must be placed in the CMWP instalation folder along with the python folder.
+Python 2.7 required
+
+Run with:
+./idea_cmwp.exe
+./idea_cmwp.exe flag
+./idea_cmwp.exe flag th
+flag = 1 if you want to run CMWP and flag = 0 if you only want to create fitting files
+th is the minimum peak intensity to be fitted (should be between 0 and 10)
+
+Input files:
+para_cmwp.dat
+fit_ini.dat
+
+Output files:
+errors.log
+fit_results.log
+std_output.log
+idea_cmwp_files/configuration_files
+idea_cmwp-pole_figures/BASE_SPR_CMWP_PHYSSOL_#_hkl.mtex
+idea_cmwp-pole_figures/BASE_SPR_CMWP_SSOL.mtex_#_hkl.mtex
+
+Error or suggestions to benatti@ifir-conicet.gov.ar
+
+REFERENCE
+Este programa toma los datos de un experimento de transmisión de un sincrotrón en el formato de salida que da el programa FIT2D.
+Los parámetros de entrada se especifican en el archivo para_fit2d.dat. El nombre de los archivos de entrada es de la forma nombre_####.extension
+Ejemplo:
+-----------Inicio de para_cmwp.dat. Esta línea no va en el archivo--------------
+-----------Las lineas que empiezan con % son comentarios y tampoco van en el archivo----------
+Input Data - 1
+1.PathForSPR        : /ruta/a/los/archivos/spr/
+2.PathForOutput     : /ruta/relativa/a/los/archivos/de/salida/
+3.InputFileName     : BASE_SPR
+4.PathForBaseFiles  : /ruta/a/los/archivos/de/configuracion/del/CMWP/
+5.NameOfBaseFiles   : BASE_FILE
+6.PathResultsFolder : /ruta/a/la/carpeta/CMWP/results/evaluate-int-dir/
+7.FileExtension     : spr
+8.IndexNr Start     : #archivo_inicial
+9.DeltaIndexNr      : #salto_entre_archivos
+10.IndexNr End      : #archivo_final
+11.Start Angle      : angulo de rotacion de la muestra en el primer archivo
+12.Delta Angle      : paso de rotacion de la muestra entre archivos
+13.End Angle        : angulo de rotacion de la muestra en el ultimo archivo
+14.Start Gamma      : porcion inicial del anillo de Debye a estudiar
+15.Delta Gamma      : ancho de la porcion del anillo de Debye a estudiar
+16.End Gamma        : porcion final del anillo de Debye a estudiar
+
+IDEA Input Data
+17.Distance         : distancia entre la muestra y el detector
+18.Pixel value      : distancia/pixel de la placa fotorafica
+19.Treshold         : picos con intensidad_raw < Treshold tienen intensidad nula y no se los ajusta
+20.MinusToZero(y/n) : si intensidad_raw < 0 -> intensidad_raw = 0
+
+Peak Positions
+I. NrOfPeaks        : numero de Picos a a analizar del difractograma
+II. Peak Positions
+hkl Theta Peak-L Peak-R BG-L BG-R:
+111 2.050 660 838 400 1065
+200 2.359 839 1000 500 1070
+220 3.324 1120 1380 1070 1385
+311 3.895 1395 1529 1370 1700
+222 4.067 1490 1690 1370 1700
+---------------Fin del para_fit2d.dat. Esta línea tampoco va---------------------------------
+Los datos de los picos se ingresan escribiendo la posición del centro (\theta_{bragg}), los píxel en que se considera que inicia y termina el pico y píxel que determina el nivel de background alrededor de ese pico.
+La lectura de datos no es muy robusta, así que se debe respetar al pie de la letra el formato del archivo.
+Se acompaña un Makefile con las reglas para compilar el código. Para compilar simplemente hacer:
+make idea_cmwp
+Para que el programa corra adecuadamente se requiere la biblioteca científica del proyecto GNU (GSL) en su versión 1.16 o superior.
+El programa utiliza una subrutina hecha en python para correr el CMWP. Por lo tanto, se requieren tanto python en su version 2.7 (https://www.python.org/) como CMWP (http://csendes.elte.hu/cmwp/).
+El ajuste de CMWP se hace ajustando los parametros a, b, c, d, e en tres pasos:
+1- a, b, d
+2- c, e
+3- b, d
+Falta implementar la posibilidad de decirle al usuario que elija su propia estrategia para realizar el ajuste, e incluir las diferentes opciones de ajste que tiene el propio CMWP.
+
+Una vez ejecutado el programa devuelve dos archivos por cada pico ingresado en para_cmwp.dat. En un conjunto de archivos se encuentran los resultados del ajuste matematico que se realizo con el CMWP, junto con los errores del mismo. El archivo está en columnas separadas por espacios siguendo el siguiente encabezado:
+#    2theta theta  alpha  beta     a a_err b b_err c c_err d d_err e e_err
+
+En el otro conjunto se archivos se encuentran las soluciones fisicas a los ajutes. El encabezado de ese conjunto de archivos es:
+#    2theta theta  alpha  beta     a a_err b b_err c c_err d d_err e e_err
+
+Siendo \alpha y \beta el ángulo polar y azimutal, respectivamente de la figura de polos. 
+
+
+La intensidad_raw mencionada en la descripcion del archivo para_cmwp.dat, es una intensidad calculada sumando la intensidad de los píxel a izquierda y derecha del pico, restando el respectivo background.
+Dado que CMWP no permite ajustar el nivel de background de los difractogramas y no produce un buen ajuste para las intensidades y las posiciones de los picos, previamente el programa ajuste a cada difractograma una suma de funciones pseudo-Voigt:
+
+pV(x, 2\theta, fit_int, H, eta) = fit_int * [eta * L(x, 2\theta, H) + (1 - eta) * G(x, 2\theta, H)]
+
+siendo L y G una función Lorentziana y una Gaussiana, respectivamente. Todas las funciones están normalizadas de modo que su integral sea 1.
+
+El usuario debe proveer además un archvio con las semillas de los parámetros a ser ajustados, entre los que están los parámetros de pV y los puntos de background. Este archivo debe llamarse fit_ini.dat.
+Finalmente se debe proveer el archio con los datos de los anchos instrumentales del equipo (IRF.dat). Se acompañan ejemplos de cada archivo.
+Del par (H, eta) se obtiene (H_{gauss}, H_{lorentz}) a partir de las expresiones [referencia]:
+
+equations
+
+El ancho instrumental se modela con la ley de Cagliotti, suponiendo una componente gaussiana y una componente lorenzina:
+(H_ins)^2 = UG * tg(x)^2 + VG * tg(x) + WG + IG / cos(x)  (Gauss)
+H_ins = UL * tg(x)^2 + VL * tg(x) + WL + IL / cos(x)  (Lorentz)
+
+(H_corr)^2 = H^2 - (H_ins)^2 (Gauss)
+H_corr = H^2 - H_ins (Lorentz)
+
+Los datos corregidos se utilizan para calcular nuevos valores de H, eta y B empleando las expresiones [referencia]:
+
+equations
+
+Si no se dispone de la información del ancho instrumental del pico se puede colocar 0 en cada uno de los valores de IRF.dat.
+---------------------------------------------------------------------------------------------------------------------------------------------
+Iformación adicional
+
+El programa acepta un parámetro opcional que es el valor del treshold. Para ingresarlo correr el programa (se supone que se está en la línea de comandos):
+./spr2txt.exe treshold (linux)
+sprt2txt.exe treshold (windows)
+De ingresarse así se sobreescribe lo que se ingresó en el para_fit2d.dat. Esto puede ser útil para determinar cuál es el nivel óptimo de treshold sin tener que modificar el archvivo para_fit2d.dat cada vez.
+
+Si un ajuste da valores que no tienen sentido físico (anchos de pico negativos, eta > 1, etc.), el programa reemplaza esos valores con los resultados obtenidos del ajuste anterior. En el caso de que esto ocurra en el primer valor, el programa coloca un -1 en el área correspondiente.
+Los valores sin sentido físico ocurren generalmente cuando la intensidad del pico es muy baja, por lo que un valor adecuado de la variable treshold debería evitar que se generen valores espurios muy frecuentemente.
+
+El programa sólo hace ajustes de pseudo-voigt, pero se buscó armarlo de modo tal que sea posible agregar modelos de otras funciones analíticas.
+
+
+
+

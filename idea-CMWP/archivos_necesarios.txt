@@ -1,5 +1,5 @@
 Suponiendo que la raiz del archivo es FILE, los siguientes son los archivos que no se puede evitar imprimir:
-FILE.bg-splie.dat
+FILE.bg-spline.dat
 FILE.dat
 FILE.dat.fit.ini
 FILE.dat.ini
@@ -7,34 +7,26 @@ FILE.dat.q.ini
 FILE.peak-index.dat
 FILE.physsol.csv
 FILE.sol
-FILE.int.ps
-
-Prescindibles:
-FILE.int.bw.ps
-FILE.int.jpg
-FILE.int0.ps
-FILE.int.m.dat == FILE.dat
-
-FILE.par
-FILE.weighted.dat.ver
-
-Archivos que genera el GNUPLOT (no se si los voy a poder sacar):
-FILE.gnu
-FILE.gnuplot_out
-FILE.gnuplot_pid
-FILE.gnuplot_x11_pid
-FILE.int.sol
-
-Hay que verificar si son necesarios:
-FILE.evaluate_pid
 FILE.int.4.dat
-FILE.int.bg.dat
+FILE.weighted.dat
+FILE.gnu
 FILE.int.th0.dat
+
+Habria que hacer un analisis mas profundo, pero en principio no seria bueno sacar estos archivos
 FILE.int.th2.dat
 FILE.int.th.dat
-FILE.weighted.dat
+FILE.int.bg.dat
+FILE.gnuplot_pid
+FILE.gnuplot_out
+FILE.int.sol
+FILE.int.m.dat == FILE.dat
 
-Removidos sin consecuencias:
-
-
-
+Prescindibles (removidos):
+FILE.int.bw.ps
+FILE.int0.ps
+FILE.int.ps
+FILE.int.jpg
+FILE.gnuplot_x11_pid
+FILE.par
+FILE.weighted.dat.ver
+FILE.evaluate_pid

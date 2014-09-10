@@ -1,9 +1,2 @@
-Sobre el CMWP
-Reducir al minimo la escritura de archivos
-Corregir este error:
-./lib/kill_gnuplot:13: no such file or directory: data/A70BS100/New_A70-BS100-20sek-Tex_spr_10_pattern_180.gnuplot_x11_pid
 Sobre la rutina en python
 Ordenar los archivos mientras los va creando
-Cuando imprimo el progreso estoy haciendo 
-Tengo que hacer pattern_acutal / total_de_patterns * 100
-Imprimir progreso total y por pattern.

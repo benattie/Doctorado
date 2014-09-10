@@ -295,7 +295,7 @@ int main(int argc, char ** argv)
     }
     while(k <= end_d); //end of spr iteration
     //End pole figure data in Machine coordinates//
-    printf("\nFinish extracting pole figure data\n");
+    printf("\nFinished extracting pole figure data\n");
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     t2 = time(&t2);
 

@@ -1,0 +1,5023 @@
+#! /usr/bin/zsh -f
+# versio twekeada del archivo evaluate. En esta version evito al impresion de varios archivos de salida que son innecesarios para las condiciones en que venia usando el CMWP
+
+PATH="/home/benattie/Programs/CMWP-140518/progs/bin:/home/benattie/Programs/CMWP-140518/progs/jre1.6.0_12/bin:/home/benattie/Programs/CMWP-140518/progs/libexec/gnuplot/4.2:/home/benattie/Documentos/Scripts/bash:/home/benattie/Programs/FullProf:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/home/benattie/Templates/bash:/usr/local/bin:/usr/bin:/bin:/usr/share/lib:/usr/ccs/bin:/usr/xpg4/bin:$PATH"
+# Copyright (C) Gábor Ribárik and Tamás Ungár, 1998-2012. All rights reserved.
+# For permission to use, copy, modify this program or any of its components,
+# see the file CMWP_COPYRIGHT.
+
+PATH=".:$PATH"
+export PATH
+
+if [[ -e UNCONFIGURED ]]
+then
+	echo "ERROR: your software is unconfigured. Please run the command ./configure"
+	echo "first. For more information, please see the files README and INSTALL."
+	exit 1
+fi
+
+if ! echo "mwp_init" | gnuplot 2>&1 | grep 'MWP mode is switched ON (version '`cat VERSION`
+then
+	echo "ERROR: gnuplot version is wrong, your software installation is incomplete."
+	echo "Please rerun the command ./configure or solve the problem manually."
+	echo "For more information, please see the files README and INSTALL."
+	exit 1
+fi
+
+#DEBUG=yes
+#FIT_DEBUG=yes
+#GNUTERM=linux
+AWK=${AWK:-gawk}
+
+export LC_ALL="POSIX"
+
+if ! ((UID))
+then
+    echo "Please do not run this program as root."
+    exit 1
+else
+    SSHCMD=( eval )
+fi
+
+if [[ -z $1 ]]
+then
+    echo "Usage: $0 <file or directory>"
+    exit 1
+elif [[ $2 = auto ]]
+then
+    AUTO="yes"
+fi
+
+# echo $$ >${1%%.dat}.evaluate_pid
+
+LOGFILE=${1%%.dat}.sol
+export FIT_LOG="tmp/$$.log"
+
+rm -f $LOGFILE $FIT_LOG
+mkdir -p tmp
+
+#export TTY=${TTY:-$(tty)}
+
+GNUTERM=${GNUTERM:-postscript}
+
+if [[ $GNUTERM = (latex|linux) ]]
+then
+	lk='$'
+	lzb='{'
+	lze='}'
+	lde='{\Delta}'
+	lst='{\cdot}'
+	lkc='K\sqrt{C}'
+	lsq='\sqrt{1+d\cdot H^2}'
+else
+	lk=''
+	lzb=''
+	lze=''
+	lde='Delta'
+	lst='*'
+	lkc='K*sqrt(C)'
+	lsq='sqrt(1+d*H^2)'
+fi
+
+if [[ ! -r lib/evaluate.fn ]]
+then
+    echo "lib/evaluate.fn not found."
+    exit 1
+else
+    . lib/evaluate.fn
+fi
+
+if [[ -d $1 ]]
+then
+    fecho "This is MWP-fit, a program for Multiple Whole Profile Fitting using"
+    fecho "theoretical line profile functions."
+else
+    fecho "This is CMWP-fit, a program for evaluation of diffraction patterns"
+    fecho "using the method of Convolutional Multiple Whole Profile fitting."
+    if false && [[ ! -z $DISPLAY ]] && [[ $2 != auto ]] && [[ -s ${1%%.dat}.bg-spline.dat ]] && [[ -s ${1%%.dat}.peak-index.dat ]] && [[ -s ${1%%.dat}.dat.ini ]] && [[ -s ${1%%.dat}.dat.fit.ini ] && [[ -s ${1%%.dat}.dat.indC.ini ]] && [[ -s ${1%%.dat}.dat.q.ini ]]
+    then
+ 	# rm -f ${1%%.dat}.evaluate_pid
+	exec ./evaluate-control $*
+    fi
+    if [[ ! -z $DISPLAY ]] && [[ $2 != auto ]]
+    then
+	echo
+	echo "You can set all the parameter values and options and create the necessary files"
+	echo "either by using this text input based program or by using the JAVA (graphical)"
+	echo "frontend. In the latter case please set first all the parameters and options,"
+	echo "then create the background spline and after these steps index the peaks."
+        q="y"
+	initialize "Do you want to start the JAVA (graphical) frontend now?> " q
+	if [[ $q = [yYiI]* ]]
+	then
+		# rm -f ${1%%.dat}.evaluate_pid
+		exec ./evaluate-control $*
+	fi
+    fi
+fi
+version=$(<VERSION)
+copyright-message >>$LOGFILE
+copyright-message
+fecho "(C)MWP version number: ${version}."
+fecho
+(echo -n "Date: "; date '+%Y-%m-%d %H:%M:%S') >>$LOGFILE
+echo -n "Date: "; date '+%Y-%m-%d %H:%M:%S'
+
+fecho
+if [[ -d $1 ]]
+then
+    argv[1]=$(echo $1|sed -e 's@[/]*$@@')
+    fecho "Data directory: $1"
+else
+    fecho "Data file: $1"
+fi
+fecho
+
+if [[ ! -d $1 && ! -r $1 ]]
+then
+    echo "$0: data file $1 does not exist or is unreadable."
+    exit 1
+fi
+
+if [[ -d $1 ]]
+then
+    for f in $1/*(.N)
+    do
+        if gawk '/\r/ {print "ERROR"} /\t/ {print "ERROR"}' $f | egrep -q "ERROR"
+	then
+	    echo "Correcting $f..."
+	    tr -d "\r" < $f | untabify | grep -v "^ *$" > $f.tmp
+	    cat $f.tmp > $f
+	    rm -f $f.tmp
+#	else
+#	    echo "$f is OK."
+	fi
+    done
+else
+    for f in $1 ${1%%.dat}.dat.ini ${1%%.dat}.dat.fit.ini ${1%%.dat}.dat.indC.ini ${1%%.dat}.dat.q.ini ${1%%.dat}.peak-index.dat ${1%%.dat}.bg-spline.dat
+    do
+        if [[ -e $f ]]
+	then
+	    if gawk '/\r/ {print "ERROR"} /\t/ {print "ERROR"}' $f | egrep -q "ERROR"
+	    then
+		echo "Correcting $f..."
+		tr -d "\r" < $f | untabify | grep -v "^ *$" > $f.tmp
+		cat $f.tmp > $f
+		rm -f $f.tmp
+#	    else
+#		echo "$f is OK."
+	    fi
+	fi
+    done
+fi
+
+if [[ -d $1 ]]
+then
+    MWP="yes"
+    ONLY_FOURIER="no"
+    for f in $1/*(.N) $1/*(@N)
+    do
+        [[ $f = *.checked ]] && continue
+        [[ ${f##*/} != ${${f##*/}:l} ]] && mv -f $f ${f%%/*}/${${f##*/}:l}
+        if [[ $f = *.fourier.dat && ! -f ${f%%.fourier.dat}.dat ]]
+	then
+	    ONLY_FOURIER="yes"
+	fi
+    done
+    FILES=( $(for f ($1/*(.N) $1/*(@N)); do if [[ $f = (*~|\#*\#|*evaluate-int*|*.checked) || ($ONLY_FOURIER != "yes" && $f = *.fourier.dat) ]]; then continue; fi; hkl=${${f%%.dat}##*/}; let i=1; h=$hkl[i]; if [[ $h = '-' ]]; then let i+=1; h="$h$hkl[i]"; fi; let i+=1; k=$hkl[i]; if [[ $k = '-' ]]; then let i+=1; k="$k$hkl[i]"; fi; let i+=1; l=$hkl[i]; if [[ $l = '-' ]]; then let i+=1; l="$l$hkl[i]"; fi; echo $(echo | ${AWK} "{print (($h)^2+($k)^2+($l)^2)}")" "$f; done | sort -n | ${AWK} '{print $2}') )
+else
+    FILES=( $1 )
+fi
+
+for f in $FILES
+do
+
+if [[ -e $f.checked && $f.checked -nt $f ]]
+then
+    echo "Skipping file check of $f."
+    continue
+fi
+
+if [[ $f != *.fourier.dat ]] && grep -vq "^[[:space:]]*[+0-9eE.-][+0-9eE.-]*[[:space:]][[:space:]]*[+0-9eE.-][+0-9eE.-]*[[:space:]]*$" $f
+then
+    echo "Corrupt data file: $f."
+    echo "The format of this file should be:"
+    echo "s I(s) or twotheta I(twotheta)"
+    echo
+    echo "I cannot understand the following line(s) in file $f:"
+    grep -v "^[[:space:]]*[+0-9eE.-][+0-9eE.-]*[[:space:]][[:space:]]*[+0-9eE.-][+0-9eE.-]*[[:space:]]*$" $f | head
+    echo
+    echo "Exiting."
+    exit 1
+fi
+
+if [[ $f = *.fourier.dat ]] && grep -vq "^[[:space:]]*[+0-9eE.-][+0-9eE.-]*[[:space:]][[:space:]]*[+0-9eE.-][+0-9eE.-]*[[:space:]][[:space:]]*[+0-9eE.-][+0-9eE.-]*[[:space:]][[:space:]]*[+0-9eE.-][+0-9eE.-]*[[:space:]]*$" $f
+then
+    echo "Corrupt data file: $f."
+    echo "The format of this file should be:"
+    echo "L A_c(L) A_s(L) abs(A(L))"
+    echo
+    echo "I cannot understand the following line(s) in file $f:"
+    grep -v "^[[:space:]]*[+0-9eE.-][+0-9eE.-]*[[:space:]][[:space:]]*[+0-9eE.-][+0-9eE.-]*[[:space:]][[:space:]]*[+0-9eE.-][+0-9eE.-]*[[:space:]][[:space:]]*[+0-9eE.-][+0-9eE.-]*[[:space:]]*$" $f | head
+    echo
+    echo "Exiting."
+    exit 1
+fi
+
+touch $f.checked
+
+done
+
+if [[ $MWP = "yes" ]]
+then
+
+    if [[ -f $1/evaluate-int.ini ]] && grep -q '^lc=' $1/evaluate-int.ini
+    then
+        q="y"
+    else
+        q="n"
+    fi
+
+    initialize "Does the crystal have hexagonal lattice? " q
+    if [[ $q = [yYiI]* ]]
+    then
+        HEX="yes"
+    fi
+
+    INIFILE=$1/evaluate-int.ini
+    FITINIFILE=$1/evaluate-int.fit.ini
+    INDCINIFILE=$1/evaluate-int.indC.ini
+    MAXFINIFILE=$1/evaluate-int.maxf.ini
+    QINIFILE=$1/evaluate-int.q.ini
+
+    if [[ ! -f ${INIFILE} ]]
+    then
+        if [[ $HEX = "yes" ]]
+        then
+	    la=1
+	    lc=1
+	    echo "Please enter the lattice constants of the crystal (in nm)."
+	    initialize 'a=' la
+	    initialize 'c=' lc
+	    echo 'la='$la > ${INIFILE}
+	    echo 'lc='$lc >> ${INIFILE}
+	    echo
+        else
+	    la=1
+	    echo "Please enter the lattice constant of the crystal (in nm)."
+	    initialize 'a=' la
+	    echo 'la='$la > ${INIFILE}
+	    echo
+        fi
+        bb=$(echo $la|${AWK} '{print $1/sqrt(2)}')
+        echo "Please enter the absolute value of the Burgers vector (in nm, default: a/sqrt(2))."
+        initialize 'b=' bb
+        echo 'bb='$bb >> ${INIFILE}
+        echo
+        if [[ $HEX = "yes" ]]
+        then
+	    C0=0.1
+	    echo "Please enter the average contrast factor of the hk0 reflections."
+	    initialize 'Chk0=' C0
+        else
+	    C0=0.3065
+	    echo "Please enter the average contrast factor of the h00 reflections."
+	    initialize 'Ch00=' C0
+        fi
+        echo 'C0='$C0 >> ${INIFILE}
+        echo
+    else
+        . ./${INIFILE}
+        if [[ -z $la && ! -z $aa ]]
+        then
+	    la=$aa
+        fi
+        if [[ -z $C0 && ! -z $Ch00 ]]
+        then
+	    C0=$Ch00
+        fi
+    fi
+
+    if [[ $HEX = "yes" ]]
+    then
+        fecho "The values of the lattice constants (in nm): a=${la}, c=${lc}"
+        fecho "The absolute value of the Burgers vector (in nm): ${bb}"
+        fecho "The average contrast factor of the hk0 reflections: ${C0}"
+    else
+        fecho "The value of the lattice constant (in nm): ${la}"
+        fecho "The absolute value of the Burgers vector (in nm): ${bb}"
+        fecho "The average contrast factor of the h00 reflections: ${C0}"
+    fi
+
+    q="y"
+    initialize "Is this OK? " q
+    [[ $q != 'y' ]] && {
+        rm -f ${INIFILE}
+        echo "Please restart the program, and enter the right values."
+        exit 1
+    }
+    echo
+
+    if [[ $HEX = "yes" ]]
+    then
+        FILES=( $(for f ($1/*(.N) $1/*(@N)); do if [[ $f = (*~|\#*\#|*evaluate-int*|*.checked) || ($ONLY_FOURIER != "yes" && $f = *.fourier.dat) ]]; then continue; fi; hkl=${${f%%.dat}##*/}; let i=1; h=$hkl[i]; if [[ $h = '-' ]]; then let i+=1; h="$h$hkl[i]"; fi; let i+=1; k=$hkl[i]; if [[ $k = '-' ]]; then let i+=1; k="$k$hkl[i]"; fi; let i+=1; l=$hkl[i]; if [[ $l = '-' ]]; then let i+=1; l="$l$hkl[i]"; fi; echo $(echo | ${AWK} "{print (4.0/3.0)*(($h)^2+($h)*($k)+($k)^2)/$la^2+($l)^2/$lc^2}")" $f"; done | sort -n | ${AWK} '{print $2}') )
+    fi
+else # MWP
+
+    DATFILE=$1
+    INIFILE=${1%%.dat}.dat.ini
+    FITINIFILE=${1%%.dat}.dat.fit.ini
+    INDCINIFILE=${1%%.dat}.dat.indC.ini
+    QINIFILE=${1%%.dat}.dat.q.ini
+    PARFILE=${1%%.dat}.par
+
+    if [[ ! -f ${INIFILE} ]]
+    then
+
+    	q="n"
+	initialize "Does the crystal have orthorombic lattice? " q
+	if [[ $q = [yYiI]* ]]
+	then
+		ORT="yes"
+	fi
+
+	if [[ $ORT != "yes" ]]
+	then
+		q="n"
+		initialize "Does the crystal have hexagonal lattice? " q
+		if [[ $q = [yYiI]* ]]
+		then
+				HEX="yes"
+		else
+			echo "Assuming cubic lattice."
+		fi
+	fi
+
+    else
+
+	if grep -q '^lb=' $INIFILE && grep -q '^lc=' $INIFILE
+	then
+		echo "The crystal lattice is orthorombic."
+		ORT="yes"
+	else
+		if grep -q '^lc=' $INIFILE
+		then
+			echo "The crystal lattice is hexagonal."
+			HEX="yes"
+		else
+			echo "The crystal lattice is cubic."
+		fi
+	fi
+
+    fi # INIFILE
+
+    if [[ ! -f ${INIFILE} ]]
+    then
+        if [[ $ORT = "yes" ]]
+        then
+            la=0.665
+            lb=2.096
+            lc=0.650
+	    echo "Please enter the lattice constants of the crystal (in nm)."
+	    initialize 'a=' la
+            initialize 'b=' lb
+	    initialize 'c=' lc
+	    echo 'la='$la > ${INIFILE}
+            echo 'lb='$lb >> ${INIFILE}
+	    echo 'lc='$lc >> ${INIFILE}
+	    echo
+        elif [[ $HEX = "yes" ]]
+	then
+	    la=1
+	    lc=1
+	    echo "Please enter the lattice constants of the crystal (in nm)."
+	    initialize 'a=' la
+	    initialize 'c=' lc
+	    echo 'la='$la > ${INIFILE}
+	    echo 'lc='$lc >> ${INIFILE}
+	    echo
+        else
+	    la=1
+	    echo "Please enter the lattice constant of the crystal (in nm)."
+	    initialize 'a=' la
+	    echo 'la='$la > ${INIFILE}
+	    echo
+        fi
+        bb=$(echo $la|${AWK} '{print $1/sqrt(2)}')
+        echo "Please enter the absolute value of the Burgers vector (in nm, default: a/sqrt(2))."
+        initialize 'burgers=' bb
+        echo 'bb='$bb >> ${INIFILE}
+        echo
+        if [[ $ORT = "yes" ]]
+        then
+	    C0=0.1
+	    echo "Please enter the average contrast factor of the h00 reflections."
+	    initialize 'Ch00=' C0
+        elif [[ $HEX = "yes" ]]
+        then
+	    C0=0.1
+	    echo "Please enter the average contrast factor of the hk0 reflections."
+	    initialize 'Chk0=' C0
+        else
+	    C0=0.3065
+	    echo "Please enter the average contrast factor of the h00 reflections."
+	    initialize 'Ch00=' C0
+        fi
+
+        if [[ -z $wavelength ]]
+        then
+	    wavelength="0.15406"
+        fi
+        initialize "wavelength> " wavelength
+
+        echo 'C0='$C0 >> ${INIFILE}
+        echo 'wavelength='${wavelength} >> ${INIFILE}
+
+        echo
+
+	ph="n"
+	let phase_no=0
+	initialize 'Do you want to add another phase (y/n) ?> ' ph
+	while [[ $ph = [yYiI]* ]]
+	do
+	    let phase_no+=1
+
+	    q="n"
+	    initialize "Does phase $phase_no have orthorombic lattice? " q
+	    if [[ $q = [yYiI]* ]]
+	    then
+		eval ORT_${phase_no}="yes"
+	    fi
+
+	    if [[ $(eval echo "\$ORT_${phase_no}") != "yes" ]]
+	    then
+	            q="n"
+		    initialize "Does phase $phase_no have hexagonal lattice? " q
+		    if [[ $q = [yYiI]* ]]
+		    then
+		            eval HEX_${phase_no}="yes"
+		    else
+			    echo "Assuming cubic lattice for phase $phase_no."
+		    fi
+
+	    fi
+
+	    if [[ $(eval echo "\$ORT_${phase_no}") = "yes" ]]
+	    then
+		eval la_${phase_no}=0.665
+		eval lb_${phase_no}=2.096
+		eval lc_${phase_no}=0.650
+		echo "Please enter the lattice constants of phase $phase_no (in nm)."
+	        initialize "a_${phase_no}=" la_${phase_no}
+                initialize "b_${phase_no}=" lb_${phase_no}
+	        initialize "c_${phase_no}=" lc_${phase_no}
+	        echo "la_${phase_no}="$(eval echo "\$la_${phase_no}") >> ${INIFILE}
+                echo "lb_${phase_no}="$(eval echo "\$lb_${phase_no}") >> ${INIFILE}
+	        echo "lc_${phase_no}="$(eval echo "\$lc_${phase_no}") >> ${INIFILE}
+	        echo
+	    elif [[ $(eval echo "\$HEX_${phase_no}") = "yes" ]]
+	    then
+	        eval la_${phase_no}=1
+	        eval lc_${phase_no}=1
+	        echo "Please enter the lattice constants of phase $phase_no (in nm)."
+	        initialize "a_${phase_no}=" la_${phase_no}
+	        initialize "c_${phase_no}=" lc_${phase_no}
+	        echo "la_${phase_no}="$(eval echo "\$la_${phase_no}") >> ${INIFILE}
+	        echo "lc_${phase_no}="$(eval echo "\$lc_${phase_no}") >> ${INIFILE}
+	        echo
+            else
+	        eval la_${phase_no}=1
+	        echo "Please enter the lattice constant of phase $phase_no (in nm)."
+	        initialize "a_${phase_no}=" la_${phase_no}
+	        echo "la_${phase_no}="$(eval echo "\$la_${phase_no}") >> ${INIFILE}
+	        echo
+            fi
+            eval bb_${phase_no}=$(echo $(eval echo "\$la_${phase_no}")|${AWK} '{print $1/sqrt(2)}')
+            echo "Please enter the absolute value of the Burgers vector (in nm, default: a/sqrt(2))."
+            initialize "burgers_${phase_no}=" bb_${phase_no}
+            echo "bb_${phase_no}="$(eval echo "\$bb_${phase_no}") >> ${INIFILE}
+            echo
+            if [[ $(eval echo "\$ORT_${phase_no}") = "yes" ]]
+            then
+	        eval C0_${phase_no}=0.1
+	        echo "Please enter the average contrast factor of the h00 reflections."
+	        initialize "Ch00_${phase_no}=" C0_${phase_no}
+            elif [[ $(eval echo "\$HEX_${phase_no}") = "yes" ]]
+            then
+	        eval C0_${phase_no}=0.1
+	        echo "Please enter the average contrast factor of the hk0 reflections."
+	        initialize "Chk0_${phase_no}=" C0_${phase_no}
+            else
+	        eval C0_${phase_no}=0.3065
+	        echo "Please enter the average contrast factor of the h00 reflections."
+	        initialize "Ch00_${phase_no}=" C0_${phase_no}
+            fi
+	    echo "C0_${phase_no}="$(eval echo "\$C0_${phase_no}") >> ${INIFILE}
+
+	    ph="n"
+	    initialize 'Do you want to add another phase (y/n) ?> ' ph
+	done
+
+	let NUM_PH=$[${phase_no}+1]
+
+    else
+        . ./${INIFILE}
+        if [[ -z $la && ! -z $aa ]]
+        then
+	    la=$aa
+        fi
+        if [[ -z $C0 && ! -z $Ch00 ]]
+        then
+	    C0=$Ch00
+        fi
+
+	let NUM_PH=1
+	while [[ $(eval echo "\$la_$NUM_PH") != "" || $(eval echo "\$bb_$NUM_PH") != "" || $(eval echo "\$C0_$NUM_PH") != "" ]]
+	do
+
+		if grep -q "^lb_${NUM_PH}=" $INIFILE && grep -q "^lc_${NUM_PH}=" $INIFILE
+		then
+			echo "The crystal lattice of phase $NUM_PH is orthorombic."
+			eval ORT_${NUM_PH}="yes"
+		else
+			if grep -q "^lc_${NUM_PH}=" $INIFILE
+			then
+				echo "The crystal lattice of phase $NUM_PH is hexagonal."
+				eval HEX_${NUM_PH}="yes"
+			else
+				echo "The crystal lattice of phase $NUM_PH is cubic."
+			fi
+		fi
+
+		let NUM_PH+=1
+	done
+
+    fi
+
+    if [[ $[$NUM_PH>1] = 1 ]]
+    then
+        fecho "Total number of phases: $NUM_PH"
+    fi
+
+    if [[ $ORT = "yes" ]]
+    then
+        fecho "The values of the lattice constants (in nm): a=${la}, b=${lb}, c=${lc}"
+        fecho "The absolute value of the Burgers vector (in nm): ${bb}"
+        fecho "The average contrast factor of the h00 reflections: ${C0}"
+        fecho "The wavelength is: ${wavelength} nm."
+    elif [[ $HEX = "yes" ]]
+    then
+        fecho "The values of the lattice constants (in nm): a=${la}, c=${lc}"
+        fecho "The absolute value of the Burgers vector (in nm): ${bb}"
+        fecho "The average contrast factor of the hk0 reflections: ${C0}"
+        fecho "The wavelength is: ${wavelength} nm."
+    else
+        fecho "The value of the lattice constant (in nm): ${la}"
+        fecho "The absolute value of the Burgers vector (in nm): ${bb}"
+        fecho "The average contrast factor of the h00 reflections: ${C0}"
+        fecho "The wavelength is: ${wavelength} nm."
+    fi
+
+    if [[ $[$NUM_PH>1] = 1 ]]
+    then
+        let phase=1
+	while [[ $[$phase<$NUM_PH] = 1 ]]
+	do
+		fecho "Phase: $phase"
+		if [[ $(eval echo "\$ORT_${phase}") = "yes" ]]
+		then
+		        fecho "The values of the lattice constants (in nm): a="$(eval echo "\$la_${phase}")", b="$(eval echo "\$lb_${phase}")", c="$(eval echo "\$lc_${phase}")
+			fecho "The absolute value of the Burgers vector (in nm): "$(eval echo "\$bb_${phase}")
+		        fecho "The average contrast factor of the h00 reflections: "$(eval echo "\$C0_${phase}")
+		elif [[ $(eval echo "\$HEX_${phase}") = "yes" ]]
+		then
+		        fecho "The values of the lattice constants (in nm): a="$(eval echo "\$la_${phase}")", c="$(eval echo "\$lc_${phase}")
+		        fecho "The absolute value of the Burgers vector (in nm): "$(eval echo "\$bb_${phase}")
+			fecho "The average contrast factor of the hk0 reflections: "$(eval echo "\$C0_${phase}")
+		else
+		        fecho "The value of the lattice constant (in nm): "$(eval echo "\$la_${phase}")
+			fecho "The absolute value of the Burgers vector (in nm): "$(eval echo "\$bb_${phase}")
+			fecho "The average contrast factor of the h00 reflections: "$(eval echo "\$C0_${phase}")
+		fi
+		fecho
+		let phase+=1
+	done
+    fi
+
+    q="y"
+    initialize "Is this OK? " q
+    [[ $q != 'y' ]] && {
+        rm -f ${INIFILE}
+        echo "Please restart the program, and enter the correct values."
+        exit 1
+    }
+    echo
+fi # MWP
+
+q="y"
+
+#initialize "Do you want to DEBUG the fitting? " q
+if [[ $q = [yYiI]* ]]
+then
+    FIT_DEBUG="yes"
+fi
+
+if [[ -z $DISPLAY ]]
+then
+    echo "NOTE: If you want to view figures/solutions instead of printing, please set your\nDISPLAY variable."
+else
+    q="y"
+    initialize "Do you want to view figures/solutions instead of printing? " q
+    if [[ $q = 'y' ]]
+    then
+    echo 'TIP: you can dismiss the new windows by pressing the key "q".'
+    echo
+    unfunction asciiprint >/dev/null 2>&1
+    unfunction psprint >/dev/null 2>&1
+    asciiprint() {
+        xterm -ut -sb -fn 10x20 -e less $*
+    }
+    psprint() {
+        gv $*
+    }
+    fi
+fi
+
+q="y"
+#echo "Do you want to print/view the figures of the Fourier Spectrum with"
+#initialize "logarithmic scale too? " q
+
+if [[ $q = [yYiI]* ]]
+then
+	LOGSCALE_SP="set logscale y; replot"
+else
+	LOGSCALE_SP=""
+fi
+
+q="y"
+#echo "Do you want to print/view the figures of the Intensity Function with"
+#initialize "logarithmic scale too? " q
+
+if [[ $q = [yYiI]* ]]
+then
+	LOGSCALE_IF="set logscale y; replot"
+else
+	LOGSCALE_IF=""
+fi
+
+NO_SIZE_EFFECT="n"
+SF_ELLIPSOIDAL="n"
+INT_FIT="n"
+FIT_LIMIT="1e-9"
+FIT_MAXITER="10000"
+DISABLE_COINC_G2="n"
+
+if [[ -f ${QINIFILE} ]]
+then
+    . ${QINIFILE}
+fi
+
+initialize "Do you want to disable the size effect? " NO_SIZE_EFFECT
+
+if [[ $NO_SIZE_EFFECT = [yYiI]* ]]
+then
+
+    fecho "The size effect is disabled."
+    SFNAME="no_sf"
+    SFDEF="The size effect is disabled."
+
+else
+
+    initialize "Do you want to use the Ellipsoidal Size Function? " SF_ELLIPSOIDAL
+
+    if [[ $SF_ELLIPSOIDAL = [yYiI]* ]]
+    then
+	fecho "Using the ellipsoidal size function."
+	SFNAME="sf_ellipsoidal"
+	SFDEF="sf_ellipsoidal(k,b,c)=Int(0.5*x*erfc((log(x)-b)/c)*(sin(Pi*k*x)/(Pi*k))**2,x=0..Inf),\nand b is order dependent."
+    else
+	fecho "Using the spherical size function."
+	SFNAME="sf_spheric"
+	SFDEF="sf_spheric(k,b,c)=Int(0.5*x*erfc((log(x)-b)/c)*(sin(Pi*k*x)/(Pi*k))**2,x=0..Inf)"
+    fi
+
+fi
+
+SF_PRECISION=1e-2
+FCT_SAMPLES=512
+
+if [[ $MWP != "yes" ]]
+then
+
+# CMWP (IF2)
+
+    if [[ $[$NUM_PH>1] = 1 ]]
+    then
+	fecho "NOTE: when using multiple phases the special treatment of coincident g^2 reflections is always disabled."
+	DISABLE_COINC_G2="y"
+    else
+        initialize "Do you want to disable the special treatment of coincident g^2 reflections? " DISABLE_COINC_G2
+    fi
+
+    NO_SIZE_EFFECT_PH=""
+    if false && [[ $[$NUM_PH>1] = 1 ]]
+    then
+        let phase=1
+	while [[ $[$phase<$NUM_PH] = 1 ]]
+	do
+		q="n"
+		initialize "Do you want to disable the size effect for phase $phase (y/n)? " q
+
+		if [[ $q = [yYiI]* ]]
+		then
+
+		    fecho "The size effect is disabled for phase ${phase}."
+		    NO_SIZE_EFFECT_PH="$NO_SIZE_EFFECT_PH\nsize_effect_disabled_$phase"
+
+		fi
+		let phase+=1
+	done
+    fi
+
+    if [[ -z $INDC ]]
+    then
+	INDC="n"
+    fi
+    initialize "Do you want to use independent contrast factors? " INDC
+    echo
+
+    if [[ $INDC = [yYiI]* ]]
+    then
+	echo 'NOTE!!!'
+	echo "The values of the contrast factors are the square of the C_i parameters."
+	echo
+    fi
+
+    USE_F_GRCS="n"
+    initialize "Do you want to use the Groma-Csikor strain function?> " USE_F_GRCS
+
+    if [[ $USE_F_GRCS = [yYiI]* ]]
+    then
+	    C0dip=$C0
+	    if [[ $ORT = "yes" ]]
+	    then
+		echo "Please enter the average dipol contrast factor of the h00 reflections."
+		initialize 'C^{dip}_{h00}=' C0dip
+	    elif [[ $HEX = "yes" ]]
+	    then
+		echo "Please enter the average dipol contrast factor of the hk0 reflections."
+		initialize 'C^{dip}_{hk0}=' C0dip
+	    else
+		echo "Please enter the average dipol contrast factor of the h00 reflections."
+		initialize 'C^{dip}_{h00}=' C0dip
+	    fi
+    fi
+    echo
+
+    if [[ -z $USE_STACKING ]]
+    then
+	USE_STACKING="n"
+    fi
+    initialize "Do you want to include the effect of stacking faults?> " USE_STACKING
+    echo
+
+    if [[ $USE_STACKING = [yYiI]* ]]
+    then
+	if [[ -z $STACKING_DAT ]]
+	then
+	    STACKING_DAT="SF-dat-files/sf_cu_twin.dat"
+	fi
+	echo
+	initialize "Stacking.dat file> " STACKING_DAT
+	if [[ ! -e $STACKING_DAT ]]
+	then
+	    fecho
+	    fecho "Error: cannot find stacking.dat file: $STACKING_DAT."
+	    exit 1
+	else
+	    fecho "Updating symlink stacking.dat to point to $STACKING_DAT."
+	    ln -sfn $STACKING_DAT stacking.dat
+	fi
+    fi
+
+    if [[ -z $USE_SPLINE ]]
+    then
+	USE_SPLINE="y"
+    fi
+    initialize "Do you want to use splines as the background function?> " USE_SPLINE
+    echo
+
+    if [[ $USE_SPLINE != [yYiI]* ]]
+    then
+	USE_LEGENDRE="y"
+	initialize "Do you want to use legendre polinomials as the background function?> " USE_LEGENDRE
+	echo
+    fi
+
+    if [[ -z $ENABLE_CONVOLUTION ]]
+    then
+	ENABLE_CONVOLUTION="y"
+    fi
+    initialize "Do you have instrumental profiles?> " ENABLE_CONVOLUTION
+
+    if [[ $ENABLE_CONVOLUTION = [yYiI]* ]]
+    then
+	if [[ -z $INSTSRCDIR ]]
+	then
+	    INSTSRCDIR="${1%%.dat}-inst-dat"
+#	    INSTSRCDIR="CdF-inst-dat"
+	fi
+	echo
+	initialize "Directory containing instrumental profiles> " INSTSRCDIR
+	if [[ ! -d $INSTSRCDIR ]]
+	then
+	    fecho
+	    fecho "Error: cannot find instrumental profile directory: $INSTSRCDIR."
+	    exit 1
+	fi
+	INSTDIR="${1%%.dat}-inst-gen-dat"
+	if [[ ! -d $INSTDIR ]]
+	then
+		mkdir -p $INSTDIR
+	else
+		rm -f ${INSTDIR}/.*(N) ${INSTDIR}/*(N)
+	fi
+    fi
+
+    if [[ -z $LIMIT1 ]]
+    then
+	LIMIT1=100
+    fi
+    NUMPEAKS=25
+    Nsub=1
+    skips=()
+
+    if [[ -z $minx ]]
+    then
+	EPFFIRST=$(head -1 $1 | $AWK '{print $1}')
+    else
+	EPFFIRST=${minx}
+    fi
+
+    if [[ -z $maxx ]]
+    then
+	EPFLAST=$(tail -1 $1 | $AWK '{print $1}')
+    else
+	EPFLAST=${maxx}
+    fi
+
+    if [[ -e ${1%%.dat}.peak-index.dat ]]
+    then
+        echo "The interval used for fitting and plotting is: [minx,maxx]"
+        initialize "Please specify the value of minx> " EPFFIRST
+        initialize "Please specify the value of maxx> " EPFLAST
+	satisfied="y"
+    else
+        call_make_peak_index="n"
+	initialize 'Do you want to call make_peak-index.sh to create the indexing file?> ' call_make_peak_index
+	if [[ $call_make_peak_index = [yYiI]* ]]
+	then
+	    ./make_peak-index.sh $1
+	    satisfied="y"
+	else
+	    satisfied="n"
+	fi
+    fi
+
+    echo
+    export wavelength EPFFIRST EPFLAST INSTSRCDIR INSTDIR
+
+    if [[ $USE_SPLINE = [yYiI]* && $AUTO != "yes" ]]
+    then
+	if [[ -s ${1%%.dat}.bg-spline.dat ]]
+	then
+	    call_mkspline="n"
+	    initialize 'Do you want to call mkspline to modify the spline data file?> ' call_mkspline
+	    if [[ $call_mkspline = [yYiI]* ]]
+	    then
+		run_mkspline $1
+	    fi
+	else
+	    while [[ ! -s ${1%%.dat}.bg-spline.dat ]]
+	    do
+		echo "The spline data file don't exist or has zero size."
+		echo "Calling mkspline to create the spline data file."
+		run_mkspline $1
+	    done
+	fi
+    fi
+
+    while [[ $satisfied != [yYiI]* ]]
+    do
+	echo 'Searching for the peaks. The program will search for the first "numpeaks" peaks.'
+	echo 'The measured interval is divided into "Nsub" number of subintervals.'
+	echo 'For each subinterval you must specify two parameters: "limit1" and "limit2".'
+	echo 'The meaning of these parameters: the background must be smaller than "limit1"'
+	echo 'and the program will include the peaks greater than "limit2".'
+	echo 'Note that limit2-limit1 must be greater than the statistical noise.'
+	echo 'The statistical noise can be diminished by enabling the averaging.'
+	initialize 'Nsub> ' Nsub
+	initialize 'numpeaks> ' NUMPEAKS
+	let n=1
+	Intb=()
+	Inte=()
+	LIMS1=()
+	LIMS2=()
+	INTB=$(head -1 $1 | $AWK '{print $1}')
+	INTE=$(tail -1 $1 | $AWK '{print $1}')
+
+	repeat $Nsub
+	do
+		if [[ ! -z $OIntb[$n] ]]
+		then
+		    INTB=$OIntb[$n]
+		    INTE=$OInte[$n]
+		    LIMIT1=$OLIMS1[$n]
+		    LIMIT2=$OLIMS2[$n]
+		fi
+
+		initialize "Beginning of Interval number $n> " INTB
+		initialize "End of Interval number $n> " INTE
+		initialize "limit1 for Interval number $n> " LIMIT1
+		if [[ -z $LIMIT2 ]]
+		then
+			LIMIT2=$(echo $LIMIT1|$AWK '{print 2*$1}')
+		fi
+		initialize "limit2 for Interval number $n> " LIMIT2
+		Intb=( $Intb $INTB )
+		Inte=( $Inte $INTE )
+		LIMS1=( $LIMS1 $LIMIT1 )
+		LIMS2=( $LIMS2 $LIMIT2 )
+		if [[ $n = 1 ]]
+		then
+			PLOT1="limit1(x)=$LIMS1[$n]*L(x,$Intb[$n])"
+			PLOT2="limit2(x)=$LIMS2[$n]*L(x,$Intb[$n])"
+		else
+			PLOT1="$PLOT1+($LIMS1[$n]-$LIMS1[$n-1])*L(x,$Intb[$n])"
+			PLOT2="$PLOT2+($LIMS2[$n]-$LIMS2[$n-1])*L(x,$Intb[$n])"
+		fi
+		INTB=$INTE
+		INTE=$(tail -1 $1 | $AWK '{print $1}')
+		let n+=1
+	done
+
+	OIntb=()
+	OInte=()
+	OLIMS1=()
+	OLIMS2=()
+	let n=1
+	repeat $Nsub
+	do
+		OIntb=( $OIntb $Intb[$n] )
+		OInte=( $OInte $Inte[$n] )
+		OLIMS1=( $OLIMS1 $LIMS1[$n] )
+		OLIMS2=( $OLIMS2 $LIMS2[$n] )
+		let n+=1
+	done
+
+	if [[ -z $AVG ]]
+	then
+	    AVG="y"
+	    AVGFIVE="n"
+	fi
+	initialize "Do you want to enable averaging (y/n)? " AVG
+
+	if [[ $AVG = [yYiI]* ]]
+	then
+		initialize "Do you want to enable 5 point averaging (y/n)? " AVGFIVE
+	fi
+
+	if [[ $AVGFIVE = [yYiI]* ]]
+	then
+	    $AWK -f lib/avg.awk <$1 | $AWK -f lib/avg.awk >tmp/$$.avg.dat
+	elif [[ $AVG = [yYiI]* ]]
+	then
+	    $AWK -f lib/avg.awk <$1 >tmp/$$.avg.dat
+	else
+	    cat $1 >tmp/$$.avg.dat
+	fi
+
+	echo
+	echo "Found the following peaks:"
+	echo "n 2*theta max FWHM"
+	:>tmp/$$-epffwhm1.dat
+	let n=1
+
+	repeat $Nsub
+	do
+		$AWK '$1>='"$Intb[$n]"' && $1<='"$Inte[$n]"' {print}' <tmp/$$.avg.dat >tmp/$$.sub.dat
+		./lib/epffwhm tmp/$$.sub.dat $LIMS1[$n] $LIMS2[$n] >>tmp/$$-epffwhm1.dat
+		let n+=1
+	done
+
+	cat tmp/$$-epffwhm1.dat | head -$NUMPEAKS | $AWK '$3>0 && $3<5 {print NR" "$1" "$2" "$3} $3<=0 {print NR" "$1" "$2" ???"} $3>=5 {print NR" "$1" "$2" ???"}'
+
+	if [[ $USE_SPLINE != [yYiI]* ]]
+	then
+
+	    if [[ -z $skip ]]
+	    then
+		skip=2
+	    fi
+	    if [[ -z $n1 ]]
+	    then
+		n1=20
+	    fi
+	    if [[ -z $n2 ]]
+	    then
+		n2=20
+	    fi
+	    echo "For the purpose of background determining, the program will skip"
+	    echo "the data in the proximity of skip witdth of each peak. The"
+	    echo "first n1 and the last n2 data points are always included for"
+	    echo "background determining. For each reflexion you should specify an"
+	    echo "individual value for skip."
+#	    initialize 'Please specify the value of skip (in Two theta degrees)> ' skip
+	    initialize 'Please specify the value of n1> ' n1
+	    initialize 'Please specify the value of n2> ' n2
+
+	    echo "Found the following peaks:"
+	    echo "n 2*theta max FWHM"
+	    let n=1
+	    :>tmp/$$-epffwhm.dat
+	    cat tmp/$$-epffwhm1.dat  | head -$NUMPEAKS | while read Twotheta_skip max_skip FWHM_skip
+	    do
+		if [[ -z $skips[$n] ]]
+		then
+		    skips=( $skips $skip )
+		else
+		    skip=$skips[$n]
+		fi
+		echo "$n $Twotheta_skip $max_skip $FWHM_skip" | head -$NUMPEAKS | $AWK '$4>0 && $4<5 {print $1" "$2" "$3" "$4} $4<=0 {print $1" "$2" "$3" ???"} $4>=5 {print $1" "$2" "$3" ???"}'
+		initialize 'Please specify the value of skip (in Two theta degrees)> ' skip
+
+		echo "$Twotheta_skip $max_skip $skip" >>tmp/$$-epffwhm.dat
+		let n+=1
+	    done
+
+	    echo "{ok=1}" >tmp/$$-bg.awk
+	    cat tmp/$$-epffwhm.dat | $AWK '{skip=$3} {print "$1>"$1-skip" && $1<"$1+skip" {ok=0}"}' >>tmp/$$-bg.awk
+	    echo "ok==1 {print}" >>tmp/$$-bg.awk
+
+#	    echo "Running $AWK script:"
+#	    cat tmp/$$-bg.awk
+
+	    cat $1|$AWK '$1>='"${EPFFIRST} {print}"|head -$n1 >tmp/$$-bg2.dat
+	    cat $1|$AWK -f tmp/$$-bg.awk >>tmp/$$-bg2.dat
+	    cat $1|$AWK '$1<='"${EPFLAST} {print}"|tail -$n2 >>tmp/$$-bg2.dat
+	    sort -n tmp/$$-bg2.dat|uniq >tmp/$$-bg.dat
+
+	fi # USE_SPLINE
+
+	echo "n 2*theta max FWHM"
+	cat tmp/$$-epffwhm1.dat | head -$NUMPEAKS | $AWK '$3>0 && $3<5 {print NR" "$1" "$2" "$3} $3<=0 {print NR" "$1" "$2" ???"} $3>=5 {print NR" "$1" "$2" ???"}'
+
+	echo
+	echo "Plotting the data points in the range [$EPFFIRST:$EPFLAST]."
+	if [[ $AUTO = "yes" ]]
+	then
+	    cat >tmp/$$.gnu <<EOF
+L(x,s)=(x==s?0.5:0.0)+(1.0+sgn(x-s))/2.0
+$PLOT1
+$PLOT2
+plot [$EPFFIRST:$EPFLAST] "tmp/$$.avg.dat" w lines, limit1(x) title "limit1", limit2(x) title "limit2"
+
+print ""
+print "Replotting the previous figure using logscale."
+replot
+EOF
+	else # AUTO
+	    cat >tmp/$$.gnu <<EOF
+L(x,s)=(x==s?0.5:0.0)+(1.0+sgn(x-s))/2.0
+$PLOT1
+$PLOT2
+plot [$EPFFIRST:$EPFLAST] "tmp/$$.avg.dat" w lines, limit1(x) title "limit1", limit2(x) title "limit2"
+
+print ""
+print "Replotting the previous figure using logscale."
+pause -1 "Press ENTER to continue."
+set logscale y
+replot
+
+pause -1 "Press ENTER to continue."
+EOF
+
+	    if [[ $USE_SPLINE != [yYiI]* ]]
+	    then
+		cat >>tmp/$$.gnu <<EOF
+set nologscale
+
+print "Plotting the data for background determination."
+plot [$EPFFIRST:$EPFLAST] "tmp/$$-bg.dat" w lines
+
+print ""
+pause -1 "Press ENTER to continue."
+EOF
+	    fi
+
+	fi # AUTO
+	rungnuplot
+
+	echo
+	satisfied="y"
+	initialize "Are you satisfied with this?> " satisfied
+    done
+
+    echo
+
+    let ir=0
+    hkls=( 111 200 220 311 222 400 331 420 422 333 511 440 531 442 600 620 533 622 444 551 711 640 642 553 731 800 733 644 820 660 822 555 751 662 840 )
+    g2=""
+    i_s0=""
+    i_max=""
+    st_p1s=""
+    st_p2s=""
+    st_p3s=""
+    st_p4s=""
+    st_fwhm2s_1=""
+    st_fwhm2s_2=""
+    st_fwhm2s_3=""
+    st_fwhm2s_4=""
+    st_fwhm2s_5=""
+    st_fwhm3s_1=""
+    st_fwhm3s_2=""
+    st_fwhm3s_3=""
+    st_fwhm3s_4=""
+    st_fwhm3s_5=""
+    st_fwhm4s_1=""
+    st_fwhm4s_2=""
+    st_fwhm4s_3=""
+    st_fwhm4s_4=""
+    st_fwhm4s_5=""
+    st_shift2s_1=""
+    st_shift2s_2=""
+    st_shift2s_3=""
+    st_shift2s_4=""
+    st_shift2s_5=""
+    st_shift3s_1=""
+    st_shift3s_2=""
+    st_shift3s_3=""
+    st_shift3s_4=""
+    st_shift3s_5=""
+    st_shift4s_1=""
+    st_shift4s_2=""
+    st_shift4s_3=""
+    st_shift4s_4=""
+    st_shift4s_5=""
+    st_hcp_p2s=""
+    st_hcp_p3s=""
+    st_hcp_p4s=""
+    st_hcp_fwhm2s_1=""
+    st_hcp_fwhm2s_2=""
+    st_hcp_fwhm2s_3=""
+    st_hcp_fwhm2s_4=""
+    st_hcp_fwhm2s_5=""
+    st_hcp_fwhm3s_1=""
+    st_hcp_fwhm3s_2=""
+    st_hcp_fwhm3s_3=""
+    st_hcp_fwhm3s_4=""
+    st_hcp_fwhm3s_5=""
+    st_hcp_fwhm4s_1=""
+    st_hcp_fwhm4s_2=""
+    st_hcp_fwhm4s_3=""
+    st_hcp_fwhm4s_4=""
+    st_hcp_fwhm4s_5=""
+    st_hcp_shift2s_1=""
+    st_hcp_shift2s_2=""
+    st_hcp_shift2s_3=""
+    st_hcp_shift2s_4=""
+    st_hcp_shift2s_5=""
+    st_hcp_shift3s_1=""
+    st_hcp_shift3s_2=""
+    st_hcp_shift3s_3=""
+    st_hcp_shift3s_4=""
+    st_hcp_shift3s_5=""
+    st_hcp_shift4s_1=""
+    st_hcp_shift4s_2=""
+    st_hcp_shift4s_3=""
+    st_hcp_shift4s_4=""
+    st_hcp_shift4s_5=""
+
+    ph_no=""
+    h20=""
+    h21=""
+    h22=""
+    h23=""
+    h24=""
+    h25=""
+    h2=""
+
+    anx=""
+    LABELCMDS=""
+
+    if [[ -e ${1%%.dat}.peak-index.dat ]] #READ_PEAK_INDEX_FILE
+    then #READ_PEAK_INDEX_FILE
+
+	egrep -v '^[[:space:]]*#' ${1%%.dat}.peak-index.dat | while read Twotheta0 I_max hkl phase
+	do
+	    if [[ -z $phase ]]
+	    then
+		phase="0"
+	    fi
+	    add_peak
+	done
+
+    else #READ_PEAK_INDEX_FILE
+
+	cat tmp/$$-epffwhm1.dat | head -$NUMPEAKS | while read maxx maxf fwhm
+	do
+	if [[ ! -z $prevmaxx ]]
+	then
+	    if [[ -z $prevend ]]
+	    then
+		start=$EPFFIRST
+	    else
+		start=$prevend
+	    fi
+	    end=$(echo|${AWK} "{print ($prevmaxx+$maxx)/2}")
+#	    echo "start: $start, maxx: $prevmaxx, end: $end"
+	    Twotheta0=$prevmaxx
+	    I_max=$prevmaxf
+	    echo "Center: $Twotheta0, I_max: $I_max"
+	    skip="n"
+	    initialize "Do you want to skip this peak?> " skip
+	    if [[ $skip != [yYiI]* ]]
+	    then
+		hkl=$hkls[$ir+1]
+		initialize "hkl> " hkl
+		initialize "I_max> " I_max
+		phase="0"
+		if [[ $[$NUM_PH>1] = 1 ]]
+	        then
+			initialize "phase number> " phase
+		fi
+		if [[ $ORT = "yes" ]]
+		then
+		    g2_from_hkl=$(let i=1; h=$hkl[i]; if [[ $h = '-' ]]; then let i+=1; h="$h$hkl[i]"; fi; let i+=1; k=$hkl[i]; if [[ $k = '-' ]]; then let i+=1; k="$k$hkl[i]"; fi; let i+=1; l=$hkl[i]; if [[ $l = '-' ]]; then let i+=1; l="$l$hkl[i]"; fi; echo|${AWK} '{print "($h)^2/($la*$la)+($k)^2/($lb*$lb)+($l)^2/($lc*$lc)}")
+		elif [[ $HEX = "yes" ]]
+		then
+		    g2_from_hkl=$(let i=1; h=$hkl[i]; if [[ $h = '-' ]]; then let i+=1; h="$h$hkl[i]"; fi; let i+=1; k=$hkl[i]; if [[ $k = '-' ]]; then let i+=1; k="$k$hkl[i]"; fi; let i+=1; l=$hkl[i]; if [[ $l = '-' ]]; then let i+=1; l="$l$hkl[i]"; fi; echo | ${AWK} "{print (4.0/3.0)*(($h)^2+($h)*($k)+($k)^2)/$la^2+($l)^2/$lc^2}")
+		else
+		    g2_from_hkl=$(let i=1; h=$hkl[i]; if [[ $h = '-' ]]; then let i+=1; h="$h$hkl[i]"; fi; let i+=1; k=$hkl[i]; if [[ $k = '-' ]]; then let i+=1; k="$k$hkl[i]"; fi; let i+=1; l=$hkl[i]; if [[ $l = '-' ]]; then let i+=1; l="$l$hkl[i]"; fi; echo|${AWK} '{print "(($h)^2+($k)^2+($l)^2)/($la*$la)}")
+		fi
+		add_peak
+		echo
+		hkl_next=$hkls[$ir+1]
+		if [[ $ORT = "yes" ]]
+		then
+		    g2_from_hkl_next=$(let i=1; h=$hkl_next[i]; if [[ $h = '-' ]]; then let i+=1; h="$h$hkl_next[i]"; fi; let i+=1; k=$hkl_next[i]; if [[ $k = '-' ]]; then let i+=1; k="$k$hkl_next[i]"; fi; let i+=1; l=$hkl_next[i]; if [[ $l = '-' ]]; then let i+=1; l="$l$hkl_next[i]"; fi; echo|${AWK} '{print "($h)^2/($la*$la)+($k)^2/($lb*$lb)+($l)^2/($lc*$lc)}")
+		elif [[ $HEX = "yes" ]]
+		then
+		    g2_from_hkl_next=$(let i=1; h=$hkl_next[i]; if [[ $h = '-' ]]; then let i+=1; h="$h$hkl_next[i]"; fi; let i+=1; k=$hkl_next[i]; if [[ $k = '-' ]]; then let i+=1; k="$k$hkl_next[i]"; fi; let i+=1; l=$hkl_next[i]; if [[ $l = '-' ]]; then let i+=1; l="$l$hkl_next[i]"; fi; echo | ${AWK} "{print (4.0/3.0)*(($h)^2+($h)*($k)+($k)^2)/$la^2+($l)^2/$lc^2}")
+		else
+		    g2_from_hkl_next=$(let i=1; h=$hkl_next[i]; if [[ $h = '-' ]]; then let i+=1; h="$h$hkl_next[i]"; fi; let i+=1; k=$hkl_next[i]; if [[ $k = '-' ]]; then let i+=1; k="$k$hkl_next[i]"; fi; let i+=1; l=$hkl_next[i]; if [[ $l = '-' ]]; then let i+=1; l="$l$hkl_next[i]"; fi; echo|${AWK} '{print "(($h)^2+($k)^2+($l)^2)/($la*$la)}")
+		fi
+#		echo "g2_from_hkl: $g2_from_hkl"
+#		echo "g2_from_hkl_next: $g2_from_hkl_next"
+		if [[ $g2_from_hkl_next = $g2_from_hkl ]]
+		then
+		    hkl="$hkl_next"
+		    I_max_prev="${I_max}"
+		    I_max="0"
+		    add_peak
+		    unset I_max_prev
+		    echo
+		fi
+	    fi
+	fi
+	prevmaxx=$maxx
+	prevmaxf=$maxf
+	prevend=$end
+    done
+    start=$prevend
+    end=$EPFLAST
+#   echo "start: $start, maxx: $prevmaxx, end: $end"
+    Twotheta0=$prevmaxx
+    I_max=$prevmaxf
+    echo "Center: $Twotheta0, I_max: $I_max"
+    skip="n"
+    initialize "Do you want to skip this peak?> " skip
+    if [[ $skip != [yYiI]* ]]
+    then
+	hkl=$hkls[$ir+1]
+	initialize "hkl> " hkl
+	initialize "I_max> " I_max
+	phase="0"
+	if [[ $[$NUM_PH>1] = 1 ]]
+        then
+		initialize "phase number> " phase
+	fi
+	if [[ $ORT = "yes" ]]
+	then
+	    g2_from_hkl=$(let i=1; h=$hkl[i]; if [[ $h = '-' ]]; then let i+=1; h="$h$hkl[i]"; fi; let i+=1; k=$hkl[i]; if [[ $k = '-' ]]; then let i+=1; k="$k$hkl[i]"; fi; let i+=1; l=$hkl[i]; if [[ $l = '-' ]]; then let i+=1; l="$l$hkl[i]"; fi; echo|${AWK} '{print "($h)^2/($la*$la)+($k)^2/($lb*$lb)+($l)^2/($lc*$lc)}")
+	elif [[ $HEX = "yes" ]]
+	then
+	    g2_from_hkl=$(let i=1; h=$hkl[i]; if [[ $h = '-' ]]; then let i+=1; h="$h$hkl[i]"; fi; let i+=1; k=$hkl[i]; if [[ $k = '-' ]]; then let i+=1; k="$k$hkl[i]"; fi; let i+=1; l=$hkl[i]; if [[ $l = '-' ]]; then let i+=1; l="$l$hkl[i]"; fi; echo | ${AWK} "{print (4.0/3.0)*(($h)^2+($h)*($k)+($k)^2)/$la^2+($l)^2/$lc^2}")
+	else
+	    g2_from_hkl=$(let i=1; h=$hkl[i]; if [[ $h = '-' ]]; then let i+=1; h="$h$hkl[i]"; fi; let i+=1; k=$hkl[i]; if [[ $k = '-' ]]; then let i+=1; k="$k$hkl[i]"; fi; let i+=1; l=$hkl[i]; if [[ $l = '-' ]]; then let i+=1; l="$l$hkl[i]"; fi; echo|${AWK} '{print "(($h)^2+($k)^2+($l)^2)/($la*$la)}")
+	fi
+	add_peak
+	hkl_next=$hkls[$ir+1]
+	if [[ $ORT = "yes" ]]
+	then
+	    g2_from_hkl_next=$(let i=1; h=$hkl_next[i]; if [[ $h = '-' ]]; then let i+=1; h="$h$hkl_next[i]"; fi; let i+=1; k=$hkl_next[i]; if [[ $k = '-' ]]; then let i+=1; k="$k$hkl_next[i]"; fi; let i+=1; l=$hkl_next[i]; if [[ $l = '-' ]]; then let i+=1; l="$l$hkl_next[i]"; fi; echo|${AWK} '{print "($h)^2/($la*$la)+($k)^2/($lb*$lb)+($l)^2/($lc*$lc)}")
+	elif [[ $HEX = "yes" ]]
+	then
+	    g2_from_hkl_next=$(let i=1; h=$hkl_next[i]; if [[ $h = '-' ]]; then let i+=1; h="$h$hkl_next[i]"; fi; let i+=1; k=$hkl_next[i]; if [[ $k = '-' ]]; then let i+=1; k="$k$hkl_next[i]"; fi; let i+=1; l=$hkl_next[i]; if [[ $l = '-' ]]; then let i+=1; l="$l$hkl_next[i]"; fi; echo | ${AWK} "{print (4.0/3.0)*(($h)^2+($h)*($k)+($k)^2)/$la^2+($l)^2/$lc^2}")
+	else
+	    g2_from_hkl_next=$(let i=1; h=$hkl_next[i]; if [[ $h = '-' ]]; then let i+=1; h="$h$hkl_next[i]"; fi; let i+=1; k=$hkl_next[i]; if [[ $k = '-' ]]; then let i+=1; k="$k$hkl_next[i]"; fi; let i+=1; l=$hkl_next[i]; if [[ $l = '-' ]]; then let i+=1; l="$l$hkl_next[i]"; fi; echo|${AWK} '{print "(($h)^2+($k)^2+($l)^2)/($la*$la)}")
+	fi
+#	echo "g2_from_hkl: $g2_from_hkl"
+#	echo "g2_from_hkl_next: $g2_from_hkl_next"
+	if [[ $g2_from_hkl_next = $g2_from_hkl ]]
+	then
+	    hkl="$hkl_next"
+	    I_max_prev="${I_max}"
+	    I_max="0"
+	    add_peak
+	    unset I_max_prev
+	    echo
+	fi
+    fi
+
+    add="n"
+    initialize "Do you want to add a new peak?> " add
+
+    while [[ $add = [yYiI]* ]]
+    do
+	initialize "Center> " Twotheta0
+	initialize "hkl> " hkl
+	initialize "I_max> " I_max
+	phase="0"
+	if [[ $[$NUM_PH>1] = 1 ]]
+        then
+		initialize "phase number> " phase
+	fi
+	add_peak
+	add="n"
+	initialize "Do you want to add a new peak?> " add
+    done
+
+    fi #READ_PEAK_INDEX_FILE
+
+    cutout="n"
+    initialize "Do you want to cut out some peak?> " cutout
+
+    while [[ $cutout = [yYiI]* ]]
+    do
+	Twotheta_first=''
+	initialize "Two theta of the first point> " Twotheta_first
+	Twotheta_last=''
+	initialize "Two theta of the last point> " Twotheta_last
+	gawk '$1<'"$Twotheta_first"' || $1>'"$Twotheta_last"' {print}' <$1 >tmp/$1.cut.tmp.$$
+	cat >tmp/$1.cut.gnu.$$ <<EOF
+set terminal x11
+set logscale y
+plot [$EPFFIRST:$EPFLAST] "tmp/$1.cut.tmp.$$" w lines
+
+pause -1 "Press ENTER to continue."
+EOF
+	echo "Plotting the cutted data."
+	gnuplot tmp/$1.cut.gnu.$$
+	overwrite="y"
+	initialize 'Do you want to replace the data using the cutted data?> ' overwrite
+	if [[ $overwrite = [yYiI]* ]]
+	then
+	    cat tmp/$1.cut.tmp.$$ >$1
+	fi
+	rm -f tmp/$1.cut.tmp.$$ tmp/$1.cut.gnu.$$
+	cutout="n"
+	initialize "Do you want to cut off some peak?> " cutout
+    done
+
+    if [[ -e ${1%%.dat}.peak-index.dat ]]
+    then
+	satisfied=""
+    else
+	satisfied="y"
+    fi
+
+    if [[ $USE_SPLINE = [yYiI]* ]]
+    then
+	satisfied="y"
+    fi
+
+    while [[ $satisfied != [yYiI]* ]]
+    do
+
+    if [[ -e ${1%%.dat}.peak-index.dat ]] #READ_PEAK_INDEX_FILE
+    then #READ_PEAK_INDEX_FILE
+
+	if [[ -z $skip ]]
+	then
+		skip=2
+	fi
+	if [[ -z $n1 ]]
+	then
+		n1=20
+	fi
+	if [[ -z $n2 ]]
+	then
+		n2=20
+	fi
+	echo "For the purpose of background determining, the program will skip"
+	echo "the data in the proximity of skip witdth of each peak. The"
+	echo "first n1 and the last n2 data points are always included for"
+	echo "background determining. For each reflexion you should specify an"
+	echo "individual value for skip."
+#	initialize 'Please specify the value of skip (in Two theta degrees)> ' skip
+	initialize 'Please specify the value of n1> ' n1
+	initialize 'Please specify the value of n2> ' n2
+
+	echo "The peaks:"
+	echo "n 2*theta max hkl"
+	cat ${1%%.dat}.peak-index.dat | $AWK '{print NR" "$1" "$2" "$3}'
+	echo
+
+	let n=1
+	:>tmp/$$-epffwhm.dat
+	cat ${1%%.dat}.peak-index.dat | while read Twotheta_skip max_skip hkl_skip
+	do
+		if [[ -z $skips[$n] ]]
+		then
+		    skips=( $skips $skip )
+		else
+		    skip=$skips[$n]
+		fi
+		echo "$n $Twotheta_skip $max_skip $hkl_skip"
+		initialize 'Please specify the value of skip (in Two theta degrees)> ' skip
+
+		echo "$Twotheta_skip $max_skip $skip" >>tmp/$$-epffwhm.dat
+		let n+=1
+	done
+
+	echo "{ok=1}" >tmp/$$-bg.awk
+	cat tmp/$$-epffwhm.dat | $AWK '{skip=$3} {print "$1>"$1-skip" && $1<"$1+skip" {ok=0}"}' >>tmp/$$-bg.awk
+	echo "ok==1 {print}" >>tmp/$$-bg.awk
+
+#	echo "Running $AWK script:"
+#	cat tmp/$$-bg.awk
+
+	cat $1|$AWK '$1>='"${EPFFIRST} {print}"|head -$n1 >tmp/$$-bg2.dat
+	cat $1|$AWK -f tmp/$$-bg.awk >>tmp/$$-bg2.dat
+	cat $1|$AWK '$1<='"${EPFLAST} {print}"|tail -$n2 >>tmp/$$-bg2.dat
+	sort -n tmp/$$-bg2.dat|uniq >tmp/$$-bg.dat
+
+	cat >tmp/$$.gnu <<EOF
+print "Plotting the data for background determination."
+plot [$EPFFIRST:$EPFLAST] "tmp/$$-bg.dat" w lines
+
+print ""
+pause -1 "Press ENTER to continue."
+EOF
+	rungnuplot
+
+    fi #READ_PEAK_INDEX_FILE
+
+    satisfied="y"
+    initialize "Are you satisfied with this?> " satisfied
+
+    done
+
+    num_r=${ir}
+    echo "Number of reflections: ${num_r}"
+
+    echo "$g2"
+    echo "$i_s0"
+    echo "$i_max"
+    echo "$ph_no"
+    echo "$h20"
+    echo "$h21"
+    echo "$h22"
+    echo "$h23"
+    echo "$h24"
+    echo "$h25"
+    echo "$h2"
+    echo "$anx"
+    echo "$LABELCMDS"
+
+if [[ $ENABLE_CONVOLUTION != [yYiI]* ]]
+then
+    if [[ -z $IF_TH_FT_limit ]]
+    then
+	IF_TH_FT_limit="1e-7"
+#	IF_TH_FT_limit="SET_IT_TO_IF_TH_FT_limit"
+    fi
+    initialize "Please specify the intensity limit when evaluating the theoretical FT> " IF_TH_FT_limit
+    fecho "IF_TH_FT_limit=$IF_TH_FT_limit"
+fi
+
+    if [[ -z $PROF_CUT ]]
+    then
+	PROF_CUT="8.0"
+#	PROF_CUT="SET_IT_TO_PROF_CUT"
+    fi
+    initialize "Please specify the profile cutting parameter (in Two theta degrees)> " PROF_CUT
+
+    fecho "PROF_CUT=$PROF_CUT"
+
+    if [[ -z $N1 ]]
+    then
+	IF_N1=1024
+    else
+	IF_N1=${N1}
+    fi
+    if [[ -z $N2 ]]
+    then
+	IF_N2=1024
+    else
+	IF_N2=${N2}
+    fi
+    initialize "Please specify N1> " IF_N1
+    initialize "Please specify N2> " IF_N2
+
+    fecho "IF_N1=$IF_N1"
+    fecho "IF_N2=$IF_N2"
+    fecho
+
+fecho "*** FIT ***"
+fecho
+unset a a1 a2 b c d e f g h
+
+if [[ $HEX = "yes" ]]
+then
+    fecho "Calculating a1,a2,b,c,d,e to fit the measured powder diffraction pattern"
+    fecho "with the corresponding theoretical function."
+else
+    fecho "Calculating a,b,c,d,e to fit the measured powder diffraction pattern"
+    fecho "with the corresponding theoretical function."
+fi
+fecho
+
+if [[ $ORT = "yes" ]]
+then
+    init_a1=1.0
+    init_a2=1.0
+    init_a3=1.0
+    init_a4=1.0
+    init_a5=1.0
+elif [[ $HEX = "yes" ]]
+then
+    init_a1=1.0
+    init_a2=1.0
+else
+    init_a=2.0
+fi
+init_b=3.0
+init_c=1.0
+init_d=80.0
+init_e=0.05
+init_epsilon=0.5
+init_W=1.0
+init_X=1.0
+init_Y=1.0
+#init_f=0.01
+#init_g=1.0
+#init_h=1.0
+scale_a=1.0
+scale_b=1.0
+scale_c=1.0
+scale_d=1.0
+scale_e=1.0
+if [[ $USE_STACKING = [yYiI]* ]]
+then
+    init_st_pr="1.0"
+fi
+
+if [[ $INDC = [yYiI]* ]]
+then
+	let p=0
+	repeat ${num_r}
+	do
+	  eval init_C_$p=1.0
+	  eval C_${p}_fixed="n"
+	  eval C_fix_$p=0
+	  let p+=1
+	done
+fi
+
+if [[ $[$NUM_PH>1] = 1 ]]
+then
+        let phase=1
+	while [[ $[$phase<$NUM_PH] = 1 ]]
+	do
+		if [[ $(eval echo "\$ORT_${phase}") = "yes" ]]
+		then
+		    eval init_a1_${phase}=1.0
+		    eval init_a2_${phase}=1.0
+		    eval init_a3_${phase}=1.0
+		    eval init_a4_${phase}=1.0
+		    eval init_a5_${phase}=1.0
+		elif [[ $(eval echo "\$HEX_${phase}") = "yes" ]]
+		then
+		    eval init_a1_${phase}=1.0
+		    eval init_a2_${phase}=1.0
+		else
+		    eval init_a_${phase}=1.0
+		fi
+
+		eval init_b_${phase}=3.0
+		eval init_c_${phase}=1.0
+		eval init_d_${phase}=80.0
+		eval init_e_${phase}=0.05
+
+		let phase+=1
+	done
+fi
+
+if [[ -f ${FITINIFILE} ]]
+then
+    . ${FITINIFILE}
+fi
+
+if [[ -f ${INDCINIFILE} ]]
+then
+    . ${INDCINIFILE}
+fi
+
+e_def="e"
+
+specify_init="n"
+initialize "Do you want to specify the initial values for the parameters? " specify_init
+
+if [[ $specify_init = [yYiI]* ]]
+then
+    if [[ $INDC = [yYiI]* ]]
+    then
+	let p=0
+	repeat ${num_r}
+	do
+	  initialize 'Please specify the initial value of '"C_$p"'> ' init_C_$p
+	  echo "You can link this contrast factor to another by setting the value of C_fix_$p"
+	  echo "to a nonzero value i+1, where i is the index of the other contrast factor."
+	  initialize 'Please specify the initial value of '"C_fix_$p"'> ' C_fix_$p
+	  initialize 'Fix value of '"C_$p"'? ' C_${p}_fixed
+	  let p+=1
+	done
+    elif [[ $ORT = "yes" ]]
+    then
+	initialize 'Please specify the initial value of a1> ' init_a1
+	a1_fixed="n"
+	initialize "Fix value of a1? " a1_fixed
+
+	initialize 'Please specify the initial value of a2> ' init_a2
+	a2_fixed="n"
+	initialize "Fix value of a2? " a2_fixed
+
+	initialize 'Please specify the initial value of a3> ' init_a3
+	a3_fixed="n"
+	initialize "Fix value of a3? " a3_fixed
+
+	initialize 'Please specify the initial value of a4> ' init_a4
+	a4_fixed="n"
+	initialize "Fix value of a4? " a4_fixed
+
+	initialize 'Please specify the initial value of a5> ' init_a5
+	a5_fixed="n"
+	initialize "Fix value of a5? " a5_fixed
+    elif [[ $HEX = "yes" ]]
+    then
+	initialize 'Please specify the initial value of a1> ' init_a1
+	a1_fixed="n"
+	initialize "Fix value of a1? " a1_fixed
+	initialize 'Please specify the initial value of a2> ' init_a2
+	a2_fixed="n"
+	initialize "Fix value of a2? " a2_fixed
+    else
+	initialize 'Please specify the initial value of a> ' init_a
+	a_fixed="n"
+	initialize "Fix value of a? " a_fixed
+    fi
+
+    if [[ $SFNAME != "no_sf" ]]
+    then
+	initialize 'Please specify the initial value of b> ' init_b
+	b_fixed="n"
+	initialize "Fix value of b? " b_fixed
+
+	initialize 'Please specify the initial value of c> ' init_c
+	c_fixed="n"
+	initialize "Fix value of c? " c_fixed
+    fi
+
+    if [[ $USE_F_GRCS = [yYiI]* ]]
+    then
+
+    initialize 'Please specify the initial value of W> ' init_W
+    W_fixed="n"
+    initialize "Fix value of W? " W_fixed
+
+    initialize 'Please specify the initial value of X> ' init_X
+    X_fixed="n"
+    initialize "Fix value of X? " X_fixed
+
+    initialize 'Please specify the initial value of Y> ' init_Y
+    Y_fixed="n"
+    initialize "Fix value of Y? " Y_fixed
+
+    else
+
+    initialize 'Please specify the initial value of d> ' init_d
+    if [[ $INDC != [yYiI]* ]]
+    then
+	d_fixed="n"
+	initialize "Fix value of d? " d_fixed
+    fi
+
+    initialize 'Please specify the initial value of e> ' init_e
+    e_fixed="n"
+    initialize "Fix value of e? " e_fixed
+
+    de_fixed="n"
+    initialize "Do you want to fix d*e? " de_fixed
+
+    fi
+
+    if [[ $USE_STACKING = [yYiI]* ]]
+    then
+	initialize "Please specify the initial value of st_pr> " init_st_pr
+	st_pr_fixed="n"
+	initialize "Fix value of st_pr? " st_pr_fixed
+    fi
+
+    if [[ $SF_ELLIPSOIDAL = [yYiI]* ]]
+    then
+	initialize 'Please specify the initial value of epsilon> ' init_epsilon
+	epsilon_fixed="n"
+	initialize "Fix value of epsilon? " epsilon_fixed
+    fi
+
+fi
+
+if [[ $INDC = [yYiI]* ]]
+then
+	ALL_C_FIXED="y"
+	let p=0
+	repeat ${num_r}
+	do
+	  if [[ $(eval echo "\$C_${p}_fixed") != [yYiI]* ]]
+	  then
+		ALL_C_FIXED="n"
+		break
+	  fi
+	  let p+=1
+	done
+	if [[ $ALL_C_FIXED != [yYiI]* ]]
+	then
+		d_fixed="y"
+		echo "NOTE: the value of d is always fixed when using individual contrast factors."
+	else
+		echo "All individual contrast factors are fixed, the value of d can be refined."
+	fi
+fi
+
+if [[ $de_fixed = [yYiI]* ]]
+then
+	de=$(echo|${AWK} "{print ($init_d)*($init_e)}")
+#	de=5.2
+	fecho "d*e=${de}"
+	e_def="(${de}/d)"
+fi
+
+if [[ $SF_ELLIPSOIDAL != [yYiI]* ]]
+then
+    init_epsilon=1.0
+    epsilon_fixed="y"
+fi
+
+if [[ $SFNAME = "no_sf" ]]
+then
+    init_b=42.0
+    init_c=0.1
+    b_fixed="y"
+    c_fixed="y"
+fi
+
+if [[ ${num_r} = 1 ]]
+then
+    if [[ $ORT = "yes" ]]
+    then
+	init_a1=0.0
+	init_a2=0.0
+	init_a3=0.0
+	init_a4=0.0
+	init_a5=0.0
+	a1_fixed="y"
+	a2_fixed="y"
+	a3_fixed="y"
+	a4_fixed="y"
+	a5_fixed="y"
+    elif [[ $HEX = "yes" ]]
+    then
+	init_a1=0.0
+	init_a2=0.0
+	a1_fixed="y"
+	a2_fixed="y"
+    else
+	init_a=0.0
+	a_fixed="y"
+    fi
+fi
+
+q="n"
+initialize "Do you want to specify the scaling parameters? " q
+
+if [[ $q = [yYiI]* ]]
+then
+    initialize 'Please specify the value of scale_a> ' scale_a
+    initialize 'Please specify the value of scale_b> ' scale_b
+    initialize 'Please specify the value of scale_c> ' scale_c
+    initialize 'Please specify the value of scale_d> ' scale_d
+    initialize 'Please specify the value of scale_e> ' scale_e
+fi
+
+if [[ $INDC = [yYiI]* ]]
+then
+    :>${INDCINIFILE}
+    let p=0
+    repeat ${num_r}
+    do
+      echo "init_C_$p=$(eval echo \$init_C_$p)" >>${INDCINIFILE}
+      if [[ $(eval echo \$C_${p}_fixed) = [yYiI]* ]]
+      then
+	  echo "C_${p}"'_fixed="y"' >>${INDCINIFILE}
+      elif [[ $(eval echo \$C_fix_${p}) -gt 0 ]]
+      then
+	  echo "C_fix_$p=$(eval echo \$C_fix_$p)" >>${INDCINIFILE}
+      fi
+      let p+=1
+    done
+    :>${FITINIFILE}
+elif [[ $ORT = "yes" ]]
+then
+    cat >${FITINIFILE} <<EOF
+init_a1=$init_a1
+init_a2=$init_a2
+init_a3=$init_a3
+init_a4=$init_a4
+init_a5=$init_a5
+EOF
+elif [[ $HEX = "yes" ]]
+then
+    cat >${FITINIFILE} <<EOF
+init_a1=$init_a1
+init_a2=$init_a2
+EOF
+else
+    cat >${FITINIFILE} <<EOF
+init_a=$init_a
+EOF
+fi
+
+if [[ $USE_F_GRCS != [yYiI]* ]]
+then
+
+	cat >>${FITINIFILE} <<EOF
+init_b=$init_b
+init_c=$init_c
+init_d=$init_d
+init_e=$init_e
+init_epsilon=$init_epsilon
+EOF
+
+else
+
+	cat >>${FITINIFILE} <<EOF
+init_b=$init_b
+init_c=$init_c
+init_W=$init_W
+init_X=$init_X
+init_Y=$init_Y
+init_epsilon=$init_epsilon
+EOF
+
+fi
+
+if [[ $USE_STACKING = [yYiI]* ]]
+then
+	cat >>${FITINIFILE} <<EOF
+init_st_pr=$init_st_pr
+EOF
+fi
+
+if [[ $[$NUM_PH>1] = 1 ]]
+then
+    if [[ $specify_init = [yYiI]* ]]
+    then
+        let phase=1
+	while [[ $[$phase<$NUM_PH] = 1 ]]
+	do
+		if [[ $(eval echo "\$ORT_${phase}") = "yes" ]]
+		then
+		    initialize "Please specify the initial value of a1_${phase}> " init_a1_${phase}
+		    eval a1_${phase}_fixed="n"
+		    initialize "Fix value of a1_${phase}? " a1_${phase}_fixed
+		    echo "init_a1_${phase}="$(eval echo "\$init_a1_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$a1_${phase}_fixed") = [yYiI]* ]] && echo "a1_${phase}_fixed"'="y"' >>${FITINIFILE}
+
+		    initialize "Please specify the initial value of a2_${phase}> " init_a2_${phase}
+		    eval a2_${phase}_fixed="n"
+		    initialize "Fix value of a2_${phase}? " a2_${phase}_fixed
+		    echo "init_a2_${phase}="$(eval echo "\$init_a2_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$a2_${phase}_fixed") = [yYiI]* ]] && echo "a2_${phase}_fixed"'="y"' >>${FITINIFILE}
+
+		    initialize "Please specify the initial value of a3_${phase}> " init_a3_${phase}
+		    eval a3_${phase}_fixed="n"
+		    initialize "Fix value of a3_${phase}? " a3_${phase}_fixed
+		    echo "init_a3_${phase}="$(eval echo "\$init_a3_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$a3_${phase}_fixed") = [yYiI]* ]] && echo "a3_${phase}_fixed"'="y"' >>${FITINIFILE}
+
+		    initialize "Please specify the initial value of a4_${phase}> " init_a4_${phase}
+		    eval a4_${phase}_fixed="n"
+		    initialize "Fix value of a4_${phase}? " a4_${phase}_fixed
+		    echo "init_a4_${phase}="$(eval echo "\$init_a4_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$a4_${phase}_fixed") = [yYiI]* ]] && echo "a4_${phase}_fixed"'="y"' >>${FITINIFILE}
+
+		    initialize "Please specify the initial value of a5_${phase}> " init_a5_${phase}
+		    eval a5_${phase}_fixed="n"
+		    initialize "Fix value of a5_${phase}? " a5_${phase}_fixed
+		    echo "init_a5_${phase}="$(eval echo "\$init_a5_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$a5_${phase}_fixed") = [yYiI]* ]] && echo "a5_${phase}_fixed"'="y"' >>${FITINIFILE}
+
+		elif [[ $(eval echo "\$HEX_${phase}") = "yes" ]]
+		then
+		    initialize "Please specify the initial value of a1_${phase}> " init_a1_${phase}
+		    eval a1_${phase}_fixed="n"
+		    initialize "Fix value of a1_${phase}? " a1_${phase}_fixed
+		    echo "init_a1_${phase}="$(eval echo "\$init_a1_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$a1_${phase}_fixed") = [yYiI]* ]] && echo "a1_${phase}_fixed"'="y"' >>${FITINIFILE}
+
+		    initialize "Please specify the initial value of a2_${phase}> " init_a2_${phase}
+		    eval a2_${phase}_fixed="n"
+		    initialize "Fix value of a2_${phase}? " a2_${phase}_fixed
+		    echo "init_a2_${phase}="$(eval echo "\$init_a2_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$a2_${phase}_fixed") = [yYiI]* ]] && echo "a2_${phase}_fixed"'="y"' >>${FITINIFILE}
+		else
+		    initialize "Please specify the initial value of a_${phase}> " init_a_${phase}
+		    eval a_${phase}_fixed="n"
+		    initialize "Fix value of a_${phase}? " a_${phase}_fixed
+		    echo "init_a_${phase}="$(eval echo "\$init_a_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$a_${phase}_fixed") = [yYiI]* ]] && echo "a_${phase}_fixed"'="y"' >>${FITINIFILE}
+		fi
+
+		if true || ! echo $NO_SIZE_EFFECT_PH | grep -q '^'"size_effect_disabled_${phase}"'$'
+		then
+		    initialize "Please specify the initial value of b_${phase}> " init_b_${phase}
+		    eval b_${phase}_fixed="n"
+		    initialize "Fix value of b_${phase}? " b_${phase}_fixed
+		    echo "init_b_${phase}="$(eval echo "\$init_b_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$b_${phase}_fixed") = [yYiI]* ]] && echo "b_${phase}_fixed"'="y"' >>${FITINIFILE}
+		    initialize "Please specify the initial value of c_${phase}> " init_c_${phase}
+		    eval c_${phase}_fixed="n"
+		    initialize "Fix value of c_${phase}? " c_${phase}_fixed
+		    echo "init_c_${phase}="$(eval echo "\$init_c_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$c_${phase}_fixed") = [yYiI]* ]] && echo "c_${phase}_fixed"'="y"' >>${FITINIFILE}
+		else
+		    eval init_b_${phase}=42.0
+		    eval init_c_${phase}=0.1
+		    eval b_${phase}_fixed="y"
+		    eval c_${phase}_fixed="y"
+		    echo "init_b_${phase}="$(eval echo "\$init_b_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$b_${phase}_fixed") = [yYiI]* ]] && echo "b_${phase}_fixed"'="y"' >>${FITINIFILE}
+		    echo "init_c_${phase}="$(eval echo "\$init_c_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$c_${phase}_fixed") = [yYiI]* ]] && echo "c_${phase}_fixed"'="y"' >>${FITINIFILE}
+	        fi
+
+		initialize "Please specify the initial value of d_${phase}> " init_d_${phase}
+		if [[ $INDC = [yYiI]* ]]
+		then
+			ALL_C_FIXED="y"
+			let p=0
+			repeat ${num_r}
+			do
+				if [[ $(eval echo "\$C_${p}_fixed") != [yYiI]* ]]
+				then
+					ALL_C_FIXED="n"
+					break
+				fi
+				let p+=1
+			done
+			if [[ $ALL_C_FIXED != [yYiI]* ]]
+			then
+				echo "NOTE: the value of d_${phase} is always fixed when using individual contrast factors."
+				eval d_${phase}_fixed="y"
+			else
+				echo "All individual contrast factors are fixed, the value of d_${phase} can be refined."
+				eval d_${phase}_fixed="n"
+			fi
+		fi
+		initialize "Fix value of d_${phase}? " d_${phase}_fixed
+		echo "init_d_${phase}="$(eval echo "\$init_d_${phase}") >> ${FITINIFILE}
+		[[ $(eval echo "\$d_${phase}_fixed") = [yYiI]* ]] && echo "d_${phase}_fixed"'="y"' >>${FITINIFILE}
+
+		initialize "Please specify the initial value of e_${phase}> " init_e_${phase}
+		eval e_${phase}_fixed="n"
+		initialize "Fix value of e_${phase}? " e_${phase}_fixed
+		echo "init_e_${phase}="$(eval echo "\$init_e_${phase}") >> ${FITINIFILE}
+		[[ $(eval echo "\$e_${phase}_fixed") = [yYiI]* ]] && echo "e_${phase}_fixed"'="y"' >>${FITINIFILE}
+
+		eval de_${phase}_fixed="n"
+		initialize "Do you want to fix d*e for phase ${phase}? " de_${phase}_fixed
+		if [[ $(eval echo "\$de_${phase}_fixed") = [yYiI]* ]]
+		then		
+			eval de_${phase}=$(echo|${AWK} "{print ($(eval echo "\$init_d_${phase}"))*($(eval echo "\$init_e_${phase}"))}")
+			fecho "For phase ${phase}: d*e=$(eval echo "\$de_${phase}")"
+			echo "de_${phase}_fixed"'="y"' >>${FITINIFILE}
+		fi
+
+		let phase+=1
+	done
+    else
+        let phase=1
+	while [[ $[$phase<$NUM_PH] = 1 ]]
+	do
+		if [[ $(eval echo "\$ORT_${phase}") = "yes" ]]
+		then
+		    echo "init_a1_${phase}="$(eval echo "\$init_a1_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$a1_${phase}_fixed") = [yYiI]* ]] && echo "a1_${phase}_fixed"'="y"' >>${FITINIFILE}
+
+		    echo "init_a2_${phase}="$(eval echo "\$init_a2_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$a2_${phase}_fixed") = [yYiI]* ]] && echo "a2_${phase}_fixed"'="y"' >>${FITINIFILE}
+		    echo "init_a3_${phase}="$(eval echo "\$init_a3_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$a3_${phase}_fixed") = [yYiI]* ]] && echo "a3_${phase}_fixed"'="y"' >>${FITINIFILE}
+		    echo "init_a4_${phase}="$(eval echo "\$init_a4_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$a4_${phase}_fixed") = [yYiI]* ]] && echo "a4_${phase}_fixed"'="y"' >>${FITINIFILE}
+		    echo "init_a5_${phase}="$(eval echo "\$init_a5_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$a5_${phase}_fixed") = [yYiI]* ]] && echo "a5_${phase}_fixed"'="y"' >>${FITINIFILE}
+		elif [[ $(eval echo "\$HEX_${phase}") = "yes" ]]
+		then
+		    echo "init_a1_${phase}="$(eval echo "\$init_a1_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$a1_${phase}_fixed") = [yYiI]* ]] && echo "a1_${phase}_fixed"'="y"' >>${FITINIFILE}
+		    echo "init_a2_${phase}="$(eval echo "\$init_a2_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$a2_${phase}_fixed") = [yYiI]* ]] && echo "a2_${phase}_fixed"'="y"' >>${FITINIFILE}
+		else
+		    echo "init_a_${phase}="$(eval echo "\$init_a_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$a_${phase}_fixed") = [yYiI]* ]] && echo "a_${phase}_fixed"'="y"' >>${FITINIFILE}
+		fi
+
+		if true || ! echo $NO_SIZE_EFFECT_PH | grep -q '^'"size_effect_disabled_${phase}"'$'
+		then
+		    echo "init_b_${phase}="$(eval echo "\$init_b_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$b_${phase}_fixed") = [yYiI]* ]] && echo "b_${phase}_fixed"'="y"' >>${FITINIFILE}
+		    echo "init_c_${phase}="$(eval echo "\$init_c_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$c_${phase}_fixed") = [yYiI]* ]] && echo "c_${phase}_fixed"'="y"' >>${FITINIFILE}
+		else
+		    eval init_b_${phase}=42.0
+		    eval init_c_${phase}=0.1
+		    eval b_${phase}_fixed="y"
+		    eval c_${phase}_fixed="y"
+		    echo "init_b_${phase}="$(eval echo "\$init_b_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$b_${phase}_fixed") = [yYiI]* ]] && echo "b_${phase}_fixed"'="y"' >>${FITINIFILE}
+		    echo "init_c_${phase}="$(eval echo "\$init_c_${phase}") >> ${FITINIFILE}
+		    [[ $(eval echo "\$c_${phase}_fixed") = [yYiI]* ]] && echo "c_${phase}_fixed"'="y"' >>${FITINIFILE}
+	        fi
+
+		echo "init_d_${phase}="$(eval echo "\$init_d_${phase}") >> ${FITINIFILE}
+		[[ $(eval echo "\$d_${phase}_fixed") = [yYiI]* ]] && echo "d_${phase}_fixed"'="y"' >>${FITINIFILE}
+		echo "init_e_${phase}="$(eval echo "\$init_e_${phase}") >> ${FITINIFILE}
+		[[ $(eval echo "\$e_${phase}_fixed") = [yYiI]* ]] && echo "e_${phase}_fixed"'="y"' >>${FITINIFILE}
+
+		if [[ $(eval echo "\$de_${phase}_fixed") = [yYiI]* ]]
+		then		
+			eval de_${phase}=$(echo|${AWK} "{print ($(eval echo "\$init_d_${phase}"))*($(eval echo "\$init_e_${phase}"))}")
+			fecho "For phase ${phase}: d*e=$(eval echo "\$de_${phase}")"
+			echo "de_${phase}_fixed"'="y"' >>${FITINIFILE}
+		fi
+
+		let phase+=1
+	done
+    fi
+fi
+
+[[ $a_fixed = [yYiI]* ]] && echo 'a_fixed="y"' >>${FITINIFILE}
+[[ $a1_fixed = [yYiI]* ]] && echo 'a1_fixed="y"' >>${FITINIFILE}
+[[ $a2_fixed = [yYiI]* ]] && echo 'a2_fixed="y"' >>${FITINIFILE}
+[[ $a3_fixed = [yYiI]* ]] && echo 'a3_fixed="y"' >>${FITINIFILE}
+[[ $a4_fixed = [yYiI]* ]] && echo 'a4_fixed="y"' >>${FITINIFILE}
+[[ $a5_fixed = [yYiI]* ]] && echo 'a5_fixed="y"' >>${FITINIFILE}
+[[ $b_fixed = [yYiI]* ]] && echo 'b_fixed="y"' >>${FITINIFILE}
+[[ $c_fixed = [yYiI]* ]] && echo 'c_fixed="y"' >>${FITINIFILE}
+[[ $d_fixed = [yYiI]* ]] && echo 'd_fixed="y"' >>${FITINIFILE}
+[[ $e_fixed = [yYiI]* ]] && echo 'e_fixed="y"' >>${FITINIFILE}
+[[ $de_fixed = [yYiI]* ]] && echo 'de_fixed="y"' >>${FITINIFILE}
+[[ $st_pr_fixed = [yYiI]* ]] && echo 'st_pr_fixed="y"' >>${FITINIFILE}
+
+cat >>${FITINIFILE} <<EOF
+scale_a=$scale_a
+scale_b=$scale_b
+scale_c=$scale_c
+scale_d=$scale_d
+scale_e=$scale_e
+EOF
+
+(
+echo "C0=${C0}"
+if [[ $INDC = [yYiI]* ]]
+then
+    let p=0
+    repeat ${num_r}
+    do
+      [[ $(eval echo \$C_${p}_fixed) = [yYiI]* ]] && echo "C_$p = $(eval echo \$init_C_$p) # FIXED" || echo "C_$p = $(eval echo \$init_C_$p)"
+      if [[ $(eval echo \$C_fix_${p}) -gt 0 ]]
+      then
+	  echo "C_fix_$p = $(eval echo \$C_fix_$p)"
+      fi
+      let p+=1
+    done
+elif [[ $ORT = "yes" ]]
+then
+    [[ $a1_fixed = [yYiI]* ]] && echo "a1 = $init_a1 # FIXED" || echo "a1 = $init_a1"
+    [[ $a2_fixed = [yYiI]* ]] && echo "a2 = $init_a2 # FIXED" || echo "a2 = $init_a2"
+    [[ $a3_fixed = [yYiI]* ]] && echo "a3 = $init_a3 # FIXED" || echo "a3 = $init_a3"
+    [[ $a4_fixed = [yYiI]* ]] && echo "a4 = $init_a4 # FIXED" || echo "a4 = $init_a4"
+    [[ $a5_fixed = [yYiI]* ]] && echo "a5 = $init_a5 # FIXED" || echo "a5 = $init_a5"
+elif [[ $HEX = "yes" ]]
+then
+    [[ $a1_fixed = [yYiI]* ]] && echo "a1 = $init_a1 # FIXED" || echo "a1 = $init_a1"
+    [[ $a2_fixed = [yYiI]* ]] && echo "a2 = $init_a2 # FIXED" || echo "a2 = $init_a2"
+else
+    [[ $a_fixed = [yYiI]* ]] && echo "a = $init_a # FIXED" || echo "a = $init_a"
+fi
+[[ $b_fixed = [yYiI]* ]] && echo "b = $init_b # FIXED" || echo "b = $init_b"
+[[ $c_fixed = [yYiI]* ]] && echo "c = $init_c # FIXED" || echo "c = $init_c"
+if [[ $USE_STACKING = [yYiI]* ]]
+then
+	[[ $st_pr_fixed = [yYiI]* ]] && echo "st_pr = $init_st_pr # FIXED" || echo "st_pr = $init_st_pr"
+fi
+if [[ $USE_F_GRCS = [yYiI]* ]]
+then
+	[[ $W_fixed = [yYiI]* ]] && echo "W = $init_W # FIXED" || echo "W = $init_W"
+	[[ $X_fixed = [yYiI]* ]] && echo "X = $init_X # FIXED" || echo "X = $init_X"
+	[[ $Y_fixed = [yYiI]* ]] && echo "Y = $init_Y # FIXED" || echo "Y = $init_Y"
+else
+	[[ $d_fixed = [yYiI]* ]] && echo "d = $init_d # FIXED" || echo "d = $init_d"
+	[[ $de_fixed != [yYiI]* && $e_fixed = [yYiI]* ]] && echo "e = $init_e # FIXED" || echo "e = $init_e"
+fi
+[[ $epsilon_fixed = [yYiI]* ]] && echo "epsilon = $init_epsilon # FIXED" || echo "epsilon = $init_epsilon"
+
+if [[ $[$NUM_PH>1] = 1 ]]
+then
+        let phase=1
+	while [[ $[$phase<$NUM_PH] = 1 ]]
+	do
+		echo "C0_${phase}"=$(eval echo "\$C0_${phase}")
+		if [[ $(eval echo "\$ORT_${phase}") = "yes" ]]
+		then
+			echo "a1_${phase}"=$(eval echo "\$init_a1_${phase}")
+			echo "a2_${phase}"=$(eval echo "\$init_a2_${phase}")
+			echo "a3_${phase}"=$(eval echo "\$init_a3_${phase}")
+			echo "a4_${phase}"=$(eval echo "\$init_a4_${phase}")
+			echo "a5_${phase}"=$(eval echo "\$init_a5_${phase}")
+		elif [[ $(eval echo "\$HEX_${phase}") = "yes" ]]
+		then
+			echo "a1_${phase}"=$(eval echo "\$init_a1_${phase}")
+			echo "a2_${phase}"=$(eval echo "\$init_a2_${phase}")
+		else
+			echo "a_${phase}"=$(eval echo "\$init_a_${phase}")
+		fi
+
+		echo "b_${phase}"=$(eval echo "\$init_b_${phase}")
+		echo "c_${phase}"=$(eval echo "\$init_c_${phase}")
+		echo "d_${phase}"=$(eval echo "\$init_d_${phase}")
+		echo "e_${phase}"=$(eval echo "\$init_e_${phase}")
+
+		let phase+=1
+	done
+fi
+
+) > tmp/$$.fit-init
+
+cat >>tmp/$$.fit-init <<EOF
+scale_a=$scale_a
+scale_b=$scale_b
+scale_c=$scale_c
+scale_d=$scale_d
+scale_e=$scale_e
+EOF
+
+if [[ $FIT_DEBUG = yes ]]
+then
+    fecho "The initial values of the parameters:"
+    cat tmp/$$.fit-init >>$LOGFILE
+    cat tmp/$$.fit-init
+    fecho
+fi
+
+if [[ $INDC = [yYiI]* ]]
+then
+    VIASTR="C_0"
+    let p=0
+    repeat ${num_r}
+    do
+      if [[ $p != 0 ]]
+      then
+	  VIASTR="${VIASTR}, C_$p"
+      fi
+      let p+=1
+    done
+    VIASTR="${VIASTR}, b, c, d, e, epsilon"
+elif [[ $ORT = "yes" ]]
+then
+    VIASTR="a1, a2, a3, a4, a5, b, c, d, e, epsilon"
+elif [[ $HEX = "yes" ]]
+then
+    VIASTR="a1, a2, b, c, d, e, epsilon"
+else
+    VIASTR="a, b, c, d, e, epsilon"
+fi
+
+if [[ $USE_F_GRCS = [yYiI]* ]]
+then
+	VIASTR=${VIASTR:s/d, e/W, X, Y/}
+fi
+
+if [[ $INDC = [yYiI]* ]]
+then
+    let p=0
+    repeat ${num_r}
+    do
+      if [[ $(eval echo \$C_${p}_fixed) = [yYiI]* || $(eval echo \$C_fix_${p}) -gt 0 ]]
+      then
+	  VIASTR=$(echo ${VIASTR}|sed -e "s/C_${p}, //")
+      fi
+      let p+=1
+    done
+elif [[ $ORT = "yes" ]]
+then
+    [[ $a1_fixed = [yYiI]* ]] && VIASTR=${VIASTR:s/a1, //}
+    [[ $a2_fixed = [yYiI]* ]] && VIASTR=${VIASTR:s/a2, //}
+    [[ $a3_fixed = [yYiI]* ]] && VIASTR=${VIASTR:s/a3, //}
+    [[ $a4_fixed = [yYiI]* ]] && VIASTR=${VIASTR:s/a4, //}
+    [[ $a5_fixed = [yYiI]* ]] && VIASTR=${VIASTR:s/a5, //}
+elif [[ $HEX = "yes" ]]
+then
+    [[ $a1_fixed = [yYiI]* ]] && VIASTR=${VIASTR:s/a1, //}
+    [[ $a2_fixed = [yYiI]* ]] && VIASTR=${VIASTR:s/a2, //}
+else
+    [[ $a_fixed = [yYiI]* ]] && VIASTR=${VIASTR:s/a, //}
+fi
+[[ $b_fixed = [yYiI]* ]] && VIASTR=${VIASTR:s/b, //}
+[[ $c_fixed = [yYiI]* ]] && VIASTR=${VIASTR:s/c, //}
+if [[ $USE_STACKING = [yYiI]* ]]
+then
+    [[ $st_pr_fixed != [yYiI]* ]] && VIASTR="${VIASTR}, st_pr"
+fi
+if [[ $USE_F_GRCS = [yYiI]* ]]
+then
+    [[ $W_fixed = [yYiI]* ]] && VIASTR=${VIASTR:s/W, //}
+    [[ $X_fixed = [yYiI]* ]] && VIASTR=${VIASTR:s/X, //}
+    [[ $Y_fixed = [yYiI]* ]] && VIASTR=${VIASTR:s/Y, //}
+else
+    [[ $d_fixed = [yYiI]* ]] && VIASTR=${VIASTR:s/d, //}
+    if [[ $de_fixed = [yYiI]* || $e_fixed = [yYiI]* ]]
+    then
+	VIASTR=${VIASTR:s/e, //}
+    fi
+fi
+if [[ $epsilon_fixed = [yYiI]* ]]
+then
+	VIASTR=${VIASTR:s/epsilon, //}
+	VIASTR=${VIASTR:s/, epsilon//}
+fi
+
+if [[ $[$NUM_PH>1] = 1 ]]
+then
+        let phase=1
+	while [[ $[$phase<$NUM_PH] = 1 ]]
+	do
+		if [[ $(eval echo "\$ORT_${phase}") = "yes" ]]
+		then
+		    VIASTR="${VIASTR}, a1_${phase}, a2_${phase}, a3_${phase}, a4_${phase}, a5_${phase}, b_${phase}, c_${phase}, d_${phase}, e_${phase}"
+		    [[ $(eval echo "\$a1_${phase}_fixed") = [yYiI]* ]] && VIASTR=$(echo $VIASTR|sed -e "s/a1_${phase}, //g") 
+		    [[ $(eval echo "\$a2_${phase}_fixed") = [yYiI]* ]] && VIASTR=$(echo $VIASTR|sed -e "s/a2_${phase}, //g") 
+		    [[ $(eval echo "\$a3_${phase}_fixed") = [yYiI]* ]] && VIASTR=$(echo $VIASTR|sed -e "s/a3_${phase}, //g") 
+		    [[ $(eval echo "\$a4_${phase}_fixed") = [yYiI]* ]] && VIASTR=$(echo $VIASTR|sed -e "s/a4_${phase}, //g") 
+		    [[ $(eval echo "\$a5_${phase}_fixed") = [yYiI]* ]] && VIASTR=$(echo $VIASTR|sed -e "s/a5_${phase}, //g") 
+		elif [[ $(eval echo "\$HEX_${phase}") = "yes" ]]
+		then
+		    VIASTR="${VIASTR}, a1_${phase}, a2_${phase}, b_${phase}, c_${phase}, d_${phase}, e_${phase}"
+		    [[ $(eval echo "\$a1_${phase}_fixed") = [yYiI]* ]] && VIASTR=$(echo $VIASTR|sed -e "s/a1_${phase}, //g") 
+		    [[ $(eval echo "\$a2_${phase}_fixed") = [yYiI]* ]] && VIASTR=$(echo $VIASTR|sed -e "s/a2_${phase}, //g") 
+		else
+		    VIASTR="${VIASTR}, a_${phase}, b_${phase}, c_${phase}, d_${phase}, e_${phase}"
+		    [[ $(eval echo "\$a_${phase}_fixed") = [yYiI]* ]] && VIASTR=$(echo $VIASTR|sed -e "s/a_${phase}, //g")
+		fi
+
+		[[ $(eval echo "\$b_${phase}_fixed") = [yYiI]* ]] && VIASTR=$(echo $VIASTR|sed -e "s/b_${phase}, //g") 
+		[[ $(eval echo "\$c_${phase}_fixed") = [yYiI]* ]] && VIASTR=$(echo $VIASTR|sed -e "s/c_${phase}, //g") 
+		[[ $(eval echo "\$d_${phase}_fixed") = [yYiI]* ]] && VIASTR=$(echo $VIASTR|sed -e "s/d_${phase}, //g") 
+		[[ $(eval echo "\$e_${phase}_fixed") = [yYiI]* ]] && VIASTR=$(echo $VIASTR|sed -e "s/e_${phase}, //g") 
+		[[ $(eval echo "\$de_${phase}_fixed") = [yYiI]* ]] && VIASTR=$(echo $VIASTR|sed -e "s/e_${phase}, //g") 
+		[[ $(eval echo "\$de_${phase}_fixed") = [yYiI]* ]] && VIASTR=$(echo $VIASTR|sed -e "s/, e_${phase}//g") 
+
+		let phase+=1
+	done
+	if [[ ! -z $FIT_ONLY_PHASE ]]
+	then
+		phase=$FIT_ONLY_PHASE
+		if [[ $phase = 0 ]]
+		then
+			VIASTR=$(echo $VIASTR|sed -e "s/, [0-9a-zA-Z][0-9a-zA-Z]*_[0-9a-zA-Z][0-9a-zA-Z]*//g")
+		else
+			VIASTR=$(echo $VIASTR|tr ", " "\n\n"|grep "_${phase}$"|tr "\n" "#"|sed -e "s/#/, /g" -e 's/, *$//g')
+		fi
+	fi
+fi
+
+# echo $VIASTR|tr ", " "\n\n"|grep -v '^[[:space:]]*$' >$PARFILE
+
+if [[ $USE_SPLINE != [yYiI]* ]]
+then
+
+satisfied=""
+while [[ $satisfied != [yYiI]* ]]
+do
+    specify_bg_polynom $*
+    satisfied="n"
+    initialize "Are you satisfied with this?> " satisfied
+    echo
+done
+
+cat tmp/$$.bgp-fit-init >>tmp/$$.fit-init
+
+fi
+
+if [[ ! -e ${1%%.dat}.peak-index.dat ]] #READ_PEAK_INDEX_FILE
+then #READ_PEAK_INDEX_FILE
+
+    if [[ $USE_SPLINE = [yYiI]* ]]
+    then
+
+	let bg_dat_n=0
+	:> tmp/$$.peak-int-corr.gnu-1
+	cat ${1%%.dat}.bg-spline.dat|tr -d "\r"|grep '^[[:space:]]*[+0-9eE.-][+0-9eE.-]*[[:space:]][[:space:]]*[+0-9eE.-][+0-9eE.-]*[[:space:]]*$'|while read bg_dat_x bg_dat_y
+	do
+	    cat << EOF >> tmp/$$.peak-int-corr.gnu-1
+bg_dat_x_${bg_dat_n}=${bg_dat_x}
+bg_dat_y_${bg_dat_n}=${bg_dat_y}
+EOF
+	    let bg_dat_n+=1
+	done
+
+	if [[ $[${bg_dat_n}<3] = 1 ]]
+	then
+	    fecho "Error: You have too few data points in ${1%%.dat}.bg-spline.dat."
+	    fecho "Minimum number of data points: 3."
+	    exit 34
+	fi
+
+	cat << EOF >> tmp/$$.peak-int-corr.gnu-1
+use_spline=1
+bg_dat_n=${bg_dat_n}
+mwp_init
+EOF
+
+    else # USE_SPLINE
+	cat tmp/$$.bgp-fit-init >tmp/$$.peak-int-corr.gnu-1
+	cat >>tmp/$$.peak-int-corr.gnu-1 <<EOF
+bgp_minx=$EPFFIRST
+bgp_maxx=$EPFLAST
+EOF
+    fi # USE_SPLINE
+
+    echo "Peak intensities before background correction:"
+    echo ${i_max}
+    echo
+
+    echo "${i_s0}" | grep -v '^ *$' | sed -e 's/=/="/g' -e 's/$/"/g' >tmp/$$.peak-int-corr.tmp1
+    . tmp/$$.peak-int-corr.tmp1
+    echo "${i_max}" | grep -v '^ *$' | sed -e 's/=/="/g' -e 's/$/"/g' >tmp/$$.peak-int-corr.tmp2
+    . tmp/$$.peak-int-corr.tmp2
+    :> tmp/$$.peak-int-corr.tmp3
+
+    let n=0
+    while [[ $(eval echo "\$i_s0_$n") != "" ]]
+    do
+	x=$(eval echo "\$i_s0_$n")
+	y=$(eval echo "\$i_max_$n")
+	cat tmp/$$.peak-int-corr.gnu-1 >tmp/$$.peak-int-corr.gnu
+	cat >>tmp/$$.peak-int-corr.gnu <<EOF
+print bgp($x)
+EOF
+	if [[ $y != 0 ]]
+	then
+	    echo i_max_$n=$(echo|gawk "{print ($y-$(gnuplot tmp/$$.peak-int-corr.gnu 2>&1|grep -v "MWP mode"))}") >>tmp/$$.peak-int-corr.tmp3
+	else
+	    echo "i_max_$n=0" >>tmp/$$.peak-int-corr.tmp3
+	fi
+	let n+=1
+    done
+    . tmp/$$.peak-int-corr.tmp3
+    i_max=$(cat tmp/$$.peak-int-corr.tmp3)
+
+    echo "Peak intensities after background correction:"
+    echo ${i_max}
+    echo
+
+fi #READ_PEAK_INDEX_FILE
+
+if [[ -z $bg_fit ]]
+then
+	bg_fit="n"
+fi
+#initialize "Do you want to fit the background's parameters?> " bg_fit
+
+if [[ $bg_fit = [yYiI]* ]]
+then
+	VIASTR="${VIASTR}, ${BGVIASTR}"
+fi
+
+if [[ -z $fit_in_K ]]
+then
+	fit_in_K="n"
+fi
+initialize "Do you want to fit in K instead of 2*theta?> " fit_in_K
+
+if [[ -z $peak_pos_fit ]]
+then
+	peak_pos_fit="n"
+fi
+initialize "Do you want to fit the peak positions?> " peak_pos_fit
+
+if [[ -z $peak_int_fit ]]
+then
+	peak_int_fit="n"
+fi
+initialize "Do you want to fit the peak intensities?> " peak_int_fit
+
+if [[ $peak_pos_fit = [yYiI]* ]]
+then
+	let n=0
+	repeat ${num_r}
+	do
+	  if [[ $DISABLE_COINC_G2 != [yYiI]* ]]
+	  then
+	    skip_from_via=0
+	    y1=$(echo $g2|grep "^g2_$n="|sed -e 's/^.*=//g')
+	    let t=0
+	    repeat ${num_r}
+	    do
+		y2=$(echo $g2|grep "^g2_$t="|sed -e 's/^.*=//g')
+		if [[ $n != $t && $y1 == $y2 ]]
+		then
+		    if [[ $[$t<$n] == 1 ]]
+		    then
+			skip_from_via=1
+		    fi
+		fi
+		let t+=1
+	    done
+	  else
+	    skip_from_via=0
+	  fi
+	  if [[ $skip_from_via != 1 ]]
+	  then
+		VIASTR="${VIASTR}, i_s0_${n}"
+	  fi
+	  let n+=1
+	done
+fi
+
+if [[ $peak_int_fit = [yYiI]* ]]
+then
+	let n=0
+	repeat ${num_r}
+	do
+	  if [[ $DISABLE_COINC_G2 != [yYiI]* ]]
+	  then
+	    skip_from_via=0
+	    y1=$(echo $g2|grep "^g2_$n="|sed -e 's/^.*=//g')
+	    let t=0
+	    repeat ${num_r}
+	    do
+		y2=$(echo $g2|grep "^g2_$t="|sed -e 's/^.*=//g')
+		if [[ $n != $t && $y1 == $y2 ]]
+		then
+		    if [[ $[$t<$n] == 1 ]]
+		    then
+			skip_from_via=1
+		    fi
+		fi
+		let t+=1
+	    done
+	  else
+	    skip_from_via=0
+	  fi
+	  if [[ $skip_from_via != 1 ]]
+	  then
+		VIASTR="${VIASTR}, i_max_${n}"
+	  fi
+	  let n+=1
+	done
+fi
+
+INT_FIT="y"
+SMP_DEF=""
+
+if test -f /proc/cpuinfo && ( grep -iq 'processor.*:.*1' /proc/cpuinfo || grep -iq 'model name.*:.*Dual Core Processor' /proc/cpuinfo )
+then
+    use_threads="y"
+else
+    use_threads="n"
+fi
+
+initialize "Do you want to use parallel computing using threads?> " use_threads
+
+if [[ $use_threads = [yYiI]* ]]
+then
+    SMP_DEF="use_threads=1"
+    SMP_DEF2=""
+else
+    SMP_DEF=""
+    SMP_DEF2=""
+fi
+
+if [[ $use_threads = [yYiI]* ]]
+then
+    let num_threads=2
+    if [[ -e /proc/cpuinfo ]]
+    then
+	let num_threads=$(grep '^processor.*:' /proc/cpuinfo|wc -l|gawk '{print $1}')
+    fi
+    if [[ $[$num_threads>8] = 1 ]]
+    then
+	num_threads=8
+    fi
+    initialize "Please specify the number of threads> " num_threads
+    SMP_DEF2="num_threads=${num_threads}"
+fi
+
+fit-message
+initialize 'Please specify the limit for stopping> ' FIT_LIMIT
+initialize 'Please specify the maximal number of iterations (0 means unlimited)> ' FIT_MAXITER
+
+rm -f tmp/$$.gnu
+
+cp tmp/$$.fit-init tmp/$$.gnu
+
+if [[ $INDC = [yYiI]* ]]
+then
+    cat << EOF >> tmp/$$.gnu
+use_individual_contrast_factors=1
+
+EOF
+fi
+
+if [[ $SFNAME = "no_sf" ]]
+then
+    cat << EOF >> tmp/$$.gnu
+FIT_LIMIT = ${FIT_LIMIT}
+FIT_MAXITER = ${FIT_MAXITER}
+
+num_r=${num_r}
+
+EOF
+else
+    cat << EOF >> tmp/$$.gnu
+FIT_LIMIT = ${FIT_LIMIT}
+FIT_MAXITER = ${FIT_MAXITER}
+show_size_parameters=1
+
+num_r=${num_r}
+
+EOF
+fi
+
+(
+    echo "$g2"
+    echo "$i_s0"
+    echo "$i_max"
+    if [[ $USE_STACKING = [yYiI]* ]]
+    then
+	echo "${st_p1s}" >> tmp/$$.gnu
+	echo "${st_p2s}" >> tmp/$$.gnu
+	echo "${st_p3s}" >> tmp/$$.gnu
+	echo "${st_p4s}" >> tmp/$$.gnu
+	echo "${st_fwhm2s_1}" >> tmp/$$.gnu
+	echo "${st_fwhm2s_2}" >> tmp/$$.gnu
+	echo "${st_fwhm2s_3}" >> tmp/$$.gnu
+	echo "${st_fwhm2s_4}" >> tmp/$$.gnu
+	echo "${st_fwhm2s_5}" >> tmp/$$.gnu
+	echo "${st_fwhm3s_1}" >> tmp/$$.gnu
+	echo "${st_fwhm3s_2}" >> tmp/$$.gnu
+	echo "${st_fwhm3s_3}" >> tmp/$$.gnu
+	echo "${st_fwhm3s_4}" >> tmp/$$.gnu
+	echo "${st_fwhm3s_5}" >> tmp/$$.gnu
+	echo "${st_fwhm4s_1}" >> tmp/$$.gnu
+	echo "${st_fwhm4s_2}" >> tmp/$$.gnu
+	echo "${st_fwhm4s_3}" >> tmp/$$.gnu
+	echo "${st_fwhm4s_4}" >> tmp/$$.gnu
+	echo "${st_fwhm4s_5}" >> tmp/$$.gnu
+	echo "${st_shift2s_1}" >> tmp/$$.gnu
+	echo "${st_shift2s_2}" >> tmp/$$.gnu
+	echo "${st_shift2s_3}" >> tmp/$$.gnu
+	echo "${st_shift2s_4}" >> tmp/$$.gnu
+	echo "${st_shift2s_5}" >> tmp/$$.gnu
+	echo "${st_shift3s_1}" >> tmp/$$.gnu
+	echo "${st_shift3s_2}" >> tmp/$$.gnu
+	echo "${st_shift3s_3}" >> tmp/$$.gnu
+	echo "${st_shift3s_4}" >> tmp/$$.gnu
+	echo "${st_shift3s_5}" >> tmp/$$.gnu
+	echo "${st_shift4s_1}" >> tmp/$$.gnu
+	echo "${st_shift4s_2}" >> tmp/$$.gnu
+	echo "${st_shift4s_3}" >> tmp/$$.gnu
+	echo "${st_shift4s_4}" >> tmp/$$.gnu
+	echo "${st_shift4s_5}" >> tmp/$$.gnu
+
+	if [[ $HEX = "yes" ]]
+	then
+
+	echo "${st_hcp_p2s}" >> tmp/$$.gnu
+	echo "${st_hcp_p3s}" >> tmp/$$.gnu
+	echo "${st_hcp_p4s}" >> tmp/$$.gnu
+	echo "${st_hcp_fwhm2s_1}" >> tmp/$$.gnu
+	echo "${st_hcp_fwhm2s_2}" >> tmp/$$.gnu
+	echo "${st_hcp_fwhm2s_3}" >> tmp/$$.gnu
+	echo "${st_hcp_fwhm2s_4}" >> tmp/$$.gnu
+	echo "${st_hcp_fwhm2s_5}" >> tmp/$$.gnu
+	echo "${st_hcp_fwhm3s_1}" >> tmp/$$.gnu
+	echo "${st_hcp_fwhm3s_2}" >> tmp/$$.gnu
+	echo "${st_hcp_fwhm3s_3}" >> tmp/$$.gnu
+	echo "${st_hcp_fwhm3s_4}" >> tmp/$$.gnu
+	echo "${st_hcp_fwhm3s_5}" >> tmp/$$.gnu
+	echo "${st_hcp_fwhm4s_1}" >> tmp/$$.gnu
+	echo "${st_hcp_fwhm4s_2}" >> tmp/$$.gnu
+	echo "${st_hcp_fwhm4s_3}" >> tmp/$$.gnu
+	echo "${st_hcp_fwhm4s_4}" >> tmp/$$.gnu
+	echo "${st_hcp_fwhm4s_5}" >> tmp/$$.gnu
+	echo "${st_hcp_shift2s_1}" >> tmp/$$.gnu
+	echo "${st_hcp_shift2s_2}" >> tmp/$$.gnu
+	echo "${st_hcp_shift2s_3}" >> tmp/$$.gnu
+	echo "${st_hcp_shift2s_4}" >> tmp/$$.gnu
+	echo "${st_hcp_shift2s_5}" >> tmp/$$.gnu
+	echo "${st_hcp_shift3s_1}" >> tmp/$$.gnu
+	echo "${st_hcp_shift3s_2}" >> tmp/$$.gnu
+	echo "${st_hcp_shift3s_3}" >> tmp/$$.gnu
+	echo "${st_hcp_shift3s_4}" >> tmp/$$.gnu
+	echo "${st_hcp_shift3s_5}" >> tmp/$$.gnu
+	echo "${st_hcp_shift4s_1}" >> tmp/$$.gnu
+	echo "${st_hcp_shift4s_2}" >> tmp/$$.gnu
+	echo "${st_hcp_shift4s_3}" >> tmp/$$.gnu
+	echo "${st_hcp_shift4s_4}" >> tmp/$$.gnu
+	echo "${st_hcp_shift4s_5}" >> tmp/$$.gnu
+
+	fi # HEX
+    fi
+) >> tmp/$$.gnu
+
+    echo "${ph_no}" >> tmp/$$.gnu
+    echo "${h20}" >> tmp/$$.gnu
+    echo "${h21}" >> tmp/$$.gnu
+    echo "${h22}" >> tmp/$$.gnu
+    echo "${h23}" >> tmp/$$.gnu
+    echo "${h24}" >> tmp/$$.gnu
+    echo "${h25}" >> tmp/$$.gnu
+    echo "${h2}" >> tmp/$$.gnu
+
+if [[ $ORT = "yes" ]]
+then
+    echo >> tmp/$$.gnu
+    echo "orthorombic_crystal=1" >> tmp/$$.gnu
+elif [[ $HEX = "yes" ]]
+then
+    echo >> tmp/$$.gnu
+    echo "hexagonal_crystal=1" >> tmp/$$.gnu
+else
+#   echo "maxa=1.0/$MAXH2" >> tmp/$$.gnu
+fi
+
+if [[ $[$NUM_PH>1] = 1 ]]
+then
+        let phase=1
+	while [[ $[$phase<$NUM_PH] = 1 ]]
+	do
+		if [[ $(eval echo "\$ORT_${phase}") = "yes" ]]
+		then
+			echo "orthorombic_crystal_${phase}=1" >> tmp/$$.gnu
+		elif [[ $(eval echo "\$HEX_${phase}") = "yes" ]]
+		then
+			echo "hexagonal_crystal_${phase}=1" >> tmp/$$.gnu
+		fi
+
+		if [[ $(eval echo "\$de_${phase}_fixed") = [yYiI]* ]]
+		then		
+			cat >>tmp/$$.gnu <<EOF
+cmwp_fixed_de_${phase}=$(eval echo "\$de_${phase}")
+EOF
+		fi
+
+		let phase+=1
+	done
+fi
+
+if [[ $SFNAME = "no_sf" ]]
+then
+    echo "size_effect_disabled=1" >> tmp/$$.gnu
+    echo >> tmp/$$.gnu
+fi
+
+if false && [[ $[$NUM_PH>1] = 1 ]]
+then
+	echo $NO_SIZE_EFFECT_PH >> tmp/$$.gnu
+fi
+
+if [[ $USE_F_GRCS = [yYiI]* ]]
+then
+    echo "use_f_grcs=1" >> tmp/$$.gnu
+    echo "burgers=$bb" >> tmp/$$.gnu
+fi
+
+if [[ $SF_ELLIPSOIDAL = [yYiI]* ]]
+then
+    echo "${anx}" >> tmp/$$.gnu
+    echo "anisotropy_enabled=1" >> tmp/$$.gnu
+fi
+
+if [[ $INT_FIT = [yYiI]* ]]
+then
+    cat << EOF >> tmp/$$.gnu
+
+fit_function(x)=theoretical_if2(x)
+use_theoretical_if2=1
+
+EOF
+fi
+
+if [[ -f ${1%%.dat}.peak-index.dat ]]
+then
+    avg=$(cat ${1%%.dat}.peak-index.dat|grep -v '^0'|gawk 'BEGIN {sum=0} {sum+=$2} END {print sum/NR}')
+else
+    avg=0
+    USE_WEIGHTS="n"
+fi
+
+if [[ -z $USE_WEIGHTS ]]
+then
+	USE_WEIGHTS="n"
+fi
+
+if [[ $avg = 0 ]]
+then
+    fecho "You can not use weights, since you don't have the .peak-index.dat file yet."
+else
+    initialize "Do you want to use weights in the least-squares fitting algorithm?> " USE_WEIGHTS
+fi
+
+if [[ $USE_WEIGHTS = [yYiI]* ]]
+then
+
+    if [[ -z $WEIGHTING_ALGORITHM ]]
+    then
+	WEIGHTING_ALGORITHM=1
+    fi
+
+    initialize "Weighting algorithm (1-4)?> " WEIGHTING_ALGORITHM
+
+    if [[ -e ${1%%.dat}.weighted.dat ]]
+    then
+	let num1=$(wc -l ${1%%.dat}.weighted.dat|gawk '{print $1}')
+	let num2=$(wc -l ${1}|gawk '{print $1}')
+	let num_uniform=$(grep ' 1$' ${1%%.dat}.weighted.dat|wc -l|gawk '{print $1}')
+    else
+	let num1=0
+	let num2=1
+	let num_uniform=0
+    fi
+
+    if [[ ! -e ${1%%.dat}.weighted.dat || ${1%%.dat}.peak-index.dat -nt ${1%%.dat}.weighted.dat || $[$num1<$num2] = 1 || $num_uniform == $num1 || ! -e ${1%%.dat}.weighted.dat.ver || ( -e ${1%%.dat}.weighted.dat.ver && $(<${1%%.dat}.weighted.dat.ver) != $WEIGHTING_ALGORITHM ) ]]
+    then
+
+	echo "(Re)creating ${1%%.dat}.weighted.dat with the weights corresponding to your selection."
+	case $WEIGHTING_ALGORITHM in
+	     1)
+		echo "NOTE: using the square root of the intensity values as errors."
+	     ;;
+	     2)
+		echo "NOTE: using the intensity values as errors."
+	     ;;
+	     3)
+		echo "NOTE: using I_max as errors - this is CMWP's OLD default weighting algorithm."
+	     ;;
+	     4)
+		echo "NOTE: using sqrt(I_max) as errors."
+	     ;;
+	     *)
+	     	echo "ERROR: unknown weighting algorithm, using uniform weights."
+	     ;;
+	esac
+	:> ${1%%.dat}.weighted.dat
+        let wn=0
+	let wmax=$(wc -l $1|${AWK} '{print $1}')
+	cat $1 | while read x y
+	do
+	  y=$(echo $y|gawk '{print sqrt($1*$1)}')
+	  case $WEIGHTING_ALGORITHM in
+	     1)
+	     	echo $x" "$y" "$(echo $y|gawk '{print sqrt($1)}') >>${1%%.dat}.weighted.dat
+	     ;;
+	     2)
+	     	echo $x" "$y" "$y >>${1%%.dat}.weighted.dat
+	     ;;
+	     3)
+	     	cat ${1%%.dat}.peak-index.dat|grep -v '^0'|gawk "BEGIN {x=${x}} BEGIN {y=${y}} BEGIN {cut=${PROF_CUT}} BEGIN {max=0} BEGIN {avg=${avg}}"'sqrt(($1-x)*($1-x))<cut && $2>max {max=$2} END {print x" "y" "(max==0?avg:max)}' >>${1%%.dat}.weighted.dat
+	     ;;
+	     4)
+	     	cat ${1%%.dat}.peak-index.dat|grep -v '^0'|gawk "BEGIN {x=${x}} BEGIN {y=${y}} BEGIN {cut=${PROF_CUT}} BEGIN {max=0} BEGIN {avg=${avg}}"'sqrt(($1-x)*($1-x))<cut && $2>max {max=$2} END {print x" "y" "sqrt(max==0?avg:max)}' >>${1%%.dat}.weighted.dat
+	     ;;
+	     *)
+	     	echo $x" "$y" 1" >>${1%%.dat}.weighted.dat
+	     ;;
+	  esac
+	  let wn+=1
+	  let wp=$[100*$wn/$wmax]
+	  echo -n "\rWorking: ${wp}% done...                      "
+	done
+	echo
+	echo "Done."
+	# echo $WEIGHTING_ALGORITHM >${1%%.dat}.weighted.dat.ver
+    else
+	echo "Data file ${1%%.dat}.weighted.dat is up to date."
+    fi
+
+else
+
+    WEIGHTING_ALGORITHM=0
+    echo "(Re)creating ${1%%.dat}.weighted.dat with uniform weights."
+    cat $1 | gawk '{print $1" "$2" 1"}' >${1%%.dat}.weighted.dat
+    echo "Done."
+    # echo $WEIGHTING_ALGORITHM >${1%%.dat}.weighted.dat.ver
+
+fi
+
+if [[ $USE_SPLINE = [yYiI]* ]]
+then
+
+    let bg_dat_n=0
+    cat ${1%%.dat}.bg-spline.dat|tr -d "\r"|grep '^[[:space:]]*[+0-9eE.-][+0-9eE.-]*[[:space:]][[:space:]]*[+0-9eE.-][+0-9eE.-]*[[:space:]]*$'|while read bg_dat_x bg_dat_y
+    do
+	cat << EOF >> tmp/$$.gnu
+bg_dat_x_${bg_dat_n}=${bg_dat_x}
+bg_dat_y_${bg_dat_n}=${bg_dat_y}
+EOF
+	let bg_dat_n+=1
+    done
+
+    echo "Successfully read ${bg_dat_n} data points from ${1%%.dat}.bg-spline.dat."
+
+    if [[ $[${bg_dat_n}<3] = 1 ]]
+    then
+	fecho "Error: You have too few data points in ${1%%.dat}.bg-spline.dat."
+	fecho "Minimum number of data points: 3."
+	exit 34
+    fi
+
+    cat << EOF >> tmp/$$.gnu
+use_spline=1
+bg_dat_n=${bg_dat_n}
+EOF
+
+elif [[ $USE_LEGENDRE = [yYiI]* ]]
+then
+    cat << EOF >> tmp/$$.gnu
+use_legendre=1
+EOF
+fi
+
+if [[ $ENABLE_CONVOLUTION != [yYiI]* ]]
+then
+    cat << EOF >> tmp/$$.gnu
+IF_TH_FT_limit=${IF_TH_FT_limit}
+EOF
+fi
+
+if [[ $de_fixed = [yYiI]* ]]
+then
+	cat >>tmp/$$.gnu <<EOF
+cmwp_fixed_de=${de}
+EOF
+fi
+
+if [[ $DISABLE_COINC_G2 = [yYiI]* ]]
+then
+	cat << EOF >> tmp/$$.gnu
+disable_coinc_g2=1
+EOF
+fi
+
+if [[ $fit_in_K = [yYiI]* ]]
+then
+	cat << EOF >> tmp/$$.gnu
+fit_in_K=1
+EOF
+fi
+
+cat << EOF >> tmp/$$.gnu
+IF_N1=${IF_N1}
+IF_N2=${IF_N2}
+wavelength=${wavelength}
+profile_cutting_parameter=${PROF_CUT}
+
+${SMP_DEF}
+${SMP_DEF2}
+mwp_init
+EOF
+
+if [[ $INT_FIT = [yYiI]* ]]
+then
+
+    if [[ ! -z ${DISPLAY} ]]
+    then
+	cat << EOF >> tmp/$$.gnu
+
+set terminal x11
+EOF
+    else
+	cat << EOF >> tmp/$$.gnu
+
+set terminal dumb
+EOF
+    fi
+
+    cat << EOF >> tmp/$$.gnu
+set title "${1%%.dat}"
+EOF
+    if [[ $fit_in_K = [yYiI]* ]]
+    then
+	echo 'set xlabel "K [1/nm]"' >> tmp/$$.gnu
+    else
+	echo 'set xlabel "Twotheta"' >> tmp/$$.gnu
+    fi
+    cat << EOF >> tmp/$$.gnu
+set ylabel "Intensity"
+set key left top Left
+set samples 20000
+
+EOF
+    echo "${LABELCMDS}" >> tmp/$$.gnu
+
+    cat << EOF >> tmp/$$.gnu
+
+set logscale y
+
+bgp_minx=$EPFFIRST
+bgp_maxx=$EPFLAST
+
+EOF
+
+    if [[ ! -z ${DISPLAY} ]]
+    then
+	cat << EOF >> tmp/$$.gnu
+plot [$EPFFIRST:$EPFLAST] "$1" using 1:2 title "measured data" with lines lt 1, fit_function(x) title "f(x)" with lines lt 2, bgp(x) title "bgp(x)" with lines lt 3
+
+# ! ./lib/save_gnuplot_x11_pid ${1%%.dat}
+EOF
+    fi
+
+    cat << EOF >> tmp/$$.gnu
+
+fit [$EPFFIRST:$EPFLAST] fit_function(x) "${1%%.dat}.weighted.dat" using 1:2:3 via ${VIASTR}
+
+# set nologscale
+# set terminal $GNUTERM
+# set output "${1%%.dat}.int0.ps"
+# plot [$EPFFIRST:$EPFLAST] "$1" using 1:2 title "measured data" with lines lt 2, fit_function(x) title "f(x)" with lines lt 1, bgp(x) title "background" with lines lt 3
+
+# set logscale y
+# replot
+
+# set nolabel
+EOF
+#   echo "${PLOTCMDS2}" >> tmp/$$.gnu
+
+    cat << EOF >> tmp/$$.gnu
+
+set terminal table
+set nologscale
+set output "${1%%.dat}.int.th0.dat"
+plot [$EPFFIRST:$EPFLAST] "$1" using 1:2, fit_function(x), bgp(x)
+
+EOF
+
+if [[ $[$NUM_PH>1] = 1 ]]
+then
+        let phase=0
+	while [[ $[$phase<$NUM_PH] = 1 ]]
+	do
+	    cat << EOF >> tmp/$$.gnu
+
+only_phase=$phase
+set terminal table
+set nologscale
+set output "${1%%.dat}.int.th0-phase${phase}.dat"
+plot [$EPFFIRST:$EPFLAST] "$1" using 1:2, fit_function(x)
+
+EOF
+	    let phase+=1
+	done
+fi
+
+    cat << EOF >> tmp/$$.gnu
+
+! ./lib/subtract ${1}
+
+# set terminal postscript
+# set output "${1%%.dat}.int.bw.ps"
+# set nologscale
+# EOF
+
+#     echo "${LABELCMDS}" >> tmp/$$.gnu
+
+#     cat << EOF >> tmp/$$.gnu
+
+# plot [$EPFFIRST:$EPFLAST] "${1%%.dat}.int.4.dat" using 1:2 title "measured data" with lines lt 2, "${1%%.dat}.int.4.dat" using 1:3 title "fitted data" with lines lt 1, "${1%%.dat}.int.4.dat" using 1:4 title "difference" with lines lt 3
+# set logscale y
+# plot [$EPFFIRST:$EPFLAST] "${1%%.dat}.int.4.dat" using 1:2 title "measured data" with lines lt 2, "${1%%.dat}.int.4.dat" using 1:3 title "fitted data" with lines lt 1, bgp(x) title "background" with lines lt 3
+
+# set terminal postscript color
+# set output "${1%%.dat}.int.ps"
+# set nologscale
+# EOF
+
+#     echo "${LABELCMDS}" >> tmp/$$.gnu
+
+#     cat << EOF >> tmp/$$.gnu
+
+# plot [$EPFFIRST:$EPFLAST] "${1%%.dat}.int.4.dat" using 1:2 title "measured data" with lines lt 2, "${1%%.dat}.int.4.dat" using 1:3 title "fitted data" with lines lt 1, "${1%%.dat}.int.4.dat" using 1:4 title "difference" with lines lt 3
+# set logscale y
+# plot [$EPFFIRST:$EPFLAST] "${1%%.dat}.int.4.dat" using 1:2 title "measured data" with lines lt 2, "${1%%.dat}.int.4.dat" using 1:3 title "fitted data" with lines lt 1, bgp(x) title "background" with lines lt 3
+
+print "CMWP_ALL_OK"
+EOF
+
+fi
+
+if [[ $ENABLE_CONVOLUTION = [yYiI]* ]]
+then
+    export INST_FORMAT="$INSTDIR/%d.dat"
+else
+    export INST_FORMAT="none"
+fi
+
+(
+echo "ENABLE_CONVOLUTION=${ENABLE_CONVOLUTION}"
+echo "NO_SIZE_EFFECT=${NO_SIZE_EFFECT}"
+echo "SF_ELLIPSOIDAL=${SF_ELLIPSOIDAL}"
+echo "USE_SPLINE=${USE_SPLINE}"
+echo "INDC=${INDC}"
+echo "USE_STACKING=${USE_STACKING}"
+if [[ $USE_STACKING = [yYiI]* ]]
+then
+	echo "STACKING_DAT=${STACKING_DAT}"
+fi
+echo "USE_WEIGHTS=${USE_WEIGHTS}"
+echo "WEIGHTING_ALGORITHM=${WEIGHTING_ALGORITHM}"
+if [[ $ENABLE_CONVOLUTION = [yYiI]* ]]
+then
+	echo "INSTSRCDIR=${INSTSRCDIR}"
+fi
+echo "minx=${EPFFIRST}"
+echo "maxx=${EPFLAST}"
+if [[ $ENABLE_CONVOLUTION != [yYiI]* ]]
+then
+	echo "IF_TH_FT_limit=${IF_TH_FT_limit}"
+fi
+echo "N1=${IF_N1}"
+echo "N2=${IF_N2}"
+echo "PROF_CUT=${PROF_CUT}"
+echo "FIT_LIMIT=${FIT_LIMIT}"
+echo "FIT_MAXITER=${FIT_MAXITER}"
+echo "fit_in_K=${fit_in_K}"
+echo "peak_pos_fit=${peak_pos_fit}"
+echo "peak_int_fit=${peak_int_fit}"
+if [[ $DISABLE_COINC_G2 = [yYiI]* ]]
+then
+	echo "DISABLE_COINC_G2=y"
+fi
+if [[ ! -z $NUMBER_OF_PHASES ]]
+then
+	echo "NUMBER_OF_PHASES=${NUMBER_OF_PHASES}"
+fi
+if [[ ! -z $FIT_ONLY_PHASE ]]
+then
+	echo "FIT_ONLY_PHASE=$FIT_ONLY_PHASE"
+fi
+) >${QINIFILE}
+
+export SAMPLENAME=${1%%.dat}
+
+cp tmp/$$.gnu ${SAMPLENAME}.gnu
+
+:> $FIT_LOG
+if [[ $FIT_DEBUG = yes ]]
+then
+	rungnuplot-fit-debug 2>&1 | {trap "" INT USR1; tee $SAMPLENAME.gnuplot_out}
+else
+	rungnuplot-fit 2>&1 | {trap "" INT USR1; tee $SAMPLENAME.gnuplot_out}
+fi
+
+# This command kills the stuck gnuplot processes:
+# ./lib/kill_gnuplot ${SAMPLENAME}
+
+if ! grep -q 'CMWP_ALL_OK' ${SAMPLENAME}.gnuplot_out
+then
+    fecho
+    fecho "ERROR: the gnuplot command did not completed successfully, please check"
+    fecho "its output file for the details:"
+    cat ${SAMPLENAME}.gnuplot_out >>$LOGFILE
+    cat ${SAMPLENAME}.gnuplot_out
+    fecho
+fi
+
+cp $FIT_LOG ${1%%.dat}.int.sol
+
+if [[ ! -s $FIT_LOG ]]
+then
+    fecho
+    zero-size-message
+elif grep -q 'BREAK:' $FIT_LOG 
+then
+    fecho
+    break-message
+    grep 'BREAK:' $FIT_LOG >>$LOGFILE
+    grep 'BREAK:' $FIT_LOG
+else
+
+if grep -q "Singular matrix in Invert_RtR" $FIT_LOG 
+then
+    grep "Singular matrix in Invert_RtR" $FIT_LOG >>$LOGFILE
+    fecho
+    singular-message
+fi
+
+grep '^[abcdeWXYC][ 0123456789_]*=.*+/-' ${1%%.dat}.int.sol|sed -e 's/ *//g' -e 's/[+/].*$//g' > ${1%%.dat}.int-abcde.sol
+
+if [[ $SF_ELLIPSOIDAL = [yYiI]* ]]
+then
+    grep '^epsilon *=' ${1%%.dat}.int.sol|tail -1|sed -e 's/ *//g' -e 's/[+/].*$//g' >> ${1%%.dat}.int-abcde.sol
+fi
+
+if [[ $USE_STACKING = [yYiI]* ]]
+then
+    grep '^st_pr *=' ${1%%.dat}.int.sol|tail -1|sed -e 's/ *//g' -e 's/[+/].*$//g' >> ${1%%.dat}.int-abcde.sol
+fi
+
+. ./${1%%.dat}.int-abcde.sol
+rm -f ${1%%.dat}.int-abcde.sol
+
+if [[ $INDC = [yYiI]* ]]
+then
+    let p=0
+    repeat ${num_r}
+    do
+      if [[ $(eval echo \$C_fix_${p}) -gt 0 ]]
+      then
+	  let fixind=$(eval echo \$C_fix_${p})
+	  let fixind-=1
+	  eval C_${p}=$(eval echo \$C_${fixind})
+      elif [[ $(eval echo \$C_${p}_fixed) = [yYiI]* ]]
+      then
+	  eval C_${p}=$(eval echo \$init_C_${p})
+      else
+      fi
+      let p+=1
+    done
+elif [[ $ORT = "yes" ]]
+then
+    [[ $a1_fixed = [yYiI]* ]] && a1=$init_a1
+    [[ $a2_fixed = [yYiI]* ]] && a2=$init_a2
+    [[ $a3_fixed = [yYiI]* ]] && a3=$init_a3
+    [[ $a4_fixed = [yYiI]* ]] && a4=$init_a4
+    [[ $a5_fixed = [yYiI]* ]] && a5=$init_a5
+elif [[ $HEX = "yes" ]]
+then
+    [[ $a1_fixed = [yYiI]* ]] && a1=$init_a1
+    [[ $a2_fixed = [yYiI]* ]] && a2=$init_a2
+else
+    [[ $a_fixed = [yYiI]* ]] && a=$init_a
+fi
+[[ $b_fixed = [yYiI]* ]] && b=$init_b
+[[ $c_fixed = [yYiI]* ]] && c=$init_c
+[[ $d_fixed = [yYiI]* ]] && d=$init_d
+[[ $e_fixed = [yYiI]* ]] && e=$init_e
+[[ $de_fixed = [yYiI]* ]] && e=$(echo|${AWK} "{print ($de)/($d)}")
+[[ $epsilon_fixed = [yYiI]* ]] && epsilon=$init_epsilon
+c=$(echo $c|${AWK} '{print sqrt($1*$1)}')
+d=$(echo $d|${AWK} '{print sqrt($1*$1)}')
+e=$(echo $e|${AWK} '{print sqrt($1*$1)}')
+epsilon=$(echo $epsilon|${AWK} '{print sqrt($1*$1)}')
+
+if [[ $USE_STACKING = [yYiI]* ]]
+then
+    [[ $st_pr_fixed = [yYiI]* ]] && st_pr=$init_st_pr
+fi
+
+sf_d=$(echo|${AWK} "{print 0.75*exp($b+1.75*$c*$c)}")
+sf_L0=$(echo|${AWK} "{print (2.0/3.0)*exp($b+1.25*$c*$c)}")
+
+physsols=()
+solsheader=()
+let solnum=0
+
+fecho "*** THE SOLUTIONS ***"
+fecho
+fecho "The unscaled parameters:"
+if [[ $INDC = [yYiI]* ]]
+then
+    let p=0
+    repeat ${num_r}
+    do
+      fecho C_${p}=$(eval echo \$C_${p})
+      let p+=1
+      physsols=( $physsols $(eval echo \$C_${p}) )
+      solsheader=( $solsheader "C_${p}" )
+      let solnum+=1
+    done
+elif [[ $ORT = "yes" ]]
+then
+    fecho "a1=$a1"
+    fecho "a2=$a2"
+    fecho "a3=$a3"
+    fecho "a4=$a4"
+    fecho "a5=$a5"
+elif [[ $HEX = "yes" ]]
+then
+    fecho "a1=$a1"
+    fecho "a2=$a2"
+else
+    fecho "a=$a"
+fi
+fecho "b=$b"
+fecho "c=$c"
+fecho "d=$d"
+fecho "e=$e"
+fecho "The scales:"
+fecho "scale_a=$scale_a"
+fecho "scale_b=$scale_b"
+fecho "scale_c=$scale_c"
+fecho "scale_d=$scale_d"
+fecho "scale_e=$scale_e"
+
+fecho "The scaled parameters:"
+if [[ $INDC = [yYiI]* ]]
+then
+    ;
+elif [[ $ORT = "yes" ]]
+then
+    a1=$(echo|${AWK} "{print ($scale_a)*($a1)}")
+    fecho "a1_scaled=$a1"
+    physsols=( $physsols $a1 )
+    solsheader=( $solsheader "a1" )
+    let solnum+=1
+    a2=$(echo|${AWK} "{print ($scale_a)*($a2)}")
+    fecho "a2_scaled=$a2"
+    physsols=( $physsols $a2 )
+    solsheader=( $solsheader "a2" )
+    let solnum+=1
+    a3=$(echo|${AWK} "{print ($scale_a)*($a3)}")
+    fecho "a3_scaled=$a3"
+    physsols=( $physsols $a3 )
+    solsheader=( $solsheader "a3" )
+    let solnum+=1
+    a4=$(echo|${AWK} "{print ($scale_a)*($a4)}")
+    fecho "a4_scaled=$a4"
+    physsols=( $physsols $a4 )
+    solsheader=( $solsheader "a4" )
+    let solnum+=1
+    a5=$(echo|${AWK} "{print ($scale_a)*($a5)}")
+    fecho "a5_scaled=$a5"
+    physsols=( $physsols $a5 )
+    solsheader=( $solsheader "a5" )
+    let solnum+=1
+elif [[ $HEX = "yes" ]]
+then
+    a1=$(echo|${AWK} "{print ($scale_a)*($a1)}")
+    fecho "a1_scaled=$a1"
+    physsols=( $physsols $a1 )
+    solsheader=( $solsheader "a1" )
+    let solnum+=1
+    a2=$(echo|${AWK} "{print ($scale_a)*($a2)}")
+    fecho "a2_scaled=$a2"
+    physsols=( $physsols $a2 )
+    solsheader=( $solsheader "a2" )
+    let solnum+=1
+else
+    a=$(echo|${AWK} "{print ($scale_a)*($a)}")
+    fecho "a_scaled=$a"
+    physsols=( $physsols $a )
+    solsheader=( $solsheader "a" )
+    let solnum+=1
+fi
+
+b=$(echo|${AWK} "{print ($scale_b)*($b)}")
+fecho "b_scaled=$b"
+c=$(echo|${AWK} "{print ($scale_c)*($c)}")
+fecho "c_scaled=$c"
+d=$(echo|${AWK} "{print ($scale_d)*($d)}")
+fecho "d_scaled=$d"
+e=$(echo|${AWK} "{print ($scale_e)*($e)}")
+fecho "e_scaled=$e"
+
+if [[ $SF_ELLIPSOIDAL = [yYiI]* ]]
+then
+    fecho "epsilon=$epsilon"
+fi
+
+if [[ $USE_F_GRCS = [yYiI]* ]]
+then
+	fecho "W=$W"
+	physsols=( $physsols $W )
+	solsheader=( $solsheader "W" )
+	let solnum+=1
+	fecho "X=$X"
+	physsols=( $physsols $X )
+	solsheader=( $solsheader "X" )
+	let solnum+=1
+	fecho "Y=$Y"
+	physsols=( $physsols $Y )
+	solsheader=( $solsheader "Y" )
+	let solnum+=1
+fi
+
+fecho
+
+if [[ $[$NUM_PH>1] = 1 ]]
+then
+        let phase=1
+	while [[ $[$phase<$NUM_PH] = 1 ]]
+	do
+
+		if [[ ! -z $FIT_ONLY_PHASE && $phase != $FIT_ONLY_PHASE ]]
+		then
+			let phase+=1
+			continue
+		fi
+
+		fecho "The parameters for phase ${phase}:"
+		if [[ $(eval echo "\$ORT_${phase}") = "yes" ]]
+		then
+		    [[ $(eval echo "\$a1_${phase}_fixed") = [yYiI]* ]] && eval a1_${phase}=$(eval echo "\$init_a1_${phase}")
+		    [[ $(eval echo "\$a2_${phase}_fixed") = [yYiI]* ]] && eval a2_${phase}=$(eval echo "\$init_a2_${phase}")
+		    [[ $(eval echo "\$a3_${phase}_fixed") = [yYiI]* ]] && eval a3_${phase}=$(eval echo "\$init_a3_${phase}")
+		    [[ $(eval echo "\$a4_${phase}_fixed") = [yYiI]* ]] && eval a4_${phase}=$(eval echo "\$init_a4_${phase}")
+		    [[ $(eval echo "\$a5_${phase}_fixed") = [yYiI]* ]] && eval a5_${phase}=$(eval echo "\$init_a5_${phase}")
+		    fecho "a1_${phase}="$(eval echo "\$a1_${phase}")
+		    fecho "a2_${phase}="$(eval echo "\$a2_${phase}")
+		    fecho "a3_${phase}="$(eval echo "\$a3_${phase}")
+		    fecho "a4_${phase}="$(eval echo "\$a4_${phase}")
+		    fecho "a5_${phase}="$(eval echo "\$a5_${phase}")
+		elif [[ $(eval echo "\$HEX_${phase}") = "yes" ]]
+		then
+		    [[ $(eval echo "\$a1_${phase}_fixed") = [yYiI]* ]] && eval a1_${phase}=$(eval echo "\$init_a1_${phase}")
+		    [[ $(eval echo "\$a2_${phase}_fixed") = [yYiI]* ]] && eval a2_${phase}=$(eval echo "\$init_a2_${phase}")
+		    fecho "a1_${phase}="$(eval echo "\$a1_${phase}")
+		    fecho "a2_${phase}="$(eval echo "\$a2_${phase}")
+		else
+		    [[ $(eval echo "\$a_${phase}_fixed") = [yYiI]* ]] && eval a_${phase}=$(eval echo "\$init_a_${phase}")
+		    fecho "a_${phase}="$(eval echo "\$a_${phase}")
+		fi
+
+		[[ $(eval echo "\$b_${phase}_fixed") = [yYiI]* ]] && eval b_${phase}=$(eval echo "\$init_b_${phase}")
+		[[ $(eval echo "\$c_${phase}_fixed") = [yYiI]* ]] && eval c_${phase}=$(eval echo "\$init_c_${phase}")
+		[[ $(eval echo "\$d_${phase}_fixed") = [yYiI]* ]] && eval d_${phase}=$(eval echo "\$init_d_${phase}")
+		[[ $(eval echo "\$e_${phase}_fixed") = [yYiI]* ]] && eval e_${phase}=$(eval echo "\$init_e_${phase}")
+		[[ $(eval echo "\$de_${phase}_fixed") = [yYiI]* ]] && eval e_${phase}=$(echo|${AWK} "{print ($(eval echo "\$de_${phase}"))/($(eval echo "\$d_${phase}"))}")
+
+		eval c_${phase}=$(echo $(eval echo "\$c_${phase}")|${AWK} '{print sqrt($1*$1)}')
+		eval d_${phase}=$(echo $(eval echo "\$d_${phase}")|${AWK} '{print sqrt($1*$1)}')
+		eval e_${phase}=$(echo $(eval echo "\$e_${phase}")|${AWK} '{print sqrt($1*$1)}')
+
+		fecho "b_${phase}="$(eval echo "\$b_${phase}")
+		fecho "c_${phase}="$(eval echo "\$c_${phase}")
+		fecho "d_${phase}="$(eval echo "\$d_${phase}")
+		fecho "e_${phase}="$(eval echo "\$e_${phase}")
+		fecho
+
+		let phase+=1
+
+	done
+fi
+
+m=$(echo $b|${AWK} '{print exp($1)}')
+sigma=$(echo $c|${AWK} '{print $1/sqrt(2)}')
+if [[ $USE_F_GRCS = [yYiI]* ]]
+then
+	rho=$(echo|${AWK} "{print (0.00001*$W)/($C0)}")
+	Re=$(echo|${AWK} "{print ($X)*exp($Y/$W)}")
+	a_dip=$(echo|${AWK} "{print 2*($X)*($C0)/($C0dip)}")
+else
+	rho=$(echo $bb $d|${AWK} '{print 2/(3.1415926535*$1*$1*$2*$2)}')
+	Re=$(echo $e|${AWK} '{print 0.38940039153570243412/$1}')
+fi
+M=$(echo $Re $rho|${AWK} '{print $1*sqrt($2)}')
+
+if [[ $USE_STACKING = [yYiI]* ]]
+then
+    st_pr=$(echo $st_pr|${AWK} '{print sqrt($1*$1)}')
+fi
+
+fecho "And now listing the physical (microstructural) parameters:"
+fecho
+fecho "The size parameters:"
+fecho "m=exp(b_scaled)=${m}nm"
+physsols=( $physsols $m )
+solsheader=( $solsheader "m" )
+let solnum+=1
+fecho "sigma=c_scaled/sqrt(2)=$sigma"
+physsols=( $physsols $sigma )
+solsheader=( $solsheader "sigma" )
+let solnum+=1
+fecho "d=${sf_d}nm"
+physsols=( $physsols ${sf_d} )
+solsheader=( $solsheader "d" )
+let solnum+=1
+fecho "L0=${sf_L0}nm"
+physsols=( $physsols ${sf_L0} )
+solsheader=( $solsheader "L0" )
+let solnum+=1
+if [[ $SF_ELLIPSOIDAL = [yYiI]* ]]
+then
+    fecho "epsilon=$epsilon"
+    physsols=( $physsols $epsilon )
+    solsheader=( $solsheader "epsilon" )
+    let solnum+=1
+fi
+if [[ $USE_STACKING = [yYiI]* ]]
+then
+    fecho
+    fecho "The stacking faults probability in percents:"
+    fecho "st_pr=${st_pr}"
+    physsols=( $physsols $st_pr )
+    solsheader=( $solsheader "st_pr" )
+    let solnum+=1
+fi
+fecho
+fecho "The strain parameters:"
+if [[ $INDC = [yYiI]* ]]
+then
+    ;
+elif [[ $ORT = "yes" ]]
+then
+    fecho "a1_scaled=$a1"
+    fecho "a2_scaled=$a2"
+    fecho "a3_scaled=$a3"
+    fecho "a4_scaled=$a4"
+    fecho "a5_scaled=$a5"
+elif [[ $HEX = "yes" ]]
+then
+    fecho "a1_scaled=$a1"
+    fecho "a2_scaled=$a2"
+else
+    fecho "q=a_scaled=$a"
+fi
+if [[ $USE_F_GRCS = [yYiI]* ]]
+then
+	fecho "rho=W/C0=${rho}(1/nm)^2"
+	fecho "Re=X*exp(Y/W)=${Re}nm"
+	physsols=( $physsols $Re )
+	solsheader=( $solsheader "Re*" )
+	let solnum+=1
+	fecho "M=Re*sqrt(rho)=$M"
+	physsols=( $physsols $M )
+	solsheader=( $solsheader "M*" )
+	let solnum+=1
+	fecho "a_dip=2*(C0/C0dip)*X=${a_dip}nm"
+	physsols=( $physsols $a_dip )
+	solsheader=( $solsheader "a_dip" )
+	let solnum+=1
+else
+	fecho "rho=2/(Pi*(${bb}nm*d_scaled)**2)=${rho}(1/nm)^2"
+	physsols=( $physsols $rho )
+	solsheader=( $solsheader "rho" )
+	let solnum+=1
+	fecho "Re^*=exp(-1/4)/(2*e_scaled)=${Re}nm"
+	physsols=( $physsols $Re )
+	solsheader=( $solsheader "Re*" )
+	let solnum+=1
+	fecho "M^*=(Re^*)*sqrt(rho)=$M"
+	physsols=( $physsols $M )
+	solsheader=( $solsheader "M*" )
+	let solnum+=1
+fi
+fecho
+
+if [[ $[$NUM_PH>1] = 1 ]]
+then
+        let phase=1
+	while [[ $[$phase<$NUM_PH] = 1 ]]
+	do
+
+		if [[ ! -z $FIT_ONLY_PHASE && $phase != $FIT_ONLY_PHASE ]]
+		then
+			let phase+=1
+			continue
+		fi
+
+		fecho "The size parameters for phase $phase:"
+		m_ph=$(echo $(eval echo "\$b_${phase}")|${AWK} '{print exp($1)}')
+		sigma_ph=$(echo $(eval echo "\$c_${phase}")|${AWK} '{print $1/sqrt(2)}')
+		fecho "m_${phase}=exp(b_${phase})=${m_ph}nm"
+		physsols=( $physsols ${m_ph} )
+		solsheader=( $solsheader "m_${phase}" )
+		let solnum+=1
+
+		fecho "sigma=c_${phase}/sqrt(2)=${sigma_ph}"
+		physsols=( $physsols ${sigma_ph} )
+		solsheader=( $solsheader "sigma_${phase}" )
+		let solnum+=1
+
+		sf_d_ph=$(echo $(eval echo "\$b_${phase}") $(eval echo "\$c_${phase}")|${AWK} '{print 0.75*exp($1+1.75*$2*$2)}')
+		sf_L0_ph=$(echo $(eval echo "\$b_${phase}") $(eval echo "\$c_${phase}")|${AWK} '{print (2.0/3.0)*exp($1+1.25*$2*$2)}')
+
+		fecho "d_${phase}=${sf_d_ph}nm"
+		physsols=( $physsols ${sf_d_ph} )
+		solsheader=( $solsheader "d_${phase}" )
+		let solnum+=1
+
+		fecho "L0_${phase}=${sf_L0_ph}nm"
+		physsols=( $physsols ${sf_L0_ph} )
+		solsheader=( $solsheader "L0_${phase}" )
+		let solnum+=1
+
+		fecho
+		fecho "The strain parameters for phase $phase:"
+
+		if [[ $(eval echo "\$ORT_${phase}") = "yes" ]]
+		then
+		    fecho "a1_${phase}="$(eval echo "\$a1_${phase}")
+		    physsols=( $physsols $(eval echo "\$a1_${phase}") )
+		    solsheader=( $solsheader "a1_${phase}" )
+		    let solnum+=1
+		    fecho "a2_${phase}="$(eval echo "\$a2_${phase}")
+		    physsols=( $physsols $(eval echo "\$a2_${phase}") )
+		    solsheader=( $solsheader "a2_${phase}" )
+		    let solnum+=1
+		    fecho "a3_${phase}="$(eval echo "\$a3_${phase}")
+		    physsols=( $physsols $(eval echo "\$a3_${phase}") )
+		    solsheader=( $solsheader "a3_${phase}" )
+		    let solnum+=1
+		    fecho "a4_${phase}="$(eval echo "\$a4_${phase}")
+		    physsols=( $physsols $(eval echo "\$a4_${phase}") )
+		    solsheader=( $solsheader "a4_${phase}" )
+		    let solnum+=1
+		    fecho "a5_${phase}="$(eval echo "\$a5_${phase}")
+		    physsols=( $physsols $(eval echo "\$a5_${phase}") )
+		    solsheader=( $solsheader "a5_${phase}" )
+		    let solnum+=1
+		elif [[ $(eval echo "\$HEX_${phase}") = "yes" ]]
+		then
+		    fecho "a1_${phase}="$(eval echo "\$a1_${phase}")
+		    physsols=( $physsols $(eval echo "\$a1_${phase}") )
+		    solsheader=( $solsheader "a1_${phase}" )
+		    let solnum+=1
+		    fecho "a2_${phase}="$(eval echo "\$a2_${phase}")
+		    physsols=( $physsols $(eval echo "\$a2_${phase}") )
+		    solsheader=( $solsheader "a2_${phase}" )
+		    let solnum+=1
+		else
+		    fecho "q=a_${phase}="$(eval echo "\$a_${phase}")
+		    physsols=( $physsols $(eval echo "\$a_${phase}") )
+		    solsheader=( $solsheader "a_${phase}" )
+		    let solnum+=1
+		fi
+
+		rho_ph=$(echo $(eval echo "\$bb_${phase}") $(eval echo "\$d_${phase}")|${AWK} '{print 2/(3.1415926535*$1*$1*$2*$2)}')
+		Re_ph=$(echo $(eval echo "\$e_${phase}")|${AWK} '{print 0.38940039153570243412/$1}')
+		M_ph=$(echo ${Re_ph} ${rho_ph}|${AWK} '{print $1*sqrt($2)}')
+
+		fecho "rho_${phase}=2/(Pi*($(eval echo "\$bb_${phase}")nm*d_${phase})**2)=${rho_ph}(1/nm)^2"
+		physsols=( $physsols ${rho_ph} )
+		solsheader=( $solsheader "rho_${phase}" )
+		let solnum+=1
+
+		fecho "Re_${phase}^*=exp(-1/4)/(2*e_${phase})=${Re_ph}nm"
+		physsols=( $physsols ${Re_ph} )
+		solsheader=( $solsheader "Re_${phase}*" )
+		let solnum+=1
+
+		fecho "M_${phase}^*=(Re_${phase}^*)*sqrt(rho_${phase})=${M_ph}"
+		physsols=( $physsols ${M_ph} )
+		solsheader=( $solsheader "M_${phase}*" )
+		let solnum+=1
+
+	let phase+=1
+
+	fecho
+
+	done
+fi
+
+solsheaderstr="#$solsheader[1]"
+physsolsstr="$physsols[1]"
+let sind=2
+while [[ $[$sind<=$solnum] = 1 ]]
+do
+  physsolsstr="${physsolsstr}\t$physsols[$sind]"
+  solsheaderstr="${solsheaderstr}\t$solsheader[$sind]"
+  let sind+=1
+done
+(echo $solsheaderstr; echo $physsolsstr) >${1%%.dat}.physsol.csv
+
+egrep '(^After.*converged.|^Maximum iteration count.*stopped.)' ${1%%.dat}.int.sol >>$LOGFILE
+egrep '(^After.*converged.|^Maximum iteration count.*stopped.)' ${1%%.dat}.int.sol
+grep '^final sum' ${1%%.dat}.int.sol >>$LOGFILE
+grep '^final sum' ${1%%.dat}.int.sol
+grep '^rel. change' ${1%%.dat}.int.sol >>$LOGFILE
+grep '^rel. change' ${1%%.dat}.int.sol
+fecho "Final set of parameters            Asymptotic Standard Error "
+fecho "=======================            =========================="
+fecho
+grep '+/-' $FIT_LOG >>$LOGFILE
+grep '+/-' $FIT_LOG
+if grep -q "Singular matrix in Invert_RtR" $FIT_LOG 
+then
+    grep "Singular matrix in Invert_RtR" $FIT_LOG >>$LOGFILE
+    fecho
+    singular-message
+fi
+fecho
+fecho "For more information about correlation matrix and confidence intervals,"
+fecho "please read the file ${1%%.dat}.int.sol."
+fecho
+
+WSSR=$(grep 'final sum of squares of residuals' ${1%%.dat}.int.sol|cut -d: -f 2|${AWK} '{print $1}')
+SUMWINTS=$(cat ${1%%.dat}.weighted.dat|${AWK} 'BEGIN {sum=0} {sum+=($2/$3)*($2/$3)} END {print sum}')
+N=$(wc -l $1|${AWK} '{print $1}')
+P=$(echo $VIASTR|tr "," "\n"|wc -l|${AWK} '{print $1}')
+Rwp=$(echo|gawk "{print sqrt($WSSR/$SUMWINTS)}")
+Rexp=$(echo|gawk "{print sqrt(($N-$P)/$SUMWINTS)}")
+GofF=$(echo|gawk "{print ($Rwp/$Rexp)}")
+
+fecho "WSSR=${WSSR}"
+fecho "N=${N}, P=${P}"
+fecho "Rwp=${Rwp}"
+fecho "Rexp=${Rexp}"
+fecho "GofF=${GofF}"
+
+# (gs -q -dNOPAUSE -dNO_PAUSE -sDEVICE=ppmraw -r72 -sOutputFile=- ${1%%.dat}.int.ps -c quit|pnmrotate -90|ppmtojpeg) 2>/dev/null >${1%%.dat}.int.jpg
+
+echo "Plotting the measured and theoretical Intensity Function."
+
+q="n"
+initialize "Do you want to print/view this figure? " q
+[[ $q = [yYiI]* ]] && psprint ${1%%.dat}.int.ps
+
+fecho
+fecho "*** END OF FITTING ***"
+echo
+
+call_mkspline2="n"
+initialize 'Do you want to call mkspline again to update the spline data file?> ' call_mkspline2
+if [[ $call_mkspline2 = [yYiI]* ]]
+then
+	run_mkspline2 $1
+fi
+
+if [[ $peak_pos_fit = [yYiI]* || $peak_int_fit = [yYiI]* ]]
+then
+    update_peak_index_file="y"
+    initialize 'Do you want to create/update the peak-index.dat file?> ' update_peak_index_file
+    if [[ $update_peak_index_file = [yYiI]* ]]
+    then
+	:> tmp/$$.peak-index.dat.1
+	if [[ $peak_pos_fit = [yYiI]* ]]
+	then
+	    let n=0
+	    repeat $num_r
+	    do
+	        if grep -q '^i_s0_'"$n"'[[:space:]]' ${LOGFILE} >/dev/null 2>&1
+		then
+			grep '^i_s0_'"$n"'[[:space:]]' ${LOGFILE}|gawk '{print $3}' >>tmp/$$.peak-index.dat.1
+		else
+			echo "0" >>tmp/$$.peak-index.dat.1
+		fi
+		let n+=1
+	    done
+	else
+		grep '^Found peak at ' ${LOGFILE}|sed -e 's/^Found peak at //g' -e 's/, intensity.*//g' >tmp/$$.peak-index.dat.1
+	fi
+	:> tmp/$$.peak-index.dat.2
+	if [[ $peak_int_fit = [yYiI]* ]]
+	then
+	    let n=0
+	    repeat $num_r
+	    do
+		if grep -q '^i_max_'"$n"'[[:space:]]' ${LOGFILE} >/dev/null 2>&1
+		then
+			grep '^i_max_'"$n"'[[:space:]]' ${LOGFILE}|gawk '{print $3}' >>tmp/$$.peak-index.dat.2
+		else
+			echo "0" >>tmp/$$.peak-index.dat.2
+		fi
+		let n+=1
+	    done
+	else
+		grep '^Found peak at ' ${LOGFILE}|sed -e 's/^Found peak at.*intensity=//g' -e 's/, phase.*//g' >tmp/$$.peak-index.dat.2
+	fi
+	grep '^hkl' ${LOGFILE}|sed -e 's@^.*=@@g' >tmp/$$.peak-index.dat.3
+	grep '^phase_no_' tmp/$$.gnu|sed -e 's@^.*=@@g' >tmp/$$.peak-index.dat.4
+	paste tmp/$$.peak-index.dat.1 tmp/$$.peak-index.dat.2 tmp/$$.peak-index.dat.3 tmp/$$.peak-index.dat.4 >${1%%.dat}.peak-index.dat
+	rm -f tmp/$$.peak-index.dat.1 tmp/$$.peak-index.dat.2 tmp/$$.peak-index.dat.3 tmp/$$.peak-index.dat.4
+    fi
+fi
+
+q="n"
+initialize "Do you want to print/view the solutions? " q
+[[ $q = [yYiI]* ]] && asciiprint ${1%%.dat}.sol
+
+q="n"
+initialize "Do you want to print/view the statistical informations (from gnuplot)? " q
+if [[ $q = [yYiI]* ]]
+then
+    asciiprint ${1%%.dat}.int.sol
+fi
+
+fi # BREAK
+
+MAKECLEAN="no"
+export MAKECLEAN
+
+echo
+
+q="y"
+initialize "Do you want to save the results and calculated data? " q
+[[ $q = [yYiI]* ]] && ./lib/saveresults $1
+
+q="n"
+initialize "Do you want to cleanup the new files? " q
+[[ $q = [yYiI]* ]] && ./makeclean
+
+rm -f tmp/$$.gnu tmp/$$.fit-init
+# CMWP (IF2)
+
+exit 0
+
+else # $MWP = "yes"
+
+    IMAXF=$(cat $FILES | ${AWK} 'BEGIN {max=0} sqrt($1*$1)>max {max=sqrt($1*$1)} END {print 2*max}')
+
+    INDC="n"
+    initialize "Do you want to use independent contrast factors? " INDC
+    echo
+
+    IC=0
+    let ir=0
+    icp=( )
+
+    :> ${1%%.dat}.fourier.dat
+    :> ${1%%.dat}.int.dat
+
+    G2=0
+    ANX=0
+    if [[ $HEX = "yes" ]]
+    then
+	H21=0
+	H22=0
+    else
+	H2=0
+    fi
+    WK=0
+    i_s0=""
+    s0=""
+    g2=""
+    anx=""
+    if [[ $HEX = "yes" ]]
+    then
+	h21=""
+	h22=""
+    else
+	h2=""
+    fi
+    wk=0
+    OFFS=0.0
+    IOFFS=0.0
+    MAXIFWHM=0
+    if [[ $HEX != "yes" ]]
+    then
+	MAXH2=0
+    fi
+    :> ${1%%.dat}.fwhm.dat
+    :> ${1%%.dat}.intbr.dat
+    :> ${1%%.dat}.fwhm.tmp.dat
+
+    N=512
+    FOURIER_FWHM_UL=5
+    MAXF=0
+    FT_RECOMPUTE="n"
+
+    if [[ $ONLY_FOURIER = "yes" ]]
+    then
+	MINIFWHM=0
+	MAXF=0
+	MAX_FF_FWHM=0
+    fi
+
+    if [[ $DEBUG = "yes" ]]
+    then
+	fecho "Characteristics of the Intensity Functions:"
+    fi
+
+    for f in $FILES
+    do
+	if [[ $ONLY_FOURIER = "yes" ]]
+	then
+	    continue
+	fi
+
+	if [[ $DEBUG = "yes" ]]
+	then
+	    fecho "${${f%%.dat}##*/}"
+	fi
+
+	NEWMAXF=$(${AWK} -f lib/maxf.awk <$f 2>/dev/null | sort -n | uniq | tail -1)
+	if echo | ${AWK} "$MAXF<$NEWMAXF"' {print "OK"}' | grep -q OK
+	then
+	    MAXF=$NEWMAXF
+	fi
+
+	IX0=$(${AWK} -f lib/max.awk < $f | ${AWK} '{print $1}')
+	I0=$(${AWK} -f lib/max.awk < $f | ${AWK} '{print $2}')
+	if [[ $DEBUG = "yes" ]]
+	then
+	    fecho "Maximal intensity: $I0 at $IX0"
+	fi
+	IFWHM=$(${AWK} -f lib/fwhm.awk "maxx=$IX0" "maxf=$I0" < $f)
+	if [[ $DEBUG = "yes" ]]
+	then
+	    fecho "FWHM: $IFWHM"
+	fi
+	IFWHMI=$(${AWK} -f lib/fwhmi.awk "max=$I0" < $f)
+	if [[ $DEBUG = "yes" ]]
+	then
+	    fecho "Integral Breadth: $IFWHMI"
+	    fecho
+	fi
+
+	if [[ -z $MINIFWHM ]]
+	then
+	    MINIFWHM=$IFWHM
+	    MINIFWHMF=$f
+	fi
+
+	if echo|${AWK} "$MAXIFWHM<$IFWHM"' {print "OK"}'|grep -q OK
+	then
+	    MAXIFWHM=$IFWHM
+	fi
+
+	if echo|${AWK} "$IFWHM<$MINIFWHM"' {print "OK"}'|grep -q OK
+	then
+	    MINIFWHM=$IFWHM
+	    MINIFWHMF=$f
+	fi
+    done
+
+    if [[ $ONLY_FOURIER != "yes" ]]
+    then
+	fourierabs_fwhm $MINIFWHMF
+	MAX_FF_FWHM=$FF_FWHM
+    fi
+
+    if [[ $DEBUG = yes ]]
+    then
+	fecho "Minimal FWHM (${${MINIFWHMF%%.dat}##*/}): $MINIFWHM"
+	fecho "Nyquist Frequency: $MAXF"
+	fecho "Maximal Fourier FWHM (${${MINIFWHMF%%.dat}##*/}): $MAX_FF_FWHM"
+	fecho
+    else
+	echo "Minimal FWHM (${${MINIFWHMF%%.dat}##*/}): $MINIFWHM"
+	echo "Nyquist Frequency: $MAXF"
+	echo "Maximal Fourier FWHM (${${MINIFWHMF%%.dat}##*/}): $MAX_FF_FWHM"
+	echo
+    fi
+
+    if [[ -f ${MAXFINIFILE} ]]
+    then
+	. ${MAXFINIFILE}
+    else
+	CMAXF=$(echo|${AWK} "{print $FOURIER_FWHM_UL*$MAX_FF_FWHM}")
+	MAXF=$CMAXF
+    fi
+
+    echo 'Common characteristics of the Fourier Spectrums:'
+    initialize 'Please specify the number of samples (must be power of 2)> ' N
+    initialize 'Please specify the upper limit of sampling (in FWHM units)> ' FOURIER_FWHM_UL
+
+    CMAXF=$(echo|${AWK} "{print $FOURIER_FWHM_UL*$MAX_FF_FWHM}")
+
+    if [[ -f ${MAXFINIFILE} ]]
+    then
+	if ! grep -q "^MAXF=${CMAXF}" ${MAXFINIFILE}
+	then
+	    echo "$FOURIER_FWHM_UL*$MAX_FF_FWHM=$CMAXF"
+	fi
+    fi
+
+    echo 'Please specify the maximal frequency used for plotting and/or'
+    initialize 'sampling the input data> ' MAXF
+    if [[ $ONLY_FOURIER != "yes" ]]
+    then
+	initialize 'Do you want to recompute the Fourier Transforms?> ' FT_RECOMPUTE
+    fi
+
+    (
+    echo "N=${N}"
+    echo "FOURIER_FWHM_UL=${FOURIER_FWHM_UL}"
+    echo "MAXF=${MAXF}"
+    echo "FT_RECOMPUTE=${FT_RECOMPUTE}"
+    ) >${MAXFINIFILE}
+    MAXFF=$MAXF
+
+    echo
+
+    (
+    echo "Common characteristics of the Fourier Spectrums:"
+    echo "The number of samples: $N"
+    echo "The upper limit of sampling (in FWHM units): $FOURIER_FWHM_UL"
+    echo "The maximal frequency used for sampling and/or plotting: $MAXF"
+    echo
+    ) >>$LOGFILE
+
+    if [[ $DEBUG = "yes" ]]
+    then
+	fecho "Characteristics of the absolute value of the Fourier Transforms:"
+    fi
+    for f in $FILES
+    do
+
+	if [[ $ONLY_FOURIER = "yes" ]]
+	then
+	    f=${f%%.fourier.dat}.dat
+	fi
+
+	if [[ $DEBUG = "yes" ]]
+	then
+	    fecho "${${f%%.dat}##*/}"
+	else
+	    echo "${${f%%.dat}##*/}"
+	fi
+
+#	echo DEBUG1
+
+	PREVOFFS=$OFFS
+	PREVG2=$G2
+	PREVANX=$ANX
+	if [[ $HEX = "yes" ]]
+	then
+	    PREVH21=$H21
+	    PREVH22=$H22
+	else
+	    PREVH2=$H2
+	fi
+	PREVWK=$WK
+
+#	echo DEBUG2
+
+	if [[ $ONLY_FOURIER != "yes" ]]
+	then
+	    IX0=$(${AWK} -f lib/max.awk < $f | ${AWK} '{print $1}')
+	    I0=$(${AWK} -f lib/max.awk < $f | ${AWK} '{print $2}')
+	    IFWHM=$(${AWK} -f lib/fwhm.awk "maxx=$IX0" "maxf=$I0" < $f)
+	    IFWHMI=$(${AWK} -f lib/fwhmi.awk "max=$I0" < $f)
+#	    echo DEBUG21
+	    if [[ $f = $MINIFWHMF ]]
+	    then
+		FF_FWHM=$MAX_FF_FWHM
+	    else
+#		echo "Calling: fourierabs_fwhm..."
+		fourierabs_fwhm $f
+	    fi
+#	    echo DEBUG22
+
+	    MAXFF=$(echo|${AWK} "{print $FOURIER_FWHM_UL*$FF_FWHM}")
+	    if echo | ${AWK} "$MAXF<$MAXFF"' {print "BAD"}' | grep -q BAD
+	    then
+		MAXFF=$(echo|${AWK} "{print 0.999*$MAXF}")
+	    fi
+#	    echo DEBUG23
+	fi
+
+#	echo DEBUG3
+
+	if [[ ${ONLY_FOURIER} != "yes" ]] && [[ ! -f ${f%%.dat}.fourier.dat || ${FT_RECOMPUTE} = [yYiI]* ]]
+	then
+	    echo "Calculating the Fourier Transform of data."
+
+	    Fourier $f 0.0 $MAXFF $N > ${1%%.dat}.fourier.dat.tmp
+
+	    smax=$(echo|${AWK} "{print 0.99999*$MAXF}")
+	    Fourier $f $MAXFF $smax 10 | (read; cat) >> ${1%%.dat}.fourier.dat.tmp
+
+	    echo
+	    echo "Saving the Fourier Transform as ${f%%.dat}.fourier.dat."
+	    cp ${1%%.dat}.fourier.dat.tmp ${f%%.dat}.fourier.dat
+	else
+	    echo "Using ${f%%.dat}.fourier.dat as the Fourier Transform of ${f}."
+	    ${AWK} '$1<'"$MAXFF {print}" < ${f%%.dat}.fourier.dat > ${1%%.dat}.fourier.dat.tmp
+	    smax=$(echo|${AWK} "{print 0.99999*$MAXF}")
+	    if [[ $ONLY_FOURIER = "yes" ]]
+	    then
+		echo "$smax 0" >> ${1%%.dat}.fourier.dat.tmp
+	    else
+		${AWK} -f lib/fourier.awk "s=$smax" < $f >> ${1%%.dat}.fourier.dat.tmp
+	    fi
+	fi
+
+	${AWK} '{print $1" "$3}' < ${1%%.dat}.fourier.dat.tmp > ${1%%.dat}.${${f%%.dat}##*/}.fouriersin.dat
+#	${AWK} "{print $PREVOFFS"'+$1" "$3}' < ${1%%.dat}.fourier.dat.tmp > ${1%%.dat}.${${f%%.dat}##*/}.fouriersin.dat
+
+	echo
+	echo
+
+	${AWK} '{print $1" "$4}' < ${1%%.dat}.fourier.dat.tmp > ${1%%.dat}.fourierabs.dat
+	AX0=$(${AWK} -f lib/max.awk < ${1%%.dat}.fourierabs.dat | ${AWK} '{print $1}')
+	A0=$(${AWK} -f lib/max.awk < ${1%%.dat}.fourierabs.dat | ${AWK} '{print $2}')
+	if [[ $DEBUG = "yes" ]]
+	then
+	    fecho "Maximal amplitude: $A0 at $AX0"
+	fi
+#	FWHM=$(${AWK} -f lib/fwhm2.awk "maxx=$AX0" "maxf=$A0" < ${1%%.dat}.fourierabs.dat)
+	if [[ $DEBUG = "yes" ]]
+	then
+#	    fecho "FWHM: $FWHM, FF_FWHM: $FF_FWHM"
+	    fecho "FWHM: $FF_FWHM"
+	fi
+
+	FWHMI=$(${AWK} -f lib/fwhmi2.awk "max=$A0" < ${1%%.dat}.fourierabs.dat)
+	if [[ $DEBUG = "yes" ]]
+	then
+	    fecho "Integral Breadth: $FWHMI"
+	    fecho
+	fi
+
+	${AWK} '{print $1+'"$OFFS"'" "$2" "$3" "$4'"/$A0"'}' < ${1%%.dat}.fourier.dat.tmp >> ${1%%.dat}.fourier.dat
+	rm -f ${1%%.dat}.fourier.dat.tmp ${1%%.dat}.fourierabs.dat
+
+	if [[ $ONLY_FOURIER != "yes" ]]
+	then
+	    IOFFS=$(echo|${AWK} "{print ${ir}*${IMAXF}}")
+	    IOFFS2=$(echo|${AWK} "{print (${ir}+0.5)*${IMAXF}}")
+	    (
+	    echo | ${AWK} 'BEGIN {print ('${ir}'+0.001)*'${IMAXF}'" "1e-5}'
+	    ${AWK} '{print '${IOFFS2}'+$1" "$2}' $f
+	    echo | ${AWK} 'BEGIN {print ('${ir}'+0.999)*'${IMAXF}'" "1e-5}'
+	    ) >> ${1%%.dat}.int.dat
+	fi
+
+	if [[ $HEX = "yes" ]]
+	then
+	    G2=$(hkl=${${f%%.dat}##*/}; let i=1; h=$hkl[i]; if [[ $h = '-' ]]; then let i+=1; h="$h$hkl[i]"; fi; let i+=1; k=$hkl[i]; if [[ $k = '-' ]]; then let i+=1; k="$k$hkl[i]"; fi; let i+=1; l=$hkl[i]; if [[ $l = '-' ]]; then let i+=1; l="$l$hkl[i]"; fi; echo | ${AWK} "{print (4.0/3.0)*(($h)*($h)+($h)*($k)+($k)*($k))/$la/$la+($l)*($l)/$lc/$lc}")
+	    ANX=$(hkl=${${f%%.dat}##*/}; let i=1; h=$hkl[i]; if [[ $h = '-' ]]; then let i+=1; h="$h$hkl[i]"; fi; let i+=1; k=$hkl[i]; if [[ $k = '-' ]]; then let i+=1; k="$k$hkl[i]"; fi; let i+=1; l=$hkl[i]; if [[ $l = '-' ]]; then let i+=1; l="$l$hkl[i]"; fi; echo | ${AWK} "{print ($l)^2/((4.0/3.0)*(($h)^2+($h)*($k)+($k)^2)*($lc^2/$la^2)+($l)^2)}")
+	else
+	    G2=$(hkl=${${f%%.dat}##*/}; let i=1; h=$hkl[i]; if [[ $h = '-' ]]; then let i+=1; h="$h$hkl[i]"; fi; let i+=1; k=$hkl[i]; if [[ $k = '-' ]]; then let i+=1; k="$k$hkl[i]"; fi; let i+=1; l=$hkl[i]; if [[ $l = '-' ]]; then let i+=1; l="$l$hkl[i]"; fi; echo | ${AWK} "{print (($h)^2+($k)^2+($l)^2)/($la*$la)}")
+	    ANX=$(hkl=${${f%%.dat}##*/}; let i=1; h=$hkl[i]; if [[ $h = '-' ]]; then let i+=1; h="$h$hkl[i]"; fi; let i+=1; k=$hkl[i]; if [[ $k = '-' ]]; then let i+=1; k="$k$hkl[i]"; fi; let i+=1; l=$hkl[i]; if [[ $l = '-' ]]; then let i+=1; l="$l$hkl[i]"; fi; echo | ${AWK} "{print ($l)^2/(($h)^2+($k)^2+($l)^2)}")
+	fi
+	K=$(echo|${AWK} "{print sqrt($G2)}")
+
+	if [[ $INDC != "y" ]]
+	then
+
+	if [[ $HEX = "yes" ]]
+	then
+	    H21=$(hkl=${${f%%.dat}##*/}; let i=1; h=$hkl[i]; if [[ $h = '-' ]]; then let i+=1; h="$h$hkl[i]"; fi; let i+=1; k=$hkl[i]; if [[ $k = '-' ]]; then let i+=1; k="$k$hkl[i]"; fi; let i+=1; l=$hkl[i]; if [[ $l = '-' ]]; then let i+=1; l="$l$hkl[i]"; fi; echo | ${AWK} "{print (($h)^2+($k)^2+($h+$k)^2)*($l)^2/(($h)^2+($k)^2+($h+$k)^2+1.5*($la/$lc)^2*($l)^2)^2}")
+	    H22=$(hkl=${${f%%.dat}##*/}; let i=1; h=$hkl[i]; if [[ $h = '-' ]]; then let i+=1; h="$h$hkl[i]"; fi; let i+=1; k=$hkl[i]; if [[ $k = '-' ]]; then let i+=1; k="$k$hkl[i]"; fi; let i+=1; l=$hkl[i]; if [[ $l = '-' ]]; then let i+=1; l="$l$hkl[i]"; fi; echo | ${AWK} "{print ($l)^4/(($h)^2+($k)^2+($h+$k)^2+1.5*($la/$lc)^2*($l)^2)^2}")
+	else
+	    H2=$(hkl=${${f%%.dat}##*/}; let i=1; h=$hkl[i]; if [[ $h = '-' ]]; then let i+=1; h="$h$hkl[i]"; fi; let i+=1; k=$hkl[i]; if [[ $k = '-' ]]; then let i+=1; k="$k$hkl[i]"; fi; let i+=1; l=$hkl[i]; if [[ $l = '-' ]]; then let i+=1; l="$l$hkl[i]"; fi; echo | ${AWK} "{print (($h)^2*($k)^2+($h)^2*($l)^2+($k)^2*($l)^2)/(($h)^2+($k)^2+($l)^2)^2}")
+	fi
+
+	fi # INDC
+
+	if [[ $HEX = "yes" ]]
+	then
+	    hkl=${${f%%.dat}##*/}; let i=1; h=$hkl[i]; if [[ $h = '-' ]]; then let i+=1; h="$h$hkl[i]"; fi; let i+=1; k=$hkl[i]; if [[ $k = '-' ]]; then let i+=1; k="$k$hkl[i]"; fi; let i+=1; l=$hkl[i]; if [[ $l = '-' ]]; then let i+=1; l="$l$hkl[i]"; fi
+	    fecho "hkl=$hkl"
+	    fecho "h=$h"
+	    fecho "k=$k"
+	    fecho "l=$l"
+	    if [[ $INDC != "y" ]]
+	    then
+		fecho "H21=$H21"
+		fecho "H22=$H22"
+	    fi
+	    fecho "g^2=$G2"
+	    fecho "K=$K"
+	    fecho
+	fi
+
+	case "${${f%%.dat}##*/}" in
+	    111|222)
+		W=0.43301270189221932338
+	    ;;
+	    200|400)
+		W=1.0
+	    ;;
+	    220)
+		W=0.70710678118654752440
+	    ;;
+	    311)
+		W=0.45226701686664543397
+	    ;;
+	    *)
+		W=0.0
+	    ;;
+	esac
+	WK=$W
+	OFFS=$(echo|${AWK} "{print $OFFS+$MAXF}")
+
+	if [[ $OFFS != *.* ]]
+	then
+	    OFFS=${OFFS}.0
+	fi
+
+	if [[ $IOFFS != *.* ]]
+	then
+	    IOFFS=${IOFFS}.0
+	fi
+
+	if [[ $G2 != *.* ]]
+	then
+	    G2=${G2}.0
+	fi
+
+	if [[ $HEX = "yes" ]]
+	then
+	    if [[ $H21 != *.* ]]
+	    then
+		H21=${H21}.0
+	    fi
+	    if [[ $H22 != *.* ]]
+	    then
+		H22=${H22}.0
+	    fi
+	else
+	    if [[ $H2 != *.* ]]
+	    then
+		H2=${H2}.0
+	    fi
+	fi
+
+	if [[ $ANX != *.* ]]
+	then
+	    ANX=${ANX}.0
+	fi
+
+	s0="${s0}\ns0_${ir}=${PREVOFFS}"
+	i_s0="${i_s0}\ni_s0_${ir}=${IOFFS}"
+	g2="${g2}\ng2_${ir}=${G2}"
+
+	if [[ $HEX = "yes" ]]
+	then
+	    h21="${h21}\nh21_${ir}=${H21}"
+	    h22="${h22}\nh22_${ir}=${H22}"
+	else
+	    h2="${h2}\nh2_${ir}=${H2}"
+	fi
+	anx="${anx}\nanx_${ir}=${ANX}"
+
+	if [[ $INDC = [yYiI]* ]]
+	then
+	    icp=( $icp C_$ir )
+	fi
+
+	LABELCMDS="${LABELCMDS}\nset label \"${${f%%.dat}##*/}\" at ${PREVOFFS}+0.2*${MAXF}, 0.9"
+	PLOTCMDS="${PLOTCMDS}\nset nologscale\nplot [$PREVOFFS:$PREVOFFS+$MAXFF] [1e-3:1.2] \"${1%%.dat}.fourier.dat\" using 1:4 title \"measured data (${${f%%.dat}##*/})\" with lines lt 2, fit_function(x) title \"f(x)\" with lines lt 1\n${LOGSCALE_SP}"
+
+	IMAXFF=0
+	if [[ $ONLY_FOURIER != "yes" ]]
+	then
+	    IMAXFF=$(cat $f | sort -n | tail -1 | ${AWK} '{print $1}')
+	fi
+	LABELCMDS2="${LABELCMDS2}\nset label \"${${f%%.dat}##*/}\" at ${IOFFS}+0.2*${IMAXF}, 0.9"
+	PLOTCMDS2="${PLOTCMDS2}\nset nologscale\nplot [$IOFFS:$IOFFS+$IMAXFF] \"${1%%.dat}.int.dat\" using 1:2 title \"measured data (${${f%%.dat}##*/})\" with lines lt 2, theoretical_if(x) title \"f(x)\" with lines lt 1\n${LOGSCALE_IF}"
+
+	if [[ $HEX != "yes" ]]
+	then
+	    if echo | ${AWK} "$MAXH2<$H2"' {print "OK"}' | grep -q OK
+	    then
+		MAXH2=$H2
+	    fi
+	fi
+
+	if [[ $HEX = "yes" ]]
+	then
+	    echo "${${f%%.dat}##*/} $IFWHM" >> ${1%%.dat}.fwhm.dat
+	    echo "${${f%%.dat}##*/} $IFWHMI" >> ${1%%.dat}.intbr.dat
+	else
+	    echo "${${f%%.dat}##*/} $K $IFWHM" >> ${1%%.dat}.fwhm.dat
+	    echo "${${f%%.dat}##*/} $K $IFWHMI" >> ${1%%.dat}.intbr.dat
+	fi
+	echo "$K $H2 $IFWHM" >> ${1%%.dat}.fwhm.tmp.dat
+
+	let ir+=1
+    done
+    num_r=${ir}
+
+    MAXOFFS=$OFFS
+    ${AWK} '{print $1" "$4}' < ${1%%.dat}.fourier.dat > ${1%%.dat}.fourierabs.dat
+    echo "la=$la" > ${1%%.dat}.fwhm-a.dat
+    echo "la=$la" > ${1%%.dat}.fwhmi-a.dat
+
+    if [[ $DEBUG = "yes" && $HEX != "yes" ]]
+    then
+	echo "MAXH2=$MAXH2"
+	echo
+    fi
+
+    wk=$(echo $wk|sed -e 's/^0+//g' -e 's/(\([0-9\.+-][0-9\.+-]*\)-0)/\1/g' -e 's/+(0-\([0-9\.][0-9\.]*\))/-\1/g')
+
+fecho "*** FIT ***"
+unset a a1 a2 b c b1 b2 c1 c2 k d e f g h
+
+if [[ $HEX = "yes" ]]
+then
+    fecho "Calculating a1,a2,b,c,d,e to fit the Fourier Spectrums with:"
+    fecho "(fct(x)/fct(0))*exp(-(K^2*C*x^2/d^2)*wf(e*x)), where fct(x) is the Fourier"
+    fecho "Transform of ${SFNAME}(x,b,c), K^2=(4/3)*(h^2+h*k+k^2)/a^2+l^2/c^2,"
+    fecho "C=Chk0*(1+a1*H1^2+a2*H2^2),"
+    fecho "H1^2=(h^2+k^2+(h+k)^2)*l^2/(h^2+k^2+(h+k)^2+(3/2)*(a/c)^2*l^2)^2,"
+    fecho "H2^2=l^4/(h^2+k^2+(h+k)^2+(3/2)*(a/c)^2*l^2)^2, and wf(x)=f^*(x) as defined"
+else
+#    fecho "Calculating a,b,c,d,e,f,g,h to fit the Fourier Spectrums with:"
+#    fecho "(fct(x)/fct(0))*exp(-(K^2*C*x^2/d^2)*wf(e*x))*exp(f*K^4*C^2*x^4*(wf(g*x)**2+h/x**2)),"
+    fecho "Calculating a,b,c,d,e to fit the Fourier Spectrums with:"
+    fecho "(fct(x)/fct(0))*exp(-(K^2*C*x^2/d^2)*wf(e*x)), where fct(x) is the Fourier"
+    fecho "Transform of ${SFNAME}(x,b,c), K^2=(h^2+k^2+l^2)/a^2, C=Ch00*(1-a*H^2),"
+    fecho "H^2=(h^2*k^2+h^2*l^2+k^2*l^2)/(h^2+k^2+l^2)^2 and wf(x)=f^*(x) as defined"
+fi
+fecho "by M. Wilkens in:"
+fecho "Proc. Conf. Fund. Aspects of Disl. Theory, National Bureau of Standards, 1969."
+fecho
+
+if [[ $INDC = [yYiI]* ]]
+then
+    for p in $icp
+    do
+	eval init_$p=1.0
+    done
+elif [[ $HEX = "yes" ]]
+then
+    init_a1=1.0
+    init_a2=1.0
+else
+    init_a=2.0
+fi
+init_b=3.0
+init_c=1.0
+init_d=80.0
+init_e=0.05
+init_epsilon=0.5
+
+if [[ -f ${FITINIFILE} ]]
+then
+    . ${FITINIFILE}
+fi
+
+if [[ -f ${INDCINIFILE} ]]
+then
+    . ${INDCINIFILE}
+fi
+
+e_def="e"
+
+q="n"
+initialize "Do you want to specify the initial values for the parameters? " q
+
+if [[ $q = [yYiI]* ]]
+then
+    if [[ $INDC = [yYiI]* ]]
+    then
+	for p in $icp
+	do
+	    initialize 'Please specify the initial value of '"$p"'> ' init_$p
+	    eval ${p}_fixed="n"
+	    initialize 'Fix value of '"$p"'? ' ${p}_fixed
+	done
+    elif [[ $HEX = "yes" ]]
+    then
+	initialize 'Please specify the initial value of a1> ' init_a1
+	a1_fixed="n"
+	initialize "Fix value of a1? " a1_fixed
+	initialize 'Please specify the initial value of a2> ' init_a2
+	a2_fixed="n"
+	initialize "Fix value of a2? " a2_fixed
+    else
+	initialize 'Please specify the initial value of a> ' init_a
+	a_fixed="n"
+	initialize "Fix value of a? " a_fixed
+    fi
+
+    if [[ $SFNAME != "no_sf" ]]
+    then
+	initialize 'Please specify the initial value of b> ' init_b
+	b_fixed="n"
+	initialize "Fix value of b? " b_fixed
+
+	initialize 'Please specify the initial value of c> ' init_c
+	c_fixed="n"
+	initialize "Fix value of c? " c_fixed
+    fi
+
+    initialize 'Please specify the initial value of d> ' init_d
+    d_fixed="n"
+    initialize "Fix value of d? " d_fixed
+
+    initialize 'Please specify the initial value of e> ' init_e
+    e_fixed="n"
+    initialize "Fix value of e? " e_fixed
+
+    de_fixed="n"
+    initialize "Do you want to fix d*e? " de_fixed
+
+    if [[ $SF_ELLIPSOIDAL = [yYiI]* ]]
+    then
+	initialize 'Please specify the initial value of epsilon> ' init_epsilon
+	epsilon_fixed="n"
+	initialize "Fix value of epsilon? " epsilon_fixed
+    fi
+
+fi
+
+if [[ $de_fixed = [yYiI]* ]]
+then
+	de=$(echo|${AWK} "{print ($init_d)*($init_e)}")
+	e_def="(${de}/d)"
+fi
+
+if [[ $SF_ELLIPSOIDAL != [yYiI]* ]]
+then
+    init_epsilon=1.0
+    epsilon_fixed="y"
+fi
+
+if [[ $SFNAME = "no_sf" ]]
+then
+    init_b=42.0
+    init_c=0.1
+    b_fixed="y"
+    c_fixed="y"
+fi
+
+if [[ ${num_r} = 1 ]]
+then
+    if [[ $HEX = "yes" ]]
+    then
+	init_a1=0.0
+	init_a2=0.0
+	a1_fixed="y"
+	a2_fixed="y"
+    else
+	init_a=0.0
+	a_fixed="y"
+    fi
+fi
+
+if [[ $INDC = [yYiI]* ]]
+then
+    :>${INDCINIFILE}
+    for p in $icp
+    do
+	echo "init_$p=$(eval echo \$init_$p)" >>${INDCINIFILE}
+	if [[ $(eval echo \$init_$p) = C* ]]
+	then
+	    IC=$(echo $IC|sed -e "s/$p/$(eval echo \$init_$p)/g")
+	fi
+    done
+    :>${FITINIFILE}
+    d_fixed="y"
+elif [[ $HEX = "yes" ]]
+then
+    cat >${FITINIFILE} <<EOF
+init_a1=$init_a1
+init_a2=$init_a2
+EOF
+else
+    cat >${FITINIFILE} <<EOF
+init_a=$init_a
+EOF
+fi
+
+cat >>${FITINIFILE} <<EOF
+init_b=$init_b
+init_c=$init_c
+EOF
+
+cat >>${FITINIFILE} <<EOF
+init_d=$init_d
+init_e=$init_e
+init_epsilon=$init_epsilon
+EOF
+
+(
+echo "C0=${C0}"
+if [[ $INDC = [yYiI]* ]]
+then
+    for p in $icp
+    do
+	if [[ $(eval echo \$init_$p) = C* ]]
+	then
+		continue
+	fi
+	[[ $(eval echo \$${p}_fixed) = [yYiI]* ]] && echo "$p = $(eval echo \$init_$p) # FIXED" || echo "$p = $(eval echo \$init_$p)"
+    done
+elif [[ $HEX = "yes" ]]
+then
+    [[ $a1_fixed = [yYiI]* ]] && echo "a1 = $init_a1 # FIXED" || echo "a1 = $init_a1"
+    [[ $a2_fixed = [yYiI]* ]] && echo "a2 = $init_a2 # FIXED" || echo "a2 = $init_a2"
+else
+    [[ $a_fixed = [yYiI]* ]] && echo "a = $init_a # FIXED" || echo "a = $init_a"
+fi
+[[ $b_fixed = [yYiI]* ]] && echo "b = $init_b # FIXED" || echo "b = $init_b"
+[[ $c_fixed = [yYiI]* ]] && echo "c = $init_c # FIXED" || echo "c = $init_c"
+[[ $d_fixed = [yYiI]* ]] && echo "d = $init_d # FIXED" || echo "d = $init_d"
+[[ $de_fixed != [yYiI]* && $e_fixed = [yYiI]* ]] && echo "e = $init_e # FIXED" || echo "e = $init_e"
+[[ $epsilon_fixed = [yYiI]* ]] && echo "epsilon = $init_epsilon # FIXED" || echo "epsilon = $init_epsilon"
+) > tmp/$$.fit-init
+
+if [[ $FIT_DEBUG = yes ]]
+then
+    fecho "The initial values of the parameters:"
+    cat tmp/$$.fit-init >>$LOGFILE
+    cat tmp/$$.fit-init
+    fecho
+fi
+
+if [[ $INDC = [yYiI]* ]]
+then
+    VIASTR="C_0"
+    for p in $icp
+    do
+	if [[ $p != C_0 ]]
+	then
+	    VIASTR="${VIASTR}, $p"
+	fi
+    done
+    VIASTR="${VIASTR}, b, c, d, e, epsilon"
+elif [[ $HEX = "yes" ]]
+then
+    VIASTR="a1, a2, b, c, d, e, epsilon"
+else
+    VIASTR="a, b, c, d, e, epsilon"
+#   VIASTR="a, b, c, d, e, f, g, h"
+fi
+
+if [[ $INDC = [yYiI]* ]]
+then
+    for p in $icp
+    do
+	if [[ $(eval echo \$${p}_fixed) = [yYiI]* || $(eval echo \$init_$p) = C* ]]
+	then
+	    VIASTR=$(echo ${VIASTR}|sed -e "s/${p}, //")
+	fi
+    done
+elif [[ $HEX = "yes" ]]
+then
+    [[ $a1_fixed = [yYiI]* ]] && VIASTR=${VIASTR:s/a1, //}
+    [[ $a2_fixed = [yYiI]* ]] && VIASTR=${VIASTR:s/a2, //}
+else
+    [[ $a_fixed = [yYiI]* ]] && VIASTR=${VIASTR:s/a, //}
+fi
+[[ $b_fixed = [yYiI]* ]] && VIASTR=${VIASTR:s/b, //}
+[[ $c_fixed = [yYiI]* ]] && VIASTR=${VIASTR:s/c, //}
+[[ $d_fixed = [yYiI]* ]] && VIASTR=${VIASTR:s/d, //}
+if [[ $de_fixed = [yYiI]* || $e_fixed = [yYiI]* ]]
+then
+	VIASTR=${VIASTR:s/e, //}
+fi
+if [[ $epsilon_fixed = [yYiI]* ]]
+then
+	VIASTR=${VIASTR:s/epsilon, //}
+	VIASTR=${VIASTR:s/, epsilon//}
+fi
+
+if [[ $ONLY_FOURIER != "yes" ]]
+then
+    initialize "Do you want to fit the intensity profiles instead of the Fourier Transforms? " INT_FIT
+fi
+
+if test -f /proc/cpuinfo && ( grep -iq 'processor.*:.*1' /proc/cpuinfo || grep -iq 'model name.*:.*Dual Core Processor' /proc/cpuinfo )
+then
+    use_threads="y"
+else
+    use_threads="n"
+fi
+
+if [[ $INT_FIT = [yYiI]* ]]
+then
+    use_threads="n"
+else
+    initialize "Do you want to use parallel computing using threads? " use_threads
+fi
+
+if [[ $use_threads = [yYiI]* ]]
+then
+    SMP_DEF="use_threads=1"
+else
+    SMP_DEF=""
+fi
+
+fit-message
+initialize 'Please specify the limit for stopping> ' FIT_LIMIT
+initialize 'Please specify the maximal number of iterations (0 means unlimited)> ' FIT_MAXITER
+
+(
+echo "NO_SIZE_EFFECT=${NO_SIZE_EFFECT}"
+echo "SF_ELLIPSOIDAL=${SF_ELLIPSOIDAL}"
+echo "INT_FIT=${INT_FIT}"
+echo "FIT_LIMIT=${FIT_LIMIT}"
+echo "FIT_MAXITER=${FIT_MAXITER}"
+) >${QINIFILE}
+
+rm -f tmp/$$.gnu
+
+cp tmp/$$.fit-init tmp/$$.gnu
+
+if [[ $SFNAME = "no_sf" ]]
+then
+    cat << EOF >> tmp/$$.gnu
+FIT_LIMIT = ${FIT_LIMIT}
+FIT_MAXITER = ${FIT_MAXITER}
+
+num_r=${num_r}
+
+EOF
+else
+    cat << EOF >> tmp/$$.gnu
+FIT_LIMIT = ${FIT_LIMIT}
+FIT_MAXITER = ${FIT_MAXITER}
+show_size_parameters=1
+
+num_r=${num_r}
+
+EOF
+fi
+
+echo "${i_s0}" >> tmp/$$.gnu
+echo "${s0}" >> tmp/$$.gnu
+echo "${g2}" >> tmp/$$.gnu
+
+if [[ $HEX = "yes" ]]
+then
+    echo "${h21}" >> tmp/$$.gnu
+    echo "${h22}" >> tmp/$$.gnu
+    echo >> tmp/$$.gnu
+    echo "hexagonal_crystal=1" >> tmp/$$.gnu
+else
+    echo "${h2}" >> tmp/$$.gnu
+    if [[ $MAXH2 != 0 ]]
+    then
+        echo "maxa=1.0/$MAXH2" >> tmp/$$.gnu
+    fi
+fi
+
+if [[ $SFNAME = "no_sf" ]]
+then
+    echo "size_effect_disabled=1" >> tmp/$$.gnu
+    echo >> tmp/$$.gnu
+fi
+
+if [[ $SF_ELLIPSOIDAL = [yYiI]* ]]
+then
+    echo "${anx}" >> tmp/$$.gnu
+    echo "anisotropy_enabled=1" >> tmp/$$.gnu
+fi
+
+if [[ $INT_FIT = [yYiI]* ]]
+then
+    cat << EOF >> tmp/$$.gnu
+
+fit_function(x)=theoretical_if(x)
+use_theoretical_if=1
+
+EOF
+else
+    cat << EOF >> tmp/$$.gnu
+
+fit_function(x)=theoretical_ft(x)
+use_theoretical_ft=1
+
+EOF
+fi
+
+if [[ $INDC = [yYiI]* ]]
+then
+    cat << EOF >> tmp/$$.gnu
+use_individual_contrast_factors=1
+EOF
+fi
+
+cat << EOF >> tmp/$$.gnu
+#p=0.05
+#warren_constants(x)=${wk}
+
+${SMP_DEF}
+mwp_init
+EOF
+
+if [[ $INT_FIT = [yYiI]* ]]
+then
+
+    if [[ ! -z ${DISPLAY} ]]
+    then
+	cat << EOF >> tmp/$$.gnu
+
+set terminal x11
+EOF
+    else
+	cat << EOF >> tmp/$$.gnu
+
+set terminal dumb
+EOF
+    fi
+
+    cat << EOF >> tmp/$$.gnu
+set title "${1%%.dat}"
+set xlabel "K [1/nm]"
+set ylabel "Intensity"
+set key left top Left
+set samples 20000
+
+EOF
+    echo "${LABELCMDS2}" >> tmp/$$.gnu
+
+    if [[ ! -z ${DISPLAY} ]]
+    then
+	cat << EOF >> tmp/$$.gnu
+
+plot "${1%%.dat}.int.dat" using 1:2 title "measured data" with lines lt 1, theoretical_if(x) title "f(x)" with lines lt 2
+EOF
+    fi
+
+    cat << EOF >> tmp/$$.gnu
+
+fit fit_function(x) "${1%%.dat}.int.dat" using 1:2 via ${VIASTR}
+
+set terminal $GNUTERM
+set output "${1%%.dat}.int.ps"
+plot [] [1e-3:1.2] "${1%%.dat}.int.dat" using 1:2 title "measured data" with lines lt 2, theoretical_if(x) title "f(x)" with lines lt 1
+
+set logscale y
+replot
+
+set nolabel
+EOF
+#   echo "${PLOTCMDS2}" >> tmp/$$.gnu
+
+    cat << EOF >> tmp/$$.gnu
+
+set terminal table
+set nologscale
+set output "${1%%.dat}.int.th0.dat"
+plot [$INT1:$INT2] theoretical_if(x) notitle
+
+! ./lib/subtract ${1}
+
+EOF
+
+else
+
+    if [[ ! -z ${DISPLAY} ]]
+    then
+	cat << EOF >> tmp/$$.gnu
+
+set terminal x11
+EOF
+    else
+	cat << EOF >> tmp/$$.gnu
+
+set terminal dumb
+EOF
+    fi
+
+    cat << EOF >> tmp/$$.gnu
+set title "Fourier Transform of ${1%%.dat}"
+set xlabel "${lk}Frequency [nm]${lk}"
+set ylabel "${lk}Amplitude${lk}"
+set key left top Left
+set samples 20000
+
+EOF
+    echo "${LABELCMDS}" >> tmp/$$.gnu
+
+    if [[ ! -z ${DISPLAY} ]]
+    then
+	cat << EOF >> tmp/$$.gnu
+
+plot [0:$MAXOFFS] [1e-3:1.2] "${1%%.dat}.fourier.dat" using 1:4 title "measured data" with lines lt 1, fit_function(x) title "f(x)" with lines lt 2
+EOF
+    fi
+
+    cat << EOF >> tmp/$$.gnu
+
+fit fit_function(x) "${1%%.dat}.fourier.dat" using 1:4 via ${VIASTR}
+
+set terminal $GNUTERM
+set output "${1%%.dat}.fourier.ps"
+plot [0:$MAXOFFS] [1e-3:1.2] "${1%%.dat}.fourier.dat" using 1:4 title "measured data" with lines lt 2, fit_function(x) title "f(x)" with lines lt 1
+${LOGSCALE_SP}
+
+set nolabel
+EOF
+#   echo "${PLOTCMDS}" >> tmp/$$.gnu
+
+    cat << EOF >> tmp/$$.gnu
+
+set terminal table
+set nologscale
+set output "${1%%.dat}.fourier.th0.dat"
+plot [0:$MAXOFFS] [1e-3:1.2] fit_function(x) notitle
+
+set nokey
+set nolabel
+set nologscale
+
+set terminal $GNUTERM
+set output "${1%%.dat}.int.ps"
+
+set title "${1%%.dat}"
+set xlabel "K [1/nm]"
+set ylabel "Intensity"
+set key left top Left
+set samples 20000
+EOF
+
+    echo "${LABELCMDS2}" >> tmp/$$.gnu
+
+    INT2=$(${AWK} 'BEGIN {max=0} $1>max {max=$1} END {print max}' "${1%%.dat}.int.dat")
+    INT1=$(${AWK} 'BEGIN {min='${INT2}'} $1<min {min=$1} END {print min}' "${1%%.dat}.int.dat")
+
+    if [[ $ONLY_FOURIER = "yes" ]]
+    then
+	cat << EOF >> tmp/$$.gnu
+
+! ./lib/subtract ${1}
+
+exit
+EOF
+    fi
+
+    cat << EOF >> tmp/$$.gnu
+
+plot "${1%%.dat}.int.dat" using 1:2 title "measured data" with lines lt 1, theoretical_if(x) title "f(x)" with lines lt 2
+
+set logscale y
+replot
+
+set terminal table
+set nologscale
+set output "${1%%.dat}.int.th0.dat"
+plot [$INT1:$INT2] theoretical_if(x) notitle
+
+#${LOGSCALE_IF}
+
+set nolabel
+
+! ./lib/subtract ${1}
+
+print "CMWP_ALL_OK"
+
+EOF
+
+fi
+
+export SAMPLENAME=${1%%.dat}
+
+cp tmp/$$.gnu ${SAMPLENAME}.gnu
+
+:> $FIT_LOG
+if [[ $FIT_DEBUG = yes ]]
+then
+	rungnuplot-fit-debug 2>&1 | {trap "" INT USR1; tee $SAMPLENAME.gnuplot_out}
+else
+	rungnuplot-fit 2>&1 | {trap "" INT USR1; tee $SAMPLENAME.gnuplot_out}
+fi
+
+if ! grep -q 'CMWP_ALL_OK' ${SAMPLENAME}.gnuplot_out
+then
+    fecho
+    fecho "ERROR: the gnuplot command did not completed successfully, please check"
+    fecho "its output file for the details:"
+    cat ${SAMPLENAME}.gnuplot_out >>$LOGFILE
+    cat ${SAMPLENAME}.gnuplot_out
+    fecho
+fi
+
+cp $FIT_LOG ${1%%.dat}.fourier.sol
+
+if [[ ! -s $FIT_LOG ]]
+then
+    fecho
+    zero-size-message
+elif grep -q 'BREAK:' $FIT_LOG
+then
+    fecho
+    break-message
+    grep 'BREAK:' $FIT_LOG >>$LOGFILE
+    grep 'BREAK:' $FIT_LOG
+else
+
+if grep -q "Singular matrix in Invert_RtR" $FIT_LOG 
+then
+    grep "Singular matrix in Invert_RtR" $FIT_LOG >>$LOGFILE
+    fecho
+    singular-message
+fi
+
+if [[ $HEX = "yes" ]]
+then
+    grep '^[abcdek][ 12]*=' ${1%%.dat}.fourier.sol|tail -6|sed -e 's/ *//g' -e 's/[+/].*$//g' > ${1%%.dat}.int-abcde.sol
+else
+    grep '^[abcdek][ 12]*=' ${1%%.dat}.fourier.sol|tail -5|sed -e 's/ *//g' -e 's/[+/].*$//g' > ${1%%.dat}.int-abcde.sol
+#    grep '^[abcdefgh][ ]*=' ${1%%.dat}.fourier.sol|tail -8|sed -e 's/ *//g' -e 's/[+/].*$//g' > ${1%%.dat}.int-abcdefgh.sol
+#    . ./${1%%.dat}.int-abcdefgh.sol
+#    rm -f ${1%%.dat}.int-abcdefgh.sol
+fi
+
+if [[ $SF_ELLIPSOIDAL = [yYiI]* ]]
+then
+    grep '^epsilon *=' ${1%%.dat}.fourier.sol|tail -1|sed -e 's/ *//g' -e 's/[+/].*$//g' >> ${1%%.dat}.int-abcde.sol
+fi
+
+. ./${1%%.dat}.int-abcde.sol
+rm -f ${1%%.dat}.int-abcde.sol
+
+if [[ $HEX = "yes" ]]
+then
+    [[ $a1_fixed = [yYiI]* ]] && a1=$init_a1
+    [[ $a2_fixed = [yYiI]* ]] && a2=$init_a2
+else
+    [[ $a_fixed = [yYiI]* ]] && a=$init_a
+fi
+[[ $b_fixed = [yYiI]* ]] && b=$init_b
+[[ $c_fixed = [yYiI]* ]] && c=$init_c
+[[ $d_fixed = [yYiI]* ]] && d=$init_d
+[[ $e_fixed = [yYiI]* ]] && e=$init_e
+[[ $de_fixed = [yYiI]* ]] && e=$(echo|${AWK} "{print ($de)/($d)}")
+[[ $epsilon_fixed = [yYiI]* ]] && epsilon=$init_epsilon
+c=$(echo $c|${AWK} '{print sqrt($1*$1)}')
+d=$(echo $d|${AWK} '{print sqrt($1*$1)}')
+e=$(echo $e|${AWK} '{print sqrt($1*$1)}')
+epsilon=$(echo $epsilon|${AWK} '{print sqrt($1*$1)}')
+
+if [[ $ONLY_FOURIER = "yes" ]]
+then
+    MAXIFWHM=$(echo $sf_d|${AWK} '{print 1.0/($1)}')
+fi
+
+cat << EOF > tmp/$$.gnu
+b=$b
+c=$c
+
+sf_precision = ${SF_PRECISION}
+fct_ul=25.0*${MAXIFWHM}
+fct_n=${FCT_SAMPLES}
+fct_function(x)=${SFNAME}(x)
+fct_param0(x)=b
+fct_param1(x)=c
+fct_normalized=1
+
+fct_calculate_fwhm=1
+sf_fwhm_fourier_int1=0.8
+sf_fwhm_function(x)=${SFNAME}(x)
+sf_fwhm_ul=15
+sf_fwhm_fourier_function(x)=fct(x)
+print sf_fwhm(2.0)
+fct_reset
+EOF
+sfparams=( $(rungnuplot 2>&1) )
+
+sf_D=$sfparams[1]
+
+m=$(echo $b|${AWK} '{print exp($1)}')
+sigma=$(echo $c|${AWK} '{print $1/sqrt(2)}')
+rho=$(echo $bb $d|${AWK} '{print 2/(3.1415926535*$1*$1*$2*$2)}')
+Re=$(echo $e|${AWK} '{print 0.38940039153570243412/$1}')
+M=$(echo $Re $rho|${AWK} '{print $1*sqrt($2)}')
+sf_d=$(echo|${AWK} "{print 0.75*exp($b+1.75*$c*$c)}")
+sf_L0=$(echo|${AWK} "{print (2.0/3.0)*exp($b+1.25*$c*$c)}")
+
+fecho "The solutions:"
+if [[ $INDC != [yYiI]* ]]
+then
+	if [[ $HEX = "yes" ]]
+	then
+	    fecho "a1=$a1"
+            fecho "a2=$a2"
+	else
+	    fecho "a=$a"
+	fi
+fi
+fecho "b=$b"
+fecho "c=$c"
+fecho "d=$d"
+fecho "e=$e"
+if [[ $SF_ELLIPSOIDAL = [yYiI]* ]]
+then
+    fecho "epsilon=$epsilon"
+fi
+#fecho "f=$f"
+#fecho "g=$g"
+#fecho "h=$h"
+fecho
+fecho "m=exp(b)=${m}nm"
+fecho "sigma=c/sqrt(2)=$sigma"
+fecho "d=${sf_d}nm"
+fecho "L0=${sf_L0}nm"
+if [[ $SF_ELLIPSOIDAL = [yYiI]* ]]
+then
+    fecho "epsilon=$epsilon"
+fi
+fecho
+if [[ $INDC != [yYiI]* ]]
+then
+	if [[ $HEX = "yes" ]]
+	then
+	    fecho "a1=$a1"
+	    fecho "a2=$a2"
+	else
+	    fecho "q=a=$a"
+	fi
+fi
+fecho "rho=2/(Pi*(${bb}nm*d)**2)=${rho}(1/nm)^2"
+fecho "Re^*=exp(-1/4)/(2*e)=${Re}nm"
+fecho "M^*=(Re^*)*sqrt(rho)=$M"
+fecho
+
+egrep '(^After.*converged.|^Maximum iteration count.*stopped.)' ${1%%.dat}.fourier.sol >>$LOGFILE
+egrep '(^After.*converged.|^Maximum iteration count.*stopped.)' ${1%%.dat}.fourier.sol
+grep '^final sum' ${1%%.dat}.fourier.sol >>$LOGFILE
+grep '^final sum' ${1%%.dat}.fourier.sol
+grep '^rel. change' ${1%%.dat}.fourier.sol >>$LOGFILE
+grep '^rel. change' ${1%%.dat}.fourier.sol
+fecho "Final set of parameters            Asymptotic Standard Error "
+fecho "=======================            =========================="
+fecho
+grep '+/-' $FIT_LOG >>$LOGFILE
+grep '+/-' $FIT_LOG
+if grep -q "Singular matrix in Invert_RtR" $FIT_LOG 
+then
+    grep "Singular matrix in Invert_RtR" $FIT_LOG >>$LOGFILE
+    fecho
+    singular-message
+fi
+fecho
+fecho "For more information about correlation matrix and confidence intervals,"
+fecho "please read the file ${1%%.dat}.fourier.sol."
+fecho
+
+if [[ $ONLY_FOURIER = "yes" ]]
+then
+    cp lib/picture_not_available.ps ${1%%.dat}.int.ps
+fi
+
+(gs -q -dNOPAUSE -dNO_PAUSE -sDEVICE=ppmraw -r72 -sOutputFile=- ${1%%.dat}.fourier.ps -c quit|pnmrotate -90|ppmtojpeg) 2>/dev/null >${1%%.dat}.fourier.jpg
+
+# (gs -q -dNOPAUSE -dNO_PAUSE -sDEVICE=ppmraw -r72 -sOutputFile=- ${1%%.dat}.int.ps -c quit|pnmrotate -90|ppmtojpeg) 2>/dev/null >${1%%.dat}.int.jpg
+
+echo "Plotting the Fourier Spectrum and the fitted curves."
+
+q="n"
+initialize "Do you want to print/view this figure? " q
+[[ $q = [yYiI]* ]] && psprint ${1%%.dat}.fourier.ps
+echo
+
+if [[ $ONLY_FOURIER != "yes" ]]
+then
+    echo "Plotting the Intensity Function and the Inverse Fourier Transform\nof the fitted curve."
+
+    q="n"
+    initialize "Do you want to print/view this figure? " q
+    [[ $q = [yYiI]* ]] && psprint ${1%%.dat}.int.ps
+    echo
+fi
+
+fi
+
+fecho
+fecho "*** END OF FITTING ***"
+echo
+
+q="n"
+initialize "Do you want to print/view the solutions? " q
+[[ $q = [yYiI]* ]] && asciiprint ${1%%.dat}.sol
+
+q="n"
+initialize "Do you want to print/view the statistical informations (from gnuplot)? " q
+if [[ $q = [yYiI]* ]]
+then
+    asciiprint ${1%%.dat}.fourier.sol
+fi
+
+echo
+
+MAKECLEAN="no"
+export MAKECLEAN
+
+q="y"
+initialize "Do you want to save the results and calculated data? " q
+[[ $q = [yYiI]* ]] && ./lib/saveresults $1
+
+q="n"
+initialize "Do you want to cleanup the new files? " q
+[[ $q = [yYiI]* ]] && ./makeclean
+
+rm -f tmp/$$.gnu tmp/$$.fit-init
+exit 0
+
+fi # $MWP = "yes"

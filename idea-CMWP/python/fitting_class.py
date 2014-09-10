@@ -33,7 +33,9 @@ class cmwp_fit:
         self.header = ""
         ptrn_i = rings.pattern_i + rings.delta_pattern
         ptrn_f = rings.pattern_f + rings.delta_pattern
-        n_ptrn = (ptrn_f - ptrn_i) / rings.delta_pattern
+        ptrn_por_spr = (ptrn_f + 1 - ptrn_i) / rings.delta_pattern
+        spr_total = (rings.spr_f + 1 - rings.spr_i) / rings.delta_spr
+        ptrn_total = ptrn_por_spr * spr_total
         n_bad_fit = 0
         bad_fit = 0
         result = numpy.zeros((n_sol_variables, 3))
@@ -41,11 +43,14 @@ class cmwp_fit:
         fp_log.write("IDEA CMWP\nERROR LOG FILE\n%s\n\n" % time.strftime("%d/%m/%Y %I:%M:%S"))
 
         for spr in range(rings.spr_i, rings.spr_f + 1, rings.delta_spr):
-            print("Processing spr %d" % spr)
+            n = (spr - rings.spr_i) / rings.delta_spr
+            print("Processing spr %d of %d" % (n, spr_total))
             for pattern in range(ptrn_i, ptrn_f, rings.delta_pattern):
                 n = (pattern - ptrn_i) / rings.delta_pattern
-                if (n % 5 == 0):
-                    print "pattern %d of %d (%.2f %%)" % (n, n_ptrn, float(n) / n_ptrn)
+                if (n % 10 == 0):
+                    print("pattern %d of %d" % (n, ptrn_por_spr))
+                    n_previos = ptrn_por_spr * (spr - 1)
+                    print("%.2f %% completed" % (float(n_previos + n) / ptrn_total * 100.))
                 if(flag == 1):
                     # soluciones fisicas del problema
                     (physsol_file, bad_fit, result) = update_params(files, rings, spr, pattern, flag, find, bad_fit, result)
