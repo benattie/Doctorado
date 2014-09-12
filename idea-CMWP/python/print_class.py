@@ -87,7 +87,8 @@ def organize_files(files):
         if datafile.startswith(files.input_file):
             move(datafile, folder)
     # me voy a la carpeta con todos los resultados del ajuste
-    chdir(files.results_folder)
+    results = files.results_folder + files.pathout
+    chdir(results)
     folder = "cmwp_idea_fit_files"
     call(["mkdir", folder])
     source = listdir("./")

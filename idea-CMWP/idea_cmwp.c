@@ -297,7 +297,6 @@ int main(int argc, char ** argv)
     printf("\nFinished extracting pole figure data\n");
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     t2 = time(&t2);
-
     printf("\nBegin CMWP routine\n");
     char cmd[100], do_run[2];
     if(argc < 2)// si no le pase el dato por linea de comandos lo tomo de pantalla
@@ -347,7 +346,6 @@ int main(int argc, char ** argv)
     strcat(buf, buf_temp);
     printf("%s", buf);
     fprintf(fp_log, "%s", buf);
-
     time_spent = difftime(t3, t2);
     sprintf(buf, "---------------------------------------------\n");
     sprintf(buf_temp, "Tiempo de ejecucion total de la rutina CMWP: %.2lf segundos\n", time_spent);
@@ -361,7 +359,6 @@ int main(int argc, char ** argv)
     printf("%s", buf);
     fprintf(fp_log, "%s", buf);
     fclose(fp_log);
-
     sprintf(buf, "cp errors.log fit_results.log %scmwp_idea_files", path_out);
     rv = system(buf);
     puts("Programa finalizado.\nConsulte los archivos fit_results.log y errors.log para ver detalles sobre los ajustes");
