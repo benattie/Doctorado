@@ -13,22 +13,19 @@
 #include "read_files.c"
 //#include "interpolate.c"
 
-struct DAT {float old; float nnew;};
-
 int main(int argc, char ** argv)
 {
-    struct DAT intensss;
     FILE *fp, *fp1, *fp_fit, *fp_log;
     char buf_temp[1024], buf[2048], buf1[1024], path_out[1024], filename1[1024], path1[1024], inform1[1024], marfile[1024];
     char *getval = malloc(sizeof(char) * (250 + 1)), resultsf[1024], path_base[1024], base_filename[1024], minus_zero[1];
-    static int del_gam, star_d;
-    int a, b, i, k, n, x, y, z, count, anf_gam, ende_gam, anf_ome, ende_ome, del_ome, rv;
+    static int del_gam, star_d, av_gam;
+    int a, b, i, k, n, x, y, z, count, anf_gam, ende_gam, anf_ome, ende_ome, del_ome, rv, exists;
     int BG_l, BG_r, end_d, del_d, numrings, posring_l[15], posring_r[15], ug_l[15], ug_r[15];
-    int pixel_number, gamma, seeds_size, bg_size, data[2500], intensity, miller[15];
-    float intens_av[1800], peak_intens_av[10], data1[2500], BG_m, intens[500][10];
-    float theta[20], th;
+    int pixel_number, gamma, seeds_size, bg_size, intensity, miller[15];
+    int ** data = matrix_int_alloc(500, 2500);
+    double av_intensity[10], av_pattern[2500], data1[2500], BG_m, theta[20], th;
     double pixel, dist, ** seeds, ** bg_seed, *dostheta = vector_double_alloc(15);
-    double ***sabo_inten = r3_tensor_double_alloc(40, 500, 10);
+    double ***sabo_inten = r3_tensor_double_alloc(40, 500, 10), ** intens = matrix_double_alloc(500, 10);
     double ***fit_inten = r3_tensor_double_alloc(40, 500, 10), ***fit_inten_err = r3_tensor_double_alloc(40, 500, 10);
     double ***fwhm = r3_tensor_double_alloc(40, 500, 10), ***fwhm_err = r3_tensor_double_alloc(40, 500, 10);
     double ***eta = r3_tensor_double_alloc(40, 500, 10), ***eta_err = r3_tensor_double_alloc(40, 500, 10);
@@ -92,6 +89,8 @@ int main(int argc, char ** argv)
     getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &ende_ome); getval = fgets(buf_temp, 2, fp);
     //gamma inicial
     getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &anf_gam); getval = fgets(buf_temp, 2, fp);
+    //cuantos difractogramas del anillo de deby se promedian
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &av_gam); getval = fgets(buf_temp, 2, fp);
     //delta gamma
     getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &del_gam); getval = fgets(buf_temp, 2, fp);
     //gamma final
@@ -104,7 +103,7 @@ int main(int argc, char ** argv)
     //Distancia que cubre un pixel en el difractograma
     getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%lf", &pixel); getval = fgets(buf_temp, 2, fp);
     //umbral que determinal cual es la intensidad minima para que ajusto un pico
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%f", &th); getval = fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%lf", &th); getval = fgets(buf_temp, 2, fp);
     //flag que determina si las cuentas negativas se pasan a 0
     getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", minus_zero); getval = fgets(buf_temp, 2, fp); 
     //skip lines
@@ -119,7 +118,7 @@ int main(int argc, char ** argv)
     for(i = 0; i < numrings; i++) //itera sobre cada pico (0 a 7) -> (1 a 8)
     {
       rv = fscanf(fp, "%d", &miller[i]);
-      rv = fscanf(fp, "%f", &theta[i]); //posicion angular del centro del pico (\theta)
+      rv = fscanf(fp, "%lf", &theta[i]); //posicion angular del centro del pico (\theta)
       rv = fscanf(fp, "%d", &posring_l[i]); //bin a la izquierda del pico
       rv = fscanf(fp, "%d", &posring_r[i]); //bin a la derecha del pico
       rv = fscanf(fp, "%d", &ug_l[i]); //bin de bg a la izquierda del pico
@@ -132,6 +131,12 @@ int main(int argc, char ** argv)
     for(i = 0; i < numrings; i++)
         printf("Position of [%d]ring = Theta:%6.3f  %8d%8d%8d%8d\n", i + 1, theta[i], posring_l[i], posring_r[i], ug_l[i], ug_r[i]);
     fclose(fp);
+    // control de que los parametros esten bien ingresados
+    if(av_gam > del_gam)
+    {
+        fprintf(stderr, "Error: Average Gamma > Delta Gamma\n");
+        exit(2);
+    }
     // End of reading the parameter file
     //////////////////////////////////////////////////////////////////////////
     //Reading of initial parameters
@@ -217,8 +222,6 @@ int main(int argc, char ** argv)
         rv = fscanf(fp1, "%d", &gamma); //gamma = cantidad de difractogramas (360 en este caso)
         getval = fgets(buf, 100, fp1); //skip line
 
-        memset(intens_av, 0, 1800 * sizeof(float));
-        memset(peak_intens_av, 0, 10 * sizeof(float));
         for(n = 0; n < numrings; n++)//error handler para cuando tenga un bad_fit en el caso spr=1 y gamma=1
         {
             sabo_inten[0][0][n] = -1;
@@ -233,14 +236,14 @@ int main(int argc, char ** argv)
         }
         //Data Read-In
         //printf("Data Read-in\n");
-        for(y = 1; y <= gamma; y++) //itero sobre todos los difractogramas (360) (recorro el anillo de Debye)
+        exists = 0;
+        for(y = 0; y <= gamma; y++) //itero sobre todos los difractogramas (360) (recorro el anillo de Debye)
         {
             for(x = 1; x <= pixel_number; x++) //iteracion dentro de cada uno de los difractogramas (con 1725 puntos) (cada porcion del anillo de Debye)
             {
                 //leo la intensidad de cada bin y la paso a formato de entero
-                rv = fscanf(fp1, "%e", &data1[x]);
-                intens_av[x] += data1[x];
-                data[x] = (int)data1[x];
+                rv = fscanf(fp1, "%le", &data1[x]);
+                data[y][x] = (int)data1[x];
             }
             n = 0; //numero de pico del difractograma
             do //itero sobre todos los picos del difractograma
@@ -251,44 +254,40 @@ int main(int argc, char ** argv)
                 a = ug_l[n]; 
                 b = ug_r[n];
                 //valor de background correspondiente al bin del pico adecuado del difractograma correspondiente
-                BG_l = data[a];
-                BG_r = data[b];
+                BG_l = data[y][a];
+                BG_r = data[y][b];
                 //background promedio
                 BG_m = ((BG_l + BG_r) / 2.);
 
                 for(z = posring_l[n]; z <= posring_r[n]; z++) //integro el pico
                 { 
                     count++;
-                    intensss.nnew = data[z];
-                    intensity += intensss.nnew;
+                    intensity += data[y][z];
                 }
-                intens[y][n] = (intensity / count) - BG_m;  // Integral values and BG correction
-                if(intens[y][n] >= 0) 
-                    peak_intens_av[n] += intens[y][n];
+                intens[y][n] = ((double)intensity / count) - BG_m;  // Integral values and BG correction
+                if(intens[y][n] < 0) intens[y][n] = 0;
                 n++;
             }
             while(n < numrings);
             //fiteo del difractograma para la obtencion del ancho de pico y eta
-            if((y % del_gam) == 0)
+            if((y + 1) % del_gam == 0)
             {
-                int exists = 1;
-                if(y == del_gam) exists = 0; //pregunto si este es el primer archivo con el que estoy trabajando
-                average(intens_av, peak_intens_av, del_gam, pixel_number, numrings);
+                memset(av_pattern, 0, 2500 * sizeof(double));
+                memset(av_intensity, 0, 10 * sizeof(double));
+                average(data, intens, y, av_gam, pixel_number, numrings, av_pattern, av_intensity);
                 //guardo las intensidades calculadas a partir del algoritmo de Sang-Bon Yi
                 for(n = 0; n < numrings; n++)
-                    sabo_inten[k][y][n] = peak_intens_av[n];
+                    sabo_inten[k][y][n] = av_intensity[n];
                 //structure holding syncrotron's information
                 exp_data sync_data = {path_out, filename1, dist, pixel, pixel_number};
                 //structure holding difractograms and fitting information
                 err_fit_data fit_errors = {fit_inten_err, fwhm_err, eta_err, breadth_err};
                 peak_shape_data shapes = {fwhm, eta, breadth};
-                peak_data difra = {numrings, bg_size, k, star_d, y, del_gam, th, miller, dostheta, data1, bg_seed, fit_inten, &shapes, &fit_errors};
+                peak_data difra = {numrings, bg_size, k, star_d, y + 1, del_gam, th, miller, dostheta, av_pattern, bg_seed, fit_inten, &shapes, &fit_errors};
                 //Int, fwhm & eta fitting
-                pv_fitting(exists, &sync_data, &difra, peak_intens_av, seeds);
-                memset(intens_av, 0, 1800 * sizeof(float));
-                memset(peak_intens_av, 0, 10 * sizeof(float));
-            }
-            //if((y % del_gam) == 0) printf("Fin (%d %d)\n", k, y);
+                pv_fitting(exists, &sync_data, &difra, av_pattern, seeds);
+                exists = 1;
+            }//if((y % del_gam) == 0) printf("Fin (%d %d)\n", k, y);
         }//end of for routine for(y = 1; y <= gamma; y++)
         fclose(fp1);
         k += del_d; //paso al siguiente spr
@@ -320,6 +319,8 @@ int main(int argc, char ** argv)
     t3 = time(&t3);
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     printf("Free allocated memory\n");
+    free_int_matrix(data, 500);
+    free_double_matrix(intens, 500);
     free_double_matrix(seeds, 2);
     free_double_matrix(bg_seed, 2);
     free(dostheta);

@@ -44,7 +44,7 @@ def update_params(files, rings, spr, pattern, flag, find, bad_fit, fit_result):
                                                                   spr, pattern)
         else:
             error = 0
-            n_steps = 1
+            # n_steps = 1
             # print "Paso %d" % n_steps
             # n_steps += 1
             # error = step_1(files, rings, spr, pattern, flag, find)

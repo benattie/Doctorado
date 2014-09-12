@@ -1,8 +1,8 @@
 #include "aux_functions.h"
 //Funciones de transformacion angular. De coordenadas de maquina (omega, gamma) a coordenadas de figura de polos (alpha, beta)
-float winkel_al(float th, float om, float ga)
+double winkel_al(double th, double om, double ga)
 {
-    float   al, rad, chi, phi;
+    double   al, rad, chi, phi;
     double  omr, gar, thr, phir, chir;
     double  COSAL;
 
@@ -19,13 +19,13 @@ float winkel_al(float th, float om, float ga)
      COSAL=(((-1 * cos(omr) * sin(phir)) - (sin(omr) * cos(phir) * cos(chir))) * (-1 * sin(thr)))
        + ((-1 * sin(omr) * sin(phir)) + (cos(omr) * cos(phir) * cos(chir))) * (cos(thr) * cos(gar));
 
-     al = (float)(acos(COSAL)) / rad;
+     al = (double)(acos(COSAL)) / rad;
      return (al);
 }
 
-float winkel_be(float thb, float omb, float gab, float alb)
+double winkel_be(double thb, double omb, double gab, double alb)
 {
-    float   be, rad_be, chi_be, phi_be;
+    double   be, rad_be, chi_be, phi_be;
     double  thbr, ombr, gabr, albr, phibr, chibr;
     double  SINALCOSBE, COSBE, SINALSINBE, SINBE;
     
@@ -61,9 +61,9 @@ float winkel_be(float thb, float omb, float gab, float alb)
     }
 
     if(SINBE < 0)
-        be = (float) 360 - (acos(COSBE) / rad_be);
+        be = (double) 360 - (acos(COSBE) / rad_be);
     else
-        be = (float) acos(COSBE) / rad_be;
+        be = (double) acos(COSBE) / rad_be;
 
     if((omb == 0) && (be > 270.0))
         be = 360 - be;
@@ -180,7 +180,7 @@ void check(gsl_vector * y, double ** seeds, int seeds_size, int n_peaks, double 
 }
 
 //Esta funcion revisa si hay elementos de intens que esten por debajo de treshold y devuelve el numero de picos que efectivamente tiene el difractograma.
-int check_for_null_peaks(float treshold, int numrings, int * zero_peak_index, float * intens)
+int check_for_null_peaks(double treshold, int numrings, int * zero_peak_index, double * intens)
 {
     int i;
     int n_zero = 0, n_peaks;
@@ -240,14 +240,20 @@ void set_seeds_back(int size, int * zero_peak_index, int exists, double ** seeds
     }
 }
 
-void average(float * intens_av, float * peak_intens_av, int n_av, int size, int numrings)
+void average(int ** data, double ** intens, int gamma, int n_av, int size, int numrings, double * av_pattern, double * av_intensity)
 {
-    int i;
+    int i, j;
+    for(i = gamma - n_av + 1; i <= gamma; i++)
+        for(j = 0; j < size; j++)
+            av_pattern[j] += data[i][j];
     for(i = 0; i < size; i++)
-        intens_av[i] /= n_av;
+        av_pattern[i] /= n_av;
 
+    for(i = gamma - n_av + 1; i <= gamma; i++)
+        for(j = 0; j < numrings; j++)
+            av_intensity[j] += intens[i][j];
     for(i = 0; i < numrings; i++)
-        peak_intens_av[i] /= n_av;
+        av_intensity[i] /= n_av;
 }
 
 void solver_iterator(int * status, gsl_multifit_fdfsolver * s, const gsl_multifit_fdfsolver_type * T)

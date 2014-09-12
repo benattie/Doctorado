@@ -43,13 +43,13 @@ class cmwp_fit:
         fp_log.write("IDEA CMWP\nERROR LOG FILE\n%s\n\n" % time.strftime("%d/%m/%Y %I:%M:%S"))
 
         for spr in range(rings.spr_i, rings.spr_f + 1, rings.delta_spr):
-            n = (spr - rings.spr_i) / rings.delta_spr
+            n = (spr - rings.spr_i) / rings.delta_spr + 1
             print("Processing spr %d of %d" % (n, spr_total))
             for pattern in range(ptrn_i, ptrn_f, rings.delta_pattern):
                 n = (pattern - ptrn_i) / rings.delta_pattern
-                if (n % 10 == 0):
+                if (n % 5 == 0):
                     n_previos = ptrn_por_spr * (spr - 1)
-                    print("pattern %d of %d (%.2f %% completed)" % (n, ptrn_por_spr, float(n_previos + n) / ptrn_total * 100.))
+                    print("\rpattern %d of %d (%.2f %% completed)" % (n, ptrn_por_spr, float(n_previos + n) / ptrn_total * 100.)),
                 if(flag == 1):
                     # soluciones fisicas del problema
                     (physsol_file, bad_fit, result) = update_params(files, rings, spr, pattern, flag, find, bad_fit, result)
@@ -74,6 +74,7 @@ class cmwp_fit:
                     for i in range(0, n_sol_variables):
                         self.sol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern - 1][i] = result[i][0]
                         self.solerr[spr / rings.delta_spr - 1][pattern / rings.delta_pattern - 1][i] = result[i][1]
+            print("")
         if(flag == 1):
             print "\n*******************************"
             print "*******************************\n"

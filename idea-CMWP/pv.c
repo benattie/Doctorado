@@ -8,7 +8,7 @@
 #include "aux_functions.h"
 #include "pv_steps.c"
 
-void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * intens, double ** seeds)
+void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double * intens, double ** seeds)
 {
     //printf("Inicio pv_fitting\n");
     //variables auxiliares del programa

@@ -23,11 +23,12 @@ class fit2d_data:
         self.delta_omega = int(cmwp_data[12][22:-1])
         self.omega_f = int(cmwp_data[13][22:-1])
         self.pattern_i = int(cmwp_data[14][22:-1])
-        self.delta_pattern = int(cmwp_data[15][22:-1])
-        self.pattern_f = int(cmwp_data[16][22:-1])
-        self.numrings = int(cmwp_data[25][22:-1])
+        self.avpattern = int(cmwp_data[15][22:-1])
+        self.delta_pattern = int(cmwp_data[16][22:-1])
+        self.pattern_f = int(cmwp_data[17][22:-1])
+        self.numrings = int(cmwp_data[26][22:-1])
         self.hkl = numpy.zeros(0)
         self.theta = numpy.zeros(0)
-        for lines in cmwp_data[28:]:
+        for lines in cmwp_data[29:]:
             self.hkl = numpy.append(self.hkl, int(lines.split()[0]))
             self.theta = numpy.append(self.theta, float(lines.split()[1]))
