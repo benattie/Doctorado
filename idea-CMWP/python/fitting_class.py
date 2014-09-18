@@ -3,6 +3,7 @@ import numpy
 import time
 import subprocess
 from fitting_strategy import update_params
+from sys import stdout
 
 
 class cmwp_fit:
@@ -33,8 +34,8 @@ class cmwp_fit:
         self.header = ""
         ptrn_i = rings.pattern_i + rings.delta_pattern
         ptrn_f = rings.pattern_f + rings.delta_pattern
-        ptrn_por_spr = (ptrn_f + 1 - ptrn_i) / rings.delta_pattern
-        spr_total = (rings.spr_f + 1 - rings.spr_i) / rings.delta_spr
+        ptrn_por_spr = (ptrn_f - ptrn_i) / rings.delta_pattern + 1
+        spr_total = (rings.spr_f - rings.spr_i) / rings.delta_spr + 1
         ptrn_total = ptrn_por_spr * spr_total
         n_bad_fit = 0
         bad_fit = 0
@@ -43,13 +44,14 @@ class cmwp_fit:
         fp_log.write("IDEA CMWP\nERROR LOG FILE\n%s\n\n" % time.strftime("%d/%m/%Y %I:%M:%S"))
 
         for spr in range(rings.spr_i, rings.spr_f + 1, rings.delta_spr):
-            n = (spr - rings.spr_i) / rings.delta_spr + 1
-            print("Processing spr %d of %d" % (n, spr_total))
+            n_spr = (spr - rings.spr_i) / rings.delta_spr + 1
+            n_previos = ptrn_por_spr * (n_spr - 1)
+            print("Processing spr %d of %d" % (n_spr, spr_total))
             for pattern in range(ptrn_i, ptrn_f, rings.delta_pattern):
                 n = (pattern - ptrn_i) / rings.delta_pattern
                 if (n % 5 == 0):
-                    n_previos = ptrn_por_spr * (spr - 1)
-                    print("\rpattern %d of %d (%.2f %% completed)" % (n, ptrn_por_spr, float(n_previos + n) / ptrn_total * 100.)),
+                    stdout.write("\r")
+                    stdout.write("pattern %d of %d (%2.2f %% completed)" % (n, ptrn_por_spr, float(n_previos + n) / ptrn_total * 100.))
                 if(flag == 1):
                     # soluciones fisicas del problema
                     (physsol_file, bad_fit, result) = update_params(files, rings, spr, pattern, flag, find, bad_fit, result)
@@ -74,7 +76,7 @@ class cmwp_fit:
                     for i in range(0, n_sol_variables):
                         self.sol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern - 1][i] = result[i][0]
                         self.solerr[spr / rings.delta_spr - 1][pattern / rings.delta_pattern - 1][i] = result[i][1]
-            print("")
+            stdout.write("\n")
         if(flag == 1):
             print "\n*******************************"
             print "*******************************\n"
