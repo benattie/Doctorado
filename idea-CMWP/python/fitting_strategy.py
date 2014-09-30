@@ -284,7 +284,7 @@ def step_2(files, rings, spr, pattern, flag, find):
     fit_ini = "%s%sspr_%d_pattern_%d%s.fit.ini" % (files.pathout, files.input_file, spr, pattern, files.ext)
     fp = open(fit_ini, "w")
     string = "init_a=%f\ninit_b=%f\ninit_c=%f\ninit_d=%f\ninit_e=%f\ninit_epsilon=%f\n" % (a, b, c, d, e, 1.00)
-    string += "a_fixed=n\nb_fixed=n\nc_fixed=y\nd_fixed=n\ne_fixed=y\nepsilon_fixed=y\n"
+    string += "a_fixed=n\nb_fixed=n\nc_fixed=y\nd_fixed=y\ne_fixed=y\nepsilon_fixed=y\n"
     string += "scale_a=1.0\nscale_b=1.0\nscale_c=1.0\nscale_d=1.0\nscale_e=1.0"
     fp.write(string)
     fp.close()

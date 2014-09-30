@@ -42,16 +42,24 @@ class cmwp_fit:
         result = numpy.zeros((n_sol_variables, 3))
         fp_log = open("errors.log", "a")
         fp_log.write("IDEA CMWP\nERROR LOG FILE\n%s\n\n" % time.strftime("%d/%m/%Y %I:%M:%S"))
+        start_time = time.time()
 
         for spr in range(rings.spr_i, rings.spr_f + 1, rings.delta_spr):
             n_spr = (spr - rings.spr_i) / rings.delta_spr + 1
             n_previos = ptrn_por_spr * (n_spr - 1)
+            sec = int(time.time() - start_time)  # tiempo de ejecucion (seg)
+            hour = int(sec / 3600)  # horas de ejecucion
+            sec = sec % 3600  # tiempo de ejecucion sin las horas
+            minute = int(sec / 60)  # minutos de ejecucion
+            sec = sec % 60  # segundos de ejecucion
             print("Processing spr %d of %d" % (n_spr, spr_total))
+            print("%d hours, %d min, %d sec elapsed" % (hour, minute, sec))
             for pattern in range(ptrn_i, ptrn_f, rings.delta_pattern):
                 n = (pattern - ptrn_i) / rings.delta_pattern
                 if (n % 5 == 0):
                     stdout.write("\r")
                     stdout.write("pattern %d of %d (%2.2f %% completed)" % (n, ptrn_por_spr, float(n_previos + n) / ptrn_total * 100.))
+                    stdout.flush()
                 if(flag == 1):
                     # soluciones fisicas del problema
                     (physsol_file, bad_fit, result) = update_params(files, rings, spr, pattern, flag, find, bad_fit, result)

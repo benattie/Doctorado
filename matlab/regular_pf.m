@@ -1,7 +1,7 @@
-% ayuda al uso de la funcion
+% rpf = regular_pf(pf, pf_start, pf_end, res_polar, res_azimuth)
 
-function rpf = regular_pf(pf, pf_start, pf_end)
-    reg_s2g =  S2Grid('regular', 'resolution', [5*degree 5*degree], 'antipodal');
+function rpf = regular_pf(pf, pf_start, pf_end, res_polar, res_azimuth)
+    reg_s2g =  S2Grid('regular', 'resolution', [res_polar * degree res_azimuth * degree], 'antipodal');
     [theta_q, rho_q] = polar(reg_s2g); % saco los angulos polares
     theta_q = reshape(theta_q, 1, length(theta_q(:)));
     rho_q = reshape(rho_q, 1, length(rho_q(:)));

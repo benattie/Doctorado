@@ -15,9 +15,9 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double * in
     char filename[500];
     FILE *fp;
     int i, n, bad_fit, zero_peak_index[(*difra).numrings];
-    double t0[difra->numrings], I0[difra->numrings], shift_H[difra->numrings], shift_eta[difra->numrings];
     //elimino los picos que tienen una intensidad menor que treshold
     int n_peaks = check_for_null_peaks(difra->treshold, (*difra).numrings, zero_peak_index, intens);
+    double t0[n_peaks], I0[n_peaks], shift_H[n_peaks], shift_eta[n_peaks];
     int seeds_size = 4 * n_peaks + 2, all_seeds_size = 4 * (*difra).numrings + 2;
     int net_size = theta2bin((*difra).bg[0][(*difra).n_bg - 1], (*sync_data).pixel, (*sync_data).dist);
     //seteo el vector con las semillas
@@ -101,14 +101,18 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double * in
       shift_eta[n] = peak_seeds[1][i + 3];
       n++;
     }
-    n = 0;
-    for(i = 2; i < seeds_size; i += 4)
+    n = 2;
+    for(i = 0; i < difra->numrings; i++)
     {
-      double theta = peak_seeds[1][i], H = peak_seeds[1][0], eta = peak_seeds[1][1];
-      double I = pseudo_voigt(theta, difra->numrings, I0, t0, H, eta, shift_H, shift_eta, difra->n_bg, bg_pos, difra->bg[1]);
-      fprintf(fp, "%.5lf %.5lf %d 0\n", peak_seeds[1][i], 0.7 * I, difra->hkl[n]);
-      n++;
-    }
+        if(zero_peak_index[i] == 0)
+        {
+            double theta = peak_seeds[1][n], H = peak_seeds[1][0], eta = peak_seeds[1][1];
+            //double I = pseudo_voigt(theta, difra->numrings, I0, t0, H, eta, shift_H, shift_eta, difra->n_bg, bg_pos, difra->bg[1]);
+            double I = pseudo_voigt(theta, n_peaks, I0, t0, H, eta, shift_H, shift_eta, difra->n_bg, bg_pos, difra->bg[1]);
+            fprintf(fp, "%.5lf %.5lf %d 0\n", peak_seeds[1][n], 0.7 * I, difra->hkl[i]);
+            n += 4;
+        }
+    }    
     fflush(fp);
     fclose(fp);
     //imprimo las posiciones y las intensidades de los puntos de background

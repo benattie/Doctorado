@@ -63,54 +63,54 @@ int main(int argc, char ** argv)
     getval = fgets(buf_temp, sizeof(buf_temp), fp);
 
     //path hacia los spr (encabezado + 360 filas x 1725 columnas) (son 37) 
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", path1);   getval = fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", path1);   getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //path hacia los archivos de salida
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", path_out); getval = fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", path_out); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //lee raiz de los archivos spr (New_Al70R-tex_)
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", filename1); getval = fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", filename1); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //skip lines
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", path_base); getval = fgets(buf_temp, 2, fp);
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", base_filename); getval = fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", path_base); getval = fgets(buf_temp, sizeof(buf_temp), fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", base_filename); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //lee la ubicacion de la carpeta de CMWP donde se almacenan todos los resultados
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", resultsf); getval = fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", resultsf); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //lee la extension de los archivos (spr)
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", inform1); getval = fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", inform1); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //numero del primer spr
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &star_d); getval = fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &star_d); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //delta en los spr
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &del_d); getval = fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &del_d); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //numero del ultimo spr
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &end_d); getval = fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &end_d); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //angulo (\Omega) inicial 
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &anf_ome); getval = fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &anf_ome); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //delta en el angulo \omega
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &del_ome); getval = fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &del_ome); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //angulo (\Omega) final
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &ende_ome); getval = fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &ende_ome); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //gamma inicial
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &anf_gam); getval = fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &anf_gam); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //cuantos difractogramas del anillo de deby se promedian
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &av_gam); getval = fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &av_gam); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //delta gamma
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &del_gam); getval = fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &del_gam); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //gamma final
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &ende_gam); getval = fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &ende_gam); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //skip lines
     getval = fgets(buf_temp, sizeof(buf_temp), fp);
     getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //Distancia de la muestra al detector
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%lf", &dist); getval = fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%lf", &dist); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //Distancia que cubre un pixel en el difractograma
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%lf", &pixel); getval = fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%lf", &pixel); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //umbral que determinal cual es la intensidad minima para que ajusto un pico
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%lf", &th); getval = fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%lf", &th); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //flag que determina si las cuentas negativas se pasan a 0
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", minus_zero); getval = fgets(buf_temp, 2, fp); 
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", minus_zero); getval = fgets(buf_temp, sizeof(buf_temp), fp); 
     //skip lines
     getval = fgets(buf_temp, 20, fp);
     getval = fgets(buf_temp, 20, fp);
     //numero de picos a analizar 
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &numrings); getval = fgets(buf_temp, 2, fp);
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &numrings); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //skip lines
     getval = fgets(buf_temp, 50, fp);
     getval = fgets(buf_temp, 50, fp);
@@ -124,7 +124,7 @@ int main(int argc, char ** argv)
       rv = fscanf(fp, "%d", &ug_l[i]); //bin de bg a la izquierda del pico
       rv = fscanf(fp, "%d", &ug_r[i]); //bin de bg a la derecha del pico
     }
-    getval = fgets(buf_temp, 2, fp); //skip line
+    getval = fgets(buf_temp, sizeof(buf_temp), fp); //skip line
     if(getval == NULL) printf("\nWARNING: There were problems while reading para_cmwp.dat\n");
     if(rv == 0 || rv == EOF) printf("\nWARNING: there were problems reading peal data in para_cmwp.dat (%d)\n", rv);
     //imprime en pantalla los datos relevantes de cada pico 
@@ -285,7 +285,7 @@ int main(int argc, char ** argv)
                 peak_shape_data shapes = {fwhm, eta, breadth};
                 peak_data difra = {numrings, bg_size, k, star_d, y + 1, del_gam, th, miller, dostheta, av_pattern, bg_seed, fit_inten, &shapes, &fit_errors};
                 //Int, fwhm & eta fitting
-                pv_fitting(exists, &sync_data, &difra, av_pattern, seeds);
+                pv_fitting(exists, &sync_data, &difra, av_intensity, seeds);
                 exists = 1;
             }//if((y % del_gam) == 0) printf("Fin (%d %d)\n", k, y);
         }//end of for routine for(y = 1; y <= gamma; y++)
