@@ -1,8 +1,8 @@
 #include "aux_functions.h"
 //Funciones de transformacion angular. De coordenadas de maquina (omega, gamma) a coordenadas de figura de polos (alpha, beta)
-float winkel_al(float th, float om, float ga)
+double winkel_al(double th, double om, double ga)
 {
-    float   al, rad, chi, phi;
+    double   al, rad, chi, phi;
     double  omr, gar, thr, phir, chir;
     double  COSAL;
 
@@ -20,13 +20,13 @@ float winkel_al(float th, float om, float ga)
            + ( (-1 * sin(omr) * sin(phir)) + (cos(omr) * cos(phir) * cos(chir)) ) * (cos(thr) * cos(gar))
            + (cos(phir) * sin(chir)) * (cos(thr) * cos(gar));
 
-     al = (float)(acos(COSAL)) / rad;
+     al = (double)(acos(COSAL)) / rad;
      return (al);
 }
 
-float winkel_be(float thb, float omb, float gab, float alb)
+double winkel_be(double thb, double omb, double gab, double alb)
 {
-    float   be, rad_be, chi_be, phi_be;
+    double   be, rad_be, chi_be, phi_be;
     double  thbr, ombr, gabr, albr, phibr, chibr;
     double  SINALCOSBE, COSBE, SINALSINBE, SINBE;
     
@@ -44,38 +44,47 @@ float winkel_be(float thb, float omb, float gab, float alb)
     SINALCOSBE = (cos(ombr) * cos(phibr) - sin(ombr) * sin(phibr) * cos(chibr)) * (-1 * sin(thbr))
                + (sin(ombr) * cos(phibr) + cos(ombr) * sin(phibr) * cos(chibr)) * (cos(thbr) * cos(gabr))
                + (sin(phibr) * sin(chibr) * (cos(thbr) * sin(gabr)));
-
-    //SINALCOSBE = (cos(ombr)*(-1 * sin(thbr))) + (((sin(ombr) * cos(phibr)) + (cos(ombr) * sin(phibr) * cos(chibr))) * (cos(thbr) * cos(gabr)));
-
+    
     COSBE = SINALCOSBE / sin(albr);
 
     SINALSINBE = (sin(ombr) * sin(chibr)) * (-1 * sin(thbr))
                + (-1 * cos(ombr) * sin(chibr)) * (cos(thbr) * cos(gabr))
                + cos(chibr) * (cos(thbr) * sin(gabr));
-    //SINALSINBE = cos(thbr) * sin(gabr);
 
     SINBE = SINALSINBE / sin(albr);
-
+/*
     if(COSBE > 1.0)
     {
         be = 0.0;
-        COSBE = 1;
+        COSBE = 1.0;
     }
     if(COSBE < -1)
     {
         be = 180.0;
-        COSBE = -1;
+        COSBE = -1.0;
     }
 
     if(SINBE < 0)
-        be = (float) 360 - (acos(COSBE) / rad_be);
+        be = (double) 360 - (acos(COSBE) / rad_be);
     else
-        be = (float) acos(COSBE) / rad_be;
+        be = (double) acos(COSBE) / rad_be;
 
     if((omb == 0) && (be > 270.0))
         be = 360 - be;
     if((omb == 0) && (be <= 80.0))
         be = 360 - be;
+*/
+    if(COSBE >= 0){
+        if(SINBE >= 0)
+            be = (double) (acos(COSBE) / rad_be);
+        else
+            be = (double) (360 + asin(SINBE) / rad_be);
+    }else{
+         if(SINBE >= 0)
+            be = (double) (acos(COSBE) / rad_be);
+        else
+            be = (double) ((acos(COSBE) - 2 * asin(SINBE)) / rad_be);
+    }
 
     return (be);
 }
@@ -187,7 +196,7 @@ void check(gsl_vector * y, double ** seeds, int seeds_size, int n_peaks, double 
 }
 
 //Esta funcion revisa si hay elementos de intens que esten por debajo de treshold y devuelve el numero de picos que efectivamente tiene el difractograma.
-int check_for_null_peaks(float treshold, int numrings, int * zero_peak_index, float * intens)
+int check_for_null_peaks(double treshold, int numrings, int * zero_peak_index, double * intens)
 {
     int i;
     int n_zero = 0, n_peaks;
@@ -247,7 +256,7 @@ void set_seeds_back(int size, int * zero_peak_index, int exists, double ** seeds
     }
 }
 
-void average(float * intens_av, float * peak_intens_av, int n_av, int size, int numrings)
+void average(double * intens_av, double * peak_intens_av, int n_av, int size, int numrings)
 {
     int i;
     for(i = 0; i < size; i++)

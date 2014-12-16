@@ -17,8 +17,6 @@ Input Data - 1
 15.Distance         : 1081e-3
 16.Pixel value      : 100e-6
 17.Treshold         : 5
-18.MinusToZero(y/n) : y
-19.LogFileCorrection: n
 
 Peak Positions
 I. NrOfPeaks        : 7

@@ -26,22 +26,21 @@ int pv_f_step1 (const gsl_vector * x, void * data, gsl_vector * f)
     //inicializo los parametros
     i = 0;
     H = gsl_vector_get (x, j); j++;
-    for(i = 0; i < numrings; i++)
-    {
+    for(i = 0; i < numrings; i++){
         t0[i] = gsl_vector_get(x, j);
         I0[i] = gsl_vector_get(x, j + 1);
         j += 2;
     }
-    for(i = 0; i < n_bg; i++)
-    {
-        bg_int[i] = gsl_vector_get(x, j); j++;
+    for(i = 0; i < n_bg; i++){
+        bg_int[i] = gsl_vector_get(x, j); 
+        j++;
     }
     
     //evaluo la funcion
-    for (i = 0; i < n; i++)
-    {   
+    for (i = 0; i < n; i++){   
         double s = gsl_vector_get(sigma, i);
-        if(s == 0) s = S; //por si me toca un punto con intensidad nula
+        if(s == 0) 
+            s = S; //por si me toca un punto con intensidad nula
         double Yi = pseudo_voigt(gsl_vector_get(ttheta, i), numrings, I0, t0, H, eta, shift_H, shift_eta, n_bg, bg_pos, bg_int);
         double res = (Yi - gsl_vector_get(y, i)) / s;
         gsl_vector_set (f, i, res);
@@ -68,23 +67,22 @@ int pv_f_step2 (const gsl_vector * x, void * data, gsl_vector * f)
     double I0[numrings], t0[numrings], shift_H[numrings], bg_int[n_bg];
     
     //inicializo los parametros
-    for(i = 0; i < numrings; i++)
-    {
+    for(i = 0; i < numrings; i++){
         t0[i] = gsl_vector_get(x, j);
         I0[i] = gsl_vector_get(x, j + 1);
         shift_H[i] = gsl_vector_get(x, j + 2);
         j += 3;
     }
-    for(i = 0; i < n_bg; i++)
-    {
-        bg_int[i] = gsl_vector_get(x, j); j++;
+    for(i = 0; i < n_bg; i++){
+        bg_int[i] = gsl_vector_get(x, j); 
+        j++;
     }
     
     //evaluo la funcion
-    for (i = 0; i < n; i++)
-    {   
+    for (i = 0; i < n; i++){   
         double s = gsl_vector_get(sigma, i);
-        if(s == 0) s = S; //por si me toca un punto con intensidad nula
+        if(s == 0) 
+            s = S; //por si me toca un punto con intensidad nula
         double Yi = pseudo_voigt(gsl_vector_get(ttheta, i), numrings, I0, t0, H, eta, shift_H, shift_eta, n_bg, bg_pos, bg_int);
         double res = (Yi - gsl_vector_get(y, i)) / s;
         gsl_vector_set (f, i, res);
@@ -113,22 +111,21 @@ int pv_f_step3 (const gsl_vector * x, void * data, gsl_vector * f)
     //inicializo los parametros
     H = gsl_vector_get (x, j); j++;
     eta = gsl_vector_get (x, j); j++;
-    for(i = 0; i < numrings; i++)
-    {
+    for(i = 0; i < numrings; i++){
         t0[i] = gsl_vector_get(x, j);
         I0[i] = gsl_vector_get(x, j + 1);
         j += 2;
     }
-    for(i = 0; i < n_bg; i++)
-    {
-        bg_int[i] = gsl_vector_get(x, j); j++;
+    for(i = 0; i < n_bg; i++){
+        bg_int[i] = gsl_vector_get(x, j); 
+        j++;
     }
     
     //evaluo la funcion
-    for (i = 0; i < n; i++)
-    {   
+    for (i = 0; i < n; i++){   
         double s = gsl_vector_get(sigma, i);
-        if(s == 0) s = S; //por si me toca un punto con intensidad nula
+        if(s == 0) 
+            s = S; //por si me toca un punto con intensidad nula
         double Yi = pseudo_voigt(gsl_vector_get(ttheta, i), numrings, I0, t0, H, eta, shift_H, shift_eta, n_bg, bg_pos, bg_int);
         double res = (Yi - gsl_vector_get(y, i)) / s;
         gsl_vector_set (f, i, res);
@@ -155,24 +152,23 @@ int pv_f_step4 (const gsl_vector * x, void * data, gsl_vector * f)
     double I0[numrings], t0[numrings], shift_H[numrings], shift_eta[numrings], bg_int[n_bg];
     
     //inicializo los parametros
-    for(i = 0; i < numrings; i++)
-    {
+    for(i = 0; i < numrings; i++){
         t0[i] = gsl_vector_get(x, j);
         I0[i] = gsl_vector_get(x, j + 1);
         shift_H[i] = gsl_vector_get(x, j + 2);
         shift_eta[i] = gsl_vector_get(x, j + 3);
         j += 4;
     }
-    for(i = 0; i < n_bg; i++)
-    {
-        bg_int[i] = gsl_vector_get(x, j); j++;
+    for(i = 0; i < n_bg; i++){
+        bg_int[i] = gsl_vector_get(x, j); 
+        j++;
     }
     
     //evaluo la funcion
-    for (i = 0; i < n; i++)
-    {   
+    for (i = 0; i < n; i++){   
         double s = gsl_vector_get(sigma, i);
-        if(s == 0) s = S; //por si me toca un punto con intensidad nula
+        if(s == 0) 
+            s = S; //por si me toca un punto con intensidad nula
         double Yi = pseudo_voigt(gsl_vector_get(ttheta, i), numrings, I0, t0, H, eta, shift_H, shift_eta, n_bg, bg_pos, bg_int);
         double res = (Yi - gsl_vector_get(y, i)) / s;
         gsl_vector_set (f, i, res);

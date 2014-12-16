@@ -8,7 +8,7 @@
 #include "aux_functions.h"
 #include "pv_steps.c"
 
-void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * intens, double ** seeds)
+void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double * intens, double ** seeds)
 {
     //printf("Inicio pv_fitting\n");
     //variables auxiliares del programa
@@ -30,8 +30,7 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
     gsl_vector * bg_pos = gsl_vector_alloc((*difra).n_bg); //error de las intensidades del difractograma
 
     //printf("Obteniendo datos\n");
-    for(i = 0; i < net_size; i++)
-    {
+    for(i = 0; i < net_size; i++){
         gsl_vector_set(ttheta, i, bin2theta(i, (*sync_data).pixel, (*sync_data).dist));//conversion de bin a coordenada angular
         gsl_vector_set(y, i, (*difra).intensity[i]);
         gsl_vector_set(sigma, i, sqrt((*difra).intensity[i])); //calculo los sigma de las intensidades
@@ -76,7 +75,8 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, float * int
    
     //printf("Correccion y salida de los resultados\n");
     bad_fit = fit_result(all_seeds_size, peak_seeds, fit_errors, zero_peak_index, sync_data, difra);
-    if(bad_fit) check(y, peak_seeds, seeds_size, n_peaks, (*difra).bg, (*difra).n_bg);
+    if(bad_fit) 
+        check(y, peak_seeds, seeds_size, n_peaks, (*difra).bg, (*difra).n_bg);
     set_seeds_back(all_seeds_size, zero_peak_index, exists, seeds, peak_seeds);
     
     //liberacion de memoria allocada y cierre de archivos

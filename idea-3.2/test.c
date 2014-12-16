@@ -1,58 +1,64 @@
-#include "pseudo_voigt.h"
-#include "aux_functions.h"
-#include "array_alloc.h"
-#include "interpolate.c"
+//#include "pseudo_voigt.h"
+//#include "aux_functions.h"
+//#include "array_alloc.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#define pi 3.14159265
 
+float winkel_be(float in)
+{
+    float   be, rad_be;
+    double  COSBE, SINBE;
+    
+    rad_be = pi / 180;
+    
+    COSBE = cos(in * rad_be);
+    SINBE = sin(in * rad_be);
+
+    if(COSBE > 1.0)
+    {
+        be = 0.0;
+        COSBE = 1.0;
+    }
+    if(COSBE < -1)
+    {
+        be = 180.0;
+        COSBE = -1.0;
+    }
+
+    if(COSBE >= 0){
+        if(SINBE >= 0)
+            be = (float) (acos(COSBE) / rad_be);
+        else
+            be = (float) (360 + asin(SINBE) / rad_be);
+    }else{
+         if(SINBE >= 0)
+            be = (float) (acos(COSBE) / rad_be);
+        else
+            be = (float) ((acos(COSBE) - 2 * asin(SINBE)) / rad_be);
+    }
+
+    return (be);
+}
 
 int main(int argc, char **argv)
 {
-   char alldatafile[500], filename1[500], path_out[500], buf[1024];
-   int m, numrings = 7, k[7] = {3330, 3330, 3330, 3330, 3330, 3330, 3330};
-   FILE *fp_all, *fp_reg;
-    
-    //////////////////////////////////////////////////////////////////////////////    
-    printf("\n======= Setting regular grid =======\n");
-    for(m = 0; m < numrings; m++)
-    {
-        strcpy(path_out, "/home/benattie/Documents/Doctorado/Git/tmp/interpolate/");
-        strcpy(filename1, "Al-AR-M-H-tex_");
-        //ARCHIVO CON LOS DATOS EN LA GRILLA IRREGULAR
-        strcpy(alldatafile, "");
-        strcat(alldatafile, path_out);
-        strcat(alldatafile, filename1);
-        strcat(alldatafile, "ALL_PF_");
-        sprintf(buf, "%d", m + 1);
-        strcat(alldatafile, buf);
-        strcat(alldatafile, ".mtex");
-        if((fp_all = fopen(alldatafile, "r")) == NULL)
-        {
-            fprintf(stderr, "Error beim oeffnen der Datei(%s).\n", alldatafile);
-            exit(1);
-        }
-        //ARCHIVO CON LOS DATOS EN UNA GRILLA REGULAR
-        strcpy(alldatafile, "");
-        strcat(alldatafile, path_out);
-        strcat(alldatafile, filename1);
-        strcat(alldatafile, "REG_PF_");
-        sprintf(buf, "%d", m + 1);
-        strcat(alldatafile, buf);
-        strcat(alldatafile, ".mtex");
-        if((fp_reg = fopen(alldatafile, "w")) == NULL)
-        {
-            fprintf(stderr, "Error beim oeffnen der Datei(%s).\n", alldatafile);
-            exit(1);
-        }
-        printf("Printing regular grid file %s with %d points\n", alldatafile, k[m]);
-        interpolate(fp_all, fp_reg, atof(argv[1]), 10, 5, k[m]);
-        fclose(fp_all);
-        fclose(fp_reg);
-    }
-    //end for routine for(m = 0; m < numrings; m++)
-    printf("\n======= Finished writting regular grid =======\n");
-    //////////////////////////////////////////////////////////////////////////////
+    float a = atof(argv[1]);
+    float be = winkel_be(a);
+    printf("ingreso %f, egreso %f\n", a, be);
+    a += 90;
+    be = winkel_be(a);
+    printf("ingreso %f, egreso %f\n", a, be);
+    a += 90;
+    be = winkel_be(a);
+    printf("ingreso %f, egreso %f\n", a, be);
+    a += 90;
+    be = winkel_be(a);
+    printf("ingreso %f, egreso %f\n", a, be);
+    a += 90;
+    be = winkel_be(a);
+    printf("ingreso %f, egreso %f\n", a, be);
     return 0;
 }

@@ -53,8 +53,8 @@ typedef struct peak_data
     int start_spr;
     int gamma;
     int start_gam;
-    float treshold;
-    float * intensity;
+    double treshold;
+    double * intensity;
     double ** bg;
     double *** intens;
     peak_shape_data * shapes;
@@ -103,9 +103,9 @@ typedef struct data_s4
     double eta;
 } data_s4;
 //DEFINICION DE FUNCIONES
-float winkel_al(float th, float om, float ga);
+double winkel_al(double th, double om, double ga);
 
-float winkel_be(float thb, float omb, float gab, float alb);
+double winkel_be(double thb, double omb, double gab, double alb);
 
 double bin2theta(int bin, double pixel, double dist);
 
@@ -129,13 +129,13 @@ void reset_all_seeds(gsl_vector * y, double ** seeds, int seeds_size, int n_peak
 
 void check(gsl_vector * y, double ** seeds, int seeds_size, int n_peaks, double ** bg, int bg_size);
 
-int check_for_null_peaks(float treshold, int numrings, int * zero_peak_index, float * intens);
+int check_for_null_peaks(double treshold, int numrings, int * zero_peak_index, double * intens);
 
 void set_seeds(int size, int * zero_peak_index, int exists, double ** seeds, double ** peak_seeds);
 
 void set_seeds_back(int size, int * zero_peak_index, int exists, double ** seeds, double ** peak_seeds);
 
-void average(float * intens_av, float * peak_intens_av, int n_av, int size, int numrings);
+void average(double * intens_av, double * peak_intens_av, int n_av, int size, int numrings);
 
 void solver_iterator(int * status, gsl_multifit_fdfsolver * s, const gsl_multifit_fdfsolver_type * T);
 

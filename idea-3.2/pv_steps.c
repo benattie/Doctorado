@@ -31,22 +31,20 @@ void pv_step1(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     //printf("Inicializando los parametros\n");
     j = 0;
     x_init[j] = seeds[exists][0]; j++;//H
-    for(i = 2; i < seeds_size; i += 4)
-    {
+    for(i = 2; i < seeds_size; i += 4){
         x_init[j] = seeds[exists][i]; j++; //theta_0
         x_init[j] = seeds[exists][i + 1]; j++; //Intesity
     }
-    for(i = 0; i < (*d).n_bg; i++)
-    {
-        x_init[j] = bg[1][i]; j++;
+    for(i = 0; i < (*d).n_bg; i++){
+        x_init[j] = bg[1][i]; 
+        j++;
     }
     gsl_vector_view x = gsl_vector_view_array(x_init, n_param); //inicializo el vector con los datos a fitear
 
     //Estructura con los parametros fijos del fiteo
     eta = seeds[exists][1];
     j = 0;
-    for(i = 2; i < seeds_size; i += 4)
-    {
+    for(i = 2; i < seeds_size; i += 4){
         shift_H[j] = seeds[exists][i + 2];
         shift_eta[j] = seeds[exists][i + 3];
         j++;
@@ -71,14 +69,13 @@ void pv_step1(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     //printf("Salida de los resultados del paso 1\n");
     j = 0;
     seeds[1][0] = gsl_vector_get(s -> x, j); j++;//H
-    for(i = 2; i < seeds_size; i += 4)
-    {
+    for(i = 2; i < seeds_size; i += 4){
         seeds[1][i] = gsl_vector_get(s -> x, j); j++; //theta_0
         seeds[1][i + 1] = gsl_vector_get(s -> x, j); j++; //Intensity
     }
-    for(i = 0; i < (*d).n_bg; i++)
-    {
-        bg[1][i] = gsl_vector_get(s -> x, j); j++;
+    for(i = 0; i < (*d).n_bg; i++){
+        bg[1][i] = gsl_vector_get(s -> x, j);
+        j++;
     }
     free(x_init);
     gsl_multifit_fdfsolver_free (s);
@@ -101,15 +98,14 @@ void pv_step2(int exists, double ** seeds, int seeds_size, double ** bg, struct 
 
     //printf("Inicializando los parametros\n");
     j = 0;
-    for(i = 2; i < seeds_size; i += 4)
-    {
+    for(i = 2; i < seeds_size; i += 4){
         x_init[j] = seeds[1][i]; j++; //theta_0
         x_init[j] = seeds[1][i + 1]; j++; //Intensity
         x_init[j] = seeds[1][i + 2]; j++; //Shift_H
     }
-    for(i = 0; i < (*d).n_bg; i++)
-    {
-        x_init[j] = bg[1][i]; j++;
+    for(i = 0; i < (*d).n_bg; i++){
+        x_init[j] = bg[1][i]; 
+        j++;
     }
     gsl_vector_view x = gsl_vector_view_array (x_init, n_param); //inicializo el vector con los datos a fitear
 
@@ -117,9 +113,9 @@ void pv_step2(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     H = seeds[1][0];
     eta = seeds[exists][1];
     j = 0;
-    for(i = 2; i < seeds_size; i += 4)
-    {
-        shift_eta[j] = seeds[exists][i + 3]; j++;
+    for(i = 2; i < seeds_size; i += 4){
+        shift_eta[j] = seeds[exists][i + 3]; 
+        j++;
     }
     data_s2 d2 = {*d, H, eta, shift_eta};
 
@@ -139,19 +135,18 @@ void pv_step2(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     
     //printf("Salida de los resultados del paso 2\n");
     j = 0;
-    for(i = 2; i < seeds_size; i += 4)
-    {
+    for(i = 2; i < seeds_size; i += 4){
         seeds[1][i] = gsl_vector_get(s -> x, j); j++; //theta_0
         seeds[1][i + 1] = gsl_vector_get(s -> x, j); j++; //Intensity
         seeds[1][i + 2] = gsl_vector_get(s -> x, j); j++; //Shift_H
     }
-    for(i = 0; i < (*d).n_bg; i++)
-    {
-        bg[1][i] = gsl_vector_get(s -> x, j); j++;
+    for(i = 0; i < (*d).n_bg; i++){
+        bg[1][i] = gsl_vector_get(s -> x, j); 
+        j++;
     }
     free(x_init);
     gsl_multifit_fdfsolver_free (s);
-        //printf("Final del paso 2\n");
+    //printf("Final del paso 2\n");
 }
 
 void pv_step3(int exists, double ** seeds, double * errors, int seeds_size, double ** bg, struct data * d, int n_param)
@@ -173,21 +168,19 @@ void pv_step3(int exists, double ** seeds, double * errors, int seeds_size, doub
     j = 0;
     x_init[j] = seeds[1][0]; j++;//H
     x_init[j] = seeds[exists][1]; j++;//eta
-    for(i = 2; i < seeds_size; i += 4)
-    {
+    for(i = 2; i < seeds_size; i += 4){
         x_init[j] = seeds[1][i]; j++; //theta_0
         x_init[j] = seeds[1][i + 1]; j++; //Intensity
     }
-    for(i = 0; i < (*d).n_bg; i++)
-    {
-        x_init[j] = bg[1][i]; j++;
+    for(i = 0; i < (*d).n_bg; i++){
+        x_init[j] = bg[1][i]; 
+        j++;
     }
     gsl_vector_view x = gsl_vector_view_array (x_init, n_param); //inicializo el vector con los datos a fitear
 
     //Estructura con los parametros fijos del fiteo
     j = 0;
-    for(i = 2; i < seeds_size; i += 4)
-    {
+    for(i = 2; i < seeds_size; i += 4){
         shift_H[j] = seeds[1][i + 2];
         shift_eta[j] = seeds[exists][i + 3];
         j++;
@@ -220,16 +213,15 @@ void pv_step3(int exists, double ** seeds, double * errors, int seeds_size, doub
     seeds[1][1] = gsl_vector_get(s -> x, j); 
     errors[1] = c * sqrt(gsl_matrix_get(covar, j, j));
     j++;//eta
-    for(i = 2; i < seeds_size; i += 4)
-    {
+    for(i = 2; i < seeds_size; i += 4){
         seeds[1][i] = gsl_vector_get(s -> x, j); 
         j++; //theta_0
         seeds[1][i + 1] = gsl_vector_get(s -> x, j); 
         j++; //Intensity
     }
-    for(i = 0; i < (*d).n_bg; i++)
-    {
-        bg[1][i] = gsl_vector_get(s -> x, j); j++;
+    for(i = 0; i < (*d).n_bg; i++){
+        bg[1][i] = gsl_vector_get(s -> x, j); 
+        j++;
     }
     free(x_init);
     gsl_multifit_fdfsolver_free (s);
@@ -253,16 +245,15 @@ void pv_step4(int exists, double ** seeds, double * errors, int seeds_size, doub
 
     //printf("Inicializando los parametros\n");
     j = 0;
-    for(i = 2; i < seeds_size; i += 4)
-    {
+    for(i = 2; i < seeds_size; i += 4){
         x_init[j] = seeds[1][i]; j++; //theta_0
         x_init[j] = seeds[1][i + 1]; j++; //Intensity
         x_init[j] = seeds[1][i + 2]; j++; //Shift_H
         x_init[j] = seeds[exists][i + 3]; j++; //Shift_eta
     }
-    for(i = 0; i < (*d).n_bg; i++)
-    {
-        x_init[j] = bg[1][i]; j++;
+    for(i = 0; i < (*d).n_bg; i++){
+        x_init[j] = bg[1][i]; 
+        j++;
     }
     gsl_vector_view x = gsl_vector_view_array (x_init, n_param); //inicializo el vector con los datos a fitear
     //Estructura con los parametros fijos del fiteo
@@ -290,8 +281,7 @@ void pv_step4(int exists, double ** seeds, double * errors, int seeds_size, doub
    
     //printf("Salida de los resultados del paso 4\n");
     j = 0;
-    for(i = 2; i < seeds_size; i += 4)
-    {
+    for(i = 2; i < seeds_size; i += 4){
         seeds[1][i] = gsl_vector_get(s -> x, j);
         errors[i] = c * sqrt(gsl_matrix_get(covar, j, j));
         j++; //theta_0
@@ -305,9 +295,9 @@ void pv_step4(int exists, double ** seeds, double * errors, int seeds_size, doub
         errors[i + 3] = c * sqrt(gsl_matrix_get(covar, j, j));
         j++; //Shift_eta
     }
-    for(i = 0; i < (*d).n_bg; i++)
-    {
-        bg[1][i] = gsl_vector_get(s -> x, j); j++;
+    for(i = 0; i < (*d).n_bg; i++){
+        bg[1][i] = gsl_vector_get(s -> x, j); 
+        j++;
     }
     free(x_init);
     gsl_multifit_fdfsolver_free (s);
