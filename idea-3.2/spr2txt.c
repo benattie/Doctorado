@@ -25,7 +25,7 @@ int main(int argc, char ** argv)
  int data[2500], intensity;
  double intens_av[1800], peak_intens_av[10];
  double data1[2500], BG_m, intens[500][10];
- double theta[20], neu_ome, neu_ome1, neu_gam1, neu_gam, alpha, beta, th;
+ double theta[20], neu_ome, neu_gam, alpha, beta, th;
  double pixel, dist;
  double ***sabo_inten = r3_tensor_double_alloc(40, 500, 10);
  double ***fit_inten = r3_tensor_double_alloc(40, 500, 10), ***fit_inten_err = r3_tensor_double_alloc(40, 500, 10);

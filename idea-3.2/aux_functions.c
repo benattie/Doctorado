@@ -52,40 +52,31 @@ double winkel_be(double thb, double omb, double gab, double alb)
                + cos(chibr) * (cos(thbr) * sin(gabr));
 
     SINBE = SINALSINBE / sin(albr);
-/*
-    if(COSBE > 1.0)
+    
+    be = -1;
+    if(COSBE >= 1.0)
     {
         be = 0.0;
         COSBE = 1.0;
     }
-    if(COSBE < -1)
+    if(COSBE <= -1)
     {
         be = 180.0;
         COSBE = -1.0;
     }
-
-    if(SINBE < 0)
-        be = (double) 360 - (acos(COSBE) / rad_be);
-    else
-        be = (double) acos(COSBE) / rad_be;
-
-    if((omb == 0) && (be > 270.0))
-        be = 360 - be;
-    if((omb == 0) && (be <= 80.0))
-        be = 360 - be;
-*/
-    if(COSBE >= 0){
-        if(SINBE >= 0)
-            be = (double) (acos(COSBE) / rad_be);
-        else
-            be = (double) (360 + asin(SINBE) / rad_be);
-    }else{
-         if(SINBE >= 0)
-            be = (double) (acos(COSBE) / rad_be);
-        else
-            be = (double) ((acos(COSBE) - 2 * asin(SINBE)) / rad_be);
+    if(be == -1){
+        if(COSBE >= 0){
+            if(SINBE >= 0)
+                be = (double) (acos(COSBE) / rad_be);
+            else
+                be = (double) (360 + asin(SINBE) / rad_be);
+        }else{
+             if(SINBE >= 0)
+                be = (double) (acos(COSBE) / rad_be);
+            else
+                be = (double) ((acos(COSBE) - 2 * asin(SINBE)) / rad_be);
+        }
     }
-
     return (be);
 }
 
