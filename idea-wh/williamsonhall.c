@@ -94,7 +94,7 @@ int main()
     out_values->chisq_min = 1000;
     out_values->best_chisq_values = best_chi_val;
 
-    printf("Iniciando el ajuste de Williamson-Hall");
+    printf("Iniciando el ajuste de Williamson-Hall\n");
     if(strcmp(fdata->is_H, "FWHM") == 0)
         if(strcmp(fdata->is_corr, "N") == 0)
             if(fdata->model == 1)

@@ -1,0 +1,12 @@
+Rules of Automation
+ (A) Automate everything that can be automated.
+ (B) Write a single script that executes all code from beginning to end.
+
+Rules of  Version Control
+ (A) Store code and data under version control.
+ (B) Run the whole directory before checking it back in.
+
+Rules of Directories
+ (A) Separate directories by function.
+ (B) Separate files into inputs and outputs.
+ (C) Make directories portable.

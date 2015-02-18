@@ -1,12 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <fcntl.h>
-#include <ctype.h>
+//#include <fcntl.h>
+//#include <ctype.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+//#include <unistd.h>
+//#include <sys/types.h>
+//#include <sys/stat.h>
 #include <time.h>
 
 #include "pv.c"
@@ -312,10 +312,6 @@ int main(int argc, char ** argv)
                     neu_ome = neu_ome - 90;
                     neu_gam = neu_gam + 180;
                 }
-                //else{
-                //    neu_ome = neu_ome1;
-                //    neu_gam = neu_gam1;
-                //} 
                 alpha = winkel_al(theta[m], neu_ome, neu_gam);
                 beta  = winkel_be(theta[m], neu_ome, neu_gam, alpha);
                     
@@ -323,8 +319,17 @@ int main(int argc, char ** argv)
                     alpha = 180 - alpha;
                     beta = 360 - beta;
                 }
-                //else
-                //    alpha = alpha;
+                //
+                // Veremos si con esto invierto correctamente el hemisferio sur
+                /*
+                if(neu_ome > 90){
+                    if(beta > 0 && beta <= 90)
+                        beta = 360 - beta;
+                    if(beta > 270 && beta < 360)
+                        beta = 360 - beta;
+                }
+                */
+
 
                 //correccion de los datos mal ajustados
                 if(fwhm[n][j + del_gam][m] == -1.0){
