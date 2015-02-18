@@ -2,7 +2,7 @@
 clear all;
 %% Nombre para identificar el conjunto de archivos
 name = 'Dual_phase';
-%% Importar los datos
+%% Importar los datos. El usuario debería crear este script.
 importscript
 %% Graficar los datos crudos
 plotscript
