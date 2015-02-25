@@ -1,17 +1,17 @@
 Input Data - 1
-1.PathForSPR        : /home/benattie/Documents/Doctorado/RX/Sync/A70-BS100/spr/
-2.PathForOutput     : data/A70BS100/
-3.InputFileName     : New_A70-BS100-20sek-Tex_
-4.PathForBaseFiles  : /home/benattie/Programs/CMWP-140518/data/A70BS100/
-5.NameOfBaseFiles   : A70BS100
+1.PathForSPR        : /home/benattie/Documents/Doctorado/XR/Sync/Al70R/spr/
+2.PathForOutput     : data/Al70R/
+3.InputFileName     : New_Al70R-tex_
+4.PathForBaseFiles  : /home/benattie/Programs/CMWP-140518/data/Al70R/
+5.NameOfBaseFiles   : Al70R_spr1_gamma0
 6.PathResultsFolder : /home/benattie/Programs/CMWP-140518/results/evaluate-int-dir/
 7.FileExtension     : spr
 8.IndexNr Start     : 1
 9.DeltaIndexNr      : 1
-10.IndexNr End      : 1
+10.IndexNr End      : 19
 11.Start Angle      : 1
 12.Delta Angle      : 5
-13.End Angle        : 5
+13.End Angle        : 91
 14.Start Gamma      : 0
 15.Average Gamma    : 5
 16.Delta Gamma      : 5
@@ -21,14 +21,15 @@ IDEA Input Data
 17.Distance         : 1081e-3
 18.Pixel value      : 100e-6
 19.Treshold         : 5
-20.MinusToZero(y/n) : y
 
 Peak Positions
-I. NrOfPeaks        : 5
+I. NrOfPeaks        : 7
 II. Peak Positions
 hkl Theta Peak-L Peak-R BG-L BG-R:
-111 2.050 660 838 400 1065
-200 2.359 839 1000 500 1070
-220 3.324 1120 1380 1070 1385
-311 3.895 1395 1529 1370 1700
-222 4.067 1490 1690 1370 1700
+111 1.742 583 713 400 935
+200 2.013 713 854 500 965
+220 2.850 1025 1130 965 1178
+311 3.342 1215 1298 1190 1450
+222 3.489 1298 1375 1190 1450
+400 4.025 1505 1559 1450 1600
+331 4.391 1650 1685 1620 1700

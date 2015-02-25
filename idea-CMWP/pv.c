@@ -10,8 +10,8 @@
 
 void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double * intens, double ** seeds)
 {
-    //printf("Inicio pv_fitting\n");
-    //variables auxiliares del programa
+//    printf("Inicio pv_fitting\n");
+    // variables auxiliares del programa
     char filename[500];
     FILE *fp;
     int i, n, bad_fit, zero_peak_index[(*difra).numrings];
@@ -32,7 +32,7 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double * in
     gsl_vector * sigma = gsl_vector_alloc(net_size); //error de las intensidades del difractograma
     gsl_vector * bg_pos = gsl_vector_alloc((*difra).n_bg); //error de las intensidades del difractograma
 
-    //printf("Obteniendo datos\n");
+//    printf("Obteniendo datos\n");
     for(i = 0; i < net_size; i++)
     {
         gsl_vector_set(ttheta, i, bin2theta(i, (*sync_data).pixel, (*sync_data).dist));//conversion de bin a coordenada angular
@@ -49,27 +49,27 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double * in
     fprintf(fp_logfile, "spr: %d gamma :%d\nsemilla inicial\n", (*difra).spr, (*difra).gamma + 1);
     print_seeds2file(fp_logfile, peak_seeds[exists], fit_errors, seeds_size, (*difra).bg, (*difra).n_bg);
    
-    //printf("Inicio de las iteraciones\n");
-    //printf("Paso 1\n");
+//    printf("Inicio de las iteraciones\n");
+//    printf("Paso 1\n");
     //print_seeds(peak_seeds[exists], seeds_size, (*difra).bg, (*difra).n_bg);
     pv_step1(exists, peak_seeds, seeds_size, (*difra).bg, &d, n_param[0]);
     //print_seeds(peak_seeds[1], seeds_size, (*difra).bg, (*difra).n_bg);
     check(y, peak_seeds, seeds_size, n_peaks, (*difra).bg, (*difra).n_bg);
-    //printf("Paso 2\n");
+//    printf("Paso 2\n");
     //print_seeds(peak_seeds[1], seeds_size, (*difra).bg, (*difra).n_bg);
     pv_step2(exists, peak_seeds, seeds_size, (*difra).bg, &d, n_param[1]);
     //print_seeds(peak_seeds[1], seeds_size, (*difra).bg, (*difra).n_bg);
     check(y, peak_seeds, seeds_size, n_peaks, (*difra).bg, (*difra).n_bg);
-    //printf("Paso 3\n");
+//    printf("Paso 3\n");
     //print_seeds(peak_seeds[1], seeds_size, (*difra).bg, (*difra).n_bg);
     pv_step3(exists, peak_seeds, fit_errors, seeds_size, (*difra).bg, &d, n_param[2]);
     //print_seeds(peak_seeds[1], seeds_size, (*difra).bg, (*difra).n_bg);
     check(y, peak_seeds, seeds_size, n_peaks, (*difra).bg, (*difra).n_bg);
-    //printf("Paso 4\n");
+//    printf("Paso 4\n");
     //print_seeds(peak_seeds[1], seeds_size, (*difra).bg, (*difra).n_bg);
     pv_step4(exists, peak_seeds, fit_errors, seeds_size, (*difra).bg, &d, n_param[3]);
     //print_seeds(peak_seeds[1], seeds_size, (*difra).bg, (*difra).n_bg);
-    //printf("Fin de las iteraciones\n");
+ //   printf("Fin de las iteraciones\n");
 
     //imprimo en fp_logfile los resultados de las iteraciones
     fprintf(fp_logfile, "semilla final\n");
@@ -77,10 +77,14 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double * in
     fflush(fp_logfile);
     fclose(fp_logfile);
    
-    //printf("Correccion y salida de los resultados\n");
+//    printf("Correccion y salida de los resultados\n");
     //imprimo el pattern
     sprintf(filename, "%s%sspr_%d_pattern_%d.dat", sync_data->path_out, sync_data->root_name, difra->spr, difra->gamma);
-    fp = fopen(filename, "w");
+    if((fp = fopen(filename, "w")) == NULL)
+    {
+        fprintf(stderr, "Error opening file %s\n", filename);
+        exit(1);
+    }
     for(i = 0; i < net_size; i++)
         if(gsl_vector_get(y, i))
             fprintf(fp, "%.5lf %.5lf\n", gsl_vector_get(ttheta, i), gsl_vector_get(y, i));
@@ -91,7 +95,11 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double * in
     fclose(fp);
     //imprimo las posiciones de los picos y sus intensidades
     sprintf(filename, "%s%sspr_%d_pattern_%d.peak-index.dat", sync_data->path_out, sync_data->root_name, difra->spr, difra->gamma);
-    fp = fopen(filename, "w");
+    if((fp = fopen(filename, "w")) == NULL)
+    {
+        fprintf(stderr, "Error opening file %s\n", filename);
+        exit(1);
+    }
     n = 0;
     for(i = 2; i < seeds_size; i += 4)
     {
@@ -117,7 +125,11 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double * in
     fclose(fp);
     //imprimo las posiciones y las intensidades de los puntos de background
     sprintf(filename, "%s%sspr_%d_pattern_%d.bg-spline.dat", sync_data->path_out, sync_data->root_name, difra->spr, difra->gamma);
-    fp = fopen(filename, "w");
+    if((fp = fopen(filename, "w")) == NULL)
+    {
+        fprintf(stderr, "Error opening file %s\n", filename);
+        exit(1);
+    }
     for(i = 0; i < difra->n_bg; i++)
       fprintf(fp, "%.5lf %.5lf\n", difra->bg[0][i], difra->bg[1][i]);
     fflush(fp);
@@ -135,5 +147,5 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double * in
     gsl_vector_free(bg_pos);
     free_double_matrix(peak_seeds, 2);
     free(fit_errors);
-    //printf("Fin pv_fitting\n");
+//    printf("Fin pv_fitting\n");
 }

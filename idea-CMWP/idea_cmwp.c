@@ -17,7 +17,7 @@ int main(int argc, char ** argv)
 {
     FILE *fp, *fp1, *fp_fit, *fp_log;
     char buf_temp[1024], buf[2048], buf1[1024], path_out[1024], filename1[1024], path1[1024], inform1[1024], marfile[1024];
-    char *getval = malloc(sizeof(char) * (250 + 1)), resultsf[1024], path_base[1024], base_filename[1024], minus_zero[1];
+    char *getval = malloc(sizeof(char) * (250 + 1)), resultsf[1024], path_base[1024], base_filename[1024];
     static int del_gam, star_d, av_gam;
     int a, b, i, k, n, x, y, z, count, anf_gam, ende_gam, anf_ome, ende_ome, del_ome, rv, exists;
     int BG_l, BG_r, end_d, del_d, numrings, posring_l[15], posring_r[15], ug_l[15], ug_r[15];
@@ -111,8 +111,6 @@ int main(int argc, char ** argv)
     getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%lf", &pixel); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //umbral que determinal cual es la intensidad minima para que ajusto un pico
     getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%lf", &th); getval = fgets(buf_temp, sizeof(buf_temp), fp);
-    //flag que determina si las cuentas negativas se pasan a 0
-    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", minus_zero); getval = fgets(buf_temp, sizeof(buf_temp), fp); 
     //skip lines
     getval = fgets(buf_temp, 20, fp);
     getval = fgets(buf_temp, 20, fp);
@@ -132,8 +130,8 @@ int main(int argc, char ** argv)
       rv = fscanf(fp, "%d", &ug_r[i]); //bin de bg a la derecha del pico
     }
     getval = fgets(buf_temp, sizeof(buf_temp), fp); //skip line
-    if(getval == NULL) printf("\nWARNING: There were problems while reading para_cmwp.dat\n");
-    if(rv == 0 || rv == EOF) printf("\nWARNING: there were problems reading peal data in para_cmwp.dat (%d)\n", rv);
+    if(getval == NULL) printf("\nWARNING: There were problems while reading %s\n", argv[1]);
+    if(rv == 0 || rv == EOF) printf("\nWARNING: there were problems reading peal data in %s (%d)\n", argv[1], rv);
     //imprime en pantalla los datos relevantes de cada pico 
     for(i = 0; i < numrings; i++)
         printf("Position of [%d]ring = Theta:%6.3f  %8d%8d%8d%8d\n", i + 1, theta[i], posring_l[i], posring_r[i], ug_l[i], ug_r[i]);
@@ -160,7 +158,7 @@ int main(int argc, char ** argv)
     seeds_size = 4 * numrings + 2;
     seeds = matrix_double_alloc(2, seeds_size);
     read_file(fp_fit, seeds, seeds_size);
-    if(getval == NULL) printf("\nWARNING: There were problems while reading fit_ini.dat\n");
+    if(getval == NULL) printf("\nWARNING: There were problems while reading %s\n", argv[2]);
     fclose(fp_fit);
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
     strcat(path_base, base_filename);
@@ -206,11 +204,11 @@ int main(int argc, char ** argv)
             break;
         default:
             printf("Numero incorrecto de argumentos\nUso correcto:\n");
-            printf("./idea_cmwp.exe \n./idea_cmwp flag\n./idea_cmwp flag treshold\n");
+            printf("./idea_cmwp.exe para_cmwp.dat fit_ini.dat\n./idea_cmwp para_cmwp.dat fit_ini.dat flag\n./idea_cmwp para_cmwp.dat fit_ini.dat flag treshold\n");
             exit(1);
     }
     k = star_d;  // file index number : star_d to end_d
-    do //Iteracion sobre todos los spr  
+    for(k = star_d; k <= end_d; k += del_d) //Iteracion sobre todos los spr
     {
         //selecciono el archivo spr que voy a procesar
         strcpy(marfile, path1);
@@ -255,6 +253,7 @@ int main(int argc, char ** argv)
         exists = 0;
         for(y = 0; y <= gamma; y++) //itero sobre todos los difractogramas (360) (recorro el anillo de Debye)
         {
+            // printf("gamma = %d\n", y);
             for(x = 1; x <= pixel_number; x++) //iteracion dentro de cada uno de los difractogramas (con 1725 puntos) (cada porcion del anillo de Debye)
             {
                 //leo la intensidad de cada bin y la paso a formato de entero
@@ -262,7 +261,7 @@ int main(int argc, char ** argv)
                 data[y][x] = (int)data1[x];
             }
             n = 0; //numero de pico del difractograma
-            do //itero sobre todos los picos del difractograma
+            for(n = 0; n < numrings; n++) //itero sobre todos los picos del difractograma
             {
                 intensity = 0;
                 count = 0;
@@ -282,9 +281,7 @@ int main(int argc, char ** argv)
                 }
                 intens[y][n] = ((double)intensity / count) - BG_m;  // Integral values and BG correction
                 if(intens[y][n] < 0) intens[y][n] = 0;
-                n++;
             }
-            while(n < numrings);
             //fiteo del difractograma para la obtencion del ancho de pico y eta
             if((y + 1) % del_gam == 0)
             {
@@ -306,9 +303,7 @@ int main(int argc, char ** argv)
             }//if((y % del_gam) == 0) printf("Fin (%d %d)\n", k, y);
         }//end of for routine for(y = 1; y <= gamma; y++)
         fclose(fp1);
-        k += del_d; //paso al siguiente spr
     }
-    while(k <= end_d); //end of spr iteration
     //End pole figure data in Machine coordinates//
     printf("\nFinished extracting pole figure data\n");
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
