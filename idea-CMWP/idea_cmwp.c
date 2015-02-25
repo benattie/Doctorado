@@ -42,7 +42,11 @@ int main(int argc, char ** argv)
     puts("The angular values of Omega and Gamma, from the parameter file");
     puts("\nIn order to work this executable must be placed in CMWP instalation folder along with the python folder");
     puts("Python 2.7 required");
-    puts("\nRun with:\n./idea_cmwp.exe\n./idea_cmwp.exe flag\n./idea_cmwp.exe flag th");
+    puts("\nRun with:\n./idea_cmwp.exe para_cmwp.dat fit_ini.dat");
+    puts("./idea_cmwp.exe para_cmwp.dat fit_ini.dat flag");
+    puts("./idea_cmwp.exe para_cmwp.dat fit_ini.dat flag th");
+    puts("para_cmwp.dat is a file with all the input parameters (you can use your own)");
+    puts("fit_ini.dat is a file with all the seeds for the fits (you can use your own)");
     puts("flag = 1 if you want to run CMWP and flag = 0 if you only want to create fitting files");
     puts("th is the minimum peak intensity to be fitted (should be between 0 and 10)");
     puts("\nError or suggestions to benatti@ifir-conicet.gov.ar");
@@ -55,9 +59,12 @@ int main(int argc, char ** argv)
     }
     //////////////////////////////////////////////////////////////////////////
     //LECTURA DEL ARCHIVO para_fit2d.dat
-    if((fp = fopen("para_cmwp.dat", "r")) == NULL)
+    //puts("Ingrese el nombre del archivo con los parámetros de entrada");
+    //getval = fgets(buf, sizeof(buf), stdin);
+    //sscanf(buf, "%s", buf1);
+    if((fp = fopen(argv[1], "r")) == NULL)
     {
-        fprintf(stderr, "Error opening file para_cmwp.dat\n");
+        fprintf(stderr, "Error opening file %s\n", argv[1]);
         exit(1);
     }
     getval = fgets(buf_temp, sizeof(buf_temp), fp);
@@ -137,12 +144,16 @@ int main(int argc, char ** argv)
         fprintf(stderr, "Error: Average Gamma > Delta Gamma\n");
         exit(2);
     }
+
     // End of reading the parameter file
     //////////////////////////////////////////////////////////////////////////
     //Reading of initial parameters
-    if((fp_fit = fopen("fit_ini.dat", "r")) == NULL)
+    //puts("Ingrese el nombre del archivo con las semillas para los ajustes");
+    //getval = fgets(buf, sizeof(buf), stdin);
+    //sscanf(buf, "%s", buf1);
+    if((fp_fit = fopen(argv[2], "r")) == NULL)
     {
-        fprintf(stderr, "Error opening file fit_ini.dat\n");
+        fprintf(stderr, "Error opening file %s\n", argv[2]);
         exit(1);
     }
     getval = fgets(buf, 250, fp_fit);//leo el titulo
@@ -183,15 +194,20 @@ int main(int argc, char ** argv)
         case 1:
             break;
         case 2:
-            flag = atoi(argv[1]);
             break;
         case 3:
-            flag = atoi(argv[1]);
-            th = atof(argv[2]);
+            break;
+        case 4:
+            flag = atoi(argv[3]);
+            break;
+        case 5:
+            flag = atoi(argv[3]);
+            th = atof(argv[4]);
             break;
         default:
             printf("Numero incorrecto de argumentos\nUso correcto:\n");
             printf("./idea_cmwp.exe \n./idea_cmwp flag\n./idea_cmwp flag treshold\n");
+            exit(1);
     }
     k = star_d;  // file index number : star_d to end_d
     do //Iteracion sobre todos los spr  

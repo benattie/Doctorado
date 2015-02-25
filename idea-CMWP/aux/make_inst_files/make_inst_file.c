@@ -33,7 +33,9 @@ int main(int argc, char ** argv)
   for(theta = theta0 - range; theta < theta0 + range; theta += step)
   {
     K = 2 * sin(theta * radian) / lambda;
-    fprintf(fp, "%.5lf %.5lf\n", K - K0, pseudo_voigt_n(theta, theta0, eta, H) / I_max);
+    //fprintf(fp, "%.5lf %.5lf\n", K - K0, pseudo_voigt_n(theta, theta0, eta, H) / I_max);
+    
+    fprintf(fp, "%.5lf %.5lf\n", K - K0, pseudo_voigt_n(K, K0, eta, H) / I_max);
   }
   fclose(fp);
   printf("done!\n");
