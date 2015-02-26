@@ -4,20 +4,12 @@ import time
 import subprocess
 from fitting_strategy import update_params
 from sys import stdout
+from functions import searchableitems
 
 
 class cmwp_fit:
     def __init__(self, files, rings, flag):
-        searches = []
-        # float con punto en la mantisa y exponente seguido de un + o -
-        searches.append("[-+]?\d*\.\d+e[-+]\d+")
-        # entero seguido de un exponente segido de un + o -
-        searches.append("[-+]?\d*e[-+]\d+")
-        # float sin exponente
-        searches.append("[-+]?\d*\.\d+")
-        # entero
-        searches.append("[-+]?\d+")
-        find = "%s|%s|%s|%s" % (searches[0], searches[1], searches[2], searches[3])
+        find = searchableitems()
         physsol_name = "%s%s.physsol.csv" % (files.path_base_file, files.base_file)
         fp_physsol = open(physsol_name, "r")
         lines = fp_physsol.readlines()
