@@ -43,11 +43,9 @@ int main(int argc, char ** argv)
     puts("\nIn order to work this executable must be placed in CMWP instalation folder along with the python folder");
     puts("Python 2.7 required");
     puts("\nRun with:\n./idea_cmwp.exe para_cmwp.dat fit_ini.dat");
-    puts("./idea_cmwp.exe para_cmwp.dat fit_ini.dat flag");
-    puts("./idea_cmwp.exe para_cmwp.dat fit_ini.dat flag th");
+    puts("./idea_cmwp.exe para_cmwp.dat fit_ini.dat th");
     puts("para_cmwp.dat is a file with all the input parameters (you can use your own)");
     puts("fit_ini.dat is a file with all the seeds for the fits (you can use your own)");
-    puts("flag = 1 if you want to run CMWP and flag = 0 if you only want to create fitting files");
     puts("th is the minimum peak intensity to be fitted (should be between 0 and 10)");
     puts("\nError or suggestions to benatti@ifir-conicet.gov.ar");
     puts("****************************************************************************");
@@ -186,7 +184,6 @@ int main(int argc, char ** argv)
     if(rv == EOF) printf("\nWARNING: There were problems while reading background data in %s\n", path_base);
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //si le paso el valor de treshold por linea de comandos que se olvide de lo que esta en archivos
-    int flag = 1;
     switch(argc)
     {
         case 1:
@@ -196,15 +193,11 @@ int main(int argc, char ** argv)
         case 3:
             break;
         case 4:
-            flag = atoi(argv[3]);
-            break;
-        case 5:
-            flag = atoi(argv[3]);
             th = atof(argv[4]);
             break;
         default:
             printf("Numero incorrecto de argumentos\nUso correcto:\n");
-            printf("./idea_cmwp.exe para_cmwp.dat fit_ini.dat\n./idea_cmwp para_cmwp.dat fit_ini.dat flag\n./idea_cmwp para_cmwp.dat fit_ini.dat flag treshold\n");
+            printf("./idea_cmwp.exe para_cmwp.dat fit_ini.dat\n./idea_cmwp para_cmwp.dat fit_ini.dat treshold\n");
             exit(1);
     }
     k = star_d;  // file index number : star_d to end_d
@@ -309,21 +302,9 @@ int main(int argc, char ** argv)
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     t2 = time(&t2);
     printf("\nBegin CMWP routine\n");
-    char cmd[100], do_run[2];
-    if(argc < 2)// si no le pase el dato por linea de comandos lo tomo de pantalla
-    {
-        printf("Run CMWP? [(y)/n]\n(If you choose n only configuration and fitting files will be created)\n");
-        rv = scanf("%s", do_run);
-        if(rv == 0 || rv == EOF) printf("Error de lectura\n");
-        do_run[0] = tolower((unsigned char) do_run[0]);
-        if(strcmp(do_run, "n") == 0)
-            flag = 0;
-        else
-            flag = 1;
-    }
-    if(flag == 1)
-        printf("Go ahead and have a cup of tea, this is gonna take a while\n");
-    sprintf(cmd, "python python/cmwp.py %d", flag);
+    char cmd[100];
+    printf("Go ahead and have a cup of tea, this is gonna take a while\n");
+    sprintf(cmd, "python python/cmwp.py %s %s", argv[1], argv[2]);
     rv = system(cmd);
     printf("End CMWP routine with code %d\n", rv);
     t3 = time(&t3);

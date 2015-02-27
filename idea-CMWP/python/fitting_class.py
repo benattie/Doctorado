@@ -8,7 +8,7 @@ from functions import searchableitems
 
 
 class cmwp_fit:
-    def __init__(self, files, rings, flag):
+    def __init__(self, files, rings, fit_data):
         find = searchableitems()
         physsol_name = "%s%s.physsol.csv" % (files.path_base_file, files.base_file)
         fp_physsol = open(physsol_name, "r")
@@ -52,42 +52,30 @@ class cmwp_fit:
                     stdout.write("\r")
                     stdout.write("pattern %d of %d (%2.2f %% completed)" % (n, ptrn_por_spr, float(n_previos + n) / ptrn_total * 100.))
                     stdout.flush()
-                if(flag == 1):
-                    # soluciones fisicas del problema
-                    (physsol_file, bad_fit, result) = update_params(files, rings, spr, pattern, flag, find, bad_fit, result)
-                    if(bad_fit == 1 or physsol_file == ""):
-                        n_bad_fit += 1
-                        reset_parameters(files, spr, pattern)
-                        fp_log.write("Bad fit spr = %d, pattern = %d\n" % (spr, pattern))
-                        # self.sol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern - 1] = -1 * numpy.ones((1, n_sol_variables))
-                        self.physsol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern - 1] = -1 * numpy.ones((1, n_variables))
-                    else:
-                        # guardo todas las soluciones fisicas del fit
-                        fp = open(physsol_file, "r")
-                        lines = fp.readlines()
-                        fp.close()
-                        v = 0
-                        self.header = lines[0].split("\t")
-                        for x in lines[1].split("\t"):
-                            # print(spr, pattern, x)
-                            self.physsol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern - 1][v] = float(x)
-                            v += 1
+                # soluciones fisicas del problema
+                (physsol_file, bad_fit, result) = update_params(files, rings,
+                                                                spr, pattern, find, fit_data, bad_fit, result)
+                if(bad_fit == 1 or physsol_file == ""):
+                    n_bad_fit += 1
+                    reset_parameters(files, spr, pattern)
+                    fp_log.write("Bad fit spr = %d, pattern = %d\n" % (spr, pattern))
+                    # self.sol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern - 1] = -1 * numpy.ones((1, n_sol_variables))
+                    self.physsol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern - 1] = -1 * numpy.ones((1, n_variables))
                     # soluciones matematicas del ajuste
                     for i in range(0, n_sol_variables):
                         self.sol[spr / rings.delta_spr - 1][pattern / rings.delta_pattern - 1][i] = result[i][0]
                         self.solerr[spr / rings.delta_spr - 1][pattern / rings.delta_pattern - 1][i] = result[i][1]
             stdout.write("\n")
-        if(flag == 1):
-            print "\n*******************************"
-            print "*******************************\n"
-            print "Warning: there were %d bad fits" % n_bad_fit
-            print "\n*******************************"
-            print "*******************************\n"
-            fp_log.write("\n*******************************\n")
-            fp_log.write("*******************************\n")
-            fp_log.write("There were %d bad fits" % n_bad_fit)
-            fp_log.write("\n*******************************\n")
-            fp_log.write("*******************************\n")
+        print "\n*******************************"
+        print "*******************************\n"
+        print "Warning: there were %d bad fits" % n_bad_fit
+        print "\n*******************************"
+        print "*******************************\n"
+        fp_log.write("\n*******************************\n")
+        fp_log.write("*******************************\n")
+        fp_log.write("There were %d bad fits" % n_bad_fit)
+        fp_log.write("\n*******************************\n")
+        fp_log.write("*******************************\n")
         fp_log.close()
 
 

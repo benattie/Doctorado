@@ -7,23 +7,23 @@ import sys
 
 # leo el archivo de configuracion
 print("Getting data")
-fp = open('para_cmwp.dat', 'r')
-para_data = fp.readlines()
-files = file_data(para_data)
-rings = fit2d_data(para_data)
+main_input = sys.argv[1]
+fp = open(main_input, 'r')
+main_data = fp.readlines()
+fp.close()
+fit_input = sys.argv[2]
+fp = open(fit_input, 'r')
+fit_data = fp.readlines()
 fp.close()
 
+files = file_data(main_data)
+rings = fit2d_data(main_data)
+
 # CMWP fitting routine
-flag = int(sys.argv[1])
 print("Performing CMWP fitting")
-cmwp_results = cmwp_fit(files, rings, flag)
+cmwp_results = cmwp_fit(files, rings, fit_data)
 
 # pasar a coordenadas de figuras de polos y dar salida a archivos
 print("Print to files")
-success = 0
-if (flag == 1):
-    success = cmwp_out(files, rings, cmwp_results)
-    print("Finished with status code %d" % success.exit)
-else:
-    print("Finished with status code %d" % success)
-# pasar a figura de polos regular
+success = cmwp_out(files, rings, cmwp_results)
+print("Finished with status code %d" % success.exit)

@@ -31,7 +31,7 @@ def searchlineintext(data, chain):
     ln = 0
     while(not(data[ln].startswith(chain))):
         if(ln == len(data) - 1):
-            return (1, 1)
+            return -1
         else:
             ln += 1
     return ln
@@ -54,7 +54,6 @@ def searchableitems():
     searches.append("[-+]?\d+")
     find = "%s|%s|%s|%s" % (searches[0], searches[1], searches[2], searches[3])
     return find
-
 
 """
 Dado el contenido de un archivo (en forma de array)
@@ -89,35 +88,35 @@ filename.
 """
 
 
-def fit_strategy(filename, files, rings, spr, pattern, flag, find):
+def fit_strategy(filename, files, rings, spr, pattern, find, fit_data):
     chain = "# Fitting strategy"
-    (data, ln) = searchlineinfile(filename, chain)
-    if(data == 1):
+    ln = searchlineintext(fit_data, chain)
+    if(ln == -1):
         print "Wrong fit.ini file (there's no fitting strategy)"
-        return -1
+        return 1
     else:
-        fit_int = data[ln + 2].replace("\n", "")
-        nsteps = int(data[ln + 4])
+        fit_int = fit_data[ln + 2].replace("\n", "")
+        nsteps = int(fit_data[ln + 4])
         fit_steps = np.zeros((nsteps, 6), dtype=str)
         for i in range(nsteps):
-            fit_steps[i] = data[ln+6+i].split()
+            fit_steps[i] = fit_data[ln+6+i].split()
 
         if(fit_int.lower() == 'y'):
-            set_fit_intensity(files, rings, spr, pattern, flag, find, "y")
+            set_fit_intensity(files, rings, spr, pattern, find, "y")
             fit_flags = np.array(['0', 'n', 'n', 'n', 'n', 'n'])
             sol_file = set_sol_file(files, rings, spr, pattern)
-            fit_cmwp(files, rings, spr, pattern, flag, find, fit_flags)
-            set_fit_intensity(files, rings, spr, pattern, flag, find, "n")
+            fit_cmwp(files, rings, spr, pattern, find, fit_flags)
+            set_fit_intensity(files, rings, spr, pattern, find, "n")
             sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file, spr, pattern)
             for i in range(nsteps):
-                physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, flag, find, fit_steps[i])
+                physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_steps[i])
         else:
-            set_fit_intensity(files, rings, spr, pattern, flag, find, "n")
+            set_fit_intensity(files, rings, spr, pattern, find, "n")
             set_sol_file(files, rings, spr, pattern)
-            physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, flag, find, fit_steps[0])
+            physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_steps[0])
             sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file, spr, pattern)
             for i in range(1, nsteps):
-                physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, flag, find, fit_steps[i])
+                physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_steps[i])
         return physsol_file
 
 """
@@ -127,7 +126,7 @@ string 'y' o 'n'
 """
 
 
-def set_fit_intensity(files, rings, spr, pattern, flag, find, fit_int):
+def set_fit_intensity(files, rings, spr, pattern, find, fit_int):
     # copio el archivo ini
     origin = "%s%s%s.ini" % (files.path_base_file, files.base_file, files.ext)
     destination = "%s%sspr_%d_pattern_%d%s.ini" % (files.pathout, files.input_file,
@@ -164,7 +163,7 @@ las variables a,b,c,d,e.
 """
 
 
-def fit_cmwp(files, sol_file, rings, spr, pattern, flag, find, fit_flags):
+def fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_flags):
     chain = "a_scaled"
     (lines, ln) = searchlineinfile(sol_file, chain)
     if (lines == 1):
@@ -190,16 +189,15 @@ def fit_cmwp(files, sol_file, rings, spr, pattern, flag, find, fit_flags):
     string += "scale_a=1.0\nscale_b=1.0\nscale_c=1.0\nscale_d=1.0\nscale_e=1.0"
     fp.write(string)
     fp.close()
-    if(flag == 1):
-        # correr el cmwp
-        # cmd = './evaluate %s%sspr_%d_pattern_%d%s auto' % (files.pathout, files.input_file, spr, pattern, files.ext)
-        cmd = 'unset DISPLAY\n'
-        cmd += './evaluate %s%sspr_%d_pattern_%d%s auto >> std_output.txt' % (files.pathout, files.input_file, spr, pattern, files.ext)
-        subprocess.call(cmd, shell=True)
-        # leo el physsol.csv y lo guardo en memoria
-        physsol_file = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file,
-                                                              spr, pattern)
-        return physsol_file
+    # correr el cmwp
+    # cmd = './evaluate %s%sspr_%d_pattern_%d%s auto' % (files.pathout, files.input_file, spr, pattern, files.ext)
+    cmd = 'unset DISPLAY\n'
+    cmd += './evaluate %s%sspr_%d_pattern_%d%s auto >> std_output.txt' % (files.pathout, files.input_file, spr, pattern, files.ext)
+    subprocess.call(cmd, shell=True)
+    # leo el physsol.csv y lo guardo en memoria
+    physsol_file = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file,
+                                                          spr, pattern)
+    return physsol_file
 
 """
 Determina en que archivo tengo que buscar las semillas para el ajuste,
