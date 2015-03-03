@@ -2,47 +2,47 @@ import numpy as np
 import re
 import subprocess
 
-"""
-Buscar una cadena de caracteres en filename
-devolver un array con el contenido de filename y con el numero de linea
-en que aparece chain
-"""
-
 
 def searchlineinfile(filename, chain):
+    """
+    Buscar una cadena de caracteres en filename
+    devolver un array con el contenido de filename y con el numero de linea
+    en que aparece chain
+    """
+
     fp = open(filename, "r")
     lines = fp.readlines()
     fp.close()
     ln = 0
-    while(not(lines[ln].startswith(chain))):
+    while(not(chain in lines[ln])):
         if(ln == len(lines) - 1):
             return (1, 1)
         else:
             ln += 1
     return (lines, ln)
 
-"""
-Buscar una cadena de caracteres en data
-devolvuelve el numero de linea en que aparece chain
-"""
-
 
 def searchlineintext(data, chain):
+    """
+    Buscar una cadena de caracteres en data
+    devolvuelve el numero de linea en que aparece chain
+    """
+
     ln = 0
-    while(not(data[ln].startswith(chain))):
+    while(not(chain in data[ln])):
         if(ln == len(data) - 1):
             return -1
         else:
             ln += 1
     return ln
 
-"""
-Define cadenas de caracteres que me interesan buscar.
-Son todas las formas en que puede aparecer un numero en un archivo
-"""
-
 
 def searchableitems():
+    """
+    Define cadenas de caracteres que me interesan buscar.
+    Son todas las formas en que puede aparecer un numero en un archivo
+    """
+
     searches = []
     # float con punto en la mantisa y exponente seguido de un + o -
     searches.append("[-+]?\d*\.\d+e[-+]\d+")
@@ -55,42 +55,42 @@ def searchableitems():
     find = "%s|%s|%s|%s" % (searches[0], searches[1], searches[2], searches[3])
     return find
 
-"""
-Dado el contenido de un archivo (en forma de array)
-devuelve una lista de cinco elementos conteniendo el resultado
-de los ajustes del cmwp (valor final, error absoluto, error relativo)
-Si no encuentra nada le pone un cero.
-"""
 
+def getcmwpsolutions(data, ln, resultado):
+    """
+    Dado el contenido de un archivo (en forma de array)
+    devuelve una lista de cinco elementos conteniendo el resultado
+    de los ajustes del cmwp (valor final, error absoluto, error relativo)
+    Si no encuentra nada le pone un cero.
+    """
 
-def getcmwpsolutions(data, ln):
     find = searchableitems()
     if(data[ln].startswith("a")):
-        a = np.array(map(float, re.findall(find, data[ln])))
+        resultado[0] = np.array(map(float, re.findall(find, data[ln])))
         ln += 1
     if(data[ln].startswith("b")):
-        b = np.array(map(float, re.findall(find, data[ln])))
+        resultado[1] = np.array(map(float, re.findall(find, data[ln])))
         ln += 1
     if(data[ln].startswith("c")):
-        c = np.array(map(float, re.findall(find, data[ln])))
+        resultado[2] = np.array(map(float, re.findall(find, data[ln])))
         ln += 1
     if(data[ln].startswith("d")):
-        d = np.array(map(float, re.findall(find, data[ln])))
+        resultado[3] = np.array(map(float, re.findall(find, data[ln])))
         ln += 1
     if(data[ln].startswith("e")):
-        e = np.array(map(float, re.findall(find, data[ln])))
+        resultado[4] = np.array(map(float, re.findall(find, data[ln])))
         ln += 1
-    return (a, b, c, d, e)
 
-"""
-Implementa una estrategia de ajuste de CMWP a partir de los datos obtenidos de
-filename.
-"""
+    return resultado
 
 
-def fit_strategy(filename, files, rings, spr, pattern, find, fit_data):
-    chain = "# Fitting strategy"
-    ln = searchlineintext(fit_data, chain)
+def fit_strategy(files, rings, spr, pattern, find, fit_data):
+    """
+    Implementa una estrategia de ajuste de CMWP a partir de los datos obtenidos de
+    filename.
+    """
+
+    ln = searchlineintext(fit_data, "Fitting strategy")
     if(ln == -1):
         print "Wrong fit.ini file (there's no fitting strategy)"
         return 1
@@ -99,34 +99,34 @@ def fit_strategy(filename, files, rings, spr, pattern, find, fit_data):
         nsteps = int(fit_data[ln + 4])
         fit_steps = np.zeros((nsteps, 6), dtype=str)
         for i in range(nsteps):
-            fit_steps[i] = fit_data[ln+6+i].split()
+            fit_steps[i] = fit_data[ln + 6 + i].split()
 
         if(fit_int.lower() == 'y'):
             set_fit_intensity(files, rings, spr, pattern, find, "y")
             fit_flags = np.array(['0', 'n', 'n', 'n', 'n', 'n'])
             sol_file = set_sol_file(files, rings, spr, pattern)
-            fit_cmwp(files, rings, spr, pattern, find, fit_flags)
+            fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_flags)
             set_fit_intensity(files, rings, spr, pattern, find, "n")
             sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file, spr, pattern)
             for i in range(nsteps):
                 physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_steps[i])
         else:
             set_fit_intensity(files, rings, spr, pattern, find, "n")
-            set_sol_file(files, rings, spr, pattern)
+            sol_file = set_sol_file(files, rings, spr, pattern)
             physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_steps[0])
             sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file, spr, pattern)
             for i in range(1, nsteps):
                 physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_steps[i])
-        return physsol_file
-
-"""
-Prepara los archivos .ini del cmwp para que se ajusten las intensidades de los
-picos o no. Esto lo determina el valor de la variable fit_int que debe ser un
-string 'y' o 'n'
-"""
+        return (physsol_file, fit_int.lower(), nsteps)
 
 
 def set_fit_intensity(files, rings, spr, pattern, find, fit_int):
+    """
+    Prepara los archivos .ini del cmwp para que se ajusten las intensidades de los
+    picos o no. Esto lo determina el valor de la variable fit_int que debe ser un
+    string 'y' o 'n'
+    """
+
     # copio el archivo ini
     origin = "%s%s%s.ini" % (files.path_base_file, files.base_file, files.ext)
     destination = "%s%sspr_%d_pattern_%d%s.ini" % (files.pathout, files.input_file,
@@ -156,19 +156,17 @@ def set_fit_intensity(files, rings, spr, pattern, find, fit_int):
     fp.writelines(lines)
     fp.close()
 
-"""
-Prepara los archivos para hacer un ajuste con el CMWP y corre el mismo.
-fit_flags es un vector de caracteres 'y' o 'n' que indican si deben ajustarse
-las variables a,b,c,d,e.
-"""
-
 
 def fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_flags):
-    chain = "a_scaled"
-    (lines, ln) = searchlineinfile(sol_file, chain)
+    """
+    Prepara los archivos para hacer un ajuste con el CMWP y corre el mismo.
+    fit_flags es un vector de caracteres 'y' o 'n' que indican si deben ajustarse
+    las variables a,b,c,d,e.
+    """
+
+    (lines, ln) = searchlineinfile(sol_file, "a_scaled")
     if (lines == 1):
         return 1
-    ln = 0
     a = float(re.findall(find, lines[ln + 0])[0])
     b = float(re.findall(find, lines[ln + 1])[0])
     c = float(re.findall(find, lines[ln + 2])[0])
@@ -199,13 +197,13 @@ def fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_flags):
                                                           spr, pattern)
     return physsol_file
 
-"""
-Determina en que archivo tengo que buscar las semillas para el ajuste,
-en funcion del spr y el pattern en el que me encuentro
-"""
-
 
 def set_sol_file(files, rings, spr, pattern):
+    """
+    Determina en que archivo tengo que buscar las semillas para el ajuste,
+    en funcion del spr y el pattern en el que me encuentro
+    """
+
     # defino cual es el archivo anterior
     if(pattern == rings.pattern_i + rings.delta_pattern):
         spr_prev = spr - rings.delta_spr
