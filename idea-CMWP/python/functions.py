@@ -105,7 +105,7 @@ def fit_strategy(files, rings, spr, pattern, find, fit_data):
             set_fit_intensity(files, rings, spr, pattern, find, "y")
             fit_flags = np.array(['0', 'n', 'n', 'n', 'n', 'n'])
             sol_file = set_sol_file(files, rings, spr, pattern)
-            fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_flags)
+            physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_flags)
             set_fit_intensity(files, rings, spr, pattern, find, "n")
             sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file, spr, pattern)
             for i in range(nsteps):
@@ -142,9 +142,9 @@ def set_fit_intensity(files, rings, spr, pattern, find, fit_int):
     chain = "FIT_LIMIT"
     ln = searchlineintext(lines, chain)
     if(fit_int == "y"):
-        lines[ln] = "FIT_LIMIT=1e-9\n"
+        lines[ln] = "FIT_LIMIT=1e-8\n"
     else:
-        lines[ln] = "FIT_LIMIT=1e-12\n"
+        lines[ln] = "FIT_LIMIT=1e-10\n"
     chain = "peak_pos_fit"
     ln = searchlineintext(lines, chain)
     if(lines == 1):
@@ -177,8 +177,7 @@ def fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_flags):
     #     ln += 1
     # st_pr = float(re.findall(find, lines[ln + 1])[0])
     # genero el archivo .fit.ini
-    fit_ini = "%s%sspr_%d_pattern_%d%s.fit.ini" % (files.pathout, files.input_file,
-                                                   spr, pattern, files.ext)
+    fit_ini = "%s%sspr_%d_pattern_%d%s.fit.ini" % (files.pathout, files.input_file, spr, pattern, files.ext)
     fp = open(fit_ini, "w")
     string = "init_a=%f\ninit_b=%f\ninit_c=%f\n" % (a, b, c)
     string += "init_d=%f\ninit_e=%f\ninit_epsilon=1.0\n" % (d, e)
@@ -190,11 +189,10 @@ def fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_flags):
     # correr el cmwp
     # cmd = './evaluate %s%sspr_%d_pattern_%d%s auto' % (files.pathout, files.input_file, spr, pattern, files.ext)
     cmd = 'unset DISPLAY\n'
-    cmd += './evaluate %s%sspr_%d_pattern_%d%s auto >> std_output.txt' % (files.pathout, files.input_file, spr, pattern, files.ext)
+    cmd += './evaluate %s%sspr_%d_pattern_%d%s auto >> %sstd_output.txt' % (files.pathout, files.input_file, spr, pattern, files.ext, files.input_file)
     subprocess.call(cmd, shell=True)
     # leo el physsol.csv y lo guardo en memoria
-    physsol_file = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file,
-                                                          spr, pattern)
+    physsol_file = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file, spr, pattern)
     return physsol_file
 
 
@@ -207,7 +205,7 @@ def set_sol_file(files, rings, spr, pattern):
     # defino cual es el archivo anterior
     if(pattern == rings.pattern_i + rings.delta_pattern):
         spr_prev = spr - rings.delta_spr
-        pattern_prev = rings.pattern_i
+        pattern_prev = rings.pattern_i + rings.delta_pattern
     else:
         spr_prev = spr
         pattern_prev = pattern - rings.delta_pattern

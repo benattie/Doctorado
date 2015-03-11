@@ -34,14 +34,14 @@ def update_params(files, rings, spr, pattern, find, fit_data, bad_fit, fit_resul
         subprocess.call(["cp", origin, destination])
         physsol_file = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file,
                                                               spr, pattern)
+        (physsol_file, fit_int, nsteps) = fit_strategy(files, rings, spr, pattern, find, fit_data)
+        (bad_fit, fit_result) = check_fit(files, spr, pattern, find, fit_int, nsteps)
     else:
-        (physsol_file, fit_int, nsteps) = fit_strategy(files, rings, spr,
-                                                       pattern, find, fit_data)
+        (physsol_file, fit_int, nsteps) = fit_strategy(files, rings, spr, pattern, find, fit_data)
         if(physsol_file == 1):
             "Mal ajuste en spr = %d y pattern = %d\n" % (spr, pattern)
             return ("", 1, 1)
-        (bad_fit, fit_result) = check_fit(files, spr, pattern, find,
-                                          fit_int, nsteps)
+        (bad_fit, fit_result) = check_fit(files, spr, pattern, find, fit_int, nsteps)
     return (physsol_file, bad_fit, fit_result)
 
 
@@ -91,6 +91,6 @@ def check_fit(files, spr, pattern, find, fit_int, nsteps):
 
     bad_fit = 0
     for x in fit_result[:, 2]:
-        if (x > 100 or isnan(x)):
+        if (x > 500 or isnan(x)):
             bad_fit = 1
     return (bad_fit, fit_result)

@@ -8,7 +8,7 @@
 #include "aux_functions.h"
 #include "pv_steps.c"
 
-void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double * intens, double ** seeds)
+void pv_fitting(char basename[1024], int exists, exp_data * sync_data, peak_data * difra, double * intens, double ** seeds)
 {
 //    printf("Inicio pv_fitting\n");
     // variables auxiliares del programa
@@ -45,8 +45,11 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double * in
  
     //creacion de un logfile con la entrada y salida de las semillas, asi no deberia tener que sacarlos resultados a pantalla para hacer un control de como va el fiteo
     //OJO sigue mas abajo!!!
-    FILE * fp_logfile = fopen("fit_results.log", "a");
-    fprintf(fp_logfile, "spr: %d gamma :%d\nsemilla inicial\n", (*difra).spr, (*difra).gamma + 1);
+    char error_filename[1024];
+    int rv;
+    rv = sprintf(error_filename, "%spvfit_result.log", basename); 
+    FILE * fp_logfile = fopen(error_filename, "a");
+    fprintf(fp_logfile, "spr: %d gamma :%d\nsemilla inicial\n", (*difra).spr, (*difra).gamma);
     print_seeds2file(fp_logfile, peak_seeds[exists], fit_errors, seeds_size, (*difra).bg, (*difra).n_bg);
    
 //    printf("Inicio de las iteraciones\n");
@@ -117,7 +120,7 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double * in
             double theta = peak_seeds[1][n], H = peak_seeds[1][0], eta = peak_seeds[1][1];
             //double I = pseudo_voigt(theta, difra->numrings, I0, t0, H, eta, shift_H, shift_eta, difra->n_bg, bg_pos, difra->bg[1]);
             double I = pseudo_voigt(theta, n_peaks, I0, t0, H, eta, shift_H, shift_eta, difra->n_bg, bg_pos, difra->bg[1]);
-            fprintf(fp, "%.5lf %.5lf %d 0\n", peak_seeds[1][n], 0.7 * I, difra->hkl[i]);
+            fprintf(fp, "%.5lf %.5lf %d 0\n", peak_seeds[1][n], 0.9 * I, difra->hkl[i]);
             n += 4;
         }
     }    

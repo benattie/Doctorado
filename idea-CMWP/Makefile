@@ -3,8 +3,8 @@
 FILE1 = pseudo_voigt
 FILE2 = array_alloc
 FILE3 = aux_functions
-CFLAGS = -Wall -O3 -I/usr/include
-LIBS = -L/usr/lib -lgsl -lgslcblas -lm
+CFLAGS = -Wall -O3 -I/share/apps/gsl-1-16/
+LIBS = -L/share/apps/gsl-1-16/lib -lgsl -lgslcblas -lm
 CC = gcc
 
 idea_cmwp: idea_cmwp.c

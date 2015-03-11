@@ -291,7 +291,7 @@ int main(int argc, char ** argv)
                 peak_shape_data shapes = {fwhm, eta, breadth};
                 peak_data difra = {numrings, bg_size, k, star_d, y + 1, del_gam, th, miller, dostheta, av_pattern, bg_seed, fit_inten, &shapes, &fit_errors};
                 //Int, fwhm & eta fitting
-                pv_fitting(exists, &sync_data, &difra, av_intensity, seeds);
+                pv_fitting(filename1, exists, &sync_data, &difra, av_intensity, seeds);
                 exists = 1;
             }//if((y % del_gam) == 0) printf("Fin (%d %d)\n", k, y);
         }//end of for routine for(y = 1; y <= gamma; y++)
@@ -326,7 +326,8 @@ int main(int argc, char ** argv)
     free_r3_tensor_double(breadth_err, 40, 500);
     t4 = time(&t4);
     time_spent = difftime(t4, t1);
-    fp_log = fopen("errors.log", "a");
+    sprintf(buf, "%sexec_time.log", filename1);
+    fp_log = fopen(buf, "a");
     sprintf(buf, "---------------------------------------------\n");
     sprintf(buf_temp, "Tiempo de ejecucion total del programa: %.2lf segundos\n", time_spent);
     strcat(buf, buf_temp);
@@ -351,9 +352,9 @@ int main(int argc, char ** argv)
     printf("%s", buf);
     fprintf(fp_log, "%s", buf);
     fclose(fp_log);
-    sprintf(buf, "cp errors.log fit_results.log %scmwp_idea_files", path_out);
+    sprintf(buf, "cp exec_time.log %serrors.log %spvfit_result.log %scmwp_idea_files", filename1, filename1, path_out);
     rv = system(buf);
-    puts("Programa finalizado.\nConsulte los archivos fit_results.log y errors.log para ver detalles sobre los ajustes");
+    printf("Programa finalizado.\nConsulte los archivos %spvfit_result.log, %serrors.log y exec_time.log para ver mas detalles\n", filename1, filename1);
     printf("\nNo importa la realidad, sólo la verosimilitud\n");
     return 0;
 } //End of Main()
