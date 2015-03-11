@@ -28,7 +28,8 @@ class cmwp_out:
         fp_physsol.flush()
 
         k = 0  # contador del archivo mtex
-        spr = rings.spr_i # indice que me marca el spr
+        spr = rings.spr_i  # indice que me marca el spr
+        ptrn_i = rings.pattern_i + rings.delta_pattern
         # tranformacion angular (gamma, omega) -> (alpha, beta)
         for omega in range(rings.omega_i, rings.omega_f + 1, rings.delta_omega):
             pattern = rings.pattern_i
@@ -49,14 +50,16 @@ class cmwp_out:
                 # salida al archivo con los valores del ajuste
                 fp_sol.write("%4d %8.4f %8.4f %8.4f %8.4f " % (k + 1, 2 * rings.theta[m], rings.theta[m], alpha, beta))
                 for i in range(0, cmwp_results.sol.shape[2]):
-                    fp_sol.write("%8.5f %8.5f " % (cmwp_results.sol[(spr - rings.spr_i) / rings.delta_spr][(pattern - rings.pattern_i) / rings.delta_pattern][i],
-                                                   cmwp_results.solerr[(spr - rings.spr_i) / rings.delta_spr][(pattern - rings.pattern_i) / rings.delta_pattern][i]))
+
+                    # soluciones matematicas del ajuste
+                    fp_sol.write("%8.5f %8.5f " % (cmwp_results.sol[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i],
+                                                   cmwp_results.solerr[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i]))
                 fp_sol.write("\n")
 
                 # salida al archivo con las soluciones fisicas
                 fp_physsol.write("%8d %8.4f %8.4f %8.4f %8.4f " % (k + 1, 2 * rings.theta[m], rings.theta[m], alpha, beta))
                 for i in range(0, cmwp_results.physsol.shape[2]):
-                    fp_physsol.write("%8.5f " % (cmwp_results.physsol[(spr - rings.spr_i) / rings.delta_spr][(pattern - rings.pattern_i) / rings.delta_pattern][i]))
+                    fp_physsol.write("%8.5f " % (cmwp_results.physsol[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern]))
                 fp_physsol.write("\n")
 
                 # siguiente dato

@@ -7,12 +7,13 @@
 #include "array_alloc.h"
 #include "aux_functions.h"
 #include "pv_steps.c"
+#include <time.h>
 
 void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double * intens, double ** seeds)
 {
     //printf("Inicio pv_fitting\n");
     //variables auxiliares del programa
-    int i, bad_fit, zero_peak_index[(*difra).numrings];
+    int i, bad_fit, zero_peak_index[difra->numrings];
     //elimino los picos que tienen una intensidad menor que treshold
     int n_peaks = check_for_null_peaks(difra->treshold, (*difra).numrings, zero_peak_index, intens);
     int seeds_size = 4 * n_peaks + 2, all_seeds_size = 4 * (*difra).numrings + 2;
@@ -41,9 +42,11 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double * in
  
     //creacion de un logfile con la entrada y salida de las semillas, asi no deberia tener que sacarlos resultados a pantalla para hacer un control de como va el fiteo
     //OJO sigue mas abajo!!!
-    FILE * fp_logfile = fopen("fit_results.log", "a");
-    fprintf(fp_logfile, "spr: %d gamma :%d\nsemilla inicial\n", (*difra).spr, (*difra).gamma + 1);
-    print_seeds2file(fp_logfile, peak_seeds[exists], fit_errors, seeds_size, (*difra).bg, (*difra).n_bg);
+    char fitlogname[1024];
+    sprintf(fitlogname, "%sfit_results", sync_data->root_name);
+    FILE * fp_logfile = fopen(fitlogname, "a");
+    fprintf(fp_logfile, "spr: %d gamma: %d\nsemilla inicial\n", difra->spr, difra->gamma);
+    print_seeds2file(fp_logfile, peak_seeds[exists], fit_errors, seeds_size, difra->bg, difra->n_bg);
    
     //printf("Inicio de las iteraciones\n");
     //printf("Paso 1\n");
@@ -73,6 +76,42 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double * in
     fflush(fp_logfile);
     fclose(fp_logfile);
    
+    //printf("Impresion del patron ajustado\n");
+    if(strcmp(sync_data->printdata, "y") == 0 || strcmp(sync_data->printdata, "Y") == 0){
+        char filename[256];
+        FILE *fp;
+        int n;
+        double t0[n_peaks], I0[n_peaks], shift_H[n_peaks], shift_eta[n_peaks];
+    
+        sprintf(filename, "%sfitted_pattern/%sspr_%d_pattern_%d.dat", sync_data->path_out, sync_data->root_name, difra->spr, difra->gamma);
+        if((fp = fopen(filename, "w")) == NULL){
+            fprintf(stderr, "Error opening file %s\n", filename); exit(1);
+        }
+
+        n = 0;
+        for(i = 2; i < seeds_size; i += 4){
+          t0[n] = peak_seeds[1][i]; 
+          I0[n] = peak_seeds[1][i + 1];
+          shift_H[n] = peak_seeds[1][i + 2];
+          shift_eta[n] = peak_seeds[1][i + 3];
+          n++;
+        }
+        double H, eta, I;
+        for(i = 0; i < net_size; i++){
+            if(gsl_vector_get(y, i)){
+                H = peak_seeds[1][0], eta = peak_seeds[1][1];
+                I = pseudo_voigt(gsl_vector_get(ttheta, i), n_peaks, I0, t0, H, eta, shift_H, shift_eta, difra->n_bg, bg_pos, difra->bg[1]);
+                fprintf(fp, "%.5lf %.5lf %.5lf\n", gsl_vector_get(ttheta, i), gsl_vector_get(y, i), I);
+            }else{
+                H = peak_seeds[1][0], eta = peak_seeds[1][1];
+                I = pseudo_voigt(gsl_vector_get(ttheta, i), n_peaks, I0, t0, H, eta, shift_H, shift_eta, difra->n_bg, bg_pos, difra->bg[1]);
+                fprintf(fp, "%.5lf %.5lf %.5lf\n", gsl_vector_get(ttheta, i), 1.0, I);
+            }
+        }
+        fflush(fp);
+        fclose(fp);
+    }
+
     //printf("Correccion y salida de los resultados\n");
     bad_fit = fit_result(all_seeds_size, peak_seeds, fit_errors, zero_peak_index, sync_data, difra);
     if(bad_fit) 

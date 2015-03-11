@@ -1,12 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-//#include <fcntl.h>
-//#include <ctype.h>
 #include <string.h>
-//#include <unistd.h>
-//#include <sys/types.h>
-//#include <sys/stat.h>
 #include <time.h>
 
 #include "pv.c"
@@ -36,7 +31,7 @@ int main(int argc, char ** argv)
  double ***breadth_err = r3_tensor_double_alloc(40, 500, 10);
  double ** seeds, ** bg_seed;
  char buf_temp[1024], buf[1024], buf1[1024];
- char path_out[150], path [150], filename[100], inform[10];
+ char path_out[150], path [150], filename[100], inform[10], printfit[16];
  char alldatafile[200];
  char marfile[150];
  FILE *fp, *fp1, *fp_IRF, *fp_fit, *fp_all;
@@ -49,13 +44,14 @@ int main(int argc, char ** argv)
  puts("\nProgram for generating the pole figures from Fit2D data.\nCoodinate-transformation to MTEX-Format.");
  puts("Pole figure in MTEX-readable format xxx_Nr.mtex.");
  puts("\nThe angular values of Omega and Gamma, from the parameter file\n");
- puts("Options: \n 1. Replacement negative intensity values to ZERO\n 2. Intensity correction with LogFile.txt\n");
  puts("Error or suggestion to sangbong.yi@hzg.de");
  puts("Error or suggestion with respect to generalized pole figure routin to benatti@ifir-conicet.gov.ar");
+ puts("Run with ./idea.exe parameter_file.dat fit_ini.ini IRF.dat");
+ puts("Run with ./idea.exe parameter_file.dat fit_ini.ini IRF.dat treshold");
  puts("\n****************************************************************************");
  //LECTURA DEL ARCHIVO para_fit2d.dat
- if((fp = fopen("para_fit2d.dat", "r")) == NULL ){
-     fprintf(stderr, "Error opening file para_fit2d.txt\n"); exit(1);
+ if((fp = fopen(argv[1], "r")) == NULL ){
+     fprintf(stderr, "Error opening file %s\n", argv[1]); exit(1);
  }
  //path hacia los archivos de salida
  getval = fgets(buf_temp, 22, fp);
@@ -111,9 +107,12 @@ int main(int argc, char ** argv)
     //Distancia que cubre un pixel en el difractograma
     getval = fgets(buf_temp, 22, fp);
     rv = fscanf(fp, "%lf", &pixel); getval = fgets(buf_temp, 2, fp);
-    //umbral que determinal cual es la intensidad minima para que ajusto un pico
+    //umbral que determina cual es la intensidad minima para que ajusto un pico
     getval = fgets(buf_temp, 22, fp);
     rv = fscanf(fp, "%lf", &th); getval = fgets(buf_temp, 2, fp);
+    // pregunto si imprimo los archivos con los ajustes
+    getval = fgets(buf_temp, 22, fp);
+    rv = fscanf(fp, "%s", printfit); getval = fgets(buf_temp, 2, fp);
     //skip lines
     getval = fgets(buf_temp, 20, fp); getval = fgets(buf_temp, 20, fp);
     //numero de picos a analizar 
@@ -130,23 +129,23 @@ int main(int argc, char ** argv)
         rv = fscanf(fp, "%d", &ug_r[i]); //bin de bg a la derecha del pico
     }// End of reading the parameter file for(i=0;i<numrings;i++)
     if(getval == NULL) 
-        printf("\nWARNING (fgets): There were problems while reading para_fit2d.dat\n");
+        printf("\nWARNING (fgets): There were problems while reading %s\n", argv[1]);
     if(rv == 0 || rv == EOF) 
-        printf("\nWARNING (fscanf): there were problems reading param data in para_fit2d.dat (%d)\n", rv);
+        printf("\nWARNING (fscanf): there were problems reading param data in %s (%d)\n", argv[1], rv);
 
     getval = fgets(buf_temp, 2, fp); //skip line
     //Reading of intrumental width files
-    if((fp_IRF = fopen("IRF.dat", "r")) == NULL ){
-        fprintf(stderr, "Error opening file IRF.dat\n"); exit(1);
+    if((fp_IRF = fopen(argv[3], "r")) == NULL ){
+        fprintf(stderr, "Error opening file %s\n", argv[3]); exit(1);
     }
     ins = read_IRF(fp_IRF);
     fclose(fp_IRF);
     if(getval == NULL) 
-        printf("\nWARNING (fgets): There were problems while reading IRF.dat\n");
+        printf("\nWARNING (fgets): There were problems while reading %s\n", argv[3]);
 
     //Reading of initial parameters
-    if((fp_fit = fopen("fit_ini.dat", "r")) == NULL ){
-        fprintf(stderr, "Error opening file fit_ini.dat\n"); exit(1);
+    if((fp_fit = fopen(argv[2], "r")) == NULL ){
+        fprintf(stderr, "Error opening file %s\n", argv[2]); exit(1);
     }
     getval = fgets(buf, 250, fp_fit);//leo el titulo
     getval = fgets(buf, 250, fp_fit);//leo el encabezado
@@ -159,17 +158,33 @@ int main(int argc, char ** argv)
     read_file(fp_fit, seeds, seeds_size, bg_seed, bg_size);
     //print_seeds(seeds[0], seeds_size, bg_seed, bg_size);
     if(getval == NULL) 
-        printf("\nWARNING (fgets): There were problems while reading fit_ini.dat\n");
+        printf("\nWARNING (fgets): There were problems while reading %s\n", argv[2]);
+    fclose(fp_fit);
 
     //imprime en pantalla los datos relevantes de cada pico 
     for(i = 0; i < numrings; i++)
         printf("Position of [%d]ring = Theta:%6.3f  %8d%8d%8d%8d\n", i + 1, theta[i], posring_l[i], posring_r[i], ug_l[i], ug_r[i]);
 
     //si le paso el valor de treshold por linea de comandos que se olvide de lo que esta en archivo
-    if(argc == 2)
-      th = atof(argv[1]);
+    if(argc == 5)
+      th = atof(argv[4]);
     //printf("\n\n%lf\n\n", th);
     //getchar();
+    timer = time(NULL); // present time in sec
+    zeit = localtime(&timer); // save "time in sec" into structure tm
+    if((fp_fit = fopen("fit_results.log", "a")) == NULL ){
+        fprintf(stderr, "Error opening file fit_results.dat\n"); exit(1);
+    }
+    fprintf(fp_fit, "\n------------------------------------------");
+    fprintf(fp_fit, "\nIDEA FIT RESULTS: %2d-%2d-%4d %2d:%2d:%2d\n", zeit->tm_mday, zeit->tm_mon + 1, zeit->tm_year + 1900, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
+    fprintf(fp_fit, "\n------------------------------------------\n");
+    fclose(fp_fit); 
+    char cmd[100];
+    printf("Create fitting result directory\n");
+    sprintf(cmd, "mkdir %sfitted_pattern", path_out);
+    printf("done!\n");
+    fflush(stderr);
+    rv = system(cmd);
 
     for(k = star_d; k <= end_d; k += del_d){ //Iteracion sobre todos los spr  
         //selecciono el archivo spr que voy a procesar
@@ -217,7 +232,7 @@ int main(int argc, char ** argv)
             eta_err[0][0][n] = -1;
             breadth_err[0][0][n] = -1;
         }
-        
+
         //printf("Data Read-in\n");
         for(y = 1; y <= gamma; y++){ //itero sobre todos los difractogramas (360) (recorro el anillo de Debye)
             for(x = 1; x <= pixel_number; x++){ //iteracion dentro de cada uno de los difractogramas (con 1725 puntos) (cada porcion del anillo de Debye)
@@ -257,7 +272,7 @@ int main(int argc, char ** argv)
                 for(n = 0; n < numrings; n++)
                     sabo_inten[k][y][n] = peak_intens_av[n];
                 //structure holding syncrotron's information
-                exp_data sync_data = {dist, pixel, pixel_number, ins};
+                exp_data sync_data = {dist, pixel, pixel_number, ins, path_out, filename, printfit};
                 //structure holding difractograms and fitting information
                 err_fit_data fit_errors = {fit_inten_err, fwhm_err, eta_err, breadth_err};
                 peak_shape_data shapes = {fwhm, fwhm_ins, eta, eta_ins, breadth, breadth_ins};
@@ -319,18 +334,6 @@ int main(int argc, char ** argv)
                     alpha = 180 - alpha;
                     beta = 360 - beta;
                 }
-                //
-                // Veremos si con esto invierto correctamente el hemisferio sur
-                /*
-                if(neu_ome > 90){
-                    if(beta > 0 && beta <= 90)
-                        beta = 360 - beta;
-                    if(beta > 270 && beta < 360)
-                        beta = 360 - beta;
-                }
-                */
-
-
                 //correccion de los datos mal ajustados
                 if(fwhm[n][j + del_gam][m] == -1.0){
                     smooth(fwhm, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);

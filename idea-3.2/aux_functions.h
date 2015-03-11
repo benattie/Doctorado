@@ -24,6 +24,9 @@ typedef struct exp_data
     double pixel;
     int size;
     IRF ins;
+    char * path_out;
+    char * root_name;
+    char * printdata;
 } exp_data;
 //estructura con los errores de los fiteos
 typedef struct err_fit_data

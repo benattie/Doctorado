@@ -80,7 +80,6 @@ def getcmwpsolutions(data, ln, resultado):
     if(data[ln].startswith("e")):
         resultado[4] = np.array(map(float, re.findall(find, data[ln])))
         ln += 1
-
     return resultado
 
 
