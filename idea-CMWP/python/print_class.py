@@ -2,10 +2,6 @@
 from winkel_fns import winkel_al, winkel_be
 from functions import organize_files
 import time
-from os import chdir
-from os import listdir
-from subprocess import call
-from shutil import move
 
 
 class cmwp_out:
@@ -70,5 +66,5 @@ class cmwp_out:
         fp_sol.close()
         fp_physsol.flush()
         fp_physsol.close()
-    organize_files(files)
-    self.exit = 0
+        organize_files(files)
+        self.exit = 0

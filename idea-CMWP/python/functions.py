@@ -1,6 +1,12 @@
 import numpy as np
 import re
 import subprocess
+from os import chdir
+from os import listdir
+from subprocess import call
+from shutil import move
+
+
 
 
 def searchlineinfile(filename, chain):
