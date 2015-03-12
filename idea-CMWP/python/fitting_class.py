@@ -23,7 +23,8 @@ class cmwp_fit:
         self.sol = numpy.zeros((n_spr, n_pattern, n_sol_variables))
         self.solerr = numpy.zeros((n_spr, n_pattern, n_sol_variables))
         self.physsol = numpy.zeros(shape)
-        self.header = ""
+        title = lines[0].replace("#", "")
+        self.header = title.split()
         ptrn_i = rings.pattern_i + rings.delta_pattern
         ptrn_f = rings.pattern_f + rings.delta_pattern
         ptrn_por_spr = (ptrn_f - ptrn_i) / rings.delta_pattern + 1
