@@ -212,3 +212,29 @@ def set_sol_file(files, rings, spr, pattern):
     sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file,
                                               spr_prev, pattern_prev)
     return sol_file
+
+
+def organize_files(files):
+    # me voy a la carpeta con los datos
+    chdir(files.pathout)
+    folder = "cmwp_idea_pole_figures"
+    call(["mkdir", folder])
+    source = listdir("./")
+    for datafile in source:
+        if datafile.endswith(".mtex"):
+            move(datafile, folder)
+    folder = "cmwp_idea_files"
+    call(["mkdir", folder])
+    source = listdir("./")
+    for datafile in source:
+        if datafile.startswith(files.input_file):
+            move(datafile, folder)
+    # me voy a la carpeta con todos los resultados del ajuste
+    results = files.results_folder + files.pathout
+    chdir(results)
+    folder = "cmwp_idea_fit_files"
+    call(["mkdir", folder])
+    source = listdir("./")
+    for datafile in source:
+        if datafile.startswith(files.input_file):
+            move(datafile, folder)
