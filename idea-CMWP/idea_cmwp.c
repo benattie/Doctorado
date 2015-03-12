@@ -352,7 +352,7 @@ int main(int argc, char ** argv)
     printf("%s", buf);
     fprintf(fp_log, "%s", buf);
     fclose(fp_log);
-    sprintf(buf, "cp exec_time.log %serrors.log %spvfit_result.log %scmwp_idea_files", filename1, filename1, path_out);
+    sprintf(buf, "cp %sexec_time.log %serrors.log %spvfit_result.log %scmwp_idea_files", filename1, filename1, filename1, path_out);
     rv = system(buf);
     printf("Programa finalizado.\nConsulte los archivos %spvfit_result.log, %serrors.log y exec_time.log para ver mas detalles\n", filename1, filename1);
     printf("\nNo importa la realidad, sólo la verosimilitud\n");

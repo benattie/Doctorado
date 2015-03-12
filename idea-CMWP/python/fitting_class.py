@@ -61,10 +61,10 @@ class cmwp_fit:
                     reset_parameters(files, spr, pattern)
                     fp_log.write("Bad fit spr = %d, pattern = %d\n" % (spr, pattern))
                     self.physsol[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern] = -1 * numpy.ones((1, n_variables))
-                    # soluciones matematicas del ajuste
-                    for i in range(0, n_sol_variables):
-                        self.sol[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i] = result[i][0]
-                        self.solerr[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i] = result[i][1]
+                # soluciones matematicas del ajuste
+                for i in range(0, n_sol_variables):
+                    self.sol[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i] = result[i][0]
+                    self.solerr[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i] = result[i][1]
             stdout.write("\n")
         print "\n*******************************"
         print "*******************************\n"
