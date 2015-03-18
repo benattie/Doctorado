@@ -208,12 +208,16 @@ def set_sol_file(files, rings, spr, pattern):
     """
 
     # defino cual es el archivo anterior
-    if(pattern == rings.pattern_i + rings.delta_pattern):
-        spr_prev = spr - rings.delta_spr
+    if(spr == rings.spr_i and pattern == rings.pattern_i + rings.delta_pattern):
+        spr_prev = spr
         pattern_prev = rings.pattern_i + rings.delta_pattern
     else:
-        spr_prev = spr
-        pattern_prev = pattern - rings.delta_pattern
+        if(pattern == rings.pattern_i + rings.delta_pattern):
+            spr_prev = spr - rings.delta_spr
+            pattern_prev = rings.pattern_i + rings.delta_pattern
+        else:
+            spr_prev = spr
+            pattern_prev = pattern - rings.delta_pattern
     # leo los resultados del archivo anterior
     sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file,
                                               spr_prev, pattern_prev)
