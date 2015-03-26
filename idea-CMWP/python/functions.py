@@ -109,7 +109,8 @@ def fit_strategy(files, rings, spr, pattern, find, fit_data):
         if(fit_int.lower() == 'y'):
             set_fit_intensity(files, rings, spr, pattern, find, "y")
             fit_flags = np.array(['0', 'n', 'n', 'n', 'n', 'n'])
-            sol_file = set_sol_file(files, rings, spr, pattern)
+            # sol_file = set_sol_file(files, rings, spr, pattern)
+            sol_file = set_sol_file(files, rings, rings.spr_i, rings.pattern_i + rings.delta_pattern)
             physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_flags)
             set_fit_intensity(files, rings, spr, pattern, find, "n")
             sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file, spr, pattern)
@@ -117,7 +118,8 @@ def fit_strategy(files, rings, spr, pattern, find, fit_data):
                 physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_steps[i])
         else:
             set_fit_intensity(files, rings, spr, pattern, find, "n")
-            sol_file = set_sol_file(files, rings, spr, pattern)
+            # sol_file = set_sol_file(files, rings, spr, pattern)
+            sol_file = set_sol_file(files, rings, rings.spr_i, rings.pattern_i + rings.delta_pattern)
             physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_steps[0])
             sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file, spr, pattern)
             for i in range(1, nsteps):

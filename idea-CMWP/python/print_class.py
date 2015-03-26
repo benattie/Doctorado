@@ -56,7 +56,7 @@ class cmwp_out:
                 # salida al archivo con las soluciones fisicas
                 fp_physsol.write("%8d %8.4f %8.4f %8.4f %8.4f " % (k + 1, 2 * rings.theta[m], rings.theta[m], alpha, beta))
                 for i in range(0, cmwp_results.physsol.shape[2]):
-                    fp_physsol.write("%8.5f " % (cmwp_results.physsol[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern]))
+                    fp_physsol.write("%8.5f " % (cmwp_results.physsol[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i]))
                 fp_physsol.write("\n")
 
                 # siguiente dato
