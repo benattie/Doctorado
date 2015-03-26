@@ -455,11 +455,7 @@ void williamson_hall_plot(int nlines, aux_data * adata, crystal_data * cdata, do
     {
         l = 0;
         for(j = 0; j < nparams; j++)
-        {
-          //printf("\ninicio %d\n", j);
-          memset(out_params[j], 0, sizeof(double) * results_size);
-          //printf("\nfin %d\n", j);
-        }
+            memset(out_params[j], 0, sizeof(double) * results_size);
         if((i % 400) == 0) printf("\nCompletado en un %d %%", (i * 100) / nlines);
         for(delta = beta_min; delta < beta_max; delta += beta_step)
         {
@@ -565,7 +561,7 @@ void print_results(file_data * fdata, FILE * fp, double ** fit_results, linear_f
 {
     int i, j;
     double b2 = pow(cdata->burgersv, 2);
-    double c = 2. / (M_PI * b2), wh_results[fit_data->n_out_params][nlines];
+    double c = 2. / (M_PI * b2), wh_results[fit_data->n_out_params][nlines]; // c = 1 / alpha
     if(strcmp(fdata->is_H, "FWHM") == 0)
     {
         fprintf(fp, "# alpha        beta          delta     q       Ch00       D(nm)    M^4 \\ro(1/nm^2)    R    chi2\n");
@@ -586,7 +582,7 @@ void print_results(file_data * fdata, FILE * fp, double ** fit_results, linear_f
     }
     else
     {
-        fprintf(fp, "# alpha        beta          delta     q       Ch00       D(nm)    M^2 \\ro(1/nm^2)    R    chi2\n");
+        fprintf(fp, "# alpha        beta          delta     q       Ch00       D(nm)    M^4 \\ro(1/nm^2)    R    chi2\n");
         for(i = 0; i < nlines; i++)
         {
             wh_results[0][i] = fit_results[0][i]; //delta
@@ -598,7 +594,7 @@ void print_results(file_data * fdata, FILE * fp, double ** fit_results, linear_f
             wh_results[6][i] = fit_results[6][i]; //chisq
             fprintf(fp, "%d %lf    %lf    ", i + 1, angles->alpha_grad[0][i], angles->beta_grad[0][i]);
             for(j = 0; j < 7; j++)
-                fprintf(fp, "%7.5lf  ", wh_results[j][i]);
+                fprintf(fp, "% 7.5lE  ", wh_results[j][i]);
             fprintf(fp, "\n");
         }
     }//end if(strcmp(fdata->is_H, "FWHM") == 0)
