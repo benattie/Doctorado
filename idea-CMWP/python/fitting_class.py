@@ -5,6 +5,7 @@ import subprocess
 from fitting_strategy import update_params
 from sys import stdout
 from functions import searchableitems
+from shutil import rmtree
 
 
 class cmwp_fit:
@@ -66,6 +67,8 @@ class cmwp_fit:
                     self.sol[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i] = result[i][0]
                     self.solerr[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i] = result[i][1]
             stdout.write("\n")
+            remove_folder = "%s%s%sspr_%d_pattern_*" % (files.results_folder, files.pathout, files.input_file, spr)
+            rmtree(remove_folder)
         print "\n*******************************"
         print "*******************************\n"
         print "Warning: there were %d bad fits" % n_bad_fit

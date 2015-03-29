@@ -7,8 +7,6 @@ from subprocess import call
 from shutil import move
 
 
-
-
 def searchlineinfile(filename, chain):
     """
     Buscar una cadena de caracteres en filename

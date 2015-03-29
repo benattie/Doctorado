@@ -576,7 +576,7 @@ void print_results(file_data * fdata, FILE * fp, double ** fit_results, linear_f
             wh_results[6][i] = fit_results[6][i]; //chisq
             fprintf(fp, "%d %lf    %lf    ", i + 1, angles->alpha_grad[0][i], angles->beta_grad[0][i]);
             for(j = 0; j < 7; j++)
-                fprintf(fp, "%7.5lf  ", wh_results[j][i]);
+                fprintf(fp, "%7.5lE  ", wh_results[j][i]);
             fprintf(fp, "\n");
         }
     }
@@ -594,7 +594,7 @@ void print_results(file_data * fdata, FILE * fp, double ** fit_results, linear_f
             wh_results[6][i] = fit_results[6][i]; //chisq
             fprintf(fp, "%d %lf    %lf    ", i + 1, angles->alpha_grad[0][i], angles->beta_grad[0][i]);
             for(j = 0; j < 7; j++)
-                fprintf(fp, "% 7.5lE  ", wh_results[j][i]);
+                fprintf(fp, "%7.5lE  ", wh_results[j][i]);
             fprintf(fp, "\n");
         }
     }//end if(strcmp(fdata->is_H, "FWHM") == 0)
