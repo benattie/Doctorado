@@ -226,6 +226,23 @@ def set_sol_file(files, rings, spr, pattern):
     return sol_file
 
 
+def getfitsolutions(fitsol_file):
+    find = searchableitems()
+    (lines, ln) = searchlineinfile(fitsol_file, "final")
+    if(lines == 1):
+        (lines, ln) = searchlineinfile(fitsol_file, "WSSR")
+        WSSR = float(re.findall(find, lines[ln])[0])
+        return np.array((WSSR, -1, -1))
+    else:
+        output = np.zeros(3)
+        output[0] = float(re.findall(find, lines[ln])[0])
+        ln = searchlineintext(lines, "rms")
+        output[1] = float(re.findall(find, lines[ln])[0])
+        ln = searchlineintext(lines, "variance")
+        output[2] = float(re.findall(find, lines[ln])[0])
+        return output
+
+
 def organize_files(files):
     # me voy a la carpeta con los datos
     chdir(files.pathout)

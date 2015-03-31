@@ -23,6 +23,7 @@ class cmwp_fit:
         self.sol = numpy.zeros((n_spr, n_pattern, n_sol_variables))
         self.solerr = numpy.zeros((n_spr, n_pattern, n_sol_variables))
         self.physsol = numpy.zeros(shape)
+        self.fitvar = numpy.zeros((n_spr, n_pattern, 3))
         title = lines[0].replace("#", "")
         self.header = title.split()
         ptrn_i = rings.pattern_i + rings.delta_pattern
@@ -65,6 +66,10 @@ class cmwp_fit:
                 for i in range(0, n_sol_variables):
                     self.sol[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i] = result[i][0]
                     self.solerr[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i] = result[i][1]
+                # parametros del ajuste
+                fitsol_file = "%s%sspr_%d_pattern_%d.int.sol" % (files.path_files, files.base_file, spr, pattern)
+                result = getfitsolutions(fitsol_file)
+                self.fitvar[(spr - files.spr_i) / files.delta_spr][(pattern - ptrn_i) / files.delta_pattern] = result
             stdout.write("\n")
         print "\n*******************************"
         print "*******************************\n"
