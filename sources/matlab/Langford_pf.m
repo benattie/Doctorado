@@ -1,5 +1,5 @@
-% [size_pf, strain_pf] = langfold(H_pf, eta_pf, lambda, theta)
 function [size_pf, strain_pf] = Langford_pf(H_pf, eta_pf, lambda, theta)
+% [size_pf, strain_pf] = langfold(H_pf, eta_pf, lambda, theta)
     %% Get data
     H = get(H_pf, 'intensities'); 
     eta = get(eta_pf, 'intensities');

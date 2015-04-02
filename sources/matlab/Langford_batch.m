@@ -1,16 +1,20 @@
-% [size_pf, strain_pf] = Langford_batch(H_pf, eta_pf, lambda, theta, start, fin)
 
-function [size_pf, strain_pf] = Langford_batch(H_pf, eta_pf, lambda, theta, start, fin)
-    size_pf = H_pf(start:fin);
-    strain_pf = H_pf(start:fin);
-    for i=start:fin
+
+function [size_pf, strain_pf] = Langford_batch(pf_H, pf_E, lambda, theta)
+   % [size_pf, strain_pf] = Langford_batch(pf_H, pf_E, lambda, theta)
+    [~, colH] = size(pf_H);
+    [~, colE] = size(pf_E);
+    if (colH ~= colE)
+        m = min(colH, colE);
+        wmsg = sprintf('Warning: PF sizes differ');
+        display(wmsg);
+    else
+        m = colH;
+    end
+    size_pf = pf_H;
+    strain_pf = pf_H;
+    for i=1:m
         %% Genero las GPF de tamaño y deformacion
-        [size_pf(i), strain_pf(i)] = Langford_pf(H_pf(i), eta_pf(i), lambda, theta(i));
-
-        %% Eliminio los resultados sin sentido fisico
-        inf_values = get(size_pf(i), 'intensities') == Inf;
-        size_pf(i) = delete(size_pf(i), inf_values);
-        inf_values = get(strain_pf(i), 'intensities') == Inf;
-        strain_pf(i) = delete(strain_pf(i), inf_values);
+        [size_pf(i), strain_pf(i)] = Langford_pf(pf_H(i), pf_E(i), lambda, theta(i));
     end
 end
