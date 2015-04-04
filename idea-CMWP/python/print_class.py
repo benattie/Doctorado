@@ -66,9 +66,9 @@ class cmwp_out:
                 fp_physsol.write("\n")
 
                 # salida al archivo con los parametros de calidad de ajuste
-                fp_fitvar.write("%8d %8.4f %8.4f %8.4f %8.4f " % (k + 1, 2 * files.theta, files.theta, alpha, beta))
+                fp_fitvar.write("%8d %8.4f %8.4f %8.4f %8.4f " % (k + 1, 2 * rings.theta[0], rings.theta[0], alpha, beta))
                 for i in range(0, cmwp_results.fitvar.shape[2]):
-                    fp_fitvar.write("%8.5f " % (cmwp_results.fitvar[(spr - files.spr_i) / files.delta_spr][(pattern - ptrn_i) / files.delta_pattern][i]))
+                    fp_fitvar.write("%8.5f " % (cmwp_results.fitvar[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i]))
                 fp_fitvar.write("\n")
 
                 # siguiente dato
