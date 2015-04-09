@@ -242,6 +242,13 @@ def getfitsolutions(fitsol_file):
         output[2] = float(re.findall(find, lines[ln])[0])
         return output
 
+def getcmwpphyssol(physsol_file):
+    find = searchableitems()
+    fp = open(physsol_file)
+    lines = fp.readlines()
+    output = map(float, re.findall(find, lines[1]))
+    return output
+
 
 def organize_files(files):
     # me voy a la carpeta con los datos
