@@ -8,7 +8,6 @@ Al70R_wh_importscript;
 Al70R_wh_postscript;
 %% Mostrar y guardar las figuras
 % Path para guardar las figuras
-figpath = '/home/benattie/Documents/Doctorado/XR/Sync/Al70R/wh_plots/figures';
-% Rotacion (eje de laminado hacia arriba)
-% yrot = rotation('axis', yvector, 'angle', 90 * degree);
+figpath = sprintf('%s/figures', pname);
+mkdir(figpath);
 Al70R_wh_plotscript

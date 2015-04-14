@@ -4,7 +4,8 @@ import time
 import subprocess
 from fitting_strategy import update_params
 from sys import stdout
-from functions import searchableitems, getfitsolutions
+from functions import getfitsolutions, getcmwpphyssol
+from functions import searchableitems, searchlineintext
 
 
 class cmwp_fit:
@@ -14,7 +15,12 @@ class cmwp_fit:
         fp_physsol = open(physsol_name, "r")
         lines = fp_physsol.readlines()
         # numero de variables del ajuste matematico
-        n_sol_variables = 5
+        ln = searchlineintext(fit_data, "fallas de apilamiento")
+        flag = fit_data[ln + 1].replace("\n", "")
+        if(flag.lower() == 'y'):
+            n_sol_variables = 6
+        else:
+            n_sol_variables = 5
         # numero de soluciones fisicas
         n_variables = len(lines[1].split("\t"))
         n_spr = int((rings.spr_f - rings.spr_i + 1) / rings.delta_spr)
@@ -51,7 +57,7 @@ class cmwp_fit:
             print("%d hours, %d min, %d sec elapsed" % (hour, minute, sec))
             for pattern in range(ptrn_i, ptrn_f, rings.delta_pattern):
                 n = (pattern - ptrn_i) / rings.delta_pattern
-                if (n % 5 == 0):
+                if (n % 1 == 0):
                     stdout.write("\r")
                     stdout.write("pattern %d of %d (%2.2f %% completed)" % (n, ptrn_por_spr, float(n_previos + n) / ptrn_total * 100.))
                     stdout.flush()
@@ -62,17 +68,17 @@ class cmwp_fit:
                     reset_parameters(files, spr, pattern)
                     fp_log.write("Bad fit spr = %d, pattern = %d\n" % (spr, pattern))
                     self.physsol[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern] = -1 * numpy.ones((1, n_variables))
-                else
+                else:
                     self.physsol[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern] = getcmwpphyssol(physsol_file)
-                    
+
                 # soluciones matematicas del ajuste
                 for i in range(0, n_sol_variables):
                     self.sol[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i] = result[i][0]
                     self.solerr[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i] = result[i][1]
                 # parametros del ajuste
                 fitsol_file = "%s%sspr_%d_pattern_%d.int.sol" % (files.path_base_file, files.input_file, spr, pattern)
-                result = getfitsolutions(fitsol_file)
-                self.fitvar[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern] = result
+                chi = getfitsolutions(fitsol_file)
+                self.fitvar[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern] = chi
             stdout.write("\n")
         print "\n*******************************"
         print "*******************************\n"

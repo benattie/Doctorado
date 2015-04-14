@@ -35,22 +35,19 @@ def update_params(files, rings, spr, pattern, find, fit_data, bad_fit, fit_resul
         physsol_file = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file,
                                                               spr, pattern)
         (physsol_file, fit_int, nsteps) = fit_strategy(files, rings, spr, pattern, find, fit_data)
-        (bad_fit, fit_result) = check_fit(files, spr, pattern, find, fit_int, nsteps)
+        (bad_fit, fit_result) = check_fit(files, spr, pattern, find, fit_int, nsteps, fit_result)
     else:
         (physsol_file, fit_int, nsteps) = fit_strategy(files, rings, spr, pattern, find, fit_data)
         if(physsol_file == 1):
             "Mal ajuste en spr = %d y pattern = %d\n" % (spr, pattern)
             return ("", 1, 1)
-        (bad_fit, fit_result) = check_fit(files, spr, pattern, find, fit_int, nsteps)
+        (bad_fit, fit_result) = check_fit(files, spr, pattern, find, fit_int, nsteps, fit_result)
     return (physsol_file, bad_fit, fit_result)
 
 
-def check_fit(files, spr, pattern, find, fit_int, nsteps):
+def check_fit(files, spr, pattern, find, fit_int, nsteps, fit_result):
     # defino el vector nan
     v_nan = numpy.array(map(float, ['NaN', 'NaN', 'NaN']))
-    # un vector de ceros
-    cero = numpy.zeros((1, 3))
-    fit_result = numpy.vstack((cero, cero, cero, cero, cero))
     result_nan = numpy.vstack((v_nan, v_nan, v_nan, v_nan, v_nan))
     if(fit_int == 'y'):
         for i in range(1, nsteps):
@@ -91,6 +88,6 @@ def check_fit(files, spr, pattern, find, fit_int, nsteps):
 
     bad_fit = 0
     for x in fit_result[:, 2]:
-        if (x > 500 or isnan(x)):
+        if (x > 100 or isnan(x)):
             bad_fit = 1
     return (bad_fit, fit_result)

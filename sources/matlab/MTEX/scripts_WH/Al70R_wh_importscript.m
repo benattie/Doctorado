@@ -19,7 +19,7 @@ setMTEXpref('zAxisDirection','outOfPlane');
 %% Specify File Names
 
 % path to files
-pname = '/home/benattie/Documents/Doctorado/XR/Sync/Al70R/wh_plots';
+pname = '/home/benattie/Documents/Doctorado/XR/Sync/Al70R/wh_plots/qmin';
 
 % which files to be imported
 fname = {...
@@ -49,7 +49,7 @@ for i=1:ncol
     matdata = cell2mat(data(2:end));
     fclose(fp);
     
-    mat = [matdata(:,1:8)]; 
+    mat = [matdata(:,1:end)]; 
     [nrows,ncol] = size(mat);
     % Escribo los datos de la esfera superior
     fout{i} = sprintf('%s/Al70R_wh_up_%d.mtex', pname, i);
@@ -76,6 +76,12 @@ for i=1:ncol
     
     Al70R_D_pfd(i) = loadPoleFigure(fout(i),h(i),CS,SS,'interface','generic',...
         'ColumnNames', { 'Polar Angle' 'Azimuth Angle' 'Intensity'}, 'Columns', [1 2 6], 'wizard', 'wizard', 'wizard', 'wizard', 'wizard', 'wizard', 'wizard');
+    
+    Al70R_R_pfd(i) = loadPoleFigure(fout(i),h(i),CS,SS,'interface','generic',...
+        'ColumnNames', { 'Polar Angle' 'Azimuth Angle' 'Intensity'}, 'Columns', [1 2 8], 'wizard', 'wizard', 'wizard', 'wizard', 'wizard', 'wizard', 'wizard');
+    
+    Al70R_chi_pfd(i) = loadPoleFigure(fout(i),h(i),CS,SS,'interface','generic',...
+        'ColumnNames', { 'Polar Angle' 'Azimuth Angle' 'Intensity'}, 'Columns', [1 2 9], 'wizard', 'wizard', 'wizard', 'wizard', 'wizard', 'wizard', 'wizard');
 end
 
 %% Grafico los datos

@@ -6,7 +6,7 @@
 # sexadecimales. El valor de y correspondiente a cada x se consigue de cada una
 # de las columnas del archivo ingresado
 
-# python transpose.py name res
+# python transpose.py file res
 # ###########################INICIO DEL PROGRAMA###############################
 import numpy as np
 import math

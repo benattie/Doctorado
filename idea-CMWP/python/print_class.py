@@ -11,7 +11,7 @@ class cmwp_out:
         outfile = "%s%sCMWP_SOL_PF.mtex" % (files.pathout, files.input_file)
         fp_sol = open(outfile, "w")
         fp_sol.write("# IDEA CMWP --- RESULT FILE --- %s\n" % time.strftime("%d/%m/%Y %I:%M:%S"))
-        fp_sol.write("# Row 2theta theta alpha beta a a_err b b_err c c_err d d_err e e_err\n")
+        fp_sol.write("# Row 2theta theta alpha beta a a_err b b_err c c_err d d_err e e_err st_pr st_pr_err\n")
         fp_sol.flush()
 
         # archivo con las soluciones fisicas
