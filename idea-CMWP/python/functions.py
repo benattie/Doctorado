@@ -5,7 +5,7 @@ from os import chdir
 from os import listdir
 from subprocess import call
 from shutil import move
-
+from sys import stdout
 
 def searchlineinfile(filename, chain):
     """
@@ -154,6 +154,7 @@ def set_fit_intensity(filename, rings, spr, pattern, find, fit_int):
     ln = min(ln_1, ln_2)
     lines[ln] = "peak_pos_fit=" + fit_int + "\n"
     lines[ln + 1] = "peak_int_fit=" + fit_int + "\n"
+    fp.seek(0, 0)
     fp.writelines(lines)
     fp.close()
 
@@ -223,8 +224,12 @@ def fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_flags):
     # correr el cmwp
     # cmd = './evaluate %s%sspr_%d_pattern_%d%s auto' % (files.pathout, files.input_file, spr, pattern, files.ext)
     cmd = 'unset DISPLAY\n'
-    cmd += './evaluate %s%sspr_%d_pattern_%d%s auto >> %sstd_output.txt' % (files.pathout, files.input_file, spr, pattern, files.ext, files.input_file)
+    print('Corriendo CMWP')
+    # cmd += './evaluate %s%sspr_%d_pattern_%d%s auto >> %sstd_output.txt' % (files.pathout, files.input_file, spr, pattern, files.ext, files.input_file)
+    cmd += './evaluate %s%sspr_%d_pattern_%d%s auto' % (files.pathout, files.input_file, spr, pattern, files.ext, files.input_file)
     subprocess.call(cmd, shell=True)
+    stdout.flush()
+
     # leo el physsol.csv y lo guardo en memoria
     physsol_file = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file, spr, pattern)
     return physsol_file
