@@ -5,7 +5,7 @@ from os import chdir
 from os import listdir
 from subprocess import call
 from shutil import move
-from sys import stdout
+
 
 def searchlineinfile(filename, chain):
     """
@@ -88,17 +88,21 @@ def fit_strategy(files, rings, spr, pattern, find, fit_data):
             set_fit_intensity(filename, rings, spr, pattern, find, "y")
             fit_flags = np.array(['0', 'n', 'n', 'n', 'n', 'n', 'n'])
             sol_file = set_sol_file(files, rings, rings.spr_i, rings.pattern_i + rings.delta_pattern)
+            print("\nPaso 1 del ajuste")
             physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_flags)
             set_fit_intensity(filename, rings, spr, pattern, find, "n")
             sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file, spr, pattern)
             for i in range(nsteps):
+                print "Paso %d del ajuste" % i + 1
                 physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_steps[i])
         else:
+            print("\nPaso 1 del ajuste")
             set_fit_intensity(filename, rings, spr, pattern, find, "n")
             sol_file = set_sol_file(files, rings, rings.spr_i, rings.pattern_i + rings.delta_pattern)
             physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_steps[0])
             sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file, spr, pattern)
             for i in range(1, nsteps):
+                print "Paso %d del ajuste" % i + 1
                 physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_steps[i])
         return (physsol_file, fit_int.lower(), nsteps)
 
@@ -110,7 +114,7 @@ def set_fit_stpr(files, rings, spr, pattern, find, flag):
     string 'y' o 'n'
     """
 
-    # copio el archivo ini
+    # copio el archivo .ini
     origin = "%s%s%s.ini" % (files.path_base_file, files.base_file, files.ext)
     destination = "%s%sspr_%d_pattern_%d%s.ini" % (files.pathout, files.input_file,
                                                    spr, pattern, files.ext)
@@ -191,7 +195,10 @@ def fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_flags):
 
     (lines, ln) = searchlineinfile(sol_file, "a_scaled")
     if (lines == 1):
-        return 1
+        print "Gnuplot no termino correctamente en el paso anterior"
+        print "Revise el archivo *_std_output.txt para mas detalles"
+        print "Modifique sus valores iniciales o su estrategia de ajuste"
+        raise Exception('SingularMatrix')
     a = float(re.findall(find, lines[ln + 0])[0])
     b = float(re.findall(find, lines[ln + 1])[0])
     c = float(re.findall(find, lines[ln + 2])[0])
@@ -222,13 +229,9 @@ def fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_flags):
     fp.write(string)
     fp.close()
     # correr el cmwp
-    # cmd = './evaluate %s%sspr_%d_pattern_%d%s auto' % (files.pathout, files.input_file, spr, pattern, files.ext)
     cmd = 'unset DISPLAY\n'
-    print('Corriendo CMWP')
-    # cmd += './evaluate %s%sspr_%d_pattern_%d%s auto >> %sstd_output.txt' % (files.pathout, files.input_file, spr, pattern, files.ext, files.input_file)
-    cmd += './evaluate %s%sspr_%d_pattern_%d%s auto' % (files.pathout, files.input_file, spr, pattern, files.ext, files.input_file)
+    cmd += './evaluate %s%sspr_%d_pattern_%d%s auto >> %sstd_output.txt' % (files.pathout, files.input_file, spr, pattern, files.ext, files.input_file)
     subprocess.call(cmd, shell=True)
-    stdout.flush()
 
     # leo el physsol.csv y lo guardo en memoria
     physsol_file = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file, spr, pattern)

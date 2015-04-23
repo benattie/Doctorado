@@ -7,21 +7,6 @@ from functions import getcmwpsolutions, searchlineinfile, fit_strategy
 
 def update_params(files, rings, spr, pattern, find, fit_data, bad_fit, fit_result):
     if(spr == rings.spr_i and pattern == rings.pattern_i + rings.delta_pattern):
-        # copio el archivo ini
-        # origin = "%s%s%s.ini" % (files.path_base_file, files.base_file, files.ext)
-        # destination = "%s%sspr_%d_pattern_%d%s.ini" % (files.pathout, files.input_file,
-        #                                                spr, pattern, files.ext)
-        # subprocess.call(["cp", origin, destination])
-        # copio el archivo .q.ini
-        # origin = "%s%s%s.q.ini" % (files.path_base_file, files.base_file, files.ext)
-        # destination = "%s%sspr_%d_pattern_%d%s.q.ini" % (files.pathout, files.input_file,
-        #                                                  spr, pattern, files.ext)
-        # subprocess.call(["cp", origin, destination])
-        # copio el archivo .fit.ini
-        origin = "%s%s%s.fit.ini" % (files.path_base_file, files.base_file, files.ext)
-        destination = "%s%sspr_%d_pattern_%d%s.fit.ini" % (files.pathout, files.input_file,
-                                                           spr, pattern, files.ext)
-        subprocess.call(["cp", origin, destination])
         # copio el physsol del archivo base
         origin = "%s%s.physsol.csv" % (files.path_base_file, files.base_file)
         destination = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file,
@@ -34,7 +19,9 @@ def update_params(files, rings, spr, pattern, find, fit_data, bad_fit, fit_resul
         subprocess.call(["cp", origin, destination])
         physsol_file = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file,
                                                               spr, pattern)
+        print("INICIO DEL AJUSTE")
         (physsol_file, fit_int, nsteps) = fit_strategy(files, rings, spr, pattern, find, fit_data)
+        print("FIN DEL AJUSTE")
         (bad_fit, fit_result) = check_fit(files, spr, pattern, find, fit_int, nsteps, fit_result)
     else:
         (physsol_file, fit_int, nsteps) = fit_strategy(files, rings, spr, pattern, find, fit_data)

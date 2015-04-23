@@ -57,7 +57,7 @@ class cmwp_fit:
             print("%d hours, %d min, %d sec elapsed" % (hour, minute, sec))
             for pattern in range(ptrn_i, ptrn_f, rings.delta_pattern):
                 n = (pattern - ptrn_i) / rings.delta_pattern
-                if (n % 1 == 0):
+                if (n % 5 == 0):
                     stdout.write("\r")
                     stdout.write("pattern %d of %d (%2.2f %% completed)" % (n, ptrn_por_spr, float(n_previos + n) / ptrn_total * 100.))
                     stdout.flush()
