@@ -1,3 +1,0 @@
-Sobre la rutina en python
-Ordenar los archivos mientras los va creando
-No hace falta crear un archivo mtex por cada pico
