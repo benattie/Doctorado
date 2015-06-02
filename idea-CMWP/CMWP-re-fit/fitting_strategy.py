@@ -1,24 +1,13 @@
 # -*- coding: utf-8 -*
-import subprocess
 import numpy
 from math import isnan
 from functions import getcmwpsolutions, searchlineinfile, fit_strategy
+from functions import copy_cmwp_files, clean_cmwp_files
 
 
 def update_params(files, rings, spr, pattern, find, fit_data, bad_fit, fit_result):
-    print("INICIO DEL AJUSTE")
-    # copio el physsol del archivo base
-    orig = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathin, files.input_file,
-                                                  spr, pattern)
-    dest = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file,
-                                                  spr, pattern)
-    subprocess.call(["cp", orig, dest])
-    # copio el sol del archivo base
-    orig = "%s%sspr_%d_pattern_%d.sol" % (files.pathin, files.input_file,
-                                          spr, pattern)
-    dest = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file,
-                                          spr, pattern)
-    subprocess.call(["cp", orig, dest])
+    print("\nINICIO DEL AJUSTE")
+    copy_cmwp_files(files, spr, pattern)
     physsol_file = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file,
                                                           spr, pattern)
     (physsol_file, fit_int, nsteps) = fit_strategy(files, rings, spr, pattern, find, fit_data)
@@ -26,6 +15,7 @@ def update_params(files, rings, spr, pattern, find, fit_data, bad_fit, fit_resul
         "Mal ajuste en spr = %d y pattern = %d\n" % (spr, pattern)
         return ("", 1, 1)
     print("FIN DEL AJUSTE")
+    clean_cmwp_files(files, spr, pattern)
     (bad_fit, fit_result) = check_fit(files, spr, pattern, find, fit_int, nsteps, fit_result)
     return (physsol_file, bad_fit, fit_result)
 

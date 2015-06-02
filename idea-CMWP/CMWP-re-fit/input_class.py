@@ -14,7 +14,6 @@ class file_data:
             self.path_base_file = cmwp_data[ln + 4][22:-1]
             self.base_file = cmwp_data[ln + 5][22:-1]
             self.results_folder = cmwp_data[ln + 6][22:-1]
-            self.input_file_ext = cmwp_data[ln + 7][22:-1]
             self.ext = ".dat"
 
 

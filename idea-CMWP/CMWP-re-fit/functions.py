@@ -318,3 +318,59 @@ def organize_files(files):
     for datafile in source:
         if datafile.startswith(files.input_file):
             move(datafile, folder)
+
+
+def copy_cmwp_files(files, spr, pattern):
+    # copio el physsol del archivo base
+    orig = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathin, files.input_file,
+                                                  spr, pattern)
+    dest = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file,
+                                                  spr, pattern)
+    subprocess.call(["cp", orig, dest])
+    # copio el sol del archivo base
+    orig = "%s%sspr_%d_pattern_%d.sol" % (files.pathin, files.input_file,
+                                          spr, pattern)
+    dest = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file,
+                                          spr, pattern)
+    subprocess.call(["cp", orig, dest])
+    # copio el dat del archivo base
+    orig = "%s%sspr_%d_pattern_%d.dat" % (files.pathin, files.input_file,
+                                          spr, pattern)
+    dest = "%s%sspr_%d_pattern_%d.dat" % (files.pathout, files.input_file,
+                                          spr, pattern)
+    subprocess.call(["cp", orig, dest])
+    # copio el dat del archivo base
+    orig = "%s%sspr_%d_pattern_%d.bg-spline.dat" % (files.pathin, files.input_file,
+                                                    spr, pattern)
+    dest = "%s%sspr_%d_pattern_%d.bg-spline.dat" % (files.pathout, files.input_file,
+                                                    spr, pattern)
+    subprocess.call(["cp", orig, dest])
+    # copio el dat del archivo base
+    orig = "%s%sspr_%d_pattern_%d.peak-index.dat" % (files.pathin, files.input_file,
+                                                     spr, pattern)
+    dest = "%s%sspr_%d_pattern_%d.peak-index.dat" % (files.pathout, files.input_file,
+                                                     spr, pattern)
+    subprocess.call(["cp", orig, dest])
+
+
+def clean_cmwp_files(files, spr, pattern):
+    # copio el physsol del archivo base
+    fp = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file,
+                                                spr, pattern)
+    subprocess.call(["rm", fp])
+    # copio el sol del archivo base
+    fp = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file,
+                                        spr, pattern)
+    subprocess.call(["rm", fp])
+    # copio el dat del archivo base
+    fp = "%s%sspr_%d_pattern_%d.dat" % (files.pathout, files.input_file,
+                                        spr, pattern)
+    subprocess.call(["rm", fp])
+    # copio el dat del archivo base
+    fp = "%s%sspr_%d_pattern_%d.bg-spline.dat" % (files.pathout, files.input_file,
+                                                  spr, pattern)
+    subprocess.call(["rm", fp])
+    # copio el dat del archivo base
+    fp = "%s%sspr_%d_pattern_%d.peak-index.dat" % (files.pathout, files.input_file,
+                                                   spr, pattern)
+    subprocess.call(["rm", fp])
