@@ -120,8 +120,7 @@ def set_fit_stpr(files, rings, spr, pattern, find, flag):
                                             spr, pattern, files.ext)
     subprocess.call(["cp", orig, dest])
     # genero el archivo .q.ini
-    orig = "%s%sspr_%d_pattern_%d%s.q.ini" % (files.pathin, files.input_file,
-                                              spr, pattern, files.ext)
+    orig = "%s%s%s.q.ini" % (files.path_base_file, files.base_file, files.ext)
     fp = open(orig, "r")
     lines = fp.readlines()
     fp.close()
@@ -320,7 +319,7 @@ def organize_files(files):
             move(datafile, folder)
 
 
-def copy_cmwp_files(files, spr, pattern):
+def copy_cmwp_files(files, spr, pattern, hkl):
     # copio el physsol del archivo base
     orig = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathin, files.input_file,
                                                   spr, pattern)
@@ -339,38 +338,71 @@ def copy_cmwp_files(files, spr, pattern):
     dest = "%s%sspr_%d_pattern_%d.dat" % (files.pathout, files.input_file,
                                           spr, pattern)
     subprocess.call(["cp", orig, dest])
-    # copio el dat del archivo base
+    # copio el archivo de background del archivo base
     orig = "%s%sspr_%d_pattern_%d.bg-spline.dat" % (files.pathin, files.input_file,
                                                     spr, pattern)
     dest = "%s%sspr_%d_pattern_%d.bg-spline.dat" % (files.pathout, files.input_file,
                                                     spr, pattern)
     subprocess.call(["cp", orig, dest])
-    # copio el dat del archivo base
+    # genero el archivo peak-index a partir del archivo base
     orig = "%s%sspr_%d_pattern_%d.peak-index.dat" % (files.pathin, files.input_file,
                                                      spr, pattern)
     dest = "%s%sspr_%d_pattern_%d.peak-index.dat" % (files.pathout, files.input_file,
                                                      spr, pattern)
     subprocess.call(["cp", orig, dest])
+    fp = open(dest, 'r')
+    data = fp.readlines()
+    fp.close()
+    fp = open(dest, 'w')
+    peak_list = select_peaks(data, hkl)
+    peak_list = peak_list.astype(np.float)
+    for peak in peak_list:
+        fp.write('%.4f %.4f %d %d\n' % (peak[0], peak[1], peak[2], peak[3]))
+    fp.close()
 
 
 def clean_cmwp_files(files, spr, pattern):
-    # copio el physsol del archivo base
+    # borro el physsol del archivo base
     fp = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file,
                                                 spr, pattern)
     subprocess.call(["rm", fp])
-    # copio el sol del archivo base
+    # borro el sol del archivo base
     fp = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file,
                                         spr, pattern)
     subprocess.call(["rm", fp])
-    # copio el dat del archivo base
+    # borro el dat del archivo base
     fp = "%s%sspr_%d_pattern_%d.dat" % (files.pathout, files.input_file,
                                         spr, pattern)
     subprocess.call(["rm", fp])
-    # copio el dat del archivo base
+    # borro el dat del archivo base
     fp = "%s%sspr_%d_pattern_%d.bg-spline.dat" % (files.pathout, files.input_file,
                                                   spr, pattern)
     subprocess.call(["rm", fp])
-    # copio el dat del archivo base
+    # borro el dat del archivo base
     fp = "%s%sspr_%d_pattern_%d.peak-index.dat" % (files.pathout, files.input_file,
                                                    spr, pattern)
     subprocess.call(["rm", fp])
+
+
+def select_peaks(data, hkl):
+    """
+    Selecciono de los datos presentes en el string data, los picos que
+    corresponden a los indicados en hkl
+    """
+
+    # extraigo los picos del archivo original
+    table = data[0].split()
+    for peak in data[1:]:
+        table = np.vstack((table, peak.split()))
+
+    output = np.zeros((1, table.shape[1]))
+    for miller in hkl:
+        ln = 0
+        for m in table[:, 2]:
+            if(miller == int(m)):
+                output = np.vstack((output, table[ln]))
+                break
+            else:
+                ln = ln + 1
+
+    return output[1:]

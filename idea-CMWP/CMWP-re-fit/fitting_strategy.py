@@ -7,7 +7,7 @@ from functions import copy_cmwp_files, clean_cmwp_files
 
 def update_params(files, rings, spr, pattern, find, fit_data, bad_fit, fit_result):
     print("\nINICIO DEL AJUSTE")
-    copy_cmwp_files(files, spr, pattern)
+    copy_cmwp_files(files, spr, pattern, rings.hkl)
     physsol_file = "%s%sspr_%d_pattern_%d.physsol.csv" % (files.pathout, files.input_file,
                                                           spr, pattern)
     (physsol_file, fit_int, nsteps) = fit_strategy(files, rings, spr, pattern, find, fit_data)
