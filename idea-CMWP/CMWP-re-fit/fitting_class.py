@@ -2,15 +2,28 @@
 import numpy
 import time
 import subprocess
+from re import findall
 from fitting_strategy import update_params
 from sys import stdout
-from functions import getfitsolutions, getcmwpphyssol
-from functions import searchableitems, searchlineintext
+from functions import getfitsolutions, getcmwpphyssol, searchlineinfile
+from functions import searchableitems, searchlineintext, select_peaks
 
 
 class cmwp_fit:
     def __init__(self, files, rings, fit_data):
+        # regla para buscar números en strings
         find = searchableitems()
+        # Defino el theta del pico que voy a usar para generar la PF
+        fname = "%s%s.peak-index.dat" % (files.path_base_file, files.base_file)
+        fp = open(fname, "r")
+        lines = fp.readlines()
+        fp.close()
+        pdata = select_peaks(lines, rings.hkl)
+        rings.theta = float(pdata[0][0]) * 0.5
+        # Obtengo el Ch00
+        ini = "%s%s%s.ini" % (files.path_base_file, files.base_file, files.ext)
+        (lines, ln) = searchlineinfile(ini, "C0")
+        rings.Ch00 = float(findall(find, lines[ln])[1])
         physsol_name = "%s%s.physsol.csv" % (files.path_base_file, files.base_file)
         fp_physsol = open(physsol_name, "r")
         lines = fp_physsol.readlines()

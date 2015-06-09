@@ -30,5 +30,7 @@ class fit2d_data:
         self.avpattern = int(cmwp_data[ln + 7][22:-1])
         self.delta_pattern = int(cmwp_data[ln + 8][22:-1])
         self.pattern_f = int(cmwp_data[ln + 9][22:-1])
+        self.theta = 1.0
+        self.Ch00 = 1.0
         ln = searchlineintext(cmwp_data, "Peaks2fit")
         self.hkl = map(int, cmwp_data[ln + 1:])

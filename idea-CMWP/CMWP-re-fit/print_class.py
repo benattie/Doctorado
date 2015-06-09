@@ -6,7 +6,6 @@ import time
 
 class cmwp_out:
     def __init__(self, files, rings, cmwp_results):
-        m = 0
         # archivo con las soluciones del ajuste
         outfile = "%s%sCMWP_SOL_PF.mtex" % (files.pathout, files.input_file)
         fp_sol = open(outfile, "w")
@@ -45,14 +44,14 @@ class cmwp_out:
                     neu_ome = omega
                     neu_gam = pattern
 
-                alpha = winkel_al(rings.theta[m], neu_ome, neu_gam)
-                beta = winkel_be(rings.theta[m], neu_ome, neu_gam, alpha)
+                alpha = winkel_al(rings.theta, neu_ome, neu_gam)
+                beta = winkel_be(rings.theta, neu_ome, neu_gam, alpha)
                 if(alpha > 90):
                     alpha = 180 - alpha
                     beta = 360 - beta
 
                 # salida al archivo con los valores del ajuste
-                fp_sol.write("%4d %8.4f %8.4f %8.4f %8.4f " % (k + 1, 2 * rings.theta[m], rings.theta[m], alpha, beta))
+                fp_sol.write("%4d %8.4f %8.4f %8.4f %8.4f " % (k + 1, 2 * rings.theta, rings.theta, alpha, beta))
                 for i in range(0, cmwp_results.sol.shape[2]):
                     # soluciones matematicas del ajuste
                     fp_sol.write("%8.5f %8.5f " % (cmwp_results.sol[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i],
@@ -60,7 +59,7 @@ class cmwp_out:
                 fp_sol.write("\n")
 
                 # salida al archivo con las soluciones fisicas
-                fp_physsol.write("%8d %8.4f %8.4f %8.4f %8.4f " % (k + 1, 2 * rings.theta[m], rings.theta[m], alpha, beta))
+                fp_physsol.write("%8d %8.4f %8.4f %8.4f %8.4f " % (k + 1, 2 * rings.theta, rings.theta, alpha, beta))
                 for i in range(0, cmwp_results.physsol.shape[2]):
                     fp_physsol.write("%8.5f " % (cmwp_results.physsol[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i]))
                 fp_physsol.write("\n")

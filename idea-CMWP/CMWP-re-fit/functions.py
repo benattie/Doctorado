@@ -89,20 +89,20 @@ def fit_strategy(files, rings, spr, pattern, find, fit_data):
         if(fit_int.lower() == 'y'):
             set_fit_intensity(filename, rings, spr, pattern, find, "y")
             fit_flags = np.array(['0', 'y', 'y', 'y', 'n', 'y', 'y'])
-            print("\nPaso 0 del ajuste (ajuste de intensidades)")
+            # print("\nPaso 0 del ajuste (ajuste de intensidades)")
             physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_flags)
             set_fit_intensity(filename, rings, spr, pattern, find, "n")
             sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file, spr, pattern)
             for i in range(nsteps):
-                print "Paso %d del ajuste" % (i + 1)
+                # print "Paso %d del ajuste" % (i + 1)
                 physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_steps[i])
         else:
-            print("\nPaso 1 del ajuste")
+            # print("\nPaso 1 del ajuste")
             set_fit_intensity(filename, rings, spr, pattern, find, "n")
             physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_steps[0])
             sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file, spr, pattern)
             for i in range(1, nsteps):
-                print "Paso %d del ajuste" % (i + 1)
+                # print "Paso %d del ajuste" % (i + 1)
                 physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_steps[i])
         return (physsol_file, fit_int.lower(), nsteps)
 
@@ -170,7 +170,7 @@ def fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_flags):
         print "Revise el archivo *_std_output.txt para mas detalles"
         print "Modifique sus valores iniciales o su estrategia de ajuste"
         raise Exception('SingularMatrix')
-    C0 = float(re.findall(find, lines[ln + 1])[0])
+    a = float(re.findall(find, lines[ln + 1])[0])
     b = float(re.findall(find, lines[ln + 2])[0])
     c = float(re.findall(find, lines[ln + 3])[0])
     d = float(re.findall(find, lines[ln + 4])[0])
@@ -187,7 +187,7 @@ def fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_flags):
     fit_ini = "%s%sspr_%d_pattern_%d%s.fit.ini" % (files.pathout, files.input_file, spr, pattern, files.ext)
     fp = open(fit_ini, "w")
     # valores iniciales
-    string = "init_b=%f\ninit_c=%finit_d=%f\ninit_e=%f\n" % (b, c, d, e)
+    string = "init_b=%f\ninit_c=%f\ninit_d=%f\ninit_e=%f\n" % (b, c, d / 5, e)
     string += "init_epsilon=1.0\ninit_st_pr=%f\n" % st_pr
     # variables a ajustar
     string += "a_fixed=%s\nb_fixed=%s\n" % (fit_flags[1], fit_flags[2])
@@ -198,18 +198,24 @@ def fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_flags):
     string += "scale_a=1.0\nscale_b=1.0\nscale_c=1.0\nscale_d=1.0\nscale_e=1.0"
     fp.write(string)
     fp.close()
-
+    miller_str = str(rings.hkl)
+    h = int(miller_str[1])
+    k = int(miller_str[2])
+    l = int(miller_str[3])
+    H2_inv = H2(h, k, l)
+    C0 = rings.Ch00 * (1 - a * H2_inv)
     # genero el archivo .indC.ini
     fit_ini = "%s%sspr_%d_pattern_%d%s.indC.ini" % (files.pathout, files.input_file, spr, pattern, files.ext)
     fp = open(fit_ini, "w")
     # valores iniciales
-    string = "init_C0\nC_0_fixed=\"y\"\n" % C0
+    string = "init_C0=%f\nC_0_fixed=\"y\"\n" % C0
     fp.write(string)
     fp.close()
 
     # correr el cmwp
-    cmd = 'unset DISPLAY\n'
-    cmd += './evaluate %s%sspr_%d_pattern_%d%s auto >> %sstd_output.txt' % (files.pathout, files.input_file, spr, pattern, files.ext, files.input_file)
+    # cmd = 'unset DISPLAY\n'
+    # cmd += './evaluate %s%sspr_%d_pattern_%d%s auto >> %sstd_output.txt' % (files.pathout, files.input_file, spr, pattern, files.ext, files.input_file)
+    cmd = './evaluate %s%sspr_%d_pattern_%d%s auto >> %sstd_output.txt' % (files.pathout, files.input_file, spr, pattern, files.ext, files.input_file)
     subprocess.call(cmd, shell=True)
 
     # devuelvo el physsol.csv
@@ -372,9 +378,9 @@ def select_peaks(data, hkl):
 
     # extraigo los picos del archivo original
     table = data[0].split()
-    for peak in data[1:]:
+    for peak in data:
         table = np.vstack((table, peak.split()))
-
+    table = table[1:, :]
     output = np.zeros((1, table.shape[1]))
     for miller in hkl:
         ln = 0
@@ -384,5 +390,10 @@ def select_peaks(data, hkl):
                 break
             else:
                 ln = ln + 1
-
     return output[1:]
+
+
+def H2(h, k, l):
+    num = float(h**2 * k**2 + h**2 * l**2 + k**2 * l**2)
+    den = float((h**2 + k**2 + l**2)**2)
+    return num / den
