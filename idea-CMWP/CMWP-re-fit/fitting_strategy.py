@@ -15,7 +15,7 @@ def update_params(files, rings, spr, pattern, find, fit_data, bad_fit, fit_resul
         "Mal ajuste en spr = %d y pattern = %d\n" % (spr, pattern)
         return ("", 1, 1)
     print("FIN DEL AJUSTE")
-    clean_cmwp_files(files, spr, pattern)
+    # clean_cmwp_files(files, spr, pattern)
     (bad_fit, fit_result) = check_fit(files, spr, pattern, find, fit_int, nsteps, fit_result)
     return (physsol_file, bad_fit, fit_result)
 
