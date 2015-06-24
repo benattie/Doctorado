@@ -187,7 +187,7 @@ def fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_flags):
     fit_ini = "%s%sspr_%d_pattern_%d%s.fit.ini" % (files.pathout, files.input_file, spr, pattern, files.ext)
     fp = open(fit_ini, "w")
     # valores iniciales
-    string = "init_b=%f\ninit_c=%f\ninit_d=%f\ninit_e=%f\n" % (b, c, d / 5, e)
+    string = "init_b=%f\ninit_c=%f\ninit_d=%f\ninit_e=%f\n" % (b, c, d / 10, e)
     string += "init_epsilon=1.0\ninit_st_pr=%f\n" % st_pr
     # variables a ajustar
     string += "a_fixed=%s\nb_fixed=%s\n" % (fit_flags[1], fit_flags[2])

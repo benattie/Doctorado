@@ -50,16 +50,25 @@ class cmwp_out:
 
                 # salida al archivo con los valores del ajuste
                 fp_sol.write("%4d %8.4f %8.4f %8.4f %8.4f " % (k + 1, 2 * files.theta, files.theta, alpha, beta))
+                sol = cmwp_results.sol[(spr - files.spr_i) / files.delta_spr][(pattern - ptrn_i) / files.delta_pattern]
+                err = cmwp_results.solerr[(spr - files.spr_i) / files.delta_spr][(pattern - ptrn_i) / files.delta_pattern]
+                rer = cmwp_results.solerr[(spr - files.spr_i) / files.delta_spr][(pattern - ptrn_i) / files.delta_pattern]
                 for i in range(0, cmwp_results.sol.shape[2]):
+                    if(sol[i] != 0):
+                        rer[i] = err[i] / sol[i] * 100
+                    else:
+                        rer[i] = 200
                     # soluciones matematicas del ajuste
-                    fp_sol.write("%8.5f %8.5f " % (cmwp_results.sol[(spr - files.spr_i) / files.delta_spr][(pattern - ptrn_i) / files.delta_pattern][i],
-                                                   cmwp_results.solerr[(spr - files.spr_i) / files.delta_spr][(pattern - ptrn_i) / files.delta_pattern][i]))
+                    fp_sol.write("%8.5f %8.5f " % (sol[i], err[i]))
                 fp_sol.write("\n")
 
                 # salida al archivo con las soluciones fisicas
                 fp_physsol.write("%8d %8.4f %8.4f %8.4f %8.4f " % (k + 1, 2 * files.theta, files.theta, alpha, beta))
                 for i in range(0, cmwp_results.physsol.shape[2]):
-                    fp_physsol.write("%8.5f " % (cmwp_results.physsol[(spr - files.spr_i) / files.delta_spr][(pattern - ptrn_i) / files.delta_pattern][i]))
+                    if(rer[3] < 1000):
+                        fp_physsol.write("%8.5f " % (cmwp_results.physsol[(spr - files.spr_i) / files.delta_spr][(pattern - ptrn_i) / files.delta_pattern][i]))
+                    else:
+                        fp_physsol.write("%8.5f " % -1)
                 fp_physsol.write("\n")
 
                 # salida al archivo con los parametros de calidad de ajuste
