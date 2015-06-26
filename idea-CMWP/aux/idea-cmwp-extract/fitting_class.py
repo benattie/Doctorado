@@ -35,8 +35,9 @@ class cmwp_fit:
                 self.physsol[(spr - files.spr_i) / files.delta_spr][(pattern - ptrn_i) / files.delta_pattern] = getphysolutions(physsol_file)
                 # soluciones del ajuste
                 sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.path_files, files.base_file, spr, pattern)
-                result = getcmwpsolutions(sol_file, n_sol_variables)
+                (result, errors) = getcmwpsolutions(sol_file, n_sol_variables)
                 self.sol[(spr - files.spr_i) / files.delta_spr][(pattern - ptrn_i) / files.delta_pattern] = result
+                self.solerr[(spr - files.spr_i) / files.delta_spr][(pattern - ptrn_i) / files.delta_pattern] = errors
                 # parametros del ajuste
                 fitsol_file = "%s%sspr_%d_pattern_%d.int.sol" % (files.path_files, files.base_file, spr, pattern)
                 result = getfitsolutions(fitsol_file)

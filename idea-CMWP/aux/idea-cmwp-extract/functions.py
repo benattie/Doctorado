@@ -70,10 +70,17 @@ def getcmwpsolutions(sol_file, n):
     find = searchableitems()
     (lines, ln) = searchlineinfile(sol_file, "a_scaled")
 
-    output = np.zeros(n)
-    for i in range(n):
-        output[i] = float(re.findall(find, lines[ln + i])[0])
-    return output
+    if(lines == 1):
+        output = np.ones(n)*-1
+        errors = np.ones(n)*-1
+    else:
+        output = np.zeros(n)
+        for i in range(n):
+            output[i] = float(re.findall(find, lines[ln + i])[0])
+        (lines, ln) = searchlineinfile(sol_file, "Final set")
+        errors = np.zeros(n)
+        errors[3] = float(re.findall(find, lines[ln + 3])[1])
+    return (output, errors)
 
 
 def getfitsolutions(fitsol_file):
