@@ -88,12 +88,12 @@ def fit_strategy(files, rings, spr, pattern, find, fit_data):
             set_fit_intensity(filename, rings, spr, pattern, find, "y")
             fit_flags = np.array(['0', 'n', 'n', 'n', 'n', 'n', 'n'])
             sol_file = set_sol_file(files, rings, rings.spr_i, rings.pattern_i + rings.delta_pattern)
-            print("\nPaso 1 del ajuste")
+            print("\nAjustando intensidades")
             physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_flags)
             set_fit_intensity(filename, rings, spr, pattern, find, "n")
             sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file, spr, pattern)
             for i in range(nsteps):
-                print "Paso %d del ajuste" % i + 1
+                print "Paso %d del ajuste" % i
                 physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_steps[i])
         else:
             print("\nPaso 1 del ajuste")
@@ -102,7 +102,7 @@ def fit_strategy(files, rings, spr, pattern, find, fit_data):
             physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_steps[0])
             sol_file = "%s%sspr_%d_pattern_%d.sol" % (files.pathout, files.input_file, spr, pattern)
             for i in range(1, nsteps):
-                print "Paso %d del ajuste" % i + 1
+                print "Paso %d del ajuste" % (i + 1)
                 physsol_file = fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_steps[i])
         return (physsol_file, fit_int.lower(), nsteps)
 

@@ -213,9 +213,9 @@ def fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_flags):
     fp.close()
 
     # correr el cmwp
-    # cmd = 'unset DISPLAY\n'
-    # cmd += './evaluate %s%sspr_%d_pattern_%d%s auto >> %sstd_output.txt' % (files.pathout, files.input_file, spr, pattern, files.ext, files.input_file)
-    cmd = './evaluate %s%sspr_%d_pattern_%d%s auto >> %sstd_output.txt' % (files.pathout, files.input_file, spr, pattern, files.ext, files.input_file)
+    cmd = 'unset DISPLAY\n'
+    cmd += './evaluate %s%sspr_%d_pattern_%d%s auto >> %sstd_output.txt' % (files.pathout, files.input_file, spr, pattern, files.ext, files.input_file)
+    # cmd = './evaluate %s%sspr_%d_pattern_%d%s auto >> %sstd_output.txt' % (files.pathout, files.input_file, spr, pattern, files.ext, files.input_file)
     subprocess.call(cmd, shell=True)
 
     # devuelvo el physsol.csv
