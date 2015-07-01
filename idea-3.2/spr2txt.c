@@ -20,7 +20,7 @@ int main(int argc, char ** argv)
  int data[2500], intensity;
  double intens_av[1800], peak_intens_av[10];
  double data1[2500], BG_m, intens[500][10];
- double theta[20], neu_ome, neu_gam, alpha, beta, th;
+ double twotheta[20], neu_ome, neu_gam, alpha, beta, th;
  double pixel, dist;
  double ***sabo_inten = r3_tensor_double_alloc(40, 500, 10);
  double ***fit_inten = r3_tensor_double_alloc(40, 500, 10), ***fit_inten_err = r3_tensor_double_alloc(40, 500, 10);
@@ -122,7 +122,7 @@ int main(int argc, char ** argv)
     getval = fgets(buf_temp, 50, fp); getval = fgets(buf_temp, 50, fp);
 
     for(i = 0; i < numrings; i++){ //itera sobre cada pico (0 a 7) -> (1 a 8)
-        rv = fscanf(fp, "%lf", &theta[i]); //posicion angular del centro del pico (\theta)
+        rv = fscanf(fp, "%lf", &twotheta[i]); //posicion angular del centro del pico (2*\theta)
         rv = fscanf(fp, "%d", &posring_l[i]); //bin a la izquierda del pico
         rv = fscanf(fp, "%d", &posring_r[i]); //bin a la derecha del pico
         rv = fscanf(fp, "%d", &ug_l[i]); //bin de bg a la izquierda del pico
@@ -163,7 +163,7 @@ int main(int argc, char ** argv)
 
     //imprime en pantalla los datos relevantes de cada pico 
     for(i = 0; i < numrings; i++)
-        printf("Position of [%d]ring = Theta:%6.3f  %8d%8d%8d%8d\n", i + 1, theta[i], posring_l[i], posring_r[i], ug_l[i], ug_r[i]);
+        printf("Position of [%d]ring = Theta:%6.3f  %8d%8d%8d%8d\n", i + 1, twotheta[i], posring_l[i], posring_r[i], ug_l[i], ug_r[i]);
 
     //si le paso el valor de treshold por linea de comandos que se olvide de lo que esta en archivo
     if(argc == 5)
@@ -172,8 +172,9 @@ int main(int argc, char ** argv)
     //getchar();
     timer = time(NULL); // present time in sec
     zeit = localtime(&timer); // save "time in sec" into structure tm
-    if((fp_fit = fopen("fit_results.log", "a")) == NULL ){
-        fprintf(stderr, "Error opening file fit_results.dat\n"); exit(1);
+    sprintf(buf, "%sfit_results.log", filename);
+    if((fp_fit = fopen(buf, "w")) == NULL ){
+        fprintf(stderr, "Error opening file %s\n", buf); exit(1);
     }
     fprintf(fp_fit, "\n------------------------------------------");
     fprintf(fp_fit, "\nIDEA FIT RESULTS: %2d-%2d-%4d %2d:%2d:%2d\n", zeit->tm_mday, zeit->tm_mon + 1, zeit->tm_year + 1900, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
@@ -327,8 +328,8 @@ int main(int argc, char ** argv)
                     neu_ome = neu_ome - 90;
                     neu_gam = neu_gam + 180;
                 }
-                alpha = winkel_al(theta[m], neu_ome, neu_gam);
-                beta  = winkel_be(theta[m], neu_ome, neu_gam, alpha);
+                alpha = winkel_al(0.5*twotheta[m], neu_ome, neu_gam);
+                beta  = winkel_be(0.5*twotheta[m], neu_ome, neu_gam, alpha);
                     
                 if(alpha > 90){
                     alpha = 180 - alpha;
@@ -357,7 +358,7 @@ int main(int argc, char ** argv)
                     }
                 }             
                 //salida del archivo con todos los datos
-                fprintf(fp_all, "%12d %12.4f %12.4f %12.4f %12.4f %13.5f ", k + 1, 2 * theta[m], theta[m], alpha, beta, sabo_inten[n][j + del_gam][m]);
+                fprintf(fp_all, "%12d %12.4f %12.4f %12.4f %12.4f %13.5f ", k + 1, twotheta[m], 0.5*twotheta[m], alpha, beta, sabo_inten[n][j + del_gam][m]);
                 fprintf(fp_all, "%13.5lf  %13.5lf ", fit_inten[n][j + del_gam][m], fit_inten_err[n][j + del_gam][m]);
                 fprintf(fp_all, "%13.5lf  %13.5lf ", fwhm[n][j + del_gam][m], fwhm_err[n][j + del_gam][m]);
                 fprintf(fp_all, "%13.5lf  %13.5lf ", eta[n][j + del_gam][m], eta_err[n][j + del_gam][m]);
