@@ -8,6 +8,10 @@ int main()
     printf("\\alpha = 0.5 * \\pi * M^2 * b^2\nK = 2 * sin(\\theta) / \\lambda\nC == contrast factor\n");
     printf("\\delta * wc = stacking fault broadening correction\n\\ro = dislocation density\n");
     printf("H = FWHM o BREADTH (opcion 8)\nModelos pares (opcion 7) trabajan con los anchos corregidos por ancho instrumental\n");
+    printf("Para correr escribir:\n./idea-wh.exe");
+    printf("IMPORTANTE\nIMPORTANTE\nIMPORTANTE\n");
+    printf("IMPORTANTE\NVerificar que el archivo para_WH.dat se encuentre en el mismo directorio que idea-wh.exe");
+    printf("IMPORTANTE\nIMPORTANTE\nIMPORTANTE\n");
 
     //variables del programa
     FILE *fp_in, *fp_out;
