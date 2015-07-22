@@ -25,7 +25,7 @@ class cmwp_out:
         fp_physsol.flush()
 
         # archivo con los parametros de calidad de ajuste
-        outfile = "%s%sCMWP_FITVAR_PF.mtex" % (files.pathout, files.base_file)
+        outfile = "%s%sCMWP_FITVAR_PF.mtex" % (files.pathout, files.input_file)
         fp_fitvar = open(outfile, "w")
         fp_fitvar.write("# IDEA CMWP --- RESULT FIT FILE --- %s\n" % time.strftime("%d/%m/%Y %I:%M:%S"))
         fp_fitvar.write("# Row 2theta theta alpha beta WSSR rms redchisq\n")
