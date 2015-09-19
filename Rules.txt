@@ -10,3 +10,6 @@ Rules of Directories
  (A) Separate directories by function.
  (B) Separate files into inputs and outputs.
  (C) Make directories portable.
+
+Rules of testing
+ (A) Always test everything
