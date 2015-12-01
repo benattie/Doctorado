@@ -311,7 +311,7 @@ int main(int argc, char ** argv)
         ////////////////////////////////////////////////////////////////////////////////////////////
         //Imprimo el tiempo de ejecucion del programa en el .mtex
         fprintf(fp_all, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
-        fprintf(fp_all, "#        Row       2theta        theta        alpha         beta       raw_int       fit_int            err");
+        fprintf(fp_all, "#        Row       2theta        theta        omega        gamma        alpha         beta       raw_int       fit_int            err");
         fprintf(fp_all, "             H            err           eta            err       Breadth            err");
         fprintf(fp_all, "       H_corr             err      eta_corr            err     Breadth_corr         err");
         fprintf(fp_all, "\n");
@@ -358,7 +358,7 @@ int main(int argc, char ** argv)
                     }
                 }             
                 //salida del archivo con todos los datos
-                fprintf(fp_all, "%12d %12.4f %12.4f %12.4f %12.4f %13.5f ", k + 1, twotheta[m], 0.5*twotheta[m], alpha, beta, sabo_inten[n][j + del_gam][m]);
+                fprintf(fp_all, "%12d %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %13.5f ", k + 1, twotheta[m], 0.5*twotheta[m], (float)(i), (float)(j), alpha, beta, sabo_inten[n][j + del_gam][m]);
                 fprintf(fp_all, "%13.5lf  %13.5lf ", fit_inten[n][j + del_gam][m], fit_inten_err[n][j + del_gam][m]);
                 fprintf(fp_all, "%13.5lf  %13.5lf ", fwhm[n][j + del_gam][m], fwhm_err[n][j + del_gam][m]);
                 fprintf(fp_all, "%13.5lf  %13.5lf ", eta[n][j + del_gam][m], eta_err[n][j + del_gam][m]);
