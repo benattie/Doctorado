@@ -3,6 +3,7 @@ import re
 import subprocess
 from os import chdir
 from os import listdir
+from os import path
 from subprocess import call
 from shutil import move
 
@@ -74,7 +75,7 @@ def fit_strategy(files, rings, spr, pattern, find, fit_data):
         fit_int = fit_data[ln + 2].replace("\n", "")
         fit_stpr = fit_data[ln + 4].replace("\n", "")
         nsteps = int(fit_data[ln + 6])
-        fit_steps = np.zeros((nsteps, 7), dtype=str)
+        fit_steps = np.zeros((nsteps, 8), dtype=str)
         for i in range(nsteps):
             fit_steps[i] = fit_data[ln + 8 + i].split()
 
@@ -119,6 +120,12 @@ def set_fit_stpr(files, rings, spr, pattern, find, flag):
     destination = "%s%sspr_%d_pattern_%d%s.ini" % (files.pathout, files.input_file,
                                                    spr, pattern, files.ext)
     subprocess.call(["cp", origin, destination])
+    # copio el archivo .indC.ini
+    origin = "%s%s%s.indC.ini" % (files.path_base_file, files.base_file, files.ext)
+    destination = "%s%sspr_%d_pattern_%d%s.indC.ini" % (files.pathout, files.input_file,
+                                                        spr, pattern, files.ext)
+    if(path.isfile(origin) == True):
+        subprocess.call(["cp", origin, destination])
     # genero el archivo .q.ini
     origin = "%s%s%s.q.ini" % (files.path_base_file, files.base_file, files.ext)
     fp = open(origin, "r")
@@ -224,8 +231,9 @@ def fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_flags):
     string += "c_fixed=%s\n" % fit_flags[3]
     string += "d_fixed=%s\ne_fixed=%s\n" % (fit_flags[4], fit_flags[5])
     string += "epsilon_fixed=y\nst_pr_fixed=%s\n" % fit_flags[6]
+    string += "de_fixed=%s\n" % fit_flags[7]
     # parametros de escala
-    string += "scale_a=1.0\nscale_b=1.0\nscale_c=1.0\nscale_d=1.0\nscale_e=1.0"
+    string += "scale_a=1.0\nscale_b=1.0\nscale_c=1.0\nscale_d=100\nscale_e=0.01"
     fp.write(string)
     fp.close()
     # correr el cmwp
