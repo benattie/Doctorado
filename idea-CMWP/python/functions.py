@@ -200,17 +200,18 @@ def fit_cmwp(files, sol_file, rings, spr, pattern, find, fit_flags):
     las variables a,b,c,d,e.
     """
 
-    (lines, ln) = searchlineinfile(sol_file, "a_scaled")
+    (lines, ln) = searchlineinfile(sol_file, "*** THE SOLUTIONS ***")
     if (lines == 1):
         print "Gnuplot no termino correctamente en el paso anterior"
         print "Revise el archivo *_std_output.txt para mas detalles"
         print "Modifique sus valores iniciales o su estrategia de ajuste"
         raise Exception('SingularMatrix')
-    a = float(re.findall(find, lines[ln + 0])[0])
-    b = float(re.findall(find, lines[ln + 1])[0])
-    c = float(re.findall(find, lines[ln + 2])[0])
-    d = float(re.findall(find, lines[ln + 3])[0])
-    e = float(re.findall(find, lines[ln + 4])[0])
+    # a = float(re.findall(find, lines[ln + 0])[0])
+    a = 0.0
+    b = float(re.findall(find, lines[ln + 18])[0])
+    c = float(re.findall(find, lines[ln + 19])[0])
+    d = float(re.findall(find, lines[ln + 20])[0])
+    e = float(re.findall(find, lines[ln + 21])[0])
 
     ln = searchlineintext(lines, "stacking faults probability")
     if(ln == -1):
