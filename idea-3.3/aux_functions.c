@@ -2,54 +2,39 @@
 //Funciones de transformacion angular. De coordenadas de maquina (omega, gamma) a coordenadas de figura de polos (alpha, beta)
 double winkel_al(double th, double om, double ga)
 {
-    double   al, rad, chi, phi;
-    double  omr, gar, thr, phir, chir;
+    double   al, rad;
+    double  omr, gar, thr;
     double  COSAL;
 
     rad = pi / 180;
-    chi = 0.0;
-    phi = 0.0;
     omr = om * rad;
     gar = ga * rad;
     thr = th * rad;
-    phir = phi * rad;
-    chir = chi * rad;
 
     /***the multiplication of matrix G and s */
-     COSAL = ( (-1 * cos(omr) * sin(phir)) - (sin(omr) * cos(phir) * cos(chir)) ) * (-1 * sin(thr))
-           + ( (-1 * sin(omr) * sin(phir)) + (cos(omr) * cos(phir) * cos(chir)) ) * (cos(thr) * cos(gar))
-           + (cos(phir) * sin(chir)) * (cos(thr) * cos(gar));
-
+     COSAL = sin(omr) * sin(thr) + cos(omr) * cos(thr) * cos(gar);
      al = (double)(acos(COSAL)) / rad;
-     return (al);
+     return al;
 }
 
 double winkel_be(double thb, double omb, double gab, double alb)
 {
-    double   be, rad_be, chi_be, phi_be;
-    double  thbr, ombr, gabr, albr, phibr, chibr;
+    double  be, rad;
+    double  thbr, ombr, gabr, albr;
     double  SINALCOSBE, COSBE, SINALSINBE, SINBE;
     
-    rad_be = pi / 180;
-    chi_be = 0.0;
-    phi_be = 0.0;
-    thbr = thb * rad_be;
-    ombr = omb * rad_be;
-    gabr = gab * rad_be;
-    albr = alb * rad_be;
-    chibr = chi_be * rad_be;
-    phibr = phi_be * rad_be;
+    rad = pi / 180;
+    thbr = thb * rad;
+    ombr = omb * rad;
+    gabr = gab * rad;
+    albr = alb * rad;
 
     /*** the multiplication of matrix G and s */
-    SINALCOSBE = (cos(ombr) * cos(phibr) - sin(ombr) * sin(phibr) * cos(chibr)) * (-1 * sin(thbr))
-               + (sin(ombr) * cos(phibr) + cos(ombr) * sin(phibr) * cos(chibr)) * (cos(thbr) * cos(gabr))
-               + (sin(phibr) * sin(chibr) * (cos(thbr) * sin(gabr)));
+    SINALCOSBE = -1* cos(ombr) * sin(thbr) + sin(ombr) * cos(thbr) * cos(gabr);
     
     COSBE = SINALCOSBE / sin(albr);
 
-    SINALSINBE = (sin(ombr) * sin(chibr)) * (-1 * sin(thbr))
-               + (-1 * cos(ombr) * sin(chibr)) * (cos(thbr) * cos(gabr))
-               + cos(chibr) * (cos(thbr) * sin(gabr));
+    SINALSINBE = cos(thbr) * sin(gabr);
 
     SINBE = SINALSINBE / sin(albr);
     
@@ -59,7 +44,7 @@ double winkel_be(double thb, double omb, double gab, double alb)
         be = 0.0;
         COSBE = 1.0;
     }
-    if(COSBE <= -1)
+    if(COSBE <= -1.0)
     {
         be = 180.0;
         COSBE = -1.0;
@@ -67,17 +52,17 @@ double winkel_be(double thb, double omb, double gab, double alb)
     if(be == -1){
         if(COSBE >= 0){
             if(SINBE >= 0)
-                be = (double) (acos(COSBE) / rad_be);
+                be = (double) (acos(COSBE) / rad);
             else
-                be = (double) (360 + asin(SINBE) / rad_be);
+                be = (double) (360 + asin(SINBE) / rad);
         }else{
              if(SINBE >= 0)
-                be = (double) (acos(COSBE) / rad_be);
+                be = (double) (acos(COSBE) / rad);
             else
-                be = (double) ((acos(COSBE) - 2 * asin(SINBE)) / rad_be);
+                be = (double) (360 + atan2(SINBE, COSBE) / rad);
         }
     }
-    return (be);
+    return be;
 }
 
 double bin2theta(int bin, double pixel, double dist)

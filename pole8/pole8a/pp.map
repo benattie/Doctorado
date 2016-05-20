@@ -1,0 +1,2100 @@
+386|LINK: 9.2 -- Copyright (C) 1986-98 Phar Lap Software, Inc.
+
+
+Linking for 32-bit protected mode
+
+
+Command line switches:
+
+-LIBPATH C:\ARCHIV~1\LF9555\Lib
+@C:\DOCUME~1\javier\CONFIG~1\Temp\ynniekfz.lnk
+-cvsym
+-nocvpack
+-twocase
+-exeformat portexe
+-stub fjdummy.exe
+-subsystem console
+-exe pp.exe
+-stack 100000h,1000h
+-offset 400000h
+pp.obj
+-map pp.map
+-startobj c0x32.obj
+-start __acrtused
+-marknt
+-notfc
+-define ___StackBase=0
+-define __fltused=0
+-define __Exception_list=0
+-order class CODE
+-order class DATA
+-order class TLSCBA
+-order class TLS
+-order class INITDATA
+-order class EXITDATA
+-order class CONST
+-order class BSS
+-empty class BSS
+-attributes class CODE ER
+-attributes class DATA RW
+-attributes class TLSCBA RW
+-attributes class TLS RW
+-attributes class INITDATA RW
+-attributes class EXITDATA RW
+-attributes class CONST RW
+-attributes class BSS   RW
+-rename segment _text _TEXT
+-rename segment _data _DATA
+-rename segment _bss _BSS
+-rename segment _rdata CONST
+-rename segment _BSSEND _BSS
+-separatecsds
+-nodosxparm
+-publist byvalue
+-order segment _CRT$XIA
+-order segment _CRT$XIC
+-order segment _CRT$XIZ
+-order segment _CRT$XCA
+-order segment _CRT$XCC
+-order segment _CRT$XCL
+-order segment _CRT$XCU
+-order segment _CRT$XCZ
+-order segment _CRT$XLA
+-order segment _CRT$XLZ
+-order segment _CRT$XPA
+-order segment _CRT$XPX
+-order segment _CRT$XPZ
+-order segment _CRT$XTA
+-order segment _CRT$XTZ
+-order segment _tls
+-order segment _tls$
+-order segment _tls$ZZZ
+-libpath C:\ARCHIV~1\LF9555\lib
+-lib C:\ARCHIV~1\LF9555\lib\lf95w.lib
+-lib fjffcc.lib
+-lib fj90f.lib
+-lib fj90g.lib
+-lib fjfi.lib
+-lib cw32.lib
+-lib import32.lib
+
+
+Input module(s):
+
+Stub "fjdummy" from file "C:\ARCHIV~1\LF9555\bin\fjdummy.exe"  [Thu Apr 02 13:47:06 1998].
+"c0nt" from file "C:\ARCHIV~1\LF9555\Lib\c0x32.obj"  [Tue Mar 02 15:49:04 1999].
+"pp" from file "pp.obj"  [Thu Mar 06 13:39:20 2008].
+"jwe_xstp" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_xrt0" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_xopt" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_isfm" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_iocf" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ilst" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_iinf" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ssys" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_xint" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_xilc" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_xica" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_xexs" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_xend" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_xarg" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_isui" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_isss" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_isob" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_iscf" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ipid" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_inao" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_inai" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ilni" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ildo" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ildi" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_iipg" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_igfn" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_igad" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_iftx" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ifnc" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ifmt" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_iflo" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_iflc" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ifct" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ifck" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ifcf" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ifcc" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ienv" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_iedo" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_iedi" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_idfm" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_icui" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_iadc" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_etpt" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_eprt" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_xpac" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_xtim" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_xsko" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_xrdy" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_xill" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_xfpe" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_xesm" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_xbsg" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_xbfh" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_xacv" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_xacd" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_itpt" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_isdp" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_irpp" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_irms" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_iosf" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ioef" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ioec" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_inis" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_inas" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_inad" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_iluc" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_iims" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_igrr" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ifss" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ifps" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ifcs" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ifcr" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ifcl" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ifch" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ifan" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ifal" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_iend" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ielo" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_iefn" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_iedp" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_idtr" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_idtb" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_idcf" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_iczb" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_icpt" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_icps" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_icob" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_icft" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_icfc" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_icep" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_icdb" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_icbd" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_icbb" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ibtr" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ibtd" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_etbm" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_eset" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_eerm" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ecnv" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_xtyp" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_irio" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_irpd" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_imdj" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ijad" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_iicn" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ifop" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_etbs" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_etbn" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_etbg" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_etbe" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_errr" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_eitm" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_einf" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ertb" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ijmj" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ijdj" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_iupd" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_iugd" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_itsn" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_itsd" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_itfn" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_itfd" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_issd" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_isfd" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_irsd" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_irfd" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ipsd" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ipfd" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ipad" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ijsb" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_iifd" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_igsd" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_igfd" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ifpf" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ifpa" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ifgs" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ifgf" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ifga" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_idpt" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_idpa" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_idgt" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_idga" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_icpf" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ibsd" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ibpd" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ibgd" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ibfd" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_etbl" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_etbf" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_emsg" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_etxt" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_emsi" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_emsx" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_emss" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_emso" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_emsf" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ems5" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ems4" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ems3" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ems2" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"jwe_ems1" from file "C:\ARCHIV~1\LF9555\Lib\fjfi.lib"  [Tue Dec 14 17:16:40 1999].
+"cprintf" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"memcpy" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"memmove" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"memset" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"strlen" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"strncat" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"strncmp" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"memcmp" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"strerror" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"strnicmp" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"xxa" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"xxv" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"close" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"isatty" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"lseek" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"open" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"read" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"unlink" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"write" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"clearerr" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"fclose" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"fflush" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"fgets" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"files" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"fmode" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"fopen" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"fputs" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"fread" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"fseek" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"fwrite" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"getcwd" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"lputc" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"printf" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"rewind" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"setvbuf" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"sprintf" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"tempnam" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"_fputc" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"fstat" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"stat" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"ctype" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"is" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"tolower" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"toupper" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"ctrl87" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"ftol" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"pow" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"atol" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"hugeval" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"initcvt" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"matherr" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"matherrl" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"calloc" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"heap" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"realloc" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"errno" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"abort" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"exit" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"getenv" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"setargv" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"setenvp" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"system" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"startup" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"cputn" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"_pathops" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"memchr" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"strcat" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"_stpcpy" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"xx" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"lockdbg" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"except" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"flushall" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"allocbuf" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"files2" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"flushout" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"fmodeptr" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"fputn" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"lgetc" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"mkname" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"perror" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"streams" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"vprinter" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"xfclose" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"__read" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"__write" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"fullpath" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"getdcwd" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"ioerror" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"__access" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"__close" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"__isatty" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"__lseek" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"__open" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"__unlink" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"clocale" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"f87exp" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"f87log" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"fpreset" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"mathptr" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"realcvt" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"scantod" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"_matherr" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"virtmem" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"errormsg" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"nowild" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"srchenv" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"setargv0" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"loadprog" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"signal" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"statcvt" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"wkanji" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"wnewline" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"wscroll" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"crtinit" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"movecurs" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"scroll" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"_wherexy" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"strcmp" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"stricmp" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"strrchr" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"defhandl" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"ta" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"setexc" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"cfinfo" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"xfflush" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"_cfinfo" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"_flshall" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"_umask" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"__eof" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"handles" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"_read" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"_write" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"cconv" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"clower" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"cupper" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"strxfrm" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"clear87" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"cvtentry" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"fuildq" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"qmul10" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"cvtfak" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"deflt87" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"ldtrunc" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"longtoa" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"mathwhy" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"xcvt" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"_pow10" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"del" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"delarray" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"ermsghlp" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"platform" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"srchstr" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"tzset" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"strncpy" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"fuistq" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"fxam" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"qdiv10" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"timedata" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"getdate" from file "C:\ARCHIV~1\LF9555\Lib\cw32.lib"  [Thu Mar 04 02:30:38 1999].
+"kernel32" from file "C:\ARCHIV~1\LF9555\Lib\import32.lib"  [Tue Mar 02 15:49:34 1999].
+"user32" from file "C:\ARCHIV~1\LF9555\Lib\import32.lib"  [Tue Mar 02 15:49:34 1999].
+"jwe_fu8f" from file "C:\ARCHIV~1\LF9555\Lib\fj90f.lib"  [Wed Dec 08 18:36:30 1999].
+"jwe_fjdu" from file "C:\ARCHIV~1\LF9555\Lib\fj90f.lib"  [Wed Dec 08 18:36:30 1999].
+"jwe_fjcv" from file "C:\ARCHIV~1\LF9555\Lib\fj90f.lib"  [Wed Dec 08 18:36:30 1999].
+"jwe_fjci" from file "C:\ARCHIV~1\LF9555\Lib\fj90f.lib"  [Wed Dec 08 18:36:30 1999].
+"jwe_fnzb" from file "C:\ARCHIV~1\LF9555\Lib\fj90f.lib"  [Wed Dec 08 18:36:30 1999].
+"jwe_fjsb" from file "C:\ARCHIV~1\LF9555\Lib\fj90f.lib"  [Wed Dec 08 18:36:30 1999].
+"jwe_gqcj" from file "C:\ARCHIV~1\LF9555\Lib\fj90g.lib"  [Fri May 07 16:01:32 1999].
+"jwe_gdbq" from file "C:\ARCHIV~1\LF9555\Lib\fj90g.lib"  [Fri May 07 16:01:32 1999].
+
+
+Segment map
+
+     Name         Group         Class     Type   Offset     Size
+------------  ------------  ------------  ----  --------  --------
+REAL STUB                                       00400000  00000244
+PE HEADER                                       00400244  000000F8
+OBJECT TABLE                                    0040033C  00000118
+_TEXT                       CODE          PUB   00401000  0004522C
+.jdata                      CODE          PUB   00446230  0000018C
+_CRT$XCU                    DATA          PUB   004463C0  00000000
+_DATA         DGROUP        DATA          PUB   00447000  00015010
+_TLSCBA       DGROUP        TLSCBA        PUB   0045C010  00000000
+_INIT_        DGROUP        INITDATA      PUB   0045C010  00000048
+_INITEND_     DGROUP        INITDATA      PUB   0045C058  00000000
+_EXIT_        DGROUP        EXITDATA      PUB   0045C058  0000002A
+_EXITEND_     DGROUP        EXITDATA      PUB   0045C082  00000000
+CONST         DGROUP        CONST         PUB   0045C084  0000029C
+_BSS          DGROUP        BSS           PUB   0045D000  00028058
+.idata                      IMPORTS       PUB   00486000  00000784
+.edata                      EXPORTS       PUB   00487000  00000200
+.reloc                      RELOCS        PUB   00488000  00003800
+
+
+Portable .EXE (PE) Sections
+
+  Name    Address     Size    File Off  File Sz    Flags
+--------  --------  --------  --------  --------  --------
+CODE      00401000  000453BC  00000600  00045400  60000020  
+DATA      00447000  0001531C  00045A00  00015400  C0000040  
+.bss      0045D000  00028058  00000000  00028200  C0000080  
+.idata    00486000  00000784  0005AE00  00000800  C0000040  
+.edata    00487000  00000200  0005B600  00000200  C0000040  
+.reloc    00488000  00003800  0005B800  00003800  42000040  
+.debug    0048C000  00014EB6  0005F000  00014EB6  40000040  
+
+
+Public symbols
+
+  Value      Name
+--------  ------------
+00000000     ___StackBase
+00000000     __fltused
+00000000     __Exception_list
+00000001     $$fjdummy
+
+00401000  Segment _TEXT of module c0nt.ASM (C:\ARCHIV~1\LF9555\Lib\c0x32.obj)
+00401000     __acrtused
+00401074     __GetExceptDLLinfo
+
+0040107C  Segment _TEXT of module pp (pp.obj)
+0040107C     _MAIN__
+
+0040125C  Segment _TEXT of module jwe_xstp (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0040125C     _jwe_xstp
+
+00401384  Segment _TEXT of module jwe_xrt0 (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00401384     _main
+
+00401428  Segment _TEXT of module jwe_xopt (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00401428     _jwe_xopt
+004024A3     _jwe_xcop
+004026C0     _jwe_xrcp
+
+004026C8  Segment _TEXT of module jwe_isfm (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004026C8     _jwe_isfm
+
+0040303C  Segment _TEXT of module jwe_iocf (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0040303C     _jwe_iocf
+
+004057AC  Segment _TEXT of module jwe_ilst (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004057AC     _jwe_ilst
+
+00405E24  Segment _TEXT of module jwe_iinf (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00405E24     _jwe_iinf
+
+00406734  Segment _TEXT of module jwe_ssys (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00406734     _l_system
+00406751     _jwe_ssyt
+0040690B     _jwe_ssye
+
+004069C8  Segment _TEXT of module jwe_xint (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004069C8     _jwe_xint
+
+00406A40  Segment _TEXT of module jwe_xilc (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00406A40     _jwe_xilc
+
+00406A88  Segment _TEXT of module jwe_xica (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00406A88     _jwe_xica
+
+00406ADC  Segment _TEXT of module jwe_xexs (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00406ADC     _jwe_xexs
+00406B38     _jwe_xets
+
+00406D24  Segment _TEXT of module jwe_xend (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00406D24     _jwe_xend
+
+00406E64  Segment _TEXT of module jwe_xarg (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00406E64     _jwe_xarg
+
+00406FBC  Segment _TEXT of module jwe_isui (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00406FBC     _jwe_isui
+004070F2     _jwe_isu1
+
+00407194  Segment _TEXT of module jwe_isss (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00407194     _jwe_isss
+
+004071A4  Segment _TEXT of module jwe_isob (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004071A4     _jwe_isob
+
+004072DC  Segment _TEXT of module jwe_iscf (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004072DC     _jwe_iscf
+
+00407E00  Segment _TEXT of module jwe_ipid (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00407E00     _jwe_ipid
+
+00407E9C  Segment _TEXT of module jwe_inao (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00407E9C     _jwe_inao
+
+00409520  Segment _TEXT of module jwe_inai (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00409520     _jwe_inai
+0040AC25     _jwe_inkw
+0040B4ED     _jwe_inch
+0040B554     _jwe_inc2
+0040B58F     _jwe_inhx
+0040B783     _jwe_inex
+0040B7CA     _jwe_inhc
+0040C677     _jwe_ine1
+0040C85C     _jwe_ine2
+0040CA48     _jwe_ine3
+0040CB60     _jwe_in_g
+0040CD65     _jwe_insf
+0040CDEA     _jwe_inah
+
+0040CE34  Segment _TEXT of module jwe_ilni (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0040CE34     _jwe_ilni
+
+0040E2E8  Segment _TEXT of module jwe_ildo (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0040E2E8     _jwe_ildo
+0040FD86     _jwe_illd
+
+0040FF84  Segment _TEXT of module jwe_ildi (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0040FF84     _jwe_ildi
+
+00410BFC  Segment _TEXT of module jwe_iipg (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00410BFC     _jwe_iipg
+
+00410F38  Segment _TEXT of module jwe_igfn (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00410F38     _jwe_igfn
+
+00410FE0  Segment _TEXT of module jwe_igad (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00410FE0     _jwe_igad
+
+00411000  Segment _TEXT of module jwe_iftx (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00411000     _jwe_iftx
+
+00411108  Segment _TEXT of module jwe_ifnc (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00411108     _jwe_ifnc
+
+004113DC  Segment _TEXT of module jwe_ifmt (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004113DC     _jwe_ifmt
+
+00412A2C  Segment _TEXT of module jwe_iflo (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00412A2C     _jwe_iflo
+
+00412AA0  Segment _TEXT of module jwe_iflc (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00412AA0     _jwe_iflc
+
+00412D04  Segment _TEXT of module jwe_ifct (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00412D04     _jwe_ifct
+
+00414B74  Segment _TEXT of module jwe_ifck (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00414B74     _jwe_ifck
+
+00414C54  Segment _TEXT of module jwe_ifcf (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00414C54     _jwe_ifcf
+
+00414E2C  Segment _TEXT of module jwe_ifcc (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00414E2C     _jwe_ifcc
+
+00414F1C  Segment _TEXT of module jwe_ienv (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00414F1C     _jwe_ienv
+
+0041508C  Segment _TEXT of module jwe_iedo (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041508C     _jwe_iedo
+
+004186D0  Segment _TEXT of module jwe_iedi (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004186D0     _jwe_iedi
+
+0041BB74  Segment _TEXT of module jwe_idfm (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041BB74     _jwe_idfm
+
+0041BFC8  Segment _TEXT of module jwe_icui (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041BFC8     _jwe_icui
+0041C3A8     _jwe_iist
+
+0041C3F8  Segment _TEXT of module jwe_iadc (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041C3F8     _jwe_iadc
+
+0041C69C  Segment _TEXT of module jwe_etpt (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041C69C     _jwe_etpt
+
+0041C6C8  Segment _TEXT of module jwe_eprt (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041C737     _jwe_epmp
+0041C7FB     _jwe_eprt
+
+0041CCB4  Segment _TEXT of module jwe_xpac (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041CCB4     _jwe_xpac
+
+0041CEB8  Segment _TEXT of module jwe_xtim (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041CEB8     _jwe_xtim
+
+0041CF50  Segment _TEXT of module jwe_xsko (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041CF50     _jwe_xsko
+
+0041CF78  Segment _TEXT of module jwe_xrdy (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041CF78     _jwe_xrdy
+
+0041CF8C  Segment _TEXT of module jwe_xill (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041CF8C     _jwe_xill
+
+0041CFB0  Segment _TEXT of module jwe_xfpe (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041CFB0     _jwe_xfpe
+
+0041D094  Segment _TEXT of module jwe_xesm (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041D094     _jwe_xesm
+
+0041D12C  Segment _TEXT of module jwe_xbsg (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041D12C     _jwe_xbsg
+
+0041D17C  Segment _TEXT of module jwe_xbfh (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041D17C     _jwe_xbfh
+
+0041D18C  Segment _TEXT of module jwe_xacv (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041D18C     _jwe_xacv
+
+0041D1B4  Segment _TEXT of module jwe_xacd (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041D1B4     _jwe_xacd
+
+0041D1BC  Segment _TEXT of module jwe_itpt (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041D1BC     _jwe_itpt
+
+0041D27C  Segment _TEXT of module jwe_isdp (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041D27C     _jwe_isdp
+0041D46A     _jwe_isd1
+0041D513     _jwe_isd2
+0041D68D     _jwe_isls
+
+0041D6E0  Segment _TEXT of module jwe_irpp (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041D6E0     _jwe_irpp
+
+0041DDB4  Segment _TEXT of module jwe_irms (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041DDB4     _jwe_irms
+
+0041DED0  Segment _TEXT of module jwe_iosf (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041DED0     _jwe_iosf
+
+0041E0A0  Segment _TEXT of module jwe_ioef (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041E0A0     _jwe_ioef
+
+0041E104  Segment _TEXT of module jwe_ioec (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041E104     _jwe_ioec
+
+0041E470  Segment _TEXT of module jwe_inis (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041E470     _jwe_inis
+
+0041E518  Segment _TEXT of module jwe_inas (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0041E518     _jwe_inas
+0041FD2C     _jwe_indi
+
+00420B70  Segment _TEXT of module jwe_inad (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00420B70     _jwe_inad
+
+004232A8  Segment _TEXT of module jwe_iluc (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004232A8     _jwe_iluc
+
+004234A0  Segment _TEXT of module jwe_iims (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004234A0     _jwe_iims
+
+00423530  Segment _TEXT of module jwe_igrr (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00423530     _jwe_igrr
+
+004237F4  Segment _TEXT of module jwe_ifss (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004237F4     _jwe_ifss
+
+004238C4  Segment _TEXT of module jwe_ifps (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004238C4     _jwe_ifps
+
+00423E34  Segment _TEXT of module jwe_ifcs (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00423E34     _jwe_ifcs
+
+00423F44  Segment _TEXT of module jwe_ifcr (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00423F44     _jwe_ifcr
+
+00423FC0  Segment _TEXT of module jwe_ifcl (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00423FC0     _jwe_ifcl
+
+00424748  Segment _TEXT of module jwe_ifch (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00424748     _jwe_ifch
+
+00424870  Segment _TEXT of module jwe_ifan (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00424870     _jwe_ifan
+
+00424A18  Segment _TEXT of module jwe_ifal (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00424A18     _jwe_ifal
+
+00424CBC  Segment _TEXT of module jwe_iend (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00424CBC     _jwe_iged
+00424E5C     _jwe_ieed
+
+00424F24  Segment _TEXT of module jwe_ielo (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00424F24     _jwe_ielo
+
+004253E8  Segment _TEXT of module jwe_iefn (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004253E8     _jwe_iefn
+
+00425554  Segment _TEXT of module jwe_iedp (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00425554     _jwe_iedp
+
+004257D8  Segment _TEXT of module jwe_idtr (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004257D8     _jwe_idtr
+
+00425950  Segment _TEXT of module jwe_idtb (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00425950     _jwe_idtb
+
+00425BA8  Segment _TEXT of module jwe_idcf (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00425BA8     _jwe_idcf
+
+00426040  Segment _TEXT of module jwe_iczb (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00426040     _jwe_iczb
+
+004261F4  Segment _TEXT of module jwe_icpt (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004261F4     _jwe_icpt
+
+00426920  Segment _TEXT of module jwe_icps (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00426920     _jwe_icps
+
+004270C8  Segment _TEXT of module jwe_icob (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004270C8     _jwe_icob
+
+004273A8  Segment _TEXT of module jwe_icft (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004273A8     _jwe_icft
+
+0042B200  Segment _TEXT of module jwe_icfc (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0042B200     _jwe_icfc
+
+0042B234  Segment _TEXT of module jwe_icep (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0042B234     _jwe_icep
+
+0042B298  Segment _TEXT of module jwe_icdb (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0042B298     _jwe_icdb
+
+0042B410  Segment _TEXT of module jwe_icbd (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0042B410     _jwe_icbd
+
+0042B544  Segment _TEXT of module jwe_icbb (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0042B544     _jwe_icbb
+
+0042B688  Segment _TEXT of module jwe_ibtr (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0042B688     _jwe_ibtr
+
+0042B89C  Segment _TEXT of module jwe_ibtd (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0042B89C     _jwe_ibtd
+
+0042BC1C  Segment _TEXT of module jwe_etbm (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0042BC1C     _jwe_etbm
+
+0042D044  Segment _TEXT of module jwe_eset (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0042D044     _jwe_eset
+
+0042D050  Segment _TEXT of module jwe_eerm (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0042D050     _jwe_eerm
+
+0042D4E8  Segment _TEXT of module jwe_ecnv (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0042D4E8     _jwe_ecnv
+
+0042D5FC  Segment _TEXT of module jwe_xtyp (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0042D5FC     _jwe_xtyp
+
+0042D910  Segment _TEXT of module jwe_irio (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0042D910     _jwe_iric
+0042E8B0     _jwe_iroc
+
+004303F0  Segment _TEXT of module jwe_irpd (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004303F0     _jwe_irpd
+004309CE     _jwe_irp1
+00430A6C     _jwe_irp2
+
+00430C30  Segment _TEXT of module jwe_imdj (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00430C30     _jwe_imdj
+
+00430C88  Segment _TEXT of module jwe_ijad (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00430C88     _jwe_ijad
+
+00430D9C  Segment _TEXT of module jwe_iicn (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00430D9C     _jwe_iicn
+
+004311C0  Segment _TEXT of module jwe_ifop (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004311C0     _jwe_ifop
+
+004320D4  Segment _TEXT of module jwe_etbs (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004320D4     _jwe_etbs_dll
+004324AE     _jwe_etbs
+
+004328D0  Segment _TEXT of module jwe_etbn (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004328D0     _jwe_etbn
+
+00432A14  Segment _TEXT of module jwe_etbg (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00432A14     _jwe_etbg
+
+00432BB0  Segment _TEXT of module jwe_etbe (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00432BB0     _jwe_etbe
+
+00432C90  Segment _TEXT of module jwe_errr (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00432C90     _jwe_errr
+
+00433538  Segment _TEXT of module jwe_eitm (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00433538     _jwe_eitm
+
+00433568  Segment _TEXT of module jwe_einf (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00433568     _jwe_einf
+
+004338D0  Segment _TEXT of module jwe_ertb (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004338D0     _jwe_egtb
+004338D6     _jwe_ebtl
+
+004338D8  Segment _TEXT of module jwe_ijmj (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004338D8     _jwe_ijmj
+
+00433A38  Segment _TEXT of module jwe_ijdj (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00433A38     _jwe_ijdj
+
+00433CD8  Segment _TEXT of module jwe_iupd (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00433CD8     _jwe_iupd
+
+00434178  Segment _TEXT of module jwe_iugd (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00434178     _jwe_iugd
+
+00434558  Segment _TEXT of module jwe_itsn (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00434558     _jwe_itsn
+
+0043463C  Segment _TEXT of module jwe_itsd (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0043463C     _jwe_itsd
+
+00434720  Segment _TEXT of module jwe_itfn (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00434720     _jwe_itfn
+
+004348E0  Segment _TEXT of module jwe_itfd (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004348E0     _jwe_itfd
+
+00434B10  Segment _TEXT of module jwe_issd (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00434B10     _jwe_issd
+
+00434B68  Segment _TEXT of module jwe_isfd (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00434B68     _jwe_isfd
+
+00434C18  Segment _TEXT of module jwe_irsd (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00434C18     _jwe_irsd
+
+00434C60  Segment _TEXT of module jwe_irfd (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00434C60     _jwe_irfd
+
+00434CE4  Segment _TEXT of module jwe_ipsd (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00434CE4     _jwe_ipsd
+
+004352B8  Segment _TEXT of module jwe_ipfd (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004352B8     _jwe_ipfd
+
+00435B00  Segment _TEXT of module jwe_ipad (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00435B00     _jwe_ipad
+
+00435BC8  Segment _TEXT of module jwe_ijsb (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00435BC8     _jwe_ijsb
+
+00435CAC  Segment _TEXT of module jwe_iifd (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00435CAC     _jwe_iifd
+
+00435F28  Segment _TEXT of module jwe_igsd (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00435F28     _jwe_igsd
+
+004360AC  Segment _TEXT of module jwe_igfd (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004360AC     _jwe_igfd
+
+0043627C  Segment _TEXT of module jwe_ifpf (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0043627C     _jwe_ifpf
+
+00436B7C  Segment _TEXT of module jwe_ifpa (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00436B7C     _jwe_ifpa
+
+00436C24  Segment _TEXT of module jwe_ifgs (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00436C24     _jwe_ifgs
+
+00436E2C  Segment _TEXT of module jwe_ifgf (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00436E2C     _jwe_ifgf
+
+004374A8  Segment _TEXT of module jwe_ifga (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004374A8     _jwe_ifga
+
+00437550  Segment _TEXT of module jwe_idpt (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00437550     _jwe_idpt
+00437BE3     _jwe_idft
+
+00437CB8  Segment _TEXT of module jwe_idpa (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00437CB8     _jwe_idpa
+0043855D     _jwe_idpb
+00438652     _jwe_idpe
+
+00438700  Segment _TEXT of module jwe_idgt (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00438700     _jwe_idgt
+
+00438AF4  Segment _TEXT of module jwe_idga (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00438AF4     _jwe_idga
+
+0043902C  Segment _TEXT of module jwe_icpf (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0043902C     _jwe_icpf
+
+00439F08  Segment _TEXT of module jwe_ibsd (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00439F08     _jwe_ibsd
+
+0043A118  Segment _TEXT of module jwe_ibpd (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0043A118     _jwe_ibpd
+
+0043A300  Segment _TEXT of module jwe_ibgd (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0043A300     _jwe_ibgd
+
+0043A47C  Segment _TEXT of module jwe_ibfd (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0043A47C     _jwe_ibfd
+
+0043AB44  Segment _TEXT of module jwe_etbl (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0043AB44     _jwe_etbl
+
+0043AB7C  Segment _TEXT of module jwe_etbf (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0043AB7C     _jwe_etbf
+
+0043AFF8  Segment _TEXT of module jwe_emsg (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0043AFF8     _jwe_emsg
+
+0043C478  Segment _TEXT of module jwe_etxt (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0043C478     _jwe_etxt
+
+0043C4DC  Segment _TEXT of module jwe_emsi (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0043C4DC     _jwe_emsi
+
+0043C4E4  Segment _TEXT of module jwe_emsx (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0043C4E4     _jwe_emsx
+
+0043C4EC  Segment _TEXT of module jwe_emss (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0043C4EC     _jwe_emss
+
+0043C4F4  Segment _TEXT of module jwe_emso (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0043C4F4     _jwe_emso
+
+0043C4FC  Segment _TEXT of module jwe_emsf (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0043C4FC     _jwe_emsf
+
+0043C504  Segment _TEXT of module jwe_ems5 (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0043C504     _jwe_ems5
+
+0043C50C  Segment _TEXT of module jwe_ems4 (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0043C50C     _jwe_ems4
+
+0043C514  Segment _TEXT of module jwe_ems3 (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0043C514     _jwe_ems3
+
+0043C51C  Segment _TEXT of module jwe_ems2 (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0043C51C     _jwe_ems2
+
+0043C524  Segment _TEXT of module jwe_ems1 (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0043C524     _jwe_ems1
+
+0043C52C  Segment _TEXT of module cprintf.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043C52C     ___org_cprintf
+0043C52C     _cprintf
+
+0043C548  Segment _TEXT of module memcpy.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043C548     _memcpy
+0043C548     ___org_memcpy
+
+0043C56C  Segment _TEXT of module memmove.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043C56C     _memmove
+0043C56C     ___org_memmove
+
+0043C5B8  Segment _TEXT of module memset.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043C5B8     _memset
+0043C5B8     ___org_memset
+
+0043C5E8  Segment _TEXT of module strlen.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043C5E8     _strlen
+0043C5E8     ___org_strlen
+
+0043C604  Segment _TEXT of module strncat.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043C604     ___org_strncat
+0043C604     _strncat
+
+0043C650  Segment _TEXT of module strncmp.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043C650     ___org_strncmp
+0043C650     _strncmp
+
+0043C684  Segment _TEXT of module memcmp.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043C684     _memcmp
+0043C684     ___org_memcmp
+
+0043C6C8  Segment _TEXT of module strerror.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043C754     __strerror
+0043C754     ___org__strerror
+0043C76C     ___org_strerror
+0043C76C     _strerror
+
+0043C780  Segment _TEXT of module strnicmp.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043C780     ___org_strnicmp
+0043C780     _strnicmp
+
+0043C7E0  Segment _TEXT of module xxa.cpp (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043C7E0     @__InitExceptBlock
+
+0043C820  Segment _TEXT of module xxv.cpp (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043C820     @terminate$qv
+0043C826     @set_terminate$qpqv$v
+0043C84B     ___call_terminate
+0043C904     @unexpected$qv
+0043C90A     @set_unexpected$qpqv$v
+0043C92F     ___call_unexpected
+0043C9A3     @__GetPolymorphicDTC$qpvui
+0043C9C2     __ExceptInit
+0043CAA4     __GetExceptDLLinfoInternal
+
+0043CAE0  Segment _TEXT of module close.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043CAE0     ___org_close
+0043CAE0     _close
+
+0043CAE8  Segment _TEXT of module isatty.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043CAE8     ___org_isatty
+0043CAE8     _isatty
+
+0043CAF0  Segment _TEXT of module lseek.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043CAF0     ___org_lseek
+0043CAF0     _lseek
+
+0043CAF8  Segment _TEXT of module open.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043CAF8     ___org_open
+0043CAF8     _open
+
+0043CB00  Segment _TEXT of module read.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043CB00     ___org_read
+0043CB00     _read
+
+0043CB08  Segment _TEXT of module unlink.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043CB08     ___org_unlink
+0043CB08     _unlink
+
+0043CB10  Segment _TEXT of module write.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043CB10     ___org_write
+0043CB10     _write
+
+0043CB18  Segment _TEXT of module clearerr.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043CB18     ___org_clearerr
+0043CB18     _clearerr
+
+0043CB28  Segment _TEXT of module fclose.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043CB28     ___org_fclose
+0043CB28     _fclose
+
+0043CBBC  Segment _TEXT of module fflush.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043CBBC     ___org_fflush
+0043CBBC     _fflush
+
+0043CC40  Segment _TEXT of module fgets.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043CC40     ___org_fgets
+0043CC40     _fgets
+
+0043CD6C  Segment _TEXT of module fopen.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043CE38     ___openfp
+0043CEE0     ___getfp
+0043CF0C     ___org_fopen
+0043CF0C     _fopen
+
+0043CF38  Segment _TEXT of module fputs.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043CF38     _fputs
+0043CF38     ___org_fputs
+
+0043CF78  Segment _TEXT of module fread.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043D0A8     _fread
+0043D0A8     ___org_fread
+
+0043D0DC  Segment _TEXT of module fseek.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043D138     _fseek
+0043D138     ___org_fseek
+0043D19C     _ftell
+0043D19C     ___org_ftell
+
+0043D21C  Segment _TEXT of module fwrite.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043D21C     _fwrite
+0043D21C     ___org_fwrite
+
+0043D250  Segment _TEXT of module getcwd.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043D250     _getcwd
+0043D250     ___org_getcwd
+
+0043D268  Segment _TEXT of module lputc.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043D268     _fputc
+0043D268     ___org_fputc
+
+0043D35C  Segment _TEXT of module printf.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043D35C     _printf
+0043D35C     ___org_printf
+
+0043D37C  Segment _TEXT of module rewind.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043D37C     _rewind
+0043D37C     ___org_rewind
+
+0043D3A0  Segment _TEXT of module setvbuf.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043D3A0     _setvbuf
+0043D3A0     ___org_setvbuf
+
+0043D3F4  Segment _TEXT of module sprintf.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043D41C     _sprintf
+0043D41C     ___org_sprintf
+0043D440     _swprintf
+0043D478     _vsprintf
+0043D478     ___org_vsprintf
+
+0043D49C  Segment _TEXT of module tempnam.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043D49C     _tempnam
+0043D49C     ___org_tempnam
+
+0043D5AC  Segment _TEXT of module _fputc.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043D5AC     __fputc
+0043D5AC     ___org__fputc
+
+0043D5C8  Segment _TEXT of module fstat.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043D5C8     _fstat
+0043D5C8     ___org_fstat
+
+0043D670  Segment _TEXT of module stat.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043D6B8     _stat
+0043D6B8     ___org_stat
+
+0043D86C  Segment _TEXT of module is.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043D86C     ___isctype
+0043D898     _isalnum
+0043D8AC     _isascii
+0043D8C0     _isalpha
+0043D8D4     _iscntrl
+0043D8E8     _isdigit
+0043D8FC     _isgraph
+0043D910     _islower
+0043D924     _isprint
+0043D954     _ispunct
+0043D968     _isspace
+0043D97C     _isupper
+0043D990     _isxdigit
+
+0043D9A4  Segment _TEXT of module tolower.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043D9A4     _tolower
+
+0043D9CC  Segment _TEXT of module toupper.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043D9CC     _toupper
+
+0043D9F4  Segment _TEXT of module ctrl87.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043D9F4     __control87
+
+0043DA1C  Segment _TEXT of module ftol.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043DA1C     __ftol
+0043DA1C     @_ftol$qv
+
+0043DA44  Segment _TEXT of module pow.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043DA44     _pow
+0043DA44     ___org_pow
+
+0043DC20  Segment _TEXT of module atol.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043DC20     _atol
+0043DC20     ___org_atol
+0043DC7C     _atoi
+0043DC7C     ___org_atoi
+
+0043DC8C  Segment _TEXT of module matherr.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043DC8C     __matherr
+0043DC8C     ___org__matherr
+
+0043DCB8  Segment _TEXT of module matherrl.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043DCB8     __matherrl
+0043DCB8     ___org__matherrl
+
+0043DCE8  Segment _TEXT of module calloc.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043DCE8     _calloc
+0043DCE8     ___org_calloc
+
+0043DD14  Segment _TEXT of module heap.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043E31C     _free
+0043E31C     ___org_free
+0043E424     _malloc
+0043E424     ___org_malloc
+0043E700     __phys_avail
+0043E718     __free_heaps
+
+0043E790  Segment _TEXT of module realloc.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043E790     __expand
+0043E790     ___org__expand
+0043E8B8     _realloc
+0043E8B8     ___org_realloc
+0043E934     __msize
+0043E934     ___org__msize
+
+0043E950  Segment _TEXT of module errno.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043E950     ___errno
+
+0043E958  Segment _TEXT of module abort.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043E958     __abort
+0043E96C     _abort
+
+0043E97C  Segment _TEXT of module exit.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043E9D8     _exit
+0043E9F0     __exit
+0043EA08     __cexit
+0043EA18     __c_exit
+
+0043EA28  Segment _TEXT of module getenv.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043EA28     _getenv
+0043EA28     ___org_getenv
+
+0043EA78  Segment _TEXT of module setargv.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043EA78     __setargv
+0043EC14     __exitargv
+0043ECB4     __addarg
+
+0043ED78  Segment _TEXT of module setenvp.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043EE00     __expandblock
+
+0043EF48  Segment _TEXT of module system.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043EF48     _system
+
+0043F030  Segment _TEXT of module startup.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043F030     __create_shmem
+0043F038     __init_exit_proc
+0043F0E4     __startup
+0043F24C     __cleanup
+0043F2C4     __terminate
+
+0043F2D8  Segment _TEXT of module cputn.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043F348     ___cputn
+
+0043F5D0  Segment _TEXT of module _pathops.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043F5D0     ___path_isdbcsleadbyte
+0043F5E0     ___path_issbcs
+
+0043F62C  Segment _TEXT of module memchr.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043F62C     _memchr
+0043F62C     ___org_memchr
+
+0043F64C  Segment _TEXT of module strcat.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043F64C     _strcat
+0043F64C     ___org_strcat
+
+0043F688  Segment _TEXT of module _stpcpy.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043F688     __stpcpy
+
+0043F6B4  Segment _TEXT of module xx.cpp (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0043F6B4     ___JumpToCatch__
+0043F6D4     @__debuggerExcListChange$qv
+00440076     @_ThrowException$qpvt1t1t1uiuiuipuc
+004400A3     @_ReThrowException$quipuc
+004400F4     __Global_unwind
+0044020F     @_CatchCleanup$qv
+00440636     __Local_unwind
+00440649     __Return_unwind
+004406B3     __ExceptionHandler
+00441039     __CurrExcContext
+0044108D     @__ThrowFileName$qv
+0044109A     @__ThrowLineNumber$qv
+004410A7     @__ThrowExceptionName$qv
+004410B4     @typeinfo@$bctr$qrx8typeinfo
+004410EA     @typeinfo@$basg$qrx8typeinfo
+004410F2     @typeinfo@$bdtr$qv
+00441111     @typeinfo@$beql$xqrx8typeinfo
+00441134     @typeinfo@$bneq$xqrx8typeinfo
+00441154     @typeinfo@before$xqrx8typeinfo
+0044119D     @typeinfo@name$xqv
+004411AE     @__GetTypeInfo$qpvt1t1t1
+00441365     @__DynamicCast$qpvt1t1t1i
+0044142C     @$xt$p8typeinfo
+00441444     @$xt$10Bad_typeid
+00441460     @$xt$8Bad_cast
+0044147C     @$xt$8typeinfo
+
+004414C4  Segment _TEXT of module lockdbg.cpp (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+004414C4     @__lockDebuggerData$qv
+004414EC     @__unlockDebuggerData$qv
+
+004414F8  Segment _TEXT of module except.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00441594     __setexc
+004415B0     __unsetexc
+004415C0     __SetUserHandler
+004415D4     __unsetuserhandler
+004415E0     __init_except
+004415F8     __exit_except
+0044160C     __InitDefaultHander
+
+00441620  Segment _TEXT of module flushall.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00441620     _flushall
+
+00441628  Segment _TEXT of module allocbuf.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00441628     __allocbuf
+
+004416A8  Segment _TEXT of module flushout.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+004416A8     __flushout
+
+00441704  Segment _TEXT of module fmodeptr.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00441704     __initfmode
+
+00441714  Segment _TEXT of module fputn.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00441714     ___fputn
+
+004417F0  Segment _TEXT of module lgetc.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00441888     __fgetc
+00441888     ___org__fgetc
+0044189C     _fgetc
+0044189C     ___org_fgetc
+
+0044196C  Segment _TEXT of module mkname.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0044196C     ___mkname
+004419BC     ___tmpnam
+
+00441A00  Segment _TEXT of module perror.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00441A00     _perror
+00441A00     ___org_perror
+
+00441A7C  Segment _TEXT of module streams.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00441A7C     __init_streams
+00441B30     __exit_streams
+
+00441B80  Segment _TEXT of module vprinter.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00441C0C     ___vprinter
+
+0044226C  Segment _TEXT of module xfclose.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0044226C     __xfclose
+
+0044229C  Segment _TEXT of module __read.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00442308     ___read
+
+00442438  Segment _TEXT of module __write.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+004424F0     ___write
+
+004425D0  Segment _TEXT of module fullpath.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+004425D0     __fullpath
+004425D0     ___org__fullpath
+
+0044266C  Segment _TEXT of module getdcwd.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0044266C     __getdcwd
+0044266C     ___org__getdcwd
+
+004427A8  Segment _TEXT of module ioerror.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+004427A8     ___IOerror
+004427EC     ___DOSerror
+0044280C     ___NTerror
+
+00442820  Segment _TEXT of module __access.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00442820     ___access
+
+0044285C  Segment _TEXT of module __close.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0044285C     ___close
+
+004428A8  Segment _TEXT of module __isatty.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+004428A8     ___isatty
+004428D8     ___isatty_osfhandle
+
+004428F0  Segment _TEXT of module __lseek.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+004428F0     ___lseek
+
+00442968  Segment _TEXT of module __open.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00442968     ___open
+
+00442B60  Segment _TEXT of module __unlink.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00442B60     ___unlink
+
+00442B7C  Segment _TEXT of module f87exp.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00442B7C     __f87_Exp2
+00442B81     __f87_Exp10
+00442B89     __f87_Exp
+
+00442C4C  Segment _TEXT of module f87log.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00442C4C     __f87_Log2
+00442C50     __f87_Log10
+00442C54     __f87_Log
+
+00442C94  Segment _TEXT of module fpreset.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00442C94     __fpreset
+
+00442CAC  Segment _TEXT of module mathptr.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00442CAC     __initmatherr
+
+00442CC4  Segment _TEXT of module realcvt.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00442F94     __cvt_init
+
+00442FAC  Segment _TEXT of module scantod.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00443474     __scan_init
+
+0044348C  Segment _TEXT of module _matherr.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0044348C     ___matherr
+
+00443538  Segment _TEXT of module virtmem.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00443538     __virt_reserve
+004435A4     __virt_commit
+004435F8     __virt_decommit
+0044361C     __virt_release
+
+00443640  Segment _TEXT of module errormsg.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0044369C     __ErrorMessage
+00443780     ___ErrorMessage
+00443790     __ErrorExit
+
+004437A8  Segment _TEXT of module nowild.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+004437A8     __initwild
+
+004437AC  Segment _TEXT of module srchenv.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+004437AC     __searchenv
+004437AC     ___org__searchenv
+
+00443824  Segment _TEXT of module loadprog.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00443824     __dummy_add_pid
+00443A40     __LoadProg
+
+00443DB4  Segment _TEXT of module signal.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00443F6C     _signal
+00443FCC     _raise
+00443FCC     ___org_raise
+
+00444044  Segment _TEXT of module statcvt.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+004440A4     __statcvt
+
+00444110  Segment _TEXT of module crtinit.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+004442B0     __crtinit
+
+00444460  Segment _TEXT of module movecurs.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00444460     ___movecursor
+
+00444488  Segment _TEXT of module scroll.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00444488     ___scroll
+
+00444520  Segment _TEXT of module _wherexy.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00444520     __wherex
+00444540     __wherey
+
+00444560  Segment _TEXT of module strcmp.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00444560     _strcmp
+00444560     ___org_strcmp
+
+0044458C  Segment _TEXT of module stricmp.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0044458C     _stricmp
+0044458C     ___org_stricmp
+
+004445D4  Segment _TEXT of module strrchr.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+004445D4     _strrchr
+004445D4     ___org_strrchr
+
+00444600  Segment _TEXT of module defhandl.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00444600     ___DefHandler
+
+0044460C  Segment _TEXT of module ta.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0044460C     @jump$qv
+00444612     ___doGlobalUnwind
+00444627     @invokeHnd$qv
+
+00444630  Segment _TEXT of module setexc.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00444630     __SetExceptionHandler
+00444645     __UnsetExceptionHandler
+00444671     __UnwindException
+
+00444678  Segment _TEXT of module xfflush.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00444678     __xfflush
+
+004446B4  Segment _TEXT of module _flshall.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+004446B4     __flushall
+
+004446EC  Segment _TEXT of module _umask.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+004446EC     __umask
+
+00444704  Segment _TEXT of module __eof.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00444704     ___eof
+
+0044478C  Segment _TEXT of module handles.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0044478C     __get_handle
+004447CC     __dup_handle
+00444834     __free_handle
+004448EC     __init_handles
+
+00444A30  Segment _TEXT of module _read.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00444A30     __rtl_read
+00444A30     ___org__rtl_read
+00444A78     __read
+00444A78     ___org__read
+
+00444A94  Segment _TEXT of module _write.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00444A94     __rtl_write
+00444A94     ___org__rtl_write
+00444ADC     __write
+00444ADC     ___org__write
+
+00444AF8  Segment _TEXT of module cconv.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00444AF8     _localeconv
+
+00444B00  Segment _TEXT of module strxfrm.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00444B00     _strxfrm
+00444B00     ___org_strxfrm
+
+00444B34  Segment _TEXT of module clear87.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00444B34     __clear87
+
+00444B48  Segment _TEXT of module cvtentry.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00444B48     ___realcvt
+00444B4E     ___nextreal
+00444B54     __scantod
+00444B5A     __scanrslt
+
+00444B60  Segment _TEXT of module fuildq.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00444B60     __fuildq
+
+00444B90  Segment _TEXT of module qmul10.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00444B90     __qmul10
+
+00444BD8  Segment _TEXT of module ldtrunc.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00444BD8     ___ldtrunc
+
+00444CD0  Segment _TEXT of module longtoa.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00444CD0     ___longtoa
+00444D44     ___utoa
+
+00444D60  Segment _TEXT of module xcvt.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00444D60     ___xcvt
+
+00445030  Segment _TEXT of module _pow10.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00445030     __pow10
+
+004451A8  Segment _TEXT of module del.cpp (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+004451A8     @$bdele$qpv
+004451A8     ___org_delete
+
+004451B8  Segment _TEXT of module delarray.cpp (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+004451B8     @$bdla$qpv
+004451B8     ___org_deletea
+
+004451C8  Segment _TEXT of module ermsghlp.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00445228     __ErrorMessageHelper
+
+004452D8  Segment _TEXT of module srchstr.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+004452D8     __searchstr
+004452D8     ___org__searchstr
+
+004453EC  Segment _TEXT of module tzset.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+004453EC     _tzset
+0044557C     __isDST
+00445690     __totalsec
+
+00445808  Segment _TEXT of module strncpy.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00445808     _strncpy
+00445808     ___org_strncpy
+
+00445858  Segment _TEXT of module fuistq.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00445858     __fuistq
+
+0044587C  Segment _TEXT of module fxam.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0044587C     __fxam
+
+00445890  Segment _TEXT of module qdiv10.ASM (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00445890     __qdiv10
+
+004458B8  Segment _TEXT of module getdate.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+004458B8     _getdate
+004458B8     ___org_getdate
+004458E4     _gettime
+004458E4     ___org_gettime
+
+0044591C  Segment _TEXT of module jwe_fu8f (C:\ARCHIV~1\LF9555\Lib\fj90f.lib)
+0044591C     _jwe_fvav
+0044596C     _jwe_fumu
+004459FC     _jwe_fvvv
+
+00445A4C  Segment _TEXT of module jwe_fjdu (C:\ARCHIV~1\LF9555\Lib\fj90f.lib)
+00445A4C     _jwe_fjdu
+
+00445BEC  Segment _TEXT of module jwe_fjcv (C:\ARCHIV~1\LF9555\Lib\fj90f.lib)
+00445BEC     _jwe_fjcv
+
+00445C1C  Segment _TEXT of module jwe_fjci (C:\ARCHIV~1\LF9555\Lib\fj90f.lib)
+00445C1C     _jwe_fjci
+
+00445C4C  Segment _TEXT of module jwe_fnzb (C:\ARCHIV~1\LF9555\Lib\fj90f.lib)
+00445C4C     _jwe_fnzb
+
+00445D8C  Segment _TEXT of module jwe_fjsb (C:\ARCHIV~1\LF9555\Lib\fj90f.lib)
+00445D8C     _f_a8sb
+
+00445EAC  Segment _TEXT of module jwe_gqcj (C:\ARCHIV~1\LF9555\Lib\fj90g.lib)
+00445EAC     _g_aqcj
+
+0044603C  Segment _TEXT of module jwe_gdbq (C:\ARCHIV~1\LF9555\Lib\fj90g.lib)
+0044603C     _g_dbleq
+
+00446230  Segment .jdata
+00446230     AllocConsole
+00446236     Beep
+0044623C     CloseHandle
+00446242     CreateFileA
+00446248     CreateFileMappingA
+0044624E     CreateProcessA
+00446254     DeleteFileA
+0044625A     EnterCriticalSection
+00446260     ExitProcess
+00446266     FileTimeToLocalFileTime
+0044626C     FileTimeToSystemTime
+00446272     FindClose
+00446278     FindFirstFileA
+0044627E     GetCommandLineA
+00446284     GetConsoleScreenBufferInfo
+0044628A     GetCurrentDirectoryA
+00446290     GetCurrentThreadId
+00446296     GetDriveTypeA
+0044629C     GetEnvironmentStrings
+004462A2     GetExitCodeProcess
+004462A8     GetFileAttributesA
+004462AE     GetFileSize
+004462B4     GetFileTime
+004462BA     GetFileType
+004462C0     GetFullPathNameA
+004462C6     GetLargestConsoleWindowSize
+004462CC     GetLastError
+004462D2     GetLocalTime
+004462D8     GetLogicalDrives
+004462DE     GetModuleFileNameA
+004462E4     GetModuleHandleA
+004462EA     GetProcAddress
+004462F0     GetStartupInfoA
+004462F6     GetStdHandle
+004462FC     GetTimeZoneInformation
+00446302     GetVersion
+00446308     GetVersionExA
+0044630E     GlobalMemoryStatus
+00446314     InitializeCriticalSection
+0044631A     IsBadReadPtr
+00446320     IsDBCSLeadByte
+00446326     LeaveCriticalSection
+0044632C     LoadLibraryExA
+00446332     MapViewOfFile
+00446338     QueryPerformanceCounter
+0044633E     QueryPerformanceFrequency
+00446344     RaiseException
+0044634A     ReadFile
+00446350     RtlUnwind
+00446356     ScrollConsoleScreenBufferA
+0044635C     SearchPathA
+00446362     SetConsoleCtrlHandler
+00446368     SetConsoleCursorPosition
+0044636E     SetConsoleScreenBufferSize
+00446374     SetConsoleWindowInfo
+0044637A     SetFilePointer
+00446380     SetHandleCount
+00446386     UnhandledExceptionFilter
+0044638C     UnmapViewOfFile
+00446392     VirtualAlloc
+00446398     VirtualFree
+0044639E     WaitForSingleObject
+004463A4     WriteConsoleOutputA
+004463AA     WriteFile
+004463B0     EnumThreadWindows
+004463B6     MessageBoxA
+
+00447000  Segment _DATA of module c0nt.ASM (C:\ARCHIV~1\LF9555\Lib\c0x32.obj)
+00447058     ___isDLL
+00447059     ___isGUI
+0044705A     __TLS_index
+0044705E     __TLS_index4
+00447062     __hInstance
+
+004475E0  Segment _DATA of module jwe_xstp (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004475E0     _jwe_xsfc
+
+00447B80  Segment _DATA of module jwe_xint (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00447B80     _jwe_x_init
+
+00447B90  Segment _DATA of module jwe_xilc (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00447B90     _jwe_lca
+
+0044A510  Segment _DATA of module jwe_iend (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0044A510     _jwe_iend
+
+0044A890  Segment _DATA of module jwe_etbm (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0044A930     _jwe_eftb
+
+0044AB20  Segment _DATA of module jwe_eerm (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0044AB94     _jwe_efca
+0044AC4C     _jwe_efcs
+
+0044C380  Segment _DATA of module jwe_ertb (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0044C380     _jwe_ertb
+
+0044E0E0  Segment _DATA of module jwe_emsi (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0044E910     _jwe_emti
+0044E930     _jwe_emni
+0044E978     _jwe_emii
+
+0044E980  Segment _DATA of module jwe_emsx (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0044EEE0     _jwe_emtx
+0044EEEC     _jwe_emnx
+0044EF0C     _jwe_emix
+
+0044EF20  Segment _DATA of module jwe_emss (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0044F574     _jwe_emts
+0044F580     _jwe_emns
+0044F5A0     _jwe_emis
+
+0044F5B0  Segment _DATA of module jwe_emso (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0044F648     _jwe_emto
+0044F64C     _jwe_emno
+0044F65C     _jwe_emio
+
+0044F670  Segment _DATA of module jwe_emsf (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00451944     _jwe_emtf
+0045194C     _jwe_emnf
+00451964     _jwe_emif
+
+00451970  Segment _DATA of module jwe_ems5 (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004520B4     _jwe_edeb
+00452484     _jwe_esub
+00452994     _jwe_esyt
+00452C74     _jwe_emt5
+00452C80     _jwe_emn5
+00452CA0     _jwe_emi5
+
+00452CB0  Segment _DATA of module jwe_ems4 (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00453D6C     _jwe_efn1
+00454C00     _jwe_efn2
+00455060     _jwe_emt4
+00455068     _jwe_emn4
+00455080     _jwe_emi4
+
+00455090  Segment _DATA of module jwe_ems3 (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004555AC     _jwe_eili
+00455B14     _jwe_eifm
+004561D0     _jwe_eide
+004564B0     _jwe_emt3
+004564BC     _jwe_emn3
+004564DC     _jwe_emi3
+
+004564F0  Segment _DATA of module jwe_ems2 (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00456938     _jwe_eifc
+00457524     _jwe_eisp
+00457BC8     _jwe_eics
+00457DA8     _jwe_emt2
+00457DB4     _jwe_emn2
+00457DD4     _jwe_emi2
+
+00457DE0  Segment _DATA of module jwe_ems1 (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00457FD8     _jwe_estm
+00458228     _jwe_eexm
+0045845C     _jwe_eimc
+004585DC     _jwe_emt1
+004585EC     _jwe_emn1
+0045860C     _jwe_emi1
+
+00458628  Segment _DATA of module xxv.cpp (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00458628     ___CPPexceptionList
+0045862C     ___exceptFlags
+00458630     ___debuggerHookFN
+00458634     ___debuggerWatchingP
+00458638     ___debuggerHookDataP
+0045863C     ___terminatePTR
+00458640     ___unexpectdPTR
+00458644     ___throwFileName
+00458648     ___throwLineNumber
+0045864C     ___throwExceptionName
+00458650     ___exceptStaticBuffP
+00458654     ___exceptMemAllocVars
+00458658     ___ExceptStaticXbuff
+0045870C     __ExceptVarsSize
+00458710     __DebuggerHookData
+
+0045879C  Segment _DATA of module files.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045879C     __streams
+
+00459F9C  Segment _DATA of module fmode.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00459F9C     __fmode
+
+00459FAC  Segment _DATA of module ctype.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00459FAC     __ctype
+
+0045A0CC  Segment _DATA of module hugeval.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045A0CC     __huge_flt
+0045A0D0     __huge_dble
+0045A0D8     __huge_ldble
+0045A0E2     __indefinite
+0045A0E6     __tiny_ldble
+
+0045A0F0  Segment _DATA of module initcvt.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045A0F0     __turboFloat
+0045A0F4     __floatconvert
+
+0045A0F8  Segment _DATA of module heap.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045A0F8     __virt_heap_size
+0045A0FC     __virt_chunk_size
+0045A100     __virt_chunk_size2
+0045A104     __nv_heap_size
+0045A108     __smalloc_threshold
+0045A10C     __virt_chunk_free
+0045A110     __virt_chunk_free2
+0045A114     __firstHeap
+0045A118     __lastHeap
+0045A11C     __linktable
+0045A120     __freeStart
+0045A12C     __rover
+0045A134     ___allocated
+
+0045A13C  Segment _DATA of module errno.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045A13C     _errno
+
+0045A160  Segment _DATA of module exit.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045A160     __atexitcnt
+0045A164     __exitbuf
+0045A168     __exitfopen
+0045A16C     __exitopen
+
+0045A170  Segment _DATA of module setargv.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045A170     __setargv__
+0045A174     __expandptr
+
+0045A1E8  Segment _DATA of module setenvp.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045A1E8     __setenvp__
+
+0045A23C  Segment _DATA of module xx.cpp (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045A23C     ___debuggerDisableTerminateCallback
+0045A348     @typeinfo@3
+
+0045A358  Segment _DATA of module except.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045A358     __stkchk
+
+0045A36C  Segment _DATA of module files2.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045A36C     __nfile
+0045A370     __openfd
+
+0045A770  Segment _DATA of module fmodeptr.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045A770     __fmodeptr
+
+0045A780  Segment _DATA of module perror.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045A780     __sys_errlist
+0045A844     __sys_nerr
+
+0045AC64  Segment _DATA of module ioerror.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045AC64     __dosErrorToSV
+
+0045AD90  Segment _DATA of module clocale.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045AD90     __Clocale
+0045B72C     __LocaleCatNames
+0045B74C     __pLocale
+0045B750     __LocaleLibName
+
+0045B8A8  Segment _DATA of module mathptr.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045B8A8     __pmatherr
+0045B8AC     __pmatherrl
+
+0045B900  Segment _DATA of module errormsg.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045B900     __messagefile
+
+0045B910  Segment _DATA of module setargv0.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045B910     __argv0
+
+0045B930  Segment _DATA of module loadprog.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045B930     __add_pid_ptr
+
+0045B9C0  Segment _DATA of module wkanji.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045B9C0     __wkanji
+
+0045B9C4  Segment _DATA of module wnewline.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045B9C4     __wnewline
+
+0045B9C8  Segment _DATA of module wscroll.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045B9C8     __wscroll
+
+0045B9CC  Segment _DATA of module crtinit.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045B9CC     __video
+0045B9E0     __directvideo
+0045B9E4     __ModeTable
+
+0045BA2C  Segment _DATA of module cfinfo.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045BA2C     __fileinfo
+
+0045BA30  Segment _DATA of module _cfinfo.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045BA30     __cfinfo_get
+
+0045BA34  Segment _DATA of module _umask.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045BA34     __notUmask
+
+0045BA38  Segment _DATA of module cconv.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045BA38     __localeconvention
+
+0045BA74  Segment _DATA of module clower.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045BA74     __lower
+
+0045BB74  Segment _DATA of module cupper.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045BB74     __upper
+
+0045BC74  Segment _DATA of module cvtfak.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045BC74     __realcvtptr
+0045BC78     __nextrealptr
+0045BC7C     __scantodptr
+0045BC80     __scanrsltptr
+
+0045BCDC  Segment _DATA of module deflt87.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045BCDC     __default87
+
+0045BCE0  Segment _DATA of module mathwhy.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045BCE0     __mathwhy
+
+0045BE34  Segment _DATA of module tzset.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045BE34     __tzname
+0045BE3C     __timezone
+0045BE40     __daylight
+
+0045BE4C  Segment _DATA of module timedata.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0045BE4C     __SWeekday
+0045BE68     __LWeekday
+0045BE84     __SMonth
+0045BEB4     __LMonth
+0045BEE4     __AmPm
+0045BEEC     __Days
+0045BEF8     __YDays
+
+0045C090  Segment CONST of module pp (pp.obj)
+0045C090     _jwe_sz__MAIN__
+0045C094     _jwe_ssn__MAIN__
+
+0045C1B0  Segment CONST of module jwe_irio (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+0045C1B0     __real@8@3ffb9249249249249000
+0045C1C0     __real@8@4002a000000000000000
+0045C1D0     __real@8@3fe189705f4136b4a800
+0045C1E0     __real@8@bffb9249249249249000
+0045C1F0     __real@8@40169896800000000000
+0045C200     __real@8@3ffbccccccccccccd000
+0045C210     __real@8@3fff8000000000000000
+0045C220     __real@8@40188000000000000000
+0045C230     __real@8@00000000000000000000
+0045C240     __real@8@bffbccccccccccccd000
+
+00484410  Segment _BSS of module jwe_xint (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00484410     _jwe_ifca
+
+00484430  Segment _BSS of module jwe_icui (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00484430     _jwe_iuia
+
+004844A0  Segment _BSS of module jwe_isdp (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004844A0     _scla_num
+004844A4     _arry_num
+004844A8     _type_flag
+004844AC     _top_addr
+
+00484510  Segment _BSS of module jwe_eerm (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00484510     _jwe_efpa
+0048452C     _jwe_eprm
+
+004845D0  Segment _BSS of module jwe_irpd (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+004845E8     _recur_call
+004845EC     _heni_add
+004845F8     _move_top
+004845FC     _item_a
+
+00484630  Segment _BSS of module jwe_etbs (C:\ARCHIV~1\LF9555\Lib\fjfi.lib)
+00484630     _jwe_etb_fca
+
+00484704  Segment _BSS of module xxv.cpp (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00484704     __DestructorCountPtr
+
+00484708  Segment _BSS of module exit.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00484708     __atexittbl
+
+00484788  Segment _BSS of module setargv.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00484788     __argc
+0048478C     __argv
+
+00484798  Segment _BSS of module setenvp.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00484798     __environ
+004847A0     _envsize
+004847A4     __env_lock
+
+004847A8  Segment _BSS of module startup.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+004847A8     __dll_table
+004847B0     __ExcRegPtr
+004847B4     __osenv
+004847B8     __oscmd
+004847BC     __C0argc
+004847C0     __C0argv
+004847C4     __C0environ
+004847D0     __stkbase
+004847D4     __isWindows
+
+00484800  Segment _BSS of module except.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00484800     __HandlerPtr
+00484804     __UserHandlerPtr
+
+00484808  Segment _BSS of module files2.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00484808     __pidtab
+00484C08     __handles
+
+0048500C  Segment _BSS of module mkname.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0048500C     __tmpnum
+
+0048501C  Segment _BSS of module ioerror.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0048501C     __doserrno
+
+00485020  Segment _BSS of module crtinit.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+00485020     __hout
+00485024     __hin
+00485028     __LastMode
+0048502C     __C4350Mode
+
+0048504C  Segment _BSS of module platform.c (C:\ARCHIV~1\LF9555\Lib\cw32.lib)
+0048504C     __ostype
+
+
+Public symbols imported from DLLs
+
+   AllocConsole=kernel32.dll.AllocConsole
+   Beep=kernel32.dll.Beep
+   CloseHandle=kernel32.dll.CloseHandle
+   CreateFileA=kernel32.dll.CreateFileA
+   CreateFileMappingA=kernel32.dll.CreateFileMappingA
+   CreateProcessA=kernel32.dll.CreateProcessA
+   DeleteFileA=kernel32.dll.DeleteFileA
+   EnterCriticalSection=kernel32.dll.EnterCriticalSection
+   EnumThreadWindows=user32.dll.EnumThreadWindows
+   ExitProcess=kernel32.dll.ExitProcess
+   FileTimeToLocalFileTime=kernel32.dll.FileTimeToLocalFileTime
+   FileTimeToSystemTime=kernel32.dll.FileTimeToSystemTime
+   FindClose=kernel32.dll.FindClose
+   FindFirstFileA=kernel32.dll.FindFirstFileA
+   GetCommandLineA=kernel32.dll.GetCommandLineA
+   GetConsoleScreenBufferInfo=kernel32.dll.GetConsoleScreenBufferInfo
+   GetCurrentDirectoryA=kernel32.dll.GetCurrentDirectoryA
+   GetCurrentThreadId=kernel32.dll.GetCurrentThreadId
+   GetDriveTypeA=kernel32.dll.GetDriveTypeA
+   GetEnvironmentStrings=kernel32.dll.GetEnvironmentStrings
+   GetExitCodeProcess=kernel32.dll.GetExitCodeProcess
+   GetFileAttributesA=kernel32.dll.GetFileAttributesA
+   GetFileSize=kernel32.dll.GetFileSize
+   GetFileTime=kernel32.dll.GetFileTime
+   GetFileType=kernel32.dll.GetFileType
+   GetFullPathNameA=kernel32.dll.GetFullPathNameA
+   GetLargestConsoleWindowSize=kernel32.dll.GetLargestConsoleWindowSize
+   GetLastError=kernel32.dll.GetLastError
+   GetLocalTime=kernel32.dll.GetLocalTime
+   GetLogicalDrives=kernel32.dll.GetLogicalDrives
+   GetModuleFileNameA=kernel32.dll.GetModuleFileNameA
+   GetModuleHandleA=kernel32.dll.GetModuleHandleA
+   GetProcAddress=kernel32.dll.GetProcAddress
+   GetStartupInfoA=kernel32.dll.GetStartupInfoA
+   GetStdHandle=kernel32.dll.GetStdHandle
+   GetTimeZoneInformation=kernel32.dll.GetTimeZoneInformation
+   GetVersion=kernel32.dll.GetVersion
+   GetVersionExA=kernel32.dll.GetVersionExA
+   GlobalMemoryStatus=kernel32.dll.GlobalMemoryStatus
+   InitializeCriticalSection=kernel32.dll.InitializeCriticalSection
+   IsBadReadPtr=kernel32.dll.IsBadReadPtr
+   IsDBCSLeadByte=kernel32.dll.IsDBCSLeadByte
+   LeaveCriticalSection=kernel32.dll.LeaveCriticalSection
+   LoadLibraryExA=kernel32.dll.LoadLibraryExA
+   MapViewOfFile=kernel32.dll.MapViewOfFile
+   MessageBoxA=user32.dll.MessageBoxA
+   QueryPerformanceCounter=kernel32.dll.QueryPerformanceCounter
+   QueryPerformanceFrequency=kernel32.dll.QueryPerformanceFrequency
+   RaiseException=kernel32.dll.RaiseException
+   ReadFile=kernel32.dll.ReadFile
+   RtlUnwind=kernel32.dll.RtlUnwind
+   ScrollConsoleScreenBufferA=kernel32.dll.ScrollConsoleScreenBufferA
+   SearchPathA=kernel32.dll.SearchPathA
+   SetConsoleCtrlHandler=kernel32.dll.SetConsoleCtrlHandler
+   SetConsoleCursorPosition=kernel32.dll.SetConsoleCursorPosition
+   SetConsoleScreenBufferSize=kernel32.dll.SetConsoleScreenBufferSize
+   SetConsoleWindowInfo=kernel32.dll.SetConsoleWindowInfo
+   SetFilePointer=kernel32.dll.SetFilePointer
+   SetHandleCount=kernel32.dll.SetHandleCount
+   UnhandledExceptionFilter=kernel32.dll.UnhandledExceptionFilter
+   UnmapViewOfFile=kernel32.dll.UnmapViewOfFile
+   VirtualAlloc=kernel32.dll.VirtualAlloc
+   VirtualFree=kernel32.dll.VirtualFree
+   WaitForSingleObject=kernel32.dll.WaitForSingleObject
+   WriteConsoleOutputA=kernel32.dll.WriteConsoleOutputA
+   WriteFile=kernel32.dll.WriteFile
