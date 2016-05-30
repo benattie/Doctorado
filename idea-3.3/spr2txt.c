@@ -331,7 +331,8 @@ int main(int argc, char ** argv)
                 }
                 */
                 if(neu_ome > 90){
-                    neu_ome = 177 - neu_ome;
+                    neu_ome = 182 - neu_ome;
+                    neu_gam = fmod(neu_gam + 90.0, 360.);
                 }
                 alpha = winkel_al(0.5*twotheta[m], neu_ome, neu_gam);
                 beta  = winkel_be(0.5*twotheta[m], neu_ome, neu_gam, alpha);

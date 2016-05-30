@@ -17,27 +17,27 @@ double winkel_al(double th, double om, double ga)
      return al;
 }
 
-double winkel_be(double thb, double omb, double gab, double alb)
+double winkel_be(double th, double om, double ga, double al)
 {
     double  be, rad;
-    double  thbr, ombr, gabr, albr;
+    double  thr, omr, gar, alr;
     double  SINALCOSBE, COSBE, SINALSINBE, SINBE;
     
     rad = pi / 180;
-    thbr = thb * rad;
-    ombr = omb * rad;
-    gabr = gab * rad;
-    albr = alb * rad;
+    thr = th * rad;
+    omr = om * rad;
+    gar = ga * rad;
+    alr = al * rad;
 
     /*** the multiplication of matrix G and s */
-    SINALCOSBE = -1* cos(ombr) * sin(thbr) + sin(ombr) * cos(thbr) * cos(gabr);
+    SINALCOSBE = -1* cos(omr) * sin(thr) + sin(omr) * cos(thr) * cos(gar);
     
-    COSBE = SINALCOSBE / sin(albr);
+    COSBE = SINALCOSBE / sin(alr);
 
-    SINALSINBE = cos(thbr) * sin(gabr);
+    SINALSINBE = cos(thr) * sin(gar);
 
-    SINBE = SINALSINBE / sin(albr);
-    
+    SINBE = SINALSINBE / sin(alr);
+   /* 
     be = -1;
     if(COSBE >= 1.0)
     {
@@ -62,6 +62,8 @@ double winkel_be(double thb, double omb, double gab, double alb)
                 be = (double) (360 + atan2(SINBE, COSBE) / rad);
         }
     }
+    */
+    be = atan2(SINBE, COSBE) / rad;
     return be;
 }
 

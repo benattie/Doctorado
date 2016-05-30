@@ -108,7 +108,7 @@ typedef struct data_s4
 //DEFINICION DE FUNCIONES
 double winkel_al(double th, double om, double ga);
 
-double winkel_be(double thb, double omb, double gab, double alb);
+double winkel_be(double th, double om, double ga, double al);
 
 double bin2theta(int bin, double pixel, double dist);
 
