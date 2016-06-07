@@ -310,10 +310,13 @@ int main(int argc, char ** argv)
         printf("Printing irregular grid file %s\n", alldatafile);
         ////////////////////////////////////////////////////////////////////////////////////////////
         //Imprimo el tiempo de ejecucion del programa en el .mtex
-        fprintf(fp_all, "\nFIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
-        fprintf(fp_all, "Row       2theta        theta        omega        gamma        alpha         beta       raw_int       fit_int            err");
-        fprintf(fp_all, "             H            err           eta            err       Breadth            err");
-        fprintf(fp_all, "       H_corr             err      eta_corr            err     Breadth_corr         err");
+        fprintf(fp_all, "FIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
+        fprintf(fp_all, "Row \t      2theta \t       theta \t       omega \t       gamma \t       alpha \t        beta \t");
+        fprintf(fp_all, "      raw_int \t      fit_int \t           err\t");
+        fprintf(fp_all, "             H \t           err \t          eta \t           err \t      ");
+        //fprintf(fp_all, "Breadth \t           err\t");
+        fprintf(fp_all, "       H_corr \t            err \t     eta_corr \t           err \t    ");
+        //fprintf(fp_all, "Breadth_corr \t        err");
         fprintf(fp_all, "\n");
         
         k = 0;//contador del archivo mtex
@@ -329,17 +332,15 @@ int main(int argc, char ** argv)
                     neu_ome = neu_ome - 90;
                     neu_gam = neu_gam + 180;
                 }
-                */
-                if(neu_ome > 90){
-                    neu_ome = 182 - neu_ome;
-                    neu_gam = fmod(neu_gam + 90.0, 360.);
-                }
+                */               
                 alpha = winkel_al(0.5*twotheta[m], neu_ome, neu_gam);
                 beta  = winkel_be(0.5*twotheta[m], neu_ome, neu_gam, alpha);
-                    
+                if(beta < 0)
+                    beta = beta + 360.;
+                   
                 if(alpha > 90){
                     alpha = 180 - alpha;
-                    beta = 360 - beta;
+                    beta = 360-beta;
                 }
                 //correccion de los datos mal ajustados
                 if(fwhm[n][j + del_gam][m] == -1.0){
@@ -347,31 +348,32 @@ int main(int argc, char ** argv)
                     smooth(fwhm_err, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
                     smooth(eta, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
                     smooth(eta_err, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
-                    smooth(breadth, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
-                    smooth(breadth_err, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                    //smooth(breadth, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                    //smooth(breadth_err, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
                     smooth(fwhm_ins, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
                     smooth(eta_ins, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
-                    smooth(breadth_ins, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                    //smooth(breadth_ins, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
                 }
                 else{
                     if(eta[n][j + del_gam][m] == -1.0){
                         smooth(eta, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
                         smooth(eta_err, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
-                        smooth(breadth, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
-                        smooth(breadth_err, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                        //smooth(breadth, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                        //smooth(breadth_err, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
                         smooth(eta_ins, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
-                        smooth(breadth_ins, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
+                        //smooth(breadth_ins, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);
                     }
                 }             
                 //salida del archivo con todos los datos
-                fprintf(fp_all, "%d %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %13.5f ", k + 1, twotheta[m], 0.5*twotheta[m], (float)(i), (float)(j), alpha, beta, sabo_inten[n][j + del_gam][m]);
-                fprintf(fp_all, "%13.5lf  %13.5lf ", fit_inten[n][j + del_gam][m], fit_inten_err[n][j + del_gam][m]);
-                fprintf(fp_all, "%13.5lf  %13.5lf ", fwhm[n][j + del_gam][m], fwhm_err[n][j + del_gam][m]);
-                fprintf(fp_all, "%13.5lf  %13.5lf ", eta[n][j + del_gam][m], eta_err[n][j + del_gam][m]);
-                fprintf(fp_all, "%13.5lf  %13.5lf ", breadth[n][j + del_gam][m], breadth_err[n][j + del_gam][m]);
-                fprintf(fp_all, "%13.5lf  %13.5lf ", fwhm_ins[n][j + del_gam][m], fwhm_err[n][j + del_gam][m]);
-                fprintf(fp_all, "%13.5lf  %13.5lf ", eta_ins[n][j + del_gam][m], eta_err[n][j + del_gam][m]);
-                fprintf(fp_all, "%13.5lf  %13.5lf\n", breadth_ins[n][j + del_gam][m], breadth_err[n][j + del_gam][m]);
+                fprintf(fp_all, "%d\t%12.4f\t%12.4f\t%12.4f\t%12.4f\t%12.4f\t%12.4f\t%13.5f\t", k + 1, twotheta[m], 0.5*twotheta[m], (float)(i), (float)(j), alpha, beta, sabo_inten[n][j + del_gam][m]);
+                fprintf(fp_all, "%13.5lf\t%13.5lf\t", fit_inten[n][j + del_gam][m], fit_inten_err[n][j + del_gam][m]);
+                fprintf(fp_all, "%13.5lf\t%13.5lf\t", fwhm[n][j + del_gam][m], fwhm_err[n][j + del_gam][m]);
+                fprintf(fp_all, "%13.5lf\t%13.5lf\t", eta[n][j + del_gam][m], eta_err[n][j + del_gam][m]);
+                //fprintf(fp_all, "%13.5lf\t%13.5lf\t", breadth[n][j + del_gam][m], breadth_err[n][j + del_gam][m]);
+                fprintf(fp_all, "%13.5lf\t%13.5lf\t", fwhm_ins[n][j + del_gam][m], fwhm_err[n][j + del_gam][m]);
+                fprintf(fp_all, "%13.5lf\t%13.5lf\t", eta_ins[n][j + del_gam][m], eta_err[n][j + del_gam][m]);
+                //fprintf(fp_all, "%13.5lf\t%13.5lf", breadth_ins[n][j + del_gam][m], breadth_err[n][j + del_gam][m]);
+                fprintf(fp_all, "\n");
                 //////////////////////////////////////////////////////////////////////////////////////////////////
                 k++;
             }//end for routine for(j = anf_gam; j <= ende_gam; j += del_gam)
