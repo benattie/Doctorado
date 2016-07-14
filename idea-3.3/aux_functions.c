@@ -282,7 +282,7 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
 {
     int bad_fit = 0, i, j = 2, k = 0;
     double dtheta, dtheta_aux, I, I_aux, I_err, H, H_aux, H_err, eta, eta_aux, eta_err, breadth, breadth_err;
-    double theta_rad, radian = M_PI / 180;
+    double theta;
     for(i = 2; i < all_seeds_size; i += 4)
     {
         if(zero_peak_index[k] == 0)
@@ -363,8 +363,11 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
             difra->errors->breadth_err[(*difra).spr][(*difra).gamma][k] = breadth_err;
             
             //printf("Correccion instrumental\n");
-            theta_rad = (dtheta * 0.5) * radian; //2theta en grados -> THETA en RADIANES
-            ins_correction(&H, &eta, sync_data->ins, theta_rad);
+            theta = (dtheta * 0.5); //2theta a theta. El paso a radianes se hace dentro de la funcion
+            ins_correction(&H, &eta, sync_data->ins, theta);
+            int set_correct = 1;
+            if(set_correct == 1)
+                thickness_correction(&H, &eta, dtheta, sync_data, difra);
             difra->shapes->fwhm_ins[(*difra).spr][(*difra).gamma][k] = H;
             difra->shapes->eta_ins[(*difra).spr][(*difra).gamma][k] = eta;
             difra->shapes->breadth_ins[(*difra).spr][(*difra).gamma][k] = M_PI * (H * 0.5) / (eta + (1 - eta) * sqrt(M_PI * log(2)));
@@ -470,4 +473,53 @@ void print_double_vector(double * v, int size)
     for(i = 0; i < size; i++)
         printf("v[%d]  %lf\n", i, v[i]);
     getchar();
+}
+
+//CORRECCION DE ENSANCHAMIENTO POR ESPESOR DE MUESTRA
+void thickness_correction(double * H, double * eta, double twotheta, exp_data *sync_data, peak_data *difra)
+{
+    double t, wc, BS;
+    double x, x1, x2, H_thick;
+    double * HG2 = vector_double_alloc(1);
+    double * HL = vector_double_alloc(1);
+    double degree = M_PI/180.;
+    deconvolution(HG2, HL, *H, *eta);
+    wc = atan2(sync_data->sample.lw90, sync_data->sample.lw0) / degree;
+    BS = sync_data->pixel * sync_data->pixel;
+    if(difra->omega < wc || difra->omega > wc + 90.)
+        t = sync_data->sample.lw0 / fabs(cos(difra->omega*degree) * cos(twotheta*degree));
+
+    if(difra->omega == wc || difra->omega == wc + 90.)
+        t = sqrt(pow(sync_data->sample.lw0, 2) + pow(sync_data->sample.lw90, 2)) / cos(twotheta*degree);
+
+    if(difra->omega > wc && difra->omega < wc + 90.)
+        t = sync_data->sample.lw90 / fabs(sin(difra->omega*degree) * cos(twotheta*degree));
+
+    x1 = atan(BS / sync_data->dist + t / sync_data->dist * tan(twotheta*degree) + tan(twotheta*degree)) - twotheta*degree;
+    x2 = atan(BS / sync_data->dist + tan(twotheta*degree)) - twotheta*degree;
+    x = sqrt(x1 * x1 - x2 * x2);
+    H_thick = 2. * sqrt(2. * log(2.)) * x / 6.;
+    *HG2 -= pow(H_thick, 2.);
+    if(*HG2 < 0) *HG2 = 0;
+    convolution(H, eta, *HG2, *HL);
+    free(HG2);
+    free(HL);
+}
+
+// Correccion por cambio de volumen y absorcion
+double correction_factor(SAMPLE_INFO sample, double omega, double twotheta)
+{
+    double fv, fa, wc, degree = M_PI / 180.;
+    wc = atan2(sample.lw90, sample.lw0) / degree;
+    fv = 1.0;
+    if(omega < wc || omega > wc + 90.)
+        fv = 1. / fabs(cos(omega*degree) * cos(twotheta*degree));
+    if(omega == wc || omega == wc + 90.)
+        fv = sqrt(pow(sample.lw0, 2) + pow(sample.lw90, 2)) / cos(twotheta*degree);
+    if(omega > wc && omega < wc + 90.)
+        fv = (sample.lw90 / sample.lw0) / fabs(sin(omega*degree) * cos(twotheta*degree));
+
+    fa = exp(-0.1 * sample.mu * sample.lw0 * (fv - 1.)); // el 0.1 tiene que ver con el cambio de unidades
+
+    return fv * fa;
 }

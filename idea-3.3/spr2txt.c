@@ -36,6 +36,7 @@ int main(int argc, char ** argv)
  char marfile[150];
  FILE *fp, *fp1, *fp_IRF, *fp_fit, *fp_all;
  IRF ins;
+ SAMPLE_INFO sample;
  time_t timer;
  struct tm *zeit;
 
@@ -138,7 +139,7 @@ int main(int argc, char ** argv)
     if((fp_IRF = fopen(argv[3], "r")) == NULL ){
         fprintf(stderr, "Error opening file %s\n", argv[3]); exit(1);
     }
-    ins = read_IRF(fp_IRF);
+    read_IRF(fp_IRF, &ins, &sample);
     fclose(fp_IRF);
     if(getval == NULL) 
         printf("\nWARNING (fgets): There were problems while reading %s\n", argv[3]);
@@ -273,11 +274,13 @@ int main(int argc, char ** argv)
                 for(n = 0; n < numrings; n++)
                     sabo_inten[k][y][n] = peak_intens_av[n];
                 //structure holding syncrotron's information
-                exp_data sync_data = {dist, pixel, pixel_number, ins, path_out, filename, printfit};
+                exp_data sync_data = {dist, pixel, pixel_number, ins, sample, path_out, filename, printfit};
                 //structure holding difractograms and fitting information
                 err_fit_data fit_errors = {fit_inten_err, fwhm_err, eta_err, breadth_err};
                 peak_shape_data shapes = {fwhm, fwhm_ins, eta, eta_ins, breadth, breadth_ins};
-                peak_data difra = {numrings, bg_size, k, star_d, y, del_gam, th, data1, bg_seed, fit_inten, &shapes, &fit_errors};
+
+                int omega = k * del_ome - del_ome; // el angulo omega correspondiente al archivo spr k
+                peak_data difra = {numrings, bg_size, k, star_d, omega, y, del_gam, th, data1, bg_seed, fit_inten, &shapes, &fit_errors};
                 //Int, fwhm & eta fitting
                 pv_fitting(exists, &sync_data, &difra, peak_intens_av, seeds);
                 memset(intens_av, 0, 1800 * sizeof(double));
@@ -311,7 +314,7 @@ int main(int argc, char ** argv)
         ////////////////////////////////////////////////////////////////////////////////////////////
         //Imprimo el tiempo de ejecucion del programa en el .mtex
         fprintf(fp_all, "FIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
-        fprintf(fp_all, "Row \t      2theta \t       theta \t       omega \t       gamma \t       alpha \t        beta \t");
+        fprintf(fp_all, "Row \t   2theta \t       theta \t       omega \t       gamma \t       alpha \t        beta \t");
         fprintf(fp_all, "      raw_int \t      fit_int \t           err\t");
         fprintf(fp_all, "             H \t           err \t          eta \t           err \t      ");
         //fprintf(fp_all, "Breadth \t           err\t");
@@ -337,11 +340,21 @@ int main(int argc, char ** argv)
                 beta  = winkel_be(0.5*twotheta[m], neu_ome, neu_gam, alpha);
                 if(beta < 0)
                     beta = beta + 360.;
-                   
+                /*                   
                 if(alpha > 90){
                     alpha = 180 - alpha;
-                    beta = 360-beta;
+                    beta = 360 - beta;
                 }
+                */
+                // Corrijo las intensidades
+                int set_correct = 1;
+                double fw = 1.0;
+                if(set_correct == 1)
+                    fw = correction_factor(sample, neu_ome, twotheta[m]);
+                sabo_inten[n][j + del_gam][m] /= fw;
+                fit_inten[n][j + del_gam][m] /= fw;
+                fit_inten_err[n][j + del_gam][m] /= fw;
+
                 //correccion de los datos mal ajustados
                 if(fwhm[n][j + del_gam][m] == -1.0){
                     smooth(fwhm, n, j + del_gam, m, star_d, del_d, end_d, del_gam, del_gam, ende_gam);

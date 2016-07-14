@@ -1,8 +1,13 @@
+# Instrumental broadening
 UG: 0.0108706
 VG: 0.0010735
 WG: 0.0002242
-IG: 0.0000000
 UL: 0.0499984
 VL: 0.0104957  
 WL: 0.0037801
-IL: 0.0000000
+
+# Sample information
+Cilinder(c)-square(s): s
+Lenght@omega=0  (mm):  1.0
+Lenght@omega=90 (mm):  2.0
+Absorption (1/cm):     3.0

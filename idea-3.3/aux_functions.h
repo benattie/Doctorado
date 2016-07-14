@@ -18,12 +18,21 @@
 
 //DEFINICION DE ESTRUCTURAS
 //datos del equipo
+typedef struct SAMPLE_INFO
+{
+    char shape[100];
+    double lw0;
+    double lw90;
+    double mu;
+} SAMPLE_INFO;
+
 typedef struct exp_data
 {
     double dist;
     double pixel;
     int size;
     IRF ins;
+    SAMPLE_INFO sample;
     char * path_out;
     char * root_name;
     char * printdata;
@@ -54,6 +63,7 @@ typedef struct peak_data
     int n_bg;
     int spr;
     int start_spr;
+    int omega;
     int gamma;
     int start_gam;
     double treshold;
@@ -153,4 +163,10 @@ int periodic_index(int i, int ini, int end);
 double delta_breadth(double H, double DH2, double eta, double Deta2);
 
 void print_double_vector(double * v, int size);
+
+//CORRECCION DE ENSANCHAMIENTO POR ESPESOR DE MUESTRA
+void thickness_correction(double * H, double * eta, double twotheta, exp_data *sync_data, peak_data *difra);
+
+// Correccion por cambio de volumen y absorcion
+double correction_factor(SAMPLE_INFO sample, double omega, double twotheta);
 #endif

@@ -14,8 +14,8 @@ Input Data - 1
 12.Start Gamma      : 0
 13.End Gamma        : 359
 14.Delta Gamma      : 5
-15.Distance         : 1081e-3
-16.Pixel value      : 100e-6
+15.Distance (mm)    : 1081
+16.Pixel value (mm) : 0.1
 17.Treshold         : 5
 18.Printpattern(y/n): y
 

@@ -85,12 +85,13 @@ void convolution(double * H, double * eta, double HG2, double HL)
 //CORRECCION POR ANCHO DE PICO INSTRUMENTAL
 void ins_correction(double * H, double * eta, IRF ins, double theta)
 {
+    double degree = M_PI / 180.;
     double * HG2 = vector_double_alloc(1);
     double * HL = vector_double_alloc(1);
     deconvolution(HG2, HL, *H, *eta);
-    *HG2 -= HG_ins2(ins, theta);
+    *HG2 -= HG_ins2(ins, theta*degree);
     if(*HG2 < 0) *HG2 = 0;
-    *HL -= HL_ins(ins, theta);
+    *HL -= HL_ins(ins, theta*degree);
     if(*HL < 0) *HL = 0;
     convolution(H, eta, *HG2, *HL);
     free(HG2);
