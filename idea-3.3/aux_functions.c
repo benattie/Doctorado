@@ -486,13 +486,13 @@ void thickness_correction(double * H, double * eta, double twotheta, exp_data *s
     deconvolution(HG2, HL, *H, *eta);
     wc = atan2(sync_data->sample.lw90, sync_data->sample.lw0) / degree;
     BS = sync_data->pixel * sync_data->pixel;
-    if(difra->omega < wc || difra->omega > wc + 90.)
+    if(difra->omega < wc || difra->omega > 180. - wc)
         t = sync_data->sample.lw0 / fabs(cos(difra->omega*degree) * cos(twotheta*degree));
 
-    if(difra->omega == wc || difra->omega == wc + 90.)
+    if(difra->omega == wc || difra->omega == 180. - wc)
         t = sqrt(pow(sync_data->sample.lw0, 2) + pow(sync_data->sample.lw90, 2)) / cos(twotheta*degree);
 
-    if(difra->omega > wc && difra->omega < wc + 90.)
+    if(difra->omega > wc && difra->omega < 180. - wc)
         t = sync_data->sample.lw90 / fabs(sin(difra->omega*degree) * cos(twotheta*degree));
 
     x1 = atan(BS / sync_data->dist + t / sync_data->dist * tan(twotheta*degree) + tan(twotheta*degree)) - twotheta*degree;
@@ -512,11 +512,11 @@ double correction_factor(SAMPLE_INFO sample, double omega, double twotheta)
     double fv, fa, wc, degree = M_PI / 180.;
     wc = atan2(sample.lw90, sample.lw0) / degree;
     fv = 1.0;
-    if(omega < wc || omega > wc + 90.)
+    if(omega < wc || omega > 180. - wc)
         fv = 1. / fabs(cos(omega*degree) * cos(twotheta*degree));
-    if(omega == wc || omega == wc + 90.)
+    if(omega == wc || omega == 180- - wc)
         fv = sqrt(pow(sample.lw0, 2) + pow(sample.lw90, 2)) / cos(twotheta*degree);
-    if(omega > wc && omega < wc + 90.)
+    if(omega > wc && omega < 180. - wc)
         fv = (sample.lw90 / sample.lw0) / fabs(sin(omega*degree) * cos(twotheta*degree));
 
     fa = exp(-0.1 * sample.mu * sample.lw0 * (fv - 1.)); // el 0.1 tiene que ver con el cambio de unidades
