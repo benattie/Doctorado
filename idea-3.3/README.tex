@@ -40,33 +40,34 @@ II. Peak Positions
 4.025 1505 1559 1450 1600
 4.391 1650 1685 1620 1700
 ---------------Fin del para_fit2d.dat. Esta línea tampoco va---------------------------------
-Los datos de los picos se ingresan escribiendo la posición del centro (\theta_{bragg}), los píxel en que se considera que inicia y termina el pico y píxel que determinal el nivel de background alrededor de ese pico.
+Los datos de los picos se ingresan escribiendo la posición del centro (2*\theta_{bragg}), los píxel en que se considera que inicia y termina el pico y píxel que determinal el nivel de background alrededor de ese pico.
 La lectura de datos no es muy robusta, así que se debe respetar al pie de la letra el formato del archivo.
 Se acompaña un Makefile con las reglas para compilar el código. Para compilar simplemente hacer:
 make spr2txt
 Para que el programa corra adecuadamente se requiere la biblioteca científica del proyecto GNU (GSL) en su versión 1.16 o superior.
 
 Una vez ejecutado el programa devuelve un archivo por cada pico ingresado en para_fit2d.dat. En archivo está en columnas separadas por espcios siguendo el siguiente encabezado:
-#    2theta theta  alpha  beta     raw_int fit_int  error   H        error   eta      error   B        error   H_corr   error   eta_corr error   B_corr   error
+#Row 2theta theta  omega gamm alpha  beta raw_int fit_int  error FWHM error eta error FWHM_cor error eta_corr error
 
-Siendo \alpha y \beta el ángulo polar y azimutal, respectivamente de la figura de polos. raw_int es una intensidad calculada sumando la intensidad de los píxel a izquierda y derecha del pico, restando el respectivo background.
+En esta cabecera \omega y \gamma son las coordendas de la figura de polos en el sistema de coordenadas del laboratorio, \omega es la rotacion respecto al eje vertical perpendicular al haz y \gamma es el ángulo a lo largo del anillo de Debye en el detector. Los valores \alpha y \beta son el ángulo polar y azimutal de la figura de polos en el sistema de coordenadas del cristal. raw_int es una intensidad calculada sumando la intensidad de los píxel a izquierda y derecha del pico, restando el respectivo background.
 Luego siguen los valores del ajuste de la pseudo-voigt que se ajustó a cada pico:
 
 pV(x, 2\theta, fit_int, H, eta) = fit_int * [eta * L(x, 2\theta, H) + (1 - eta) * G(x, 2\theta, H)]
 
-siendo L y G una función lorentziana y una gaussiana, respectivamente. Todas las funciones están normalizadas de modo que su integral sea 1. Con los valores de H y eta se calcula el ancho integral B del pico, a partir de [referencia]:
+siendo L y G una función lorentziana y una gaussiana, respectivamente. Todas las funciones están normalizadas de modo que su integral sea 1.
 
-equation
+El usuario debe proveer además un archivo con las semillas de los parámetros a ser ajustados, entre los que están los parámetros de pV y los puntos de background.
+Finalmente se debe proveer el archivo con los datos de los anchos instrumentales del equipo e información sobre la geometría de la muestra. Se acompañan ejemplos de cada archivo.
+Del par (H, eta) se puede obtener (H_{gauss}, H_{lorentz}) a partir de las expresiones [referencia]:
 
-El usuario debe proveer además un archvio con las semillas de los parámetros a ser ajustados, entre los que están los parámetros de pV y los puntos de background. Este archivo debe llamarse fit_ini.dat.
-Finalmente se debe proveer el archio con los datos de los anchos instrumentales del equipo (IRF.dat). Se acompañan ejemplos de cada archivo.
-Del par (H, eta) se obtiene (H_{gauss}, H_{lorentz}) a partir de las expresiones [referencia]:
-
-equations
+H_{lorentz} = H * (0.72928 * eta + 0.19289 * eta^2 + 0.07783 * eta^3);
+H_{gauss} = H * sqrt(1 - 0.74417 * eta - 0.24781 * eta^2 - 0.00810 * eta^3);
 
 El ancho instrumental se modela con la ley de Cagliotti, suponiendo una componente gaussiana y una componente lorenzina:
-(H_ins)^2 = UG * tg(x)^2 + VG * tg(x) + WG + IG / cos(x)  (Gauss)
-H_ins = UL * tg(x)^2 + VL * tg(x) + WL + IL / cos(x)  (Lorentz)
+(H^ins_G)^2 = UG * tg(x)^2 + VG * tg(x) + WG + IG / cos(x)  (Gauss)
+H^ins_L = UL * tg(x)^2 + VL * tg(x) + WL + IL / cos(x)  (Lorentz)
+
+Los coeficientes ingresados en el archivo de resolucion instrumental suponen que H^ins_G y H^ins_L están en grados sexagesimales.
 
 (H_corr)^2 = H^2 - (H_ins)^2 (Gauss)
 H_corr = H^2 - H_ins (Lorentz)
