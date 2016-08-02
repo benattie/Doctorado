@@ -132,7 +132,7 @@ void reset_global_seeds(double ** seeds)
 
 void reset_peak_seeds(double ** seeds, int peak_index)
 {
-    int i;
+    unsigned int i;
     for(i = peak_index; i < peak_index + 4; i++)
         seeds[1][i] = seeds[0][i];
 }

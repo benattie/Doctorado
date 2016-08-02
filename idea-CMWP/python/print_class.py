@@ -38,18 +38,11 @@ class cmwp_out:
         for omega in range(rings.omega_i, rings.omega_f + 1, rings.delta_omega):
             pattern = rings.pattern_i
             for pattern in range(rings.pattern_i, rings.pattern_f + 1, rings.delta_pattern):
-                if(omega > 90):
-                    neu_ome = omega - 90
-                    neu_gam = pattern + 180
-                else:
-                    neu_ome = omega
-                    neu_gam = pattern
 
                 alpha = winkel_al(rings.theta[m], neu_ome, neu_gam)
                 beta = winkel_be(rings.theta[m], neu_ome, neu_gam, alpha)
-                if(alpha > 90):
-                    alpha = 180 - alpha
-                    beta = 360 - beta
+                if(beta < 0):
+                    beta = 360 + beta
 
                 # salida al archivo con los valores del ajuste
                 fp_sol.write("%4d %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f " % (k + 1, 2 * rings.theta[m], rings.theta[m], omega, pattern, alpha, beta))

@@ -47,7 +47,10 @@ void pv_fitting(char basename[1024], int exists, exp_data * sync_data, peak_data
     //OJO sigue mas abajo!!!
     char error_filename[1024];
     int rv;
-    rv = sprintf(error_filename, "%spvfit_result.log", basename); 
+    rv = sprintf(error_filename, "%spvfit_result.log", basename);
+    if (rv < 0)
+       printf("Warning: there were problems writing %s filename\n", error_filename);
+
     FILE * fp_logfile = fopen(error_filename, "a");
     fprintf(fp_logfile, "spr: %d gamma :%d\nsemilla inicial\n", (*difra).spr, (*difra).gamma);
     print_seeds2file(fp_logfile, peak_seeds[exists], fit_errors, seeds_size, (*difra).bg, (*difra).n_bg);

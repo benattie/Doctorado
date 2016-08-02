@@ -12,24 +12,29 @@
 #include "pv.c"
 #include "read_files.c"
 //#include "interpolate.c"
+#define np 20
+#define diffsize 2500
+#define nspr 40
+#define ngam 500
+#define buffsize 2048
 
 int main(int argc, char ** argv)
 {
     FILE *fp, *fp1, *fp_fit, *fp_log;
-    char buf_temp[1024], buf[2048], buf1[1024], path_out[1024], filename1[1024], path1[1024], inform1[1024], marfile[1024];
-    char *getval = malloc(sizeof(char) * (250 + 1)), resultsf[1024], path_base[1024], base_filename[1024];
+    char buf_temp[buffsize], buf[buffsize], buf1[buffsize], path_out[buffsize], filename1[buffsize], path1[buffsize], inform1[buffsize], marfile[buffsize];
+    char *getval = malloc(sizeof(char) * (250 + 1)), resultsf[buffsize], path_base[buffsize], base_filename[buffsize];
     static int del_gam, star_d, av_gam;
     int a, b, i, k, n, x, y, z, count, anf_gam, ende_gam, anf_ome, ende_ome, del_ome, rv, exists;
-    int BG_l, BG_r, end_d, del_d, numrings, posring_l[15], posring_r[15], ug_l[15], ug_r[15];
-    int pixel_number, gamma, seeds_size, bg_size, intensity, miller[15];
-    int ** data = matrix_int_alloc(500, 2500);
-    double av_intensity[10], av_pattern[2500], data1[2500], BG_m, theta[20], th;
-    double pixel, dist, ** seeds, ** bg_seed, *dostheta = vector_double_alloc(15);
-    double ***sabo_inten = r3_tensor_double_alloc(40, 500, 10), ** intens = matrix_double_alloc(500, 10);
-    double ***fit_inten = r3_tensor_double_alloc(40, 500, 10), ***fit_inten_err = r3_tensor_double_alloc(40, 500, 10);
-    double ***fwhm = r3_tensor_double_alloc(40, 500, 10), ***fwhm_err = r3_tensor_double_alloc(40, 500, 10);
-    double ***eta = r3_tensor_double_alloc(40, 500, 10), ***eta_err = r3_tensor_double_alloc(40, 500, 10);
-    double ***breadth = r3_tensor_double_alloc(40, 500, 10), ***breadth_err = r3_tensor_double_alloc(40, 500, 10);
+    int BG_l, BG_r, end_d, del_d, numrings, posring_l[np], posring_r[np], ug_l[np], ug_r[np];
+    int pixel_number, gamma, seeds_size, bg_size, intensity, miller[np];
+    int ** data = matrix_int_alloc(ngam, diffsize);
+    double av_intensity[np], av_pattern[diffsize], data1[diffsize], BG_m, dos_theta[np], th;
+    double pixel, dist, ** seeds, ** bg_seed, *dostheta = vector_double_alloc(np);
+    double ***sabo_inten = r3_tensor_double_alloc(nspr, ngam, np), ** intens = matrix_double_alloc(ngam, np);
+    double ***fit_inten = r3_tensor_double_alloc(nspr, ngam, np), ***fit_inten_err = r3_tensor_double_alloc(nspr, ngam, np);
+    double ***fwhm = r3_tensor_double_alloc(nspr, ngam, np), ***fwhm_err = r3_tensor_double_alloc(nspr, ngam, np);
+    double ***eta = r3_tensor_double_alloc(nspr, ngam, np), ***eta_err = r3_tensor_double_alloc(nspr, ngam, np);
+    double ***breadth = r3_tensor_double_alloc(nspr, ngam, np), ***breadth_err = r3_tensor_double_alloc(nspr, nspr, np);
     time_t t1, t2, t3, t4;
     double time_spent;
     //tomo el tiempo de ejecucion
@@ -121,7 +126,7 @@ int main(int argc, char ** argv)
     for(i = 0; i < numrings; i++) //itera sobre cada pico (0 a 7) -> (1 a 8)
     {
       rv = fscanf(fp, "%d", &miller[i]);
-      rv = fscanf(fp, "%lf", &theta[i]); //posicion angular del centro del pico (\theta)
+      rv = fscanf(fp, "%lf", &dos_theta[i]); //posicion angular del centro del pico (\theta)
       rv = fscanf(fp, "%d", &posring_l[i]); //bin a la izquierda del pico
       rv = fscanf(fp, "%d", &posring_r[i]); //bin a la derecha del pico
       rv = fscanf(fp, "%d", &ug_l[i]); //bin de bg a la izquierda del pico
@@ -132,7 +137,7 @@ int main(int argc, char ** argv)
     if(rv == 0 || rv == EOF) printf("\nWARNING: there were problems reading peal data in %s (%d)\n", argv[1], rv);
     //imprime en pantalla los datos relevantes de cada pico 
     for(i = 0; i < numrings; i++)
-        printf("Position of [%d]ring = Theta:%6.3f  %8d%8d%8d%8d\n", i + 1, theta[i], posring_l[i], posring_r[i], ug_l[i], ug_r[i]);
+        printf("Position of [%d]ring = Theta:%6.3f  %8d%8d%8d%8d\n", i + 1, dos_theta[i], posring_l[i], posring_r[i], ug_l[i], ug_r[i]);
     fclose(fp);
     // control de que los parametros esten bien ingresados
     if(av_gam > del_gam)
@@ -208,11 +213,11 @@ int main(int argc, char ** argv)
         strcat(marfile, filename1);
         sprintf(buf, "%d", k);
         if(k < 10)
-            sprintf(buf1, "0000");
-        if(k >= 10 && k < 100)
             sprintf(buf1, "000");
-        if(k >= 100)
+        if(k >= 10 && k < 100)
             sprintf(buf1, "00");
+        if(k >= 100)
+            sprintf(buf1, "0");
         strcat(marfile, buf1);
         strcat(marfile, buf);
         strcat(marfile, ".");
@@ -278,8 +283,8 @@ int main(int argc, char ** argv)
             //fiteo del difractograma para la obtencion del ancho de pico y eta
             if((y + 1) % del_gam == 0)
             {
-                memset(av_pattern, 0, 2500 * sizeof(double));
-                memset(av_intensity, 0, 10 * sizeof(double));
+                memset(av_pattern, 0, diffsize * sizeof(double));
+                memset(av_intensity, 0, np * sizeof(double));
                 average(data, intens, y, av_gam, pixel_number, numrings, av_pattern, av_intensity);
                 //guardo las intensidades calculadas a partir del algoritmo de Sang-Bon Yi
                 for(n = 0; n < numrings; n++)
@@ -310,20 +315,20 @@ int main(int argc, char ** argv)
     t3 = time(&t3);
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     printf("Free allocated memory\n");
-    free_int_matrix(data, 500);
-    free_double_matrix(intens, 500);
+    free_int_matrix(data, ngam);
+    free_double_matrix(intens, ngam);
     free_double_matrix(seeds, 2);
     free_double_matrix(bg_seed, 2);
     free(dostheta);
-    free_r3_tensor_double(sabo_inten, 40, 500);
-    free_r3_tensor_double(fit_inten, 40, 500);
-    free_r3_tensor_double(fit_inten_err, 40, 500);
-    free_r3_tensor_double(fwhm, 40, 500);
-    free_r3_tensor_double(fwhm_err, 40, 500);
-    free_r3_tensor_double(eta, 40, 500);
-    free_r3_tensor_double(eta_err, 40, 500);
-    free_r3_tensor_double(breadth, 40, 500);
-    free_r3_tensor_double(breadth_err, 40, 500);
+    free_r3_tensor_double(sabo_inten, nspr, ngam);
+    free_r3_tensor_double(fit_inten, nspr, ngam);
+    free_r3_tensor_double(fit_inten_err, nspr, ngam);
+    free_r3_tensor_double(fwhm, nspr, ngam);
+    free_r3_tensor_double(fwhm_err, nspr, ngam);
+    free_r3_tensor_double(eta, nspr, ngam);
+    free_r3_tensor_double(eta_err, nspr, ngam);
+    free_r3_tensor_double(breadth, nspr, ngam);
+    free_r3_tensor_double(breadth_err, nspr, ngam);
     t4 = time(&t4);
     time_spent = difftime(t4, t1);
     sprintf(buf, "%sexec_time.log", filename1);
