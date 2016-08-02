@@ -4,8 +4,8 @@ FILE0 = spr2txt
 FILE1 = pseudo_voigt
 FILE2 = array_alloc
 FILE3 = aux_functions
-CFLAGS = -Wall -O3 -I/usr/include
-LIBS = -L/usr/lib -lgsl -lgslcblas -lm
+CFLAGS = -Wall -O3 -I/usr/local/include
+LIBS = -L/usr/local/lib -lgsl -lgslcblas -lm
 CC = gcc
 
 idea: spr2txt.c

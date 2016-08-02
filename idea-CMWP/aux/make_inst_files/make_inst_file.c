@@ -7,20 +7,20 @@ int main(int argc, char ** argv)
   if(argc != 5)
   {
     printf("Numero incorrecto de argumentos\n");
-    printf("Para ejecutar ingrese:\n./make_inst_file lambda theta0 eta H\n");
+    printf("Para ejecutar ingrese:\n./make_inst_file lambda theta0 H eta\n");
     exit(1);
   }
   printf("------------------------------------------------------------\n");
   printf("Programa para generar los puntos de los archivos instrumentales como son requeridos por el programa CMWP\n");
   printf("Se supone que el pico se ajusto con una funcion pseudo-voigt\n");
-  printf("Para ejecutar ingrese:\n./make_inst_file lambda theta0 eta H\n");
+  printf("Para ejecutar ingrese:\n./make_inst_file lambda theta0 H eta\n");
   printf("------------------------------------------------------------\n");
   //tomo los parametros de la linea de commandos
   FILE *fp = fopen(argv[2], "w");//el nombre del archivo es la posicion en theta del centro del pico
   double lambda = atof(argv[1]);
   double theta0 = atof(argv[2]);
-  double eta = atof(argv[3]);
-  double H = atof(argv[4]);
+  double H = atof(argv[3]);
+  double eta = atof(argv[4]);
   //parametros del programa
   int N = 100;
   double radian = M_PI / 180.;

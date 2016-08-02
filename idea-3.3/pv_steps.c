@@ -16,6 +16,7 @@
 void pv_step1(int exists, double ** seeds, int seeds_size, double ** bg, struct data * d, int n_param)
 {
     //variables generales del programa
+    //printf("Mem Alloc\n");
     int i, j;
     double eta;
     double * shift_H = vector_double_alloc((*d).numrings);
@@ -60,7 +61,7 @@ void pv_step1(int exists, double ** seeds, int seeds_size, double ** bg, struct 
     pv.params = &d1; //datos experimentales
  
     //inicializo el solver
-    //printf ("\nInicio del fit\n");
+    //printf ("\nSet solver\n");
     T = gsl_multifit_fdfsolver_lmsder;
     s = gsl_multifit_fdfsolver_alloc(T, d->n, n_param);
     gsl_multifit_fdfsolver_set(s, &pv, &x.vector);
@@ -160,8 +161,10 @@ void pv_step3(int exists, double ** seeds, double * errors, int seeds_size, doub
     double c, chi, dof;
     const gsl_multifit_fdfsolver_type * T;
     gsl_multifit_fdfsolver * s;
+
     gsl_multifit_function_fdf pv; //funcion a fitear
     gsl_matrix * covar = gsl_matrix_alloc (n_param, n_param);//matriz covariante
+    gsl_matrix * J = gsl_matrix_alloc (d->n, n_param);//matriz jacobiana
     double * x_init = vector_double_alloc(n_param);
 
     //printf("Inicializando los parametros\n");
@@ -200,7 +203,8 @@ void pv_step3(int exists, double ** seeds, double * errors, int seeds_size, doub
     s = gsl_multifit_fdfsolver_alloc (T, (*d).n, n_param);
     gsl_multifit_fdfsolver_set (s, &pv, &x.vector);
     solver_iterator(&status, s, T);
-    gsl_multifit_covar (s->J, 0.0, covar);
+    gsl_multifit_fdfsolver_jac(s, J);
+    gsl_multifit_covar (J, 0.0, covar);
     chi = gsl_blas_dnrm2(s->f);
     dof = pv.n - pv.p;
     c = GSL_MAX_DBL(1, pow(chi, 2.0) / sqrt(dof));
@@ -240,6 +244,7 @@ void pv_step4(int exists, double ** seeds, double * errors, int seeds_size, doub
     const gsl_multifit_fdfsolver_type * T;
     gsl_multifit_fdfsolver * s;
     gsl_multifit_function_fdf pv; //funcion a fitear
+    gsl_matrix * J = gsl_matrix_alloc (d->n, n_param);//matriz jacobiana
     gsl_matrix * covar = gsl_matrix_alloc (n_param, n_param);//matriz covariante
     double * x_init = vector_double_alloc(n_param);
 
@@ -274,7 +279,8 @@ void pv_step4(int exists, double ** seeds, double * errors, int seeds_size, doub
     s = gsl_multifit_fdfsolver_alloc (T, (*d).n, n_param);
     gsl_multifit_fdfsolver_set (s, &pv, &x.vector);
     solver_iterator(&status, s, T);
-    gsl_multifit_covar(s->J, 0.0, covar);
+    gsl_multifit_fdfsolver_jac(s, J);
+    gsl_multifit_covar(J, 0.0, covar);
     chi = gsl_blas_dnrm2(s->f);
     dof = pv.n - pv.p;
     c = GSL_MAX_DBL(1, pow(chi, 2.0) / sqrt(dof));

@@ -281,10 +281,10 @@ int main(int argc, char ** argv)
                 //structure holding difractograms and fitting information
                 err_fit_data fit_errors = {fit_inten_err, fwhm_err, eta_err, breadth_err};
                 peak_shape_data shapes = {fwhm, fwhm_ins, eta, eta_ins, breadth, breadth_ins};
-
                 int omega = k * del_ome - del_ome; // el angulo omega correspondiente al archivo spr k
                 peak_data difra = {numrings, bg_size, k, star_d, omega, y, del_gam, th, data1, bg_seed, fit_inten, &shapes, &fit_errors};
                 //Int, fwhm & eta fitting
+                //printf("Start fitting\n");
                 pv_fitting(exists, &sync_data, &difra, peak_intens_av, seeds);
                 memset(intens_av, 0, 1800 * sizeof(double));
                 memset(peak_intens_av, 0, 10 * sizeof(double));
@@ -333,7 +333,7 @@ int main(int argc, char ** argv)
                 if(beta < 0)
                     beta = beta + 360.;
                 // Corrijo las intensidades
-                int set_correct = 1;
+                int set_correct = 0;
                 double fw = 1.0;
                 if(set_correct == 1)
                     fw = correction_factor(sample, neu_ome, twotheta[m]);

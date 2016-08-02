@@ -124,7 +124,7 @@ void reset_global_seeds(double ** seeds)
 
 void reset_peak_seeds(double ** seeds, int peak_index)
 {
-    int i;
+    unsigned int i;
     for(i = peak_index; i < peak_index + 4; i++)
         seeds[1][i] = seeds[0][i];
 }
@@ -365,7 +365,7 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
             //printf("Correccion instrumental\n");
             theta = (dtheta * 0.5); //2theta a theta. El paso a radianes se hace dentro de la funcion
             ins_correction(&H, &eta, sync_data->ins, theta);
-            int set_correct = 1;
+            int set_correct = 0;
             if(set_correct == 1)
                 thickness_correction(&H, &eta, dtheta, sync_data, difra);
             difra->shapes->fwhm_ins[(*difra).spr][(*difra).gamma][k] = H;
@@ -478,7 +478,7 @@ void print_double_vector(double * v, int size)
 //CORRECCION DE ENSANCHAMIENTO POR ESPESOR DE MUESTRA
 void thickness_correction(double * H, double * eta, double twotheta, exp_data *sync_data, peak_data *difra)
 {
-    double t, wc, BS;
+    double t = 0.0, wc, BS;
     double x, x1, x2, H_thick;
     double * HG2 = vector_double_alloc(1);
     double * HL = vector_double_alloc(1);
