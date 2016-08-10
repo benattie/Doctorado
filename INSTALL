@@ -1,0 +1,83 @@
+--------------------------------------------------------------------------
+INSTALATION INSTRUCTIONS FOR IDEA and IDEA-WH
+--------------------------------------------------------------------------
+Linux
+-------------------------------------------------------------------------
+Instalation in linux distributions is quite straight forward:
+A. Install dependences (in Synaptic):
+    1. Open for Synaptic or any other package manager.
+    2. Select the GSL related packages: gsl-bin, libgsl-dev, libgsl-dbg, libgsl2.
+    3. Select gcc and make packages.
+    4. Press apply to install the dependences
+
+    NOTE: the code needs a GSL version 1.16 or superior.
+
+B. Once the dependences are installed:
+    1. Download the code from Github (https://github.com/benattie/Doctorado.git)
+    2. Open a terminal and navigate to the folder idea-3.3
+    3. Run "make"
+    4. Done. There should be an .exe file with the IDEA executable.
+
+--------------------------------------------------------------------------
+Windows
+-------------------------------------------------------------------------
+Instalation in Windows OS is not as easy as in linux, because the GSL library doesn't natively run on Windows, and must be emulated trough Cygwin.
+
+A. Install Cygwin
+    1. Go to http://cygwin.com/install.html and choose and download the cygwin version suited for your computer (64-bit or 32-bit).
+    2. Execute the .exe file, accepting everything you are asked for.
+    3. Choose a mirror for downloading and then click Next
+    4. Choose the following packages for installing (change Default for Install):
+        Archive/zip
+        Devel/automake 1.9
+        Devel/binutils
+        Devel/gcc-core
+        Devel/gcc-fortran
+        Devel/gcc-g++
+        Devel/gcc-objc
+        Devel/gcc-objc
+        Devel/git
+        Devel/git-cvs
+        Devel/git-gui
+        Devel/gitk
+        Devel/make
+        Editors/geany
+        Editors/geany-devel
+        Editors/geany-plugins-addons
+        Editors/geany-plugins-common
+        Editors/geany-plugins-deugger
+        Editors/geany-plugins-geanyctags
+        Math/libopenblas
+        Math/openblas
+        Libs/libgsl-devel
+        Libs/libgsl0
+        Science/gsl
+        X11 
+
+        And then click "Next" as many times as is necessary.
+
+    5. Have a cup of tea, the program will download and install all packages.
+
+B. Install IDEA
+    1. Open Cygwin
+    2. Type the following line in your cygwin terminal:
+	    git clone https://github.com/benattie/Doctorado
+    and wait to the file to be dowloaded
+    3. cd Doctorado/idea-3.3
+    4. make
+    5. A file called idea.exe should now be created
+
+NOTE: for accesing Windows folders inside cygwin
+
+If your data files are in C:\Users\hornero\Documents\Cu70R
+You can go to the Cu70R folder by writting:
+	cd /cygdrive/c/Users/hornero/Documents/Cu70R
+You can always use the comand "ls" (whitout the quotes) for checking the content of the current folder.
+
+NOTE: for more information about how to use IDEA see the README.tex file inside the idea-3.3 folder.
+
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+INSTALATION INSTRUCTIONS FOR IDEA-CMWP
+--------------------------------------------------------------------------

@@ -1,1 +1,0 @@
-../idea-3.0/pseudo_voigt.h

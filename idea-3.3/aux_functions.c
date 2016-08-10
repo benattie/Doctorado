@@ -365,8 +365,7 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
             //printf("Correccion instrumental\n");
             theta = (dtheta * 0.5); //2theta a theta. El paso a radianes se hace dentro de la funcion
             ins_correction(&H, &eta, sync_data->ins, theta);
-            int set_correct = 0;
-            if(set_correct == 1)
+            if(strcmp(sync_data->thicknescorr, "y") == 0 || strcmp(sync_data->thicknescorr, "Y") == 0)
                 thickness_correction(&H, &eta, dtheta, sync_data, difra);
             difra->shapes->fwhm_ins[(*difra).spr][(*difra).gamma][k] = H;
             difra->shapes->eta_ins[(*difra).spr][(*difra).gamma][k] = eta;

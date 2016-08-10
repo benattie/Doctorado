@@ -204,7 +204,7 @@ void pv_step3(int exists, double ** seeds, double * errors, int seeds_size, doub
     gsl_multifit_fdfsolver_set (s, &pv, &x.vector);
     solver_iterator(&status, s, T);
     gsl_multifit_fdfsolver_jac(s, J);
-    gsl_multifit_covar (J, 0.0, ovar);
+    gsl_multifit_covar (J, 0.0, covar);
     chi = gsl_blas_dnrm2(s->f);
     dof = pv.n - pv.p;
     c = GSL_MAX_DBL(1, pow(chi, 2.0) / sqrt(dof));

@@ -33,7 +33,7 @@ int main(int argc, char ** argv)
  double ***breadth_err = r3_tensor_double_alloc(40, 500, Np);
  double ** seeds, ** bg_seed;
  char buf_temp[1024], buf[1024], buf1[1024];
- char path_out[256], path [256], filename[256], inform[16], printfit[16];
+ char path_out[256], path [256], filename[256], inform[16], printfit[16], widthcorr[16];
  char alldatafile[256];
  char marfile[256];
  FILE *fp, *fp1, *fp_IRF, *fp_fit, *fp_all;
@@ -116,6 +116,9 @@ int main(int argc, char ** argv)
     // pregunto si imprimo los archivos con los ajustes
     getval = fgets(buf_temp, 22, fp);
     rv = fscanf(fp, "%s", printfit); getval = fgets(buf_temp, 2, fp);
+    // ask wether I should take into account the thickness of the sample
+    getval = fgets(buf_temp, 22, fp);
+    rv = fscanf(fp, "%s", widthcorr); getval = fgets(buf_temp, 2, fp);
     //skip lines
     getval = fgets(buf_temp, 20, fp); getval = fgets(buf_temp, 20, fp);
     //numero de picos a analizar 
@@ -277,7 +280,7 @@ int main(int argc, char ** argv)
                 for(n = 0; n < numrings; n++)
                     sabo_inten[k][y][n] = peak_intens_av[n];
                 //structure holding syncrotron's information
-                exp_data sync_data = {dist, pixel, pixel_number, ins, sample, path_out, filename, printfit};
+                exp_data sync_data = {dist, pixel, pixel_number, ins, sample, path_out, filename, printfit, widthcorr};
                 //structure holding difractograms and fitting information
                 err_fit_data fit_errors = {fit_inten_err, fwhm_err, eta_err, breadth_err};
                 peak_shape_data shapes = {fwhm, fwhm_ins, eta, eta_ins, breadth, breadth_ins};
@@ -315,15 +318,15 @@ int main(int argc, char ** argv)
         }
         printf("Printing irregular grid file %s\n", alldatafile);
         ////////////////////////////////////////////////////////////////////////////////////////////
-        //Imprimo el tiempo de ejecucion del programa en el .mtex
+        //Print header and execution time in the .mtex file
         fprintf(fp_all, "FIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
         fprintf(fp_all, "Row       2theta      theta       omega       gamma       alpha       beta 	     ");
         fprintf(fp_all, "raw_int     fit_int     err         FWHM        err         eta         err         ");
         fprintf(fp_all, "FWHM_corr   err         eta_corr    err\n");
         
-        k = 0;//contador del archivo mtex
-        n = star_d; //indice que me marca el spr
-        // tranformacion angular (gamma, omega)-->(alpha,beta)
+        k = 0;// Pole figure number
+        n = star_d; // spr index
+        // Angular transformation (gamma, omega)-->(alpha,beta)
         for(i = anf_ome; i <= ende_ome; i += del_ome){ //itero sobre \omega
             for(j = anf_gam; j <= ende_gam; j += del_gam){ //itero sobre \gamma
                 neu_ome = i;
@@ -332,14 +335,13 @@ int main(int argc, char ** argv)
                 beta  = winkel_be(0.5*twotheta[m], neu_ome, neu_gam, alpha);
                 if(beta < 0)
                     beta = beta + 360.;
-                // Corrijo las intensidades
-                int set_correct = 0;
-                double fw = 1.0;
-                if(set_correct == 1)
-                    fw = correction_factor(sample, neu_ome, twotheta[m]);
-                sabo_inten[n][j + del_gam][m] /= fw;
-                fit_inten[n][j + del_gam][m] /= fw;
-                fit_inten_err[n][j + del_gam][m] /= fw;
+                // Thickness corretio for intensities
+                if(strcmp(widthcorr, "y") == 0 || strcmp(widthcorr, "Y") == 0){
+                    double fw = correction_factor(sample, neu_ome, twotheta[m]);
+                    sabo_inten[n][j + del_gam][m] /= fw;
+                    fit_inten[n][j + del_gam][m] /= fw;
+                    fit_inten_err[n][j + del_gam][m] /= fw;            
+                }
 
                 //correccion de los datos mal ajustados
                 if(fwhm[n][j + del_gam][m] == -1.0){

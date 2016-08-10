@@ -36,6 +36,7 @@ typedef struct exp_data
     char * path_out;
     char * root_name;
     char * printdata;
+    char * thicknescorr;
 } exp_data;
 //estructura con los errores de los fiteos
 typedef struct err_fit_data

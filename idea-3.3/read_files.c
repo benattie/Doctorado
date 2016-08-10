@@ -55,7 +55,7 @@ void read_IRF(FILE * fp, IRF * ins, SAMPLE_INFO *sample)
     int rv = 0;
     char buf[100];
 
-    // Datos del ancho instrumental
+    // Instrumental broadening parametes
     getval = fgets(buf, 100, fp);
     getval = fgets(buf, 4, fp);
     rv = fscanf(fp, "%lf", &(ins->UG));
@@ -75,8 +75,7 @@ void read_IRF(FILE * fp, IRF * ins, SAMPLE_INFO *sample)
     getval = fgets(buf, 4, fp);
     rv = fscanf(fp, "%lf", &(ins->WL));
 
-    // Datos de la forma de la muestra
-    // (para las correcciones por espesor de muestra, volumen y absorcion)
+    // Sample shape data
     getval = fgets(buf, 100, fp);
     getval = fgets(buf, 100, fp);
     getval = fgets(buf, 100, fp);
