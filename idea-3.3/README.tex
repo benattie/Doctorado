@@ -1,97 +1,83 @@
 Version 3.3 of IDEA (to 10-08-2016)
-Sugestions and questions to benatti@ifir-conicet.gov.ar
+Suggestions and questions to benatti@ifir-conicet.gov.ar
 
 INTRODUCTION
 This software takes the data from a diffraction experiment (FIT2D[1] spreadsheet format), fits them with a sum of pseudo-Voigt functions and returns texture and 
 generalized pole figures.
 
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 INPUT:
 A. SPR files
-The software needs the diffraction counts from the detector in a spreadsheet format, whith the first line a a header. Each of the following rows must be
-a cake of the Debye Scherrer Rings measured during the experiment.
+The software needs the diffraction counts from the detector in a spreadsheet format, with the first line being a header. Each of the following rows must be a cake of the Debye Scherrer Rings measured during the experiment.
 
 B. data_info.ini
-In this file the main data must be specified, such as the path to the spr files, the number of files to be analized, the sample orientation reprented in each
-of the SPR files. The program doesn't perform a robust data reading, so the format of the text files must be respected. In the input folder there is an example
-for each of the input data files.
+In this file the main data must be specified, such as the path to the spr files, the number of files to be analyzed, the sample orientation repreented in each of the SPR files. The program doesn't perform a robust data reading, so the format of the text files must be respected. In the input folder there is an example for each of the input data files.
 
 C. fit_ini.dat
 This file contain the initial guess for the fitting procedure.
 
 D. IRF.dat
-Contains the coefficients for the instrumental resolution function. The software uses the Cagliotti formula for correct the measured broeadening of the samples.
-It also contains information about the dimensions of the sample and the absortion coefficient for the thickess and volumen correction.
+Contains the coefficients for the instrumental resolution function. The software uses the Cagliotti formula for correct the measured broadening of the samples. It also contains information about the dimensions of the sample and the absortion coefficient for the thickness and volume correction.
 
 E. Compiling and Running the program
-For compiling the software you have to install the dependences (see INSTALL file in the root folder), navigate to the idea-3.3 foder and run:
+For compiling the software you have to install the dependencies (see INSTALL file in the root folder), navigate to the idea-3.3 folder and run:
 
 make
 
-An .exe file will be created. You can move the file wherever you find convenient, but you must be sure that the tree input files are in the same folder. For
-running just type in a terminal
+An .exe file will be created. You can move the file wherever you find convenient, but you must be sure that the tree input files are in the same folder. For running just type in a terminal:
+
 ./idea.exe data_info.ini fit_ini.dat IRF.dat
 
-
----------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------
 NOTE: There is an optional paramater for idea.exe, which is the value of the threshold:
+
 ./idea.exe data_info.ini fit_ini.dat IRF.dat treshold
 
-Because of texture, some of the peaks may disapear from one diffraction pattern to the next, so the program first estimates the intensity of the peak by adding 
-the intensity counts of a peak and substracting the background. The result is the raw_int variable. The definition of the peak and the background points should 
-be specified in the data_info.ini file for each peak (using bin number instead of the theta angle).
+Because of texture, some of the peaks may disappear from one diffraction pattern to the next, so the program first estimates the intensity of the peak by adding the intensity counts of a peak and subtracting the background. The result is the raw_int variable. The definition of the peak and the background points should be specified in the data_info.ini file for each peak (using bin number instead of the theta angle).
 
-If raw_int is less than treshold the peak is considered to have zero intensity and is not fitted. This number should also be specified in the data_info.ini file,
-but if the user set this value trough command line, the value of the treshold will be overriden in the program.
+If raw_int is less than threshold the peak is considered to have zero intensity and is not fitted. This number should also be specified in the data_info.ini file, but if the user set this value trough command line, the value of the threshold will be overridden in the program.
 
-If a fit lacks of physical meaning (FWHM < 0, eta > 1, etc.), those values will be replaced with the results of the prevoius fitting. If this happens in the first
-fitting a -1 will be placed in the correspondig variable. Bad fits occur generally when the intensity of the peak is too low, so a good value of the treshold 
-variable should avoid many bad fits.
----------------------------------------------------------------------------------------------------------------------------------------------
+If a fit lacks of physical meaning (FWHM < 0, eta > 1, etc.), those values will be replaced with the results of the previous fitting. If this happens in the first fitting a -1 will be placed in the corresponding variable. Bad fits occur generally when the intensity of the peak is too low, so a good value of the threshold variable should avoid many bad fits.
+-------------------------------------------------------------------------------------------------------------------------
 
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 OUTPUT:
 Once executed, the software returns a .mtex file for each peak written in the data_info.ini file. The output is tab separated column text file with the following
 header:
+
 Row 2theta theta  omega gamma alpha  beta raw_int fit_int  err FWHM err eta err FWHM_cor error eta_corr error
 
-In this header 2theta represents the Bragg angle of the peak considered, omega is the rotation of the sample in the vertical axis perpendicular to the beam 
-(considered to vary between 0 and 180), gamma is the angular coordinate along the Debye ring. The pair (omega, gamma) constitute the pole figure coordinates in 
-the lab system. alpha and beta are the polar an azimutal angle in the crystal coordinate system, the ones that are commonly used for making pole figures.
+In this header 2theta represents the Bragg angle of the peak considered, omega is the rotation of the sample in the vertical axis perpendicular to the beam (considered varying between 0 and 180), gamma is the angular coordinate along the Debye ring. The pair (omega, gamma) constitute the pole figure coordinates in the lab system. alpha and beta are the polar an azimuth angle in the crystal coordinate system, the ones that are commonly used for making pole figures.
 
 The software fits the whole pattern with a sum of pseudo-Voigt functions[2]:
 
     pV(x, 2\theta, fit_int, H, eta) = fit_int * [eta * L(x, 2\theta, FWHM) + (1 - eta) * G(x, 2\theta, FWHM)]
 
-with G(x, 2\theta, FWHM) and L(x, 2\theta, FWHM) a gaussian and a lorentzian function, respectively. Al functions are normalized in a way the integral is 1. 
-Therefore the integral of pV is fit_int, has a full witdth at half maximum of FWHM and eta is the weight of the lorentzian component of pV.
+with G(x, 2\theta, FWHM) and L(x, 2\theta, FWHM) a Gaussian and a Lorentzian function, respectively. Al functions are normalized in a way the integral is 1. Therefore, the integral of pV is fit_int, has a full width at half maximum of FWHM and eta is the weight of the Lorentzian component of pV.
 
-The fitting function also takes into account the background of the measurements using a piece-wise linear aproximation. Points of the pattern that are to the
-right of the last background point are disregarded from the fit, so you can use this as a way to select the range in wich you want to fit the data.
+The fitting function also takes into account the background of the measurements using a piece-wise linear approximation. Points of the pattern that are to the right of the last background point are disregarded from the fit, so you can use this as a way to select the range in which you want to fit the data.
 
-Once the fitting is done the pair (FWHM, eta) is corrected for instrumental broeadening. For this, the (FWHM, eta) values are used for obtaining the witdth of
-the Gaussian and Lorentzian function of the Voigt function[3]. This is done using the following expression:
+Once the fitting is done the pair (FWHM, eta) is corrected for instrumental broadening. For this, the (FWHM, eta) values are used for obtaining the width of the Gaussian and Lorentzian function of the Voigt function[3]. This is done using the following expression:
 
 H_{lorentz} = FWHM * (0.72928 * eta + 0.19289 * eta^2 + 0.07783 * eta^3)
 
 H_{gauss} = FWHM * sqrt(1 - 0.74417 * eta - 0.24781 * eta^2 - 0.00810 * eta^3)
 
-Instrumental broeadening is modeled using Cagliotti's Law[4-5]:
+Instrumental broadening is modeled using Cagliotti's Law[4-5]:
 
 (H^ins_G)^2 = UG * tg(x)^2 + VG * tg(x) + WG (Gauss)
 
 H^ins_L = UL * tg(x)^2 + VL * tg(x) + WL (Lorentz)
 
 where UG, VG, WG, UL, VL, and WL are the coefficients put in the IRF.dat file.
-
----------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------
 NOTE: The coefficients written in the IRF file assume that H^ins_G and H^ins_L are in sexagesimal degrees.
----------------------------------------------------------------------------------------------------------------------------------------------
-The instrumental broeadening is then substracted:
+-------------------------------------------------------------------------------------------------------------------------
+The instrumental broadening is then subtracted:
 
 (H_corr)^2 = H^2 - (H_ins)^2 (Gauss)
 FWHMH_corr = H^2 - H_ins (Lorentz)
@@ -102,13 +88,13 @@ FWHM^5 = HG^5 + 2.69269 * HG^4 * HL + 2.42843 * HG^3 * HL^2 + 4.47163 * HG^2 * H
 
 eta = 1.36603 * (HL / FWHM) - 0.47719 * (HL / FWHM)^2 + 0.11116 * (HL / FWHM)^3
 
----------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------
 NOTE: If you don't have information about the instrumental broeadening, just set all the coefficients to 0 in IRF.dat.
----------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------
  
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 References
 [1] FIT2D software: http://www.esrf.eu/computing/scientific/FIT2D/
 [2] https://en.wikipedia.org/wiki/Voigt_profile
