@@ -2,9 +2,12 @@ Version 3.3 of IDEA (to 10-08-2016)
 Sugestions and questions to benatti@ifir-conicet.gov.ar
 
 INTRODUCTION
-This software takes the data from a diffraction experiment (FIT2D spreadsheet format), fits them with a sum of pseudo-Voigt functions and returns texture and 
+This software takes the data from a diffraction experiment (FIT2D[1] spreadsheet format), fits them with a sum of pseudo-Voigt functions and returns texture and 
 generalized pole figures.
 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 INPUT:
 A. SPR files
 The software needs the diffraction counts from the detector in a spreadsheet format, whith the first line a a header. Each of the following rows must be
@@ -48,7 +51,10 @@ fitting a -1 will be placed in the correspondig variable. Bad fits occur general
 variable should avoid many bad fits.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 
-F. OUTPUT
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+OUTPUT:
 Once executed, the software returns a .mtex file for each peak written in the data_info.ini file. The output is tab separated column text file with the following
 header:
 Row 2theta theta  omega gamma alpha  beta raw_int fit_int  err FWHM err eta err FWHM_cor error eta_corr error
@@ -57,7 +63,7 @@ In this header 2theta represents the Bragg angle of the peak considered, omega i
 (considered to vary between 0 and 180), gamma is the angular coordinate along the Debye ring. The pair (omega, gamma) constitute the pole figure coordinates in 
 the lab system. alpha and beta are the polar an azimutal angle in the crystal coordinate system, the ones that are commonly used for making pole figures.
 
-The software fits the whole pattern with a sum of pseudo-Voigt functions:
+The software fits the whole pattern with a sum of pseudo-Voigt functions[2]:
 
     pV(x, 2\theta, fit_int, H, eta) = fit_int * [eta * L(x, 2\theta, FWHM) + (1 - eta) * G(x, 2\theta, FWHM)]
 
@@ -68,13 +74,13 @@ The fitting function also takes into account the background of the measurements 
 right of the last background point are disregarded from the fit, so you can use this as a way to select the range in wich you want to fit the data.
 
 Once the fitting is done the pair (FWHM, eta) is corrected for instrumental broeadening. For this, the (FWHM, eta) values are used for obtaining the witdth of
-the Gaussian and Lorentzian function of the Voigt function[ref]. This is done using the following expression:
+the Gaussian and Lorentzian function of the Voigt function[3]. This is done using the following expression:
 
 H_{lorentz} = FWHM * (0.72928 * eta + 0.19289 * eta^2 + 0.07783 * eta^3)
 
 H_{gauss} = FWHM * sqrt(1 - 0.74417 * eta - 0.24781 * eta^2 - 0.00810 * eta^3)
 
-Instrumental broeadening is modeled using Cagliotti's Law:
+Instrumental broeadening is modeled using Cagliotti's Law[4-5]:
 
 (H^ins_G)^2 = UG * tg(x)^2 + VG * tg(x) + WG (Gauss)
 
@@ -82,19 +88,30 @@ H^ins_L = UL * tg(x)^2 + VL * tg(x) + WL (Lorentz)
 
 where UG, VG, WG, UL, VL, and WL are the coefficients put in the IRF.dat file.
 
+---------------------------------------------------------------------------------------------------------------------------------------------
 NOTE: The coefficients written in the IRF file assume that H^ins_G and H^ins_L are in sexagesimal degrees.
-
+---------------------------------------------------------------------------------------------------------------------------------------------
 The instrumental broeadening is then substracted:
 
 (H_corr)^2 = H^2 - (H_ins)^2 (Gauss)
 FWHMH_corr = H^2 - H_ins (Lorentz)
 
-and the corrected data is used to get the corrected values of FWHM and eta[ref]:
+and the corrected data is used to get the corrected values of FWHM and eta[2-3]:
 
 FWHM^5 = HG^5 + 2.69269 * HG^4 * HL + 2.42843 * HG^3 * HL^2 + 4.47163 * HG^2 * HL^3 + 0.07842 * HG HL^4 + HL^5
 
 eta = 1.36603 * (HL / FWHM) - 0.47719 * (HL / FWHM)^2 + 0.11116 * (HL / FWHM)^3
 
+---------------------------------------------------------------------------------------------------------------------------------------------
 NOTE: If you don't have information about the instrumental broeadening, just set all the coefficients to 0 in IRF.dat.
-
-
+---------------------------------------------------------------------------------------------------------------------------------------------
+ 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+References
+[1] FIT2D software: http://www.esrf.eu/computing/scientific/FIT2D/
+[2] https://en.wikipedia.org/wiki/Voigt_profile
+[3] https://www.ill.eu/fileadmin/users_files/documents/news_and_events/workshops_events/2015/FPSchool-2015/Microstructural_effects_FP.pdf
+[4] Caglioti, Paoletti, Ricci Nuclear Instruments and Methods 3 (1958) 223-228
+[5] http://www.ccp14.ac.uk/tutorial/fullprof/doc/winplotr.htm
