@@ -1,0 +1,29 @@
+Summary of the files in the folder
+
+A. Main functions
+
+1. idea_main.c
+Main program, has the routine for reading data_info.ini file, the read-in of the raw data, the angular transformation routine and the printing of the output files.
+
+2. pv.c
+Preprocessing of the data for the fitting, printing of the fitted patterns and the logfiles of the fittings.
+
+3. pv_steps
+Implementation of the fitting strategy
+
+B. Aditional functions
+
+1. read_files.c
+Functions for reading fit_ini.dat and IRF.dat files.
+
+2. array_alloc.c (array_alloc.h)
+Functions for allocating arrays of different dimensions. (And the header files of such functions).
+
+3. aux_functions.c (aux_functions.h)
+Angular transformation functions, fitting utility/debugging functions. (And the header files of such functions).
+
+4. pv_f.c
+Definitions of the fitting functions for each step of the fitting strategy written in pv_steps.c.
+
+5. pseudo_voigt.c (pseudo_voigt.h)
+Definitions of the mathematical functions needed along the software. The instrumental correction functions are here too. (And the header files of such functions).

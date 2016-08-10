@@ -1,6 +1,6 @@
 # Makefile for building C stuff with GSL
 #
-FILE0 = spr2txt
+FILE0 = idea_main
 FILE1 = pseudo_voigt
 FILE2 = array_alloc
 FILE3 = aux_functions
@@ -8,7 +8,7 @@ CFLAGS = -Wall -O3 -I/usr/local/include
 LIBS = -L/usr/local/lib -lgsl -lgslcblas -lm
 CC = gcc
 
-idea: spr2txt.c
+idea: $(FILE0).c
 	$(CC) $(CFLAGS) -c $(FILE1).c -o $(FILE1).o
 	$(CC) $(CFLAGS) -c $(FILE2).c -o $(FILE2).o
 	$(CC) $(CFLAGS) -c $(FILE3).c -o $(FILE3).o
