@@ -17,10 +17,6 @@ root_ply/:
 Williamson Hall(Nati):
     programas para encontrar factores de contraste necesarios para hacer WIlliamson-Hall con mediciones de ancho de pico.
 
-aux bin files/:
-    transpose.py: script que transpone un archivo spr y lo pone en un formato graficable por gnuplot y procesable por winplotr
-    winplotr: programa para poder ajustar difractogramas
-
 older versions/:
     código de versiones viejas del software idea
 
@@ -30,5 +26,5 @@ idea-x.y/:
 idea-WH/:
     Programa para hacer ajustes de Williamson Hall con la salida del software IDEA
 
-CMWP_pf/:
+idea-CMWP/:
     Programa para hacer análisis de difractogramas utilizando la técnica de Convolutional Whole Profile Fitting y realizar figuras de polos a partir de datos de sincrotrón.
