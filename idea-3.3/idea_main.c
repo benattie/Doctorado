@@ -8,6 +8,7 @@
 #include "read_files.c"
 
 #define Np 20
+#define Nbins 2500
 
 int main(int argc, char ** argv)
 {
@@ -19,9 +20,9 @@ int main(int argc, char ** argv)
  int posring_l[Np], posring_r[Np], ug_l[Np], ug_r[Np];
  int pixel_number, gamma;
  int seeds_size, bg_size, n_peaks;
- int data[2500], intensity;
- double intens_av[1800], peak_intens_av[Np];
- double data1[2500], BG_m, intens[512][Np];
+ int data[Nbins], intensity;
+ double intens_av[Nbins], peak_intens_av[Np];
+ double data1[Nbins], BG_m, intens[512][Np];
  double twotheta[Np], neu_ome, neu_gam, alpha, beta, th;
  double pixel, dist;
  double ***sabo_inten = r3_tensor_double_alloc(40, 500, Np);
@@ -224,8 +225,8 @@ int main(int argc, char ** argv)
             printf("\nWARNING (fscanf): there were problems reading pixel number in %s (%d)\n", marfile, rv);
 
         //printf("pixel=%d gamma=%d\n", pixel_number, gamma);
-        memset(intens_av, 0, 1800 * sizeof(double));
-        memset(peak_intens_av, 0, 10 * sizeof(double));
+        memset(intens_av, 0, Nbins * sizeof(double));
+        memset(peak_intens_av, 0, Np * sizeof(double));
         for(n = 0; n < numrings; n++){ //error handler para cuando tenga un bad_fit en el caso spr=1 y gamma=1
             sabo_inten[0][0][n] = -1;
             fit_inten[0][0][n] = -1;
@@ -289,8 +290,8 @@ int main(int argc, char ** argv)
                 //Int, fwhm & eta fitting
                 //printf("Start fitting\n");
                 pv_fitting(exists, &sync_data, &difra, peak_intens_av, seeds);
-                memset(intens_av, 0, 1800 * sizeof(double));
-                memset(peak_intens_av, 0, 10 * sizeof(double));
+                memset(intens_av, 0, Nbins * sizeof(double));
+                memset(peak_intens_av, 0, Np * sizeof(double));
             } // if((y % del_gam) == 0) printf("Fin (%d %d)\n", k, y);
         } // end of for routine for(y = 1; y <= gamma; y++)
         fclose(fp1);

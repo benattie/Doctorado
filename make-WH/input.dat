@@ -1,0 +1,12 @@
+Path2OUT: /home/benattie/Documents/Doctorado/XR/Sync/2016/IF75/IF-R75-small/
+Path2IDEA: /home/benattie/Documents/Doctorado/XR/Sync/2016/IF75/IF-R75-small/out/
+Path2CMWP: /home/benattie/Documents/Doctorado/XR/Sync/2016/IF75/IF-R75-small/cmwp/idea_cmwp_PF/
+InputFile: IF75R-tex_
+Wavelength (nm): 0.0142361
+Ch00: 0.493566
+Number of peaks: 4
+# h k l
+1 1 1 0
+2 2 0 0
+3 2 1 1
+4 2 2 0 

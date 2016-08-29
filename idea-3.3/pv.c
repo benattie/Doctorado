@@ -45,9 +45,10 @@ void pv_fitting(int exists, exp_data * sync_data, peak_data * difra, double * in
     char fitlogname[1024];
     sprintf(fitlogname, "%sfit_results.log", sync_data->root_name);
     FILE * fp_logfile = fopen(fitlogname, "a");
-    fprintf(fp_logfile, "spr: %d gamma: %d\nsemilla inicial\n", difra->spr, difra->gamma);
+    int npattern = 0;
+    fprintf(fp_logfile, "spr: %d gamma: %d (p%d)\nsemilla inicial\n", difra->spr, difra->gamma, npattern);
     print_seeds2file(fp_logfile, peak_seeds[exists], fit_errors, seeds_size, difra->bg, difra->n_bg);
-   
+    npattern++;
     //printf("Inicio de las iteraciones\n");
     //printf("Paso 1\n");
     //print_seeds(peak_seeds[exists], seeds_size, (*difra).bg, (*difra).n_bg);
