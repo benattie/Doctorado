@@ -281,7 +281,7 @@ int fit_result(int all_seeds_size, double ** peak_seeds, double * errors, int * 
 int results_output(int all_seeds_size, double ** peak_seeds, double * errors, int * zero_peak_index, exp_data * sync_data, peak_data * difra, int spr, int gamma)
 {
     int bad_fit = 0, i, j = 2, k = 0;
-    double dtheta, dtheta_aux, I, I_aux, I_err, H, H_aux, H_err, eta, eta_aux, eta_err, breadth, breadth_err;
+    double dtheta,dtheta_err, dtheta_aux, I, I_aux, I_err, H, H_aux, H_err, eta, eta_aux, eta_err, breadth, breadth_err;
     double theta;
     for(i = 2; i < all_seeds_size; i += 4)
     {
@@ -295,6 +295,7 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
             {
                 bad_fit = 1;
                 dtheta = peak_seeds[0][j];
+                dtheta_err = 0.0;
                 I = 0.0;
                 I_err = 0.0;
                 H = -1.0;
@@ -310,6 +311,7 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
                 {
                     bad_fit = 1;
                     dtheta = peak_seeds[0][j];
+                    dtheta_err = 0.0;
                     I = I_aux;
                     I_err = errors[j + 1];
                     H = -1.0;
@@ -325,6 +327,7 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
                     {
                         bad_fit = 1;
                         dtheta = dtheta_aux;
+                        dtheta_err = errors[j];
                         I = I_aux;
                         I_err = errors[j + 1];
                         H = H_aux;
@@ -338,6 +341,7 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
                     {
                         bad_fit = 0;
                         dtheta = dtheta_aux;
+                        dtheta_err = errors[j];
                         I = I_aux;
                         I_err = errors[j + 1];
                         H = H_aux;
@@ -353,6 +357,9 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
             difra->intens[(*difra).spr][(*difra).gamma][k] = I;
             difra->errors->intens_err[(*difra).spr][(*difra).gamma][k] = I_err;
             
+            difra->pos[(*difra).spr][(*difra).gamma][k] = dtheta;
+            difra->errors->pos_err[(*difra).spr][(*difra).gamma][k] = dtheta_err;
+
             difra->shapes->fwhm[(*difra).spr][(*difra).gamma][k] = H;
             difra->errors->fwhm_err[(*difra).spr][(*difra).gamma][k] = H_err;
     
@@ -375,6 +382,7 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
         else
         {
             (*difra).intens[(*difra).spr][(*difra).gamma][k] =  0.0;
+            (*difra).pos[(*difra).spr][(*difra).gamma][k] =  -2.0;
             difra->shapes->fwhm[(*difra).spr][(*difra).gamma][k] = -2.0;
             difra->shapes->fwhm_ins[(*difra).spr][(*difra).gamma][k] = -2.0;
             difra->errors->fwhm_err[(*difra).spr][(*difra).gamma][k] = -2.0;

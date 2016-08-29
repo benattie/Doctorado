@@ -42,6 +42,7 @@ typedef struct exp_data
 typedef struct err_fit_data
 {
     double *** intens_err;
+    double *** pos_err;
     double *** fwhm_err;
     double *** eta_err;
     double *** breadth_err;
@@ -71,6 +72,7 @@ typedef struct peak_data
     double * intensity;
     double ** bg;
     double *** intens;
+    double *** pos;
     peak_shape_data * shapes;
     err_fit_data * errors;
 } peak_data;

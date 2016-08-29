@@ -27,6 +27,7 @@ int main(int argc, char ** argv)
  double pixel, dist;
  double ***sabo_inten = r3_tensor_double_alloc(40, 500, Np);
  double ***fit_inten = r3_tensor_double_alloc(40, 500, Np), ***fit_inten_err = r3_tensor_double_alloc(40, 500, Np);
+ double ***pos = r3_tensor_double_alloc(40, 500, Np), ***pos_err = r3_tensor_double_alloc(40, 500, Np);
  double ***fwhm = r3_tensor_double_alloc(40, 500, Np), ***fwhm_err = r3_tensor_double_alloc(40, 500, Np);
  double ***eta = r3_tensor_double_alloc(40, 500, Np), ***eta_err = r3_tensor_double_alloc(40, 500, Np);
  double ***fwhm_ins = r3_tensor_double_alloc(40, 500, Np), ***eta_ins = r3_tensor_double_alloc(40, 500, Np);
@@ -201,11 +202,11 @@ int main(int argc, char ** argv)
         sprintf(buf, "%d", k);
         memset(buf1,0,sizeof(buf1));
         if(k < 10)
-            sprintf(buf1, "000");
+            sprintf(buf1, "0000");
         if(k >= 10 && k < 100)
-            sprintf(buf1, "00");
+            sprintf(buf1, "000");
         if(k >= 100 && k < 1000)
-            sprintf(buf1, "0");
+            sprintf(buf1, "00");
         strcat(marfile, buf1);
         strcat(marfile, buf);
         strcat(marfile, ".");
@@ -230,6 +231,7 @@ int main(int argc, char ** argv)
         for(n = 0; n < numrings; n++){ //error handler para cuando tenga un bad_fit en el caso spr=1 y gamma=1
             sabo_inten[0][0][n] = -1;
             fit_inten[0][0][n] = -1;
+            pos[0][0][n] = -1;
             fwhm[0][0][n] = -1;
             eta[0][0][n] = -1;
             breadth[0][0][n] = -1;
@@ -237,6 +239,7 @@ int main(int argc, char ** argv)
             eta_ins[0][0][n] = -1;
             breadth_ins[0][0][n] = -1;
             fit_inten_err[0][0][n] = -1;
+            pos_err[0][0][n] = -1;
             fwhm_err[0][0][n] = -1;
             eta_err[0][0][n] = -1;
             breadth_err[0][0][n] = -1;
@@ -247,8 +250,8 @@ int main(int argc, char ** argv)
             for(x = 1; x <= pixel_number; x++){ //iteracion dentro de cada uno de los difractogramas (con 1725 puntos) (cada porcion del anillo de Debye)
                 //leo la intensidad de cada bin y la paso a formato de entero
                 rv = fscanf(fp1, "%le", &data1[x]);
-                intens_av[x] += data1[x];
-                data[x] = (int)data1[x];
+                intens_av[x] += fabs(data1[x]);
+                data[x] = abs((int)data1[x]);
                 if(rv == 0 || rv == EOF) 
                     printf("\nWARNING (fscanf): there were problems reading data in column %d, line %d in %s (%d)\n", x, y, marfile, rv);
             }
@@ -283,10 +286,11 @@ int main(int argc, char ** argv)
                 //structure holding syncrotron's information
                 exp_data sync_data = {dist, pixel, pixel_number, ins, sample, path_out, filename, printfit, widthcorr};
                 //structure holding difractograms and fitting information
-                err_fit_data fit_errors = {fit_inten_err, fwhm_err, eta_err, breadth_err};
+                err_fit_data fit_errors = {fit_inten_err, pos_err, fwhm_err, eta_err, breadth_err};
                 peak_shape_data shapes = {fwhm, fwhm_ins, eta, eta_ins, breadth, breadth_ins};
                 int omega = k * del_ome - del_ome; // el angulo omega correspondiente al archivo spr k
-                peak_data difra = {numrings, bg_size, k, star_d, omega, y, del_gam, th, data1, bg_seed, fit_inten, &shapes, &fit_errors};
+                //peak_data difra = {numrings, bg_size, k, star_d, omega, y, del_gam, th, data1, bg_seed, fit_inten, pos, &shapes, &fit_errors};
+                peak_data difra = {numrings, bg_size, k, star_d, omega, y, del_gam, th, intens_av, bg_seed, fit_inten, pos, &shapes, &fit_errors};
                 //Int, fwhm & eta fitting
                 //printf("Start fitting\n");
                 pv_fitting(exists, &sync_data, &difra, peak_intens_av, seeds);
@@ -321,7 +325,7 @@ int main(int argc, char ** argv)
         ////////////////////////////////////////////////////////////////////////////////////////////
         //Print header and execution time in the .mtex file
         fprintf(fp_all, "FIT2D_DATA.exe: %d-%2d-%2d %2d:%2d:%2d\n", zeit->tm_year + 1900, zeit->tm_mon + 1, zeit->tm_mday, zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
-        fprintf(fp_all, "Row       2theta      theta       omega       gamma       alpha       beta 	     ");
+        fprintf(fp_all, "Row       2theta      err       omega       gamma       alpha       beta 	     ");
         fprintf(fp_all, "raw_int     fit_int     err         FWHM        err         eta         err         ");
         fprintf(fp_all, "FWHM_corr   err         eta_corr    err\n");
         
@@ -336,7 +340,7 @@ int main(int argc, char ** argv)
                 beta  = winkel_be(0.5*twotheta[m], neu_ome, neu_gam, alpha);
                 if(beta < 0)
                     beta = beta + 360.;
-                // Thickness corretio for intensities
+                // Thickness correction for intensities
                 if(strcmp(widthcorr, "y") == 0 || strcmp(widthcorr, "Y") == 0){
                     double fw = correction_factor(sample, neu_ome, twotheta[m]);
                     sabo_inten[n][j + del_gam][m] /= fw;
@@ -361,7 +365,9 @@ int main(int argc, char ** argv)
                     }
                 }             
                 //salida del archivo con todos los datos
-                fprintf(fp_all, "%5d\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.5f\t", k + 1, twotheta[m], 0.5*twotheta[m], (float)(i), (float)(j), alpha, beta, sabo_inten[n][j + del_gam][m]);
+                fprintf(fp_all, "%5d\t%8.4lf\t%8.4lf\t", k + 1, pos[n][j + del_gam][m], pos_err[n][j + del_gam][m]);
+                fprintf(fp_all, "%8.2f\t%8.2f\t", (float)(i), (float)(j));
+                fprintf(fp_all, "%8.4lf\t%8.4lf\t%8.5lf\t", alpha, beta, sabo_inten[n][j + del_gam][m]);
                 fprintf(fp_all, "%8.5lf\t%8.5lf\t", fit_inten[n][j + del_gam][m], fit_inten_err[n][j + del_gam][m]);
                 fprintf(fp_all, "%8.5lf\t%8.5lf\t", fwhm[n][j + del_gam][m], fwhm_err[n][j + del_gam][m]);
                 fprintf(fp_all, "%8.5lf\t%8.5lf\t", eta[n][j + del_gam][m], eta_err[n][j + del_gam][m]);
@@ -385,6 +391,8 @@ int main(int argc, char ** argv)
  free_r3_tensor_double(sabo_inten, 40, 500);
  free_r3_tensor_double(fit_inten, 40, 500);
  free_r3_tensor_double(fit_inten_err, 40, 500);
+ free_r3_tensor_double(pos, 40, 500);
+ free_r3_tensor_double(pos_err, 40, 500);
  free_r3_tensor_double(fwhm, 40, 500);
  free_r3_tensor_double(fwhm_ins, 40, 500);
  free_r3_tensor_double(fwhm_err, 40, 500);
