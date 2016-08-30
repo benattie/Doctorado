@@ -16,7 +16,7 @@ int main(int argc, char ** argv)
  int rv = 0;
  int Z, a, b, i, j, k, m, n, x, y, z, count, anf_gam, ende_gam, del_gam, anf_ome, ende_ome, del_ome;
  int BG_l, BG_r;
- int NrSample, star_d, end_d, del_d, numrings;
+ int NrSample, star_d, end_d, del_d, numrings, npattern = 1;
  int posring_l[Np], posring_r[Np], ug_l[Np], ug_r[Np];
  int pixel_number, gamma;
  int seeds_size, bg_size, n_peaks;
@@ -290,10 +290,11 @@ int main(int argc, char ** argv)
                 peak_shape_data shapes = {fwhm, fwhm_ins, eta, eta_ins, breadth, breadth_ins};
                 int omega = k * del_ome - del_ome; // el angulo omega correspondiente al archivo spr k
                 //peak_data difra = {numrings, bg_size, k, star_d, omega, y, del_gam, th, data1, bg_seed, fit_inten, pos, &shapes, &fit_errors};
-                peak_data difra = {numrings, bg_size, k, star_d, omega, y, del_gam, th, intens_av, bg_seed, fit_inten, pos, &shapes, &fit_errors};
+                peak_data difra = {npattern, numrings, bg_size, k, star_d, omega, y, del_gam, th, intens_av, bg_seed, fit_inten, pos, &shapes, &fit_errors};
                 //Int, fwhm & eta fitting
                 //printf("Start fitting\n");
                 pv_fitting(exists, &sync_data, &difra, peak_intens_av, seeds);
+                npattern++;
                 memset(intens_av, 0, Nbins * sizeof(double));
                 memset(peak_intens_av, 0, Np * sizeof(double));
             } // if((y % del_gam) == 0) printf("Fin (%d %d)\n", k, y);
