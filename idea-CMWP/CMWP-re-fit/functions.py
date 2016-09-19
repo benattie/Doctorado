@@ -1,6 +1,8 @@
 import numpy as np
 import re
 import subprocess
+from glob import iglob
+from os.path import exists as existe
 from os import chdir
 from os import listdir
 from subprocess import call
@@ -62,8 +64,8 @@ def searchableitems():
 
 def fit_strategy(files, rings, spr, pattern, find, fit_data):
     """
-    Implementa una estrategia de ajuste de CMWP a partir de los datos obtenidos de
-    filename.
+    Implementa una estrategia de ajuste de CMWP a partir de los datos obtenidos
+    de filename.
     """
 
     ln = searchlineintext(fit_data, "Fitting strategy")
@@ -283,24 +285,27 @@ def organize_files(files):
     chdir(files.pathout)
     folder = "cmwp_idea_pole_figures"
     call(["mkdir", folder])
-    source = listdir("./")
-    for datafile in source:
-        if datafile.endswith(".mtex"):
+    for datafile in iglob("*.mtex"):
+        if existe(folder + datafile):
+            print("Error moving .mtex file: %s already exists in destination" % datafile)
+        else:
             move(datafile, folder)
     folder = "cmwp_idea_files"
     call(["mkdir", folder])
-    source = listdir("./")
-    for datafile in source:
-        if datafile.startswith(files.input_file):
+    for datafile in iglob(files.input_file + "*"):
+        if existe(folder + datafile):
+            print("Error moving files into %s: %s already exists in destination" % (folder, datafile))
+        else:
             move(datafile, folder)
     # me voy a la carpeta con todos los resultados del ajuste
     results = files.results_folder + files.pathout
     chdir(results)
     folder = "cmwp_idea_fit_files"
     call(["mkdir", folder])
-    source = listdir("./")
-    for datafile in source:
-        if datafile.startswith(files.input_file):
+    for datafile in iglob(files.input_file + "*"):
+        if existe(folder + datafile):
+            print("Error moving files into %s: %s already exists in destination" % (folder, datafile))
+        else:
             move(datafile, folder)
 
 

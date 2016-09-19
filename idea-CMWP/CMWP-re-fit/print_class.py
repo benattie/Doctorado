@@ -41,23 +41,23 @@ class cmwp_out:
                 beta = winkel_be(rings.theta * 0.5, omega, pattern, alpha)
 
                 # salida al archivo con los valores del ajuste
-                fp_sol.write("%4d %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f " % (k + 1, rings.theta, rings.theta * 0.5, omega, pattern, alpha, beta))
+                fp_sol.write("%d %8.3f %8.3f %8.1f %8.1f %8.4f %8.4f " % (k + 1, rings.theta, rings.theta * 0.5, omega, pattern, alpha, beta))
                 for i in range(0, cmwp_results.sol.shape[2]):
                     # soluciones matematicas del ajuste
-                    fp_sol.write("%8.5f %8.5f " % (cmwp_results.sol[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i],
+                    fp_sol.write("%8.5e %8.5e " % (cmwp_results.sol[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i],
                                                    cmwp_results.solerr[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i]))
                 fp_sol.write("\n")
 
                 # salida al archivo con las soluciones fisicas
-                fp_physsol.write("%8d %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f " % (k + 1, rings.theta, rings.theta * 0.5, omega, pattern, alpha, beta))
+                fp_physsol.write("%d %8.3f %8.3f %8.1f %8.1f %8.4f %8.4f " % (k + 1, rings.theta, rings.theta * 0.5, omega, pattern, alpha, beta))
                 for i in range(0, cmwp_results.physsol.shape[2]):
-                    fp_physsol.write("%8.5f " % (cmwp_results.physsol[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i]))
+                    fp_physsol.write("%8.5e " % (cmwp_results.physsol[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i]))
                 fp_physsol.write("\n")
 
                 # salida al archivo con los parametros de calidad de ajuste
-                fp_fitvar.write("%8d %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f " % (k + 1, rings.theta, rings.theta * 0.5, omega, pattern, alpha, beta))
+                fp_fitvar.write("%d %8.3f %8.3f %8.1f %8.1f %8.4f %8.4f " % (k + 1, rings.theta, rings.theta * 0.5, omega, pattern, alpha, beta))
                 for i in range(0, cmwp_results.fitvar.shape[2]):
-                    fp_fitvar.write("%8.5f " % (cmwp_results.fitvar[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i]))
+                    fp_fitvar.write("%8.5e " % (cmwp_results.fitvar[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i]))
                 fp_fitvar.write("\n")
 
                 # siguiente dato
