@@ -35,8 +35,12 @@ class fit2d_data:
 
         ln = searchlineintext(cmwp_data, "Peak Positions")
         self.numrings = int(cmwp_data[ln + 1][22:-1])
+        self.numphases = int(cmwp_data[ln + 2][22:-1])
+        self.ph = numpy.zeros(0)
         self.hkl = numpy.zeros(0)
-        self.theta = numpy.zeros(0)
-        for lines in cmwp_data[ln + 4:]:
-            self.hkl = numpy.append(self.hkl, int(lines.split()[0]))
-            self.theta = numpy.append(self.theta, float(lines.split()[1]))
+        self.dtheta = numpy.zeros(0)
+        for lines in cmwp_data[ln + 5:]:
+            if (lines != "\n" and lines != "\r\n"):
+                self.ph = numpy.append(self.ph, int(lines.split()[0]))
+                self.hkl = numpy.append(self.hkl, int(lines.split()[1]))
+                self.dtheta = numpy.append(self.dtheta, float(lines.split()[2]))

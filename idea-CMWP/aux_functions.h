@@ -32,14 +32,12 @@ typedef struct err_fit_data
     double *** intens_err;
     double *** fwhm_err;
     double *** eta_err;
-    double *** breadth_err;
 } err_fit_data;
 //parametros que definen la forma del pico
 typedef struct peak_shape_data
 {
     double *** fwhm;
     double *** eta;
-    double *** breadth;
 } peak_shape_data;
 
 //datos del difractorgrama
@@ -52,6 +50,7 @@ typedef struct peak_data
     int gamma;
     int start_gam;
     double treshold;
+    int *ph;
     int *hkl;
     double *dostheta;
     double * intensity;
@@ -148,8 +147,6 @@ int results_output(int all_seeds_size, double ** peak_seeds, double * errors, in
 void smooth(double *** v, int i, int j, int k, int start_i,  int di, int end_i, int start_j, int dj, int end_j);
 
 int periodic_index(int i, int ini, int end);
-
-double delta_breadth(double H, double DH2, double eta, double Deta2);
 
 void print_double_vector(double * v, int size);
 #endif

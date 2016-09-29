@@ -26,7 +26,7 @@ int main(int argc, char ** argv)
     static int del_gam, star_d, av_gam;
     int a, b, i, k, n, x, y, z, count, anf_gam, ende_gam, anf_ome, ende_ome, del_ome, rv, exists;
     int BG_l, BG_r, end_d, del_d, numrings, posring_l[np], posring_r[np], ug_l[np], ug_r[np];
-    int pixel_number, gamma, seeds_size, bg_size, intensity, miller[np];
+    int pixel_number, gamma, seeds_size, bg_size, intensity, miller[np], numphases, phase[np];
     int ** data = matrix_int_alloc(ngam, diffsize);
     double av_intensity[np], av_pattern[diffsize], data1[diffsize], BG_m, dos_theta[np], th;
     double pixel, dist, ** seeds, ** bg_seed, *dostheta = vector_double_alloc(np);
@@ -34,7 +34,6 @@ int main(int argc, char ** argv)
     double ***fit_inten = r3_tensor_double_alloc(nspr, ngam, np), ***fit_inten_err = r3_tensor_double_alloc(nspr, ngam, np);
     double ***fwhm = r3_tensor_double_alloc(nspr, ngam, np), ***fwhm_err = r3_tensor_double_alloc(nspr, ngam, np);
     double ***eta = r3_tensor_double_alloc(nspr, ngam, np), ***eta_err = r3_tensor_double_alloc(nspr, ngam, np);
-    double ***breadth = r3_tensor_double_alloc(nspr, ngam, np), ***breadth_err = r3_tensor_double_alloc(nspr, nspr, np);
     time_t t1, t2, t3, t4;
     double time_spent;
     //tomo el tiempo de ejecucion
@@ -61,7 +60,7 @@ int main(int argc, char ** argv)
             exit(0);
     }
     //////////////////////////////////////////////////////////////////////////
-    //LECTURA DEL ARCHIVO para_fit2d.dat
+    //LECTURA DEL ARCHIVO .ini
     //puts("Ingrese el nombre del archivo con los parámetros de entrada");
     //getval = fgets(buf, sizeof(buf), stdin);
     //sscanf(buf, "%s", buf1);
@@ -72,14 +71,15 @@ int main(int argc, char ** argv)
     }
     getval = fgets(buf_temp, sizeof(buf_temp), fp);
 
-    //path hacia los spr (encabezado + 360 filas x 1725 columnas) (son 37) 
+    // path hacia los spr (encabezado + 360 filas x 1725 columnas) (son 37) 
     getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", path1);   getval = fgets(buf_temp, sizeof(buf_temp), fp);
-    //path hacia los archivos de salida
+    // path hacia los archivos de salida
     getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", path_out); getval = fgets(buf_temp, sizeof(buf_temp), fp);
-    //lee raiz de los archivos spr (New_Al70R-tex_)
+    // lee raiz de los archivos spr (New_Al70R-tex_)
     getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", filename1); getval = fgets(buf_temp, sizeof(buf_temp), fp);
-    //skip lines
+    // path a los archivos base del CMWP
     getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", path_base); getval = fgets(buf_temp, sizeof(buf_temp), fp);
+    // raiz de los archivos base del CMWP
     getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", base_filename); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //lee la ubicacion de la carpeta de CMWP donde se almacenan todos los resultados
     getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%s", resultsf); getval = fgets(buf_temp, sizeof(buf_temp), fp);
@@ -99,7 +99,7 @@ int main(int argc, char ** argv)
     getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &ende_ome); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //gamma inicial
     getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &anf_gam); getval = fgets(buf_temp, sizeof(buf_temp), fp);
-    //cuantos difractogramas del anillo de deby se promedian
+    //cuantos difractogramas del anillo de debye se promedian
     getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &av_gam); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //delta gamma
     getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &del_gam); getval = fgets(buf_temp, sizeof(buf_temp), fp);
@@ -119,12 +119,15 @@ int main(int argc, char ** argv)
     getval = fgets(buf_temp, 20, fp);
     //numero de picos a analizar 
     getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &numrings); getval = fgets(buf_temp, sizeof(buf_temp), fp);
+    // numero de fases a analizar
+    getval = fgets(buf_temp, 22, fp); rv = fscanf(fp, "%d", &numphases); getval = fgets(buf_temp, sizeof(buf_temp), fp);
     //skip lines
     getval = fgets(buf_temp, 50, fp);
     getval = fgets(buf_temp, 50, fp);
 
     for(i = 0; i < numrings; i++) //itera sobre cada pico (0 a 7) -> (1 a 8)
     {
+      rv = fscanf(fp, "%d", &phase[i]);
       rv = fscanf(fp, "%d", &miller[i]);
       rv = fscanf(fp, "%lf", &dos_theta[i]); //posicion angular del centro del pico (\theta)
       rv = fscanf(fp, "%d", &posring_l[i]); //bin a la izquierda del pico
@@ -134,10 +137,10 @@ int main(int argc, char ** argv)
     }
     getval = fgets(buf_temp, sizeof(buf_temp), fp); //skip line
     if(getval == NULL) printf("\nWARNING: There were problems while reading %s\n", argv[1]);
-    if(rv == 0 || rv == EOF) printf("\nWARNING: there were problems reading peal data in %s (%d)\n", argv[1], rv);
+    if(rv == 0 || rv == EOF) printf("\nWARNING: there were problems reading the data in %s (%d)\n", argv[1], rv);
     //imprime en pantalla los datos relevantes de cada pico 
     for(i = 0; i < numrings; i++)
-        printf("Position of [%d]ring = Theta:%6.3f  %8d%8d%8d%8d\n", i + 1, dos_theta[i], posring_l[i], posring_r[i], ug_l[i], ug_r[i]);
+        printf("Position of [%d]ring = 2Theta:%6.3f  %8d%8d%8d%8d\n", i + 1, dos_theta[i], posring_l[i], posring_r[i], ug_l[i], ug_r[i]);
     fclose(fp);
     // control de que los parametros esten bien ingresados
     if(av_gam > del_gam)
@@ -240,18 +243,16 @@ int main(int argc, char ** argv)
             fit_inten[0][0][n] = -1;
             fwhm[0][0][n] = -1;
             eta[0][0][n] = -1;
-            breadth[0][0][n] = -1;
             fit_inten_err[0][0][n] = -1;
             fwhm_err[0][0][n] = -1;
             eta_err[0][0][n] = -1;
-            breadth_err[0][0][n] = -1;
         }
         //Data Read-In
-        //printf("Data Read-in\n");
+        // printf("Data Read-in\n");
         exists = 0;
         for(y = 0; y <= gamma; y++) //itero sobre todos los difractogramas (360) (recorro el anillo de Debye)
         {
-            // printf("gamma = %d\n", y);
+            //printf("gamma = %d\n", y);
             for(x = 1; x <= pixel_number; x++) //iteracion dentro de cada uno de los difractogramas (con 1725 puntos) (cada porcion del anillo de Debye)
             {
                 //leo la intensidad de cada bin y la paso a formato de entero
@@ -292,13 +293,14 @@ int main(int argc, char ** argv)
                 //structure holding syncrotron's information
                 exp_data sync_data = {path_out, filename1, dist, pixel, pixel_number};
                 //structure holding difractograms and fitting information
-                err_fit_data fit_errors = {fit_inten_err, fwhm_err, eta_err, breadth_err};
-                peak_shape_data shapes = {fwhm, eta, breadth};
-                peak_data difra = {numrings, bg_size, k, star_d, y + 1, del_gam, th, miller, dostheta, av_pattern, bg_seed, fit_inten, &shapes, &fit_errors};
+                err_fit_data fit_errors = {fit_inten_err, fwhm_err, eta_err};
+                peak_shape_data shapes = {fwhm, eta};
+                peak_data difra = {numrings, bg_size, k, star_d, y + 1, del_gam, th, phase, miller, dostheta, av_pattern, bg_seed, fit_inten, &shapes, &fit_errors};
                 //Int, fwhm & eta fitting
                 pv_fitting(filename1, exists, &sync_data, &difra, av_intensity, seeds);
                 exists = 1;
-            }//if((y % del_gam) == 0) printf("Fin (%d %d)\n", k, y);
+            }
+            // if((y % del_gam) == 0) printf("Fin (%d %d)\n", k, y);
         }//end of for routine for(y = 1; y <= gamma; y++)
         fclose(fp1);
     }
@@ -327,8 +329,6 @@ int main(int argc, char ** argv)
     free_r3_tensor_double(fwhm_err, nspr, ngam);
     free_r3_tensor_double(eta, nspr, ngam);
     free_r3_tensor_double(eta_err, nspr, ngam);
-    free_r3_tensor_double(breadth, nspr, ngam);
-    free_r3_tensor_double(breadth_err, nspr, ngam);
     t4 = time(&t4);
     time_spent = difftime(t4, t1);
     sprintf(buf, "%sexec_time.log", filename1);

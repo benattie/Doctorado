@@ -22,17 +22,17 @@ def update_params(files, rings, spr, pattern, find, fit_data, bad_fit, fit_resul
         print("INICIO DEL AJUSTE")
         (physsol_file, fit_int, nsteps) = fit_strategy(files, rings, spr, pattern, find, fit_data)
         print("FIN DEL AJUSTE")
-        (bad_fit, fit_result) = check_fit(files, spr, pattern, find, fit_int, nsteps, fit_result)
+        (bad_fit, fit_result) = check_fit(files, rings, spr, pattern, find, fit_int, nsteps, fit_result)
     else:
         (physsol_file, fit_int, nsteps) = fit_strategy(files, rings, spr, pattern, find, fit_data)
         if(physsol_file == 1):
             "Mal ajuste en spr = %d y pattern = %d\n" % (spr, pattern)
             return ("", 1, 1)
-        (bad_fit, fit_result) = check_fit(files, spr, pattern, find, fit_int, nsteps, fit_result)
+        (bad_fit, fit_result) = check_fit(files, rings, spr, pattern, find, fit_int, nsteps, fit_result)
     return (physsol_file, bad_fit, fit_result)
 
 
-def check_fit(files, spr, pattern, find, fit_int, nsteps, fit_result):
+def check_fit(files, rings, spr, pattern, find, fit_int, nsteps, fit_result):
     # defino el vector nan
     v_nan = numpy.array(map(float, ['NaN', 'NaN', 'NaN']))
     result_nan = numpy.vstack((v_nan, v_nan, v_nan, v_nan, v_nan))
@@ -48,7 +48,7 @@ def check_fit(files, spr, pattern, find, fit_int, nsteps, fit_result):
             if(lines == 1):
                 fit_result = result_nan
             else:
-                fit_result = getcmwpsolutions(lines, ln + 3, fit_result)
+                fit_result = getcmwpsolutions(rings, lines, ln + 3, fit_result)
     else:
         # obtengo los resultados del paso 1
         file_name = "%sspr_%d_pattern_%d" % (files.input_file, spr, pattern)
@@ -59,7 +59,7 @@ def check_fit(files, spr, pattern, find, fit_int, nsteps, fit_result):
         if(lines == 1):
             fit_result = result_nan
         else:
-            fit_result = getcmwpsolutions(lines, ln + 3, fit_result)
+            fit_result = getcmwpsolutions(rings, lines, ln + 3, fit_result)
 
         for i in range(1, nsteps):
             # obtengo los resultados del paso n
@@ -71,10 +71,11 @@ def check_fit(files, spr, pattern, find, fit_int, nsteps, fit_result):
             if(lines == 1):
                 fit_result = result_nan
             else:
-                fit_result = getcmwpsolutions(lines, ln + 3, fit_result)
+                fit_result = getcmwpsolutions(rings, lines, ln + 3, fit_result)
 
     bad_fit = 0
-    for x in fit_result[:, 2]:
-        if (x > 100 or isnan(x)):
-            bad_fit = 1
+    for i in range(0, rings.numphases):
+        for x in fit_result[:, i, 2]:
+            if (x > 100 or isnan(x)):
+                bad_fit = 1
     return (bad_fit, fit_result)

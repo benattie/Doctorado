@@ -57,7 +57,7 @@ void pv_fitting(char basename[1024], int exists, exp_data * sync_data, peak_data
    
 //    printf("Inicio de las iteraciones\n");
 //    printf("Paso 1\n");
-    //print_seeds(peak_seeds[exists], seeds_size, (*difra).bg, (*difra).n_bg);
+//    print_seeds(peak_seeds[exists], seeds_size, (*difra).bg, (*difra).n_bg);
     pv_step1(exists, peak_seeds, seeds_size, (*difra).bg, &d, n_param[0]);
     //print_seeds(peak_seeds[1], seeds_size, (*difra).bg, (*difra).n_bg);
     check(y, peak_seeds, seeds_size, n_peaks, (*difra).bg, (*difra).n_bg);
@@ -74,8 +74,8 @@ void pv_fitting(char basename[1024], int exists, exp_data * sync_data, peak_data
 //    printf("Paso 4\n");
     //print_seeds(peak_seeds[1], seeds_size, (*difra).bg, (*difra).n_bg);
     pv_step4(exists, peak_seeds, fit_errors, seeds_size, (*difra).bg, &d, n_param[3]);
-    //print_seeds(peak_seeds[1], seeds_size, (*difra).bg, (*difra).n_bg);
- //   printf("Fin de las iteraciones\n");
+//    print_seeds(peak_seeds[1], seeds_size, (*difra).bg, (*difra).n_bg);
+//    printf("Fin de las iteraciones\n");
 
     //imprimo en fp_logfile los resultados de las iteraciones
     fprintf(fp_logfile, "semilla final\n");
@@ -123,7 +123,7 @@ void pv_fitting(char basename[1024], int exists, exp_data * sync_data, peak_data
             double theta = peak_seeds[1][n], H = peak_seeds[1][0], eta = peak_seeds[1][1];
             //double I = pseudo_voigt(theta, difra->numrings, I0, t0, H, eta, shift_H, shift_eta, difra->n_bg, bg_pos, difra->bg[1]);
             double I = pseudo_voigt(theta, n_peaks, I0, t0, H, eta, shift_H, shift_eta, difra->n_bg, bg_pos, difra->bg[1]);
-            fprintf(fp, "%.5lf %.5lf %d 0\n", peak_seeds[1][n], 0.9 * I, difra->hkl[i]);
+            fprintf(fp, "%.5lf %.5lf %d %d\n", peak_seeds[1][n], I, difra->hkl[i], difra->ph[i]);
             n += 4;
         }
     }    

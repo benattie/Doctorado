@@ -4,16 +4,18 @@ import time
 import subprocess
 from fitting_strategy import update_params
 from sys import stdout
-from functions import getfitsolutions, getcmwpphyssol
+from functions import getfitsolutions, getcmwpphyssol, return_flag
 from functions import searchableitems, searchlineintext
 
 
 class cmwp_fit:
     def __init__(self, files, rings, fit_data):
+        # numero de soluciones fisicas
         find = searchableitems()
         physsol_name = "%s%s.physsol.csv" % (files.path_base_file, files.base_file)
         fp_physsol = open(physsol_name, "r")
         lines = fp_physsol.readlines()
+        n_variables = len(lines[1].split("\t"))
         # numero de variables del ajuste matematico
         ln = searchlineintext(fit_data, "fallas de apilamiento")
         flag = fit_data[ln + 1].replace("\n", "")
@@ -21,13 +23,11 @@ class cmwp_fit:
             n_sol_variables = 6
         else:
             n_sol_variables = 5
-        # numero de soluciones fisicas
-        n_variables = len(lines[1].split("\t"))
         n_spr = int((rings.spr_f - rings.spr_i + 1) / rings.delta_spr)
         n_pattern = int((rings.pattern_f - rings.pattern_i + 1) / rings.delta_pattern)
         shape = (n_spr, n_pattern, n_variables)
-        self.sol = numpy.zeros((n_spr, n_pattern, n_sol_variables))
-        self.solerr = numpy.zeros((n_spr, n_pattern, n_sol_variables))
+        self.sol = numpy.zeros((n_spr, n_pattern, rings.numphases, n_sol_variables))
+        self.solerr = numpy.zeros((n_spr, n_pattern, rings.numphases, n_sol_variables))
         self.physsol = numpy.zeros(shape)
         self.fitvar = numpy.zeros((n_spr, n_pattern, 3))
         title = lines[0].replace("#", "")
@@ -39,7 +39,7 @@ class cmwp_fit:
         ptrn_total = ptrn_por_spr * spr_total
         n_bad_fit = 0
         bad_fit = 0
-        result = numpy.zeros((n_sol_variables, 3))
+        result = numpy.zeros((n_sol_variables, rings.numphases, 3))
         error_filename = "%serrors.log" % files.input_file
         fp_log = open(error_filename, "a")
         fp_log.write("IDEA CMWP\nERROR LOG FILE\n%s\n\n" % time.strftime("%d/%m/%Y %I:%M:%S"))
@@ -67,14 +67,16 @@ class cmwp_fit:
                     n_bad_fit += 1
                     reset_parameters(files, spr, pattern)
                     fp_log.write("Bad fit spr = %d, pattern = %d\n" % (spr, pattern))
-                    self.physsol[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern] = -1 * numpy.ones((1, n_variables))
+                    flag = return_flag()
+                    self.physsol[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern] = flag * numpy.ones((1, n_variables))
                 else:
                     self.physsol[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern] = getcmwpphyssol(physsol_file)
 
                 # soluciones matematicas del ajuste
                 for i in range(0, n_sol_variables):
-                    self.sol[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i] = result[i][0]
-                    self.solerr[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][i] = result[i][1]
+                    for j in range(0, rings.numphases):
+                        self.sol[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][j][i] = result[i][j][0]
+                        self.solerr[(spr - rings.spr_i) / rings.delta_spr][(pattern - ptrn_i) / rings.delta_pattern][j][i] = result[i][j][1]
                 # parametros del ajuste
                 fitsol_file = "%s%sspr_%d_pattern_%d.int.sol" % (files.path_base_file, files.input_file, spr, pattern)
                 chi = getfitsolutions(fitsol_file)
