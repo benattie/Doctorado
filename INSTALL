@@ -29,13 +29,13 @@ A. Install Cygwin
     3. Choose a mirror for downloading and then click Next
     4. Choose the following packages for installing (change Default for Install):
         Archive/zip
-        Devel/automake 1.9
+        Devel/automake1.9
         Devel/binutils
         Devel/gcc-core
         Devel/gcc-fortran
         Devel/gcc-g++
         Devel/gcc-objc
-        Devel/gcc-objc
+        Devel/gcc-objc++
         Devel/git
         Devel/git-cvs
         Devel/git-gui
@@ -52,7 +52,7 @@ A. Install Cygwin
         Libs/libgsl-devel
         Libs/libgsl0
         Science/gsl
-        X11 
+        X11
 
         And then click "Next" as many times as is necessary.
 
