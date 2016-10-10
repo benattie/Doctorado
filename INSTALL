@@ -29,7 +29,7 @@ A. Install Cygwin
     3. Choose a mirror for downloading and then click Next
     4. Choose the following packages for installing (change Default for Install):
         Archive/zip
-        Devel/automake 1.9
+        Devel/automake1.9
         Devel/binutils
         Devel/gcc-core
         Devel/gcc-fortran
@@ -90,7 +90,6 @@ make: *** [Makefile:16: idea] Error 1
 
 In that case, you have to open the file pv_steps.c and look for the lines which contain the function gsl_multifit_fdfsolver_jac(s, J);
 There you'll find instruction to comment and uncomment some lines in order to solve the problem. I'm currently working in a more robust solution to this problem.
-
 
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
