@@ -1,30 +1,16 @@
-Acá figura un conjunto de scripts de python, código C, más algún que otro programita y archivos de configuración accesorios que fui generando junto durante el doctorado.
+Here I present a set of python, C, matlab and bash code that I've been creating during my PhD in physics, in the branch of material science.
+Currently in the process of translating all the help files in english. Right now, only this file and the INSTALL file.
 
-aux data files/: archivos necesarios para correr los programas siguientes. Contiene información relevante de los ajustes, como dónde se van a guardar los archivos de salida, la cantidad de archivos de entrada, etc.
-status_error_codes.txt --> salidas del programa para hacer ajustes no lineales de la gsl
-Makefile --> makefile para compilar en C usando la gsl
-Instructivo.txt --> instructivo para utilizar idea
-IRF.dat --> Archivo con los parametros de Caglioti para sustraer el ancho intrumental en idea
-PARA_LIN2GKSS.dat
+bin/: A folder created for storing the executables files. It's empty in the repository because I don't upload compiled code.
 
-aux code files/:
-gnuplot_script_generator-1.0/: scripts que permiten generar scripts de gnuplot para procesar masivamente los datos obtenidos de los ajustes
-    gpl_scrip_gen.py
-interpolate/:
-    programas para encontrar la relacion entre los anchos de pico de una pseudo-voigt y una voigt
-root_ply/: 
-    programas para encontrar raices de polinomios
-Williamson Hall(Nati):
-    programas para encontrar factores de contraste necesarios para hacer WIlliamson-Hall con mediciones de ancho de pico.
+idea-3.3/: A program for processing data from Synchrotron X-Ray Diffraction experiments. The software fits a pseudo-voigt to each pattern and then export data so it can be presented in a pole figure.
 
-older versions/:
-    código de versiones viejas del software idea
+idea-CMWP/: More or less the same as idea-3.3, but using the CMWP routine for the fitting (not included)
 
-idea-x.y/:
-    version actual de idea. Software para ajustar difractogramas utilizando funciones pseudo-Voigt para obtener parámetros microestructuras de un material a partir de datos de sincrotrón.
+idea-wa/: A prototype of a software for performing the Warren-Averbach method to each peak of an X-Ray pattern. It's not finished because I ended working with the CMWP routine, which is a more advanced approach of the same method.
 
-idea-WH/:
-    Programa para hacer ajustes de Williamson Hall con la salida del software IDEA
+idea-wh/: Uses the output of idea-3.3 create Williamson-Hall plots from the data. It estimates the best parameters and creates generalized pole figures from Williamson-Hall's crystalyte size and dislocation density. Currently outdated and replaced for idea-CMWP.
 
-idea-CMWP/:
-    Programa para hacer análisis de difractogramas utilizando la técnica de Convolutional Whole Profile Fitting y realizar figuras de polos a partir de datos de sincrotrón.
+make-WH/: This program takes the output from idea-CMWP and creates Williamson-Hall plots from it. This is done in order to check that the fit done by idea-CMWP was good.
+
+sources/: Some auxiliary sources from early stages of the development. In the python folder there's a program that is used for preprocessing the data and in the Matlab folder there are scripts for working with the output of idea.

@@ -35,7 +35,7 @@ A. Install Cygwin
         Devel/gcc-fortran
         Devel/gcc-g++
         Devel/gcc-objc
-        Devel/gcc-objc
+        Devel/gcc-objc++
         Devel/git
         Devel/git-cvs
         Devel/git-gui
@@ -45,14 +45,14 @@ A. Install Cygwin
         Editors/geany-devel
         Editors/geany-plugins-addons
         Editors/geany-plugins-common
-        Editors/geany-plugins-deugger
+        Editors/geany-plugins-debugger
         Editors/geany-plugins-geanyctags
         Math/libopenblas
         Math/openblas
         Libs/libgsl-devel
         Libs/libgsl0
         Science/gsl
-        X11 
+        X11/ - All dependences
 
         And then click "Next" as many times as is necessary.
 
@@ -75,6 +75,22 @@ You can go to the Cu70R folder by writting:
 You can always use the comand "ls" (whitout the quotes) for checking the content of the current folder.
 
 NOTE: for more information about how to use IDEA see the README.tex file inside the idea-3.3 folder.
+
+TROUBLESHOOTING
+If you install an old version of the GSL you may see a warning that has a line like this:
+
+some lines some lines some lines
+
+pv_steps.c:282:5: warning: implicit declaration of function 'gsl_multifit_fdfsolver_jac' [-Wimplicit-function-declaration]
+    gsl_multifit_fdfsolver_jac(s, J);
+    ^
+some lines some lines some lines
+
+make: *** [Makefile:16: idea] Error 1
+
+In that case, you have to open the file pv_steps.c and look for the lines which contain the function gsl_multifit_fdfsolver_jac(s, J);
+There you'll find instruction to comment and uncomment some lines in order to solve the problem. I'm currently working in a more robust solution to this problem.
+
 
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
