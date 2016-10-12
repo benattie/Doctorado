@@ -57,44 +57,52 @@ void read_IRF(FILE * fp, IRF * ins, SAMPLE_INFO *sample)
 
     // Instrumental broadening parametes
     getval = fgets(buf, 100, fp);
+
     getval = fgets(buf, 4, fp);
     rv = fscanf(fp, "%lf", &(ins->UG));
     getval = fgets(buf, 100, fp);
+
     getval = fgets(buf, 4, fp);
     rv = fscanf(fp, "%lf", &(ins->VG));
     getval = fgets(buf, 100, fp);
+
     getval = fgets(buf, 4, fp);
     rv = fscanf(fp, "%lf", &(ins->WG));
     getval = fgets(buf, 100, fp);
+
     getval = fgets(buf, 4, fp);
     rv = fscanf(fp, "%lf", &(ins->UL));
     getval = fgets(buf, 100, fp);
+
     getval = fgets(buf, 4, fp);
     rv = fscanf(fp, "%lf", &(ins->VL));
     getval = fgets(buf, 100, fp);
+
     getval = fgets(buf, 4, fp);
     rv = fscanf(fp, "%lf", &(ins->WL));
+    getval = fgets(buf, 100, fp);
 
     // Sample shape data
     getval = fgets(buf, 100, fp);
     getval = fgets(buf, 100, fp);
+
+    getval = fgets(buf, 23, fp);
+    rv = fscanf(fp, "%1s", sample->shape);
     getval = fgets(buf, 100, fp);
 
     getval = fgets(buf, 23, fp);
-    rv = fscanf(fp, "%s", sample->shape);
-    getval = fgets(buf, 100, fp);
-    getval = fgets(buf, 23, fp);
     rv = fscanf(fp, "%lf", &(sample->lw0));
     getval = fgets(buf, 100, fp);
+
     getval = fgets(buf, 23, fp);
     rv = fscanf(fp, "%lf", &(sample->lw90));
     getval = fgets(buf, 100, fp);
+
     getval = fgets(buf, 23, fp);
     rv = fscanf(fp, "%lf", &(sample->mu));
     getval = fgets(buf, 100, fp);
 
-
-    if(getval == NULL) printf("\nWARNING (fgets): There were problems while reading IRF.dat\n");
+    if(getval == NULL) printf("\nWARNING (fgets): There were problems while reading file in read_IRF\n");
     if(rv == 0 || rv == EOF) printf("\nWARNING (fscanf): there were problems reading param data in IRF.dat (%d)\n", rv);
 }
 /*

@@ -29,7 +29,7 @@ A. Install Cygwin
     3. Choose a mirror for downloading and then click Next
     4. Choose the following packages for installing (change Default for Install):
         Archive/zip
-        Devel/automake1.9
+        Devel/automake1.10
         Devel/binutils
         Devel/gcc-core
         Devel/gcc-fortran
@@ -96,3 +96,93 @@ There you'll find instruction to comment and uncomment some lines in order to so
 --------------------------------------------------------------------------
 INSTALATION INSTRUCTIONS FOR IDEA-CMWP
 --------------------------------------------------------------------------
+Linux
+-------------------------------------------------------------------------
+A. Dependencies
+    For running IDEA-CMWP in Linux, first you have to install the software needed for running CMWP. In addition to everything that was installed with IDEA (see above), you should install the gv and zsh packages.
+    In Debian based systems this is acomplished by opening a terminal and typing:
+
+        apt-get install gv zsh
+
+Press enter afterwards.
+
+B. Install CMWP
+    1. Download the CMWP package from http://csendes.elte.hu/cmwp/
+    2. You will download a .tar.gz file. For this example we will call the file CMWP-current.tar.gz. Move the file wherever is convenient for you.
+    3. Open a terminal and go to the folder where the .tar.gz file is:
+
+        cd /path/to/the/tar_file
+
+    4. Extract the contents of the by typing:
+
+        tar -xfv CMWP-current.tar.gz
+
+    5. Go to the newly created folder and open the INSTALL file with your favorite text editor. In the file you'll find the installation instructions for CMWP.
+    6. Install the software following the instructions provided by it.
+
+C. Install IDEA-CMWP
+    1. Using the terminal, go to the folder idea-CMWP, that should be next to the idea-3.3 folder (see installation of IDEA, above)
+    2. Type:
+        
+        make
+    
+    3. A file named idea-cmwp.exe should be created.
+    4. Copy this file to the CMWP folder.
+    5. Copy the python folder to the CMWP folder.
+    
+--------------------------------------------------------------------------
+Windows
+-------------------------------------------------------------------------
+A. Dependencies
+    1. Run Cygwin setup.
+    2. In addition to everything that was installed during the installation of IDEA, add the following dependencies:
+        Graphics/gv
+        Shells/zsh
+        Libs/libX11-devel
+        Libs/libXt-devel
+
+B. Install Java
+    1. Go to https://www.java.com/ and download and install the current version of JAVA for your operating system.
+
+C. Enable the graphic interphase
+    1. Go to Start Menu, and right-click on "Equipment".
+    2. Click on "Properties". A new window will be open.
+    3. On this window click on "Advanced system configuration". Another window will open.
+    4. Go to "Advanced settings", and then click on "Enviroment variables".
+    5. This should bring up another window. In the bottom half of the screen (System variables), select the line called Path, and click "Edit"
+    6. Go to the end of the line and add this: 
+
+        ;C:\cygwin\bin;C:\cygwin\usr\local\bin;C:\Program Files\Java\jdk1.8.0_101
+
+    NOTE: You should change C:\cygwin\bin and C:\cygwin\usr\local\bin for the actual location of the Cygwin folder, which may be different depending on how did you install Cygwin.
+    NOTE2: Change C:\Program Files\Java\jdk1.8.0_101 for the path to the folder where Java was installed.
+
+    7. Click OK to save this change
+    8. Click OK to close the Environment window
+    9. Click OK to close the System properties
+
+D. Set path to Java on Linux
+    1. In the cygwin home folder, look for the file named .bash_profile (create it if necessary) and add this lines at the end of the file:
+
+        # Add java path
+        export JAVA_HOME="/cygdrive/c/Program\ Files/Java/jdk1.8.0_101/"
+        export PATH=$PATH:$JAVA_HOME/bin
+
+C. Install CMWP
+    1. Go to http://csendes.elte.hu/cmwp/ and download the CMWP installer.
+    2. You will download a .tar.gz file. For this example we will call the file CMWP-current.tar.gz. Move the file wherever is convenient for you.
+    3. Move this file to your Cygwin home folder.
+    4. Open the Cygwin Terminal and go to wherever you put the file CMWP-current.tar.gz.
+    5. Extract the file:
+
+        tar -xfv CMWP-current.tar.gz
+    6. A new folder will be created, cd into that folder.
+    7. Follow the instructions in the INSTALL file in order to install CMWP.
+
+D. Build IDEA-CMWP
+    1. While in the Cygwin terminal
+cd IDEA-CMWP
+make
+
+E. Set everything
+Copy python and idea-cmwp.exe a CMWP

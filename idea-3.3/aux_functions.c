@@ -521,7 +521,7 @@ double correction_factor(SAMPLE_INFO sample, double omega, double twotheta)
     fv = 1.0;
     if(omega < wc || omega > 180. - wc)
         fv = 1. / fabs(cos(omega*degree) * cos(twotheta*degree));
-    if(omega == wc || omega == 180- - wc)
+    if(omega == wc || omega == 180 - wc)
         fv = sqrt(pow(sample.lw0, 2) + pow(sample.lw90, 2)) / cos(twotheta*degree);
     if(omega > wc && omega < 180. - wc)
         fv = (sample.lw90 / sample.lw0) / fabs(sin(omega*degree) * cos(twotheta*degree));
