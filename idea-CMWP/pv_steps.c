@@ -202,15 +202,21 @@ void pv_step3(int exists, double ** seeds, double * errors, int seeds_size, doub
     pv.n = (*d).n; //numero de puntos experimentales
     pv.p = n_param; //variables a fitear (debe cumplir <= pv.n)
     pv.params = &d3; //parametros fijos
- 
+
+
     //inicializo el solver
     T = gsl_multifit_fdfsolver_lmsder;
     s = gsl_multifit_fdfsolver_alloc (T, (*d).n, n_param);
     gsl_multifit_fdfsolver_set (s, &pv, &x.vector);
     solver_iterator(&status, s, T);
-    //gsl_multifit_fdfsolver_jac(s, J);
-    //gsl_multifit_covar (J, 0.0, covar);
-    gsl_multifit_covar (s->J, 0.0, covar);
+    // Uncomment for GSL version previous to 2.1
+    // gsl_multifit_covar (s->J, 0.0, covar);
+    //
+    // Comment the following 3 lines if using GSL version previous to 2.1
+    gsl_matrix * J = gsl_matrix_calloc (d->n, n_param);//matriz jacobiana
+    gsl_multifit_fdfsolver_jac(s, J);
+    gsl_multifit_covar (J, 0.0, covar);
+
     chi = gsl_blas_dnrm2(s->f);
     dof = pv.n - pv.p;
     c = GSL_MAX_DBL(1, pow(chi, 2.0) / sqrt(dof));
@@ -287,9 +293,14 @@ void pv_step4(int exists, double ** seeds, double * errors, int seeds_size, doub
     s = gsl_multifit_fdfsolver_alloc (T, (*d).n, n_param);
     gsl_multifit_fdfsolver_set (s, &pv, &x.vector);
     solver_iterator(&status, s, T);
-    //gsl_multifit_fdfsolver_jac(s, J);
-    //gsl_multifit_covar (J, 0.0, covar);
-    gsl_multifit_covar (s->J, 0.0, covar);
+    // Uncomment for GSL version previous to 2.1
+    // gsl_multifit_covar (s->J, 0.0, covar);
+    //
+    // Comment the following 3 lines if using GSL version previous to 2.1
+    gsl_matrix * J = gsl_matrix_calloc (d->n, n_param);//matriz jacobiana
+    gsl_multifit_fdfsolver_jac(s, J);
+    gsl_multifit_covar (J, 0.0, covar);
+
     chi = gsl_blas_dnrm2(s->f);
     dof = pv.n - pv.p;
     c = GSL_MAX_DBL(1, pow(chi, 2.0) / sqrt(dof));
