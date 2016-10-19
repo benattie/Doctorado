@@ -39,6 +39,7 @@ class cmwp_out:
         k = 0  # contador del archivo mtex
         spr = rings.spr_i  # indice que me marca el spr
         ptrn_i = rings.pattern_i + rings.delta_pattern
+        ptrn_f = rings.pattern_f
         # tranformacion angular (gamma, omega) -> (alpha, beta)
         for omega in range(rings.omega_i, rings.omega_f + 1, rings.delta_omega):
             pattern = rings.pattern_i
@@ -65,14 +66,18 @@ class cmwp_out:
                     fp_sol.close()
 
                 # salida al archivo con las soluciones fisicas
-                fp_physsol.write("%d %8.3f %8.3f %8.1f %8.1f %8.4f %8.4f " % (k + 1, rings.dtheta[m], rings.theta[m] * 0.5, omega, pattern, alpha, beta))
+                fp_physsol.write("%d %8.3f %8.3f %8.1f %8.1f %8.4f %8.4f " % (k + 1, rings.dtheta[m], rings.dtheta[m] * 0.5, omega, pattern, alpha, beta))
                 for i in range(0, cmwp_results.physsol.shape[2]):
+                    ini_x = (rings.spr_i - rings.spr_i) / rings.delta_spr
                     x = (spr - rings.spr_i) / rings.delta_spr
+                    end_x = (rings.spr_f - rings.spr_i) / rings.delta_spr
+                    ini_y = (ptrn_i - ptrn_i) / rings.delta_pattern
                     y = (pattern - ptrn_i) / rings.delta_pattern
+                    end_y = (ptrn_f - ptrn_i) / rings.delta_pattern
                     ps = cmwp_results.physsol[x][y][i]
                     flag = return_flag()
                     if(ps == flag):
-                        smooth(cmwp_results.physsol, x, y, i, flag)
+                        smooth(cmwp_results.physsol, ini_x, x, end_x, ini_y, y, end_y, i, flag)
                         fp_physsol.write("%8.5e " % (cmwp_results.physsol[x][y][i]))
                     else:
                         fp_physsol.write("%8.5e " % (cmwp_results.physsol[x][y][i]))

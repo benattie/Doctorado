@@ -166,7 +166,7 @@ void pv_step3(int exists, double ** seeds, double * errors, int seeds_size, doub
     const gsl_multifit_fdfsolver_type * T;
     gsl_multifit_fdfsolver * s;
     gsl_multifit_function_fdf pv; //funcion a fitear
-    gsl_matrix * J = gsl_matrix_alloc (d->n, n_param);//matriz jacobiana
+    //gsl_matrix * J = gsl_matrix_alloc (d->n, n_param);//matriz jacobiana
     gsl_matrix * covar = gsl_matrix_alloc (n_param, n_param);//matriz covariante
     double * x_init = vector_double_alloc(n_param);
 
@@ -208,8 +208,9 @@ void pv_step3(int exists, double ** seeds, double * errors, int seeds_size, doub
     s = gsl_multifit_fdfsolver_alloc (T, (*d).n, n_param);
     gsl_multifit_fdfsolver_set (s, &pv, &x.vector);
     solver_iterator(&status, s, T);
-    gsl_multifit_fdfsolver_jac(s, J);
-    gsl_multifit_covar (J, 0.0, covar);
+    //gsl_multifit_fdfsolver_jac(s, J);
+    //gsl_multifit_covar (J, 0.0, covar);
+    gsl_multifit_covar (s->J, 0.0, covar);
     chi = gsl_blas_dnrm2(s->f);
     dof = pv.n - pv.p;
     c = GSL_MAX_DBL(1, pow(chi, 2.0) / sqrt(dof));
@@ -250,7 +251,7 @@ void pv_step4(int exists, double ** seeds, double * errors, int seeds_size, doub
     const gsl_multifit_fdfsolver_type * T;
     gsl_multifit_fdfsolver * s;
     gsl_multifit_function_fdf pv; //funcion a fitear
-    gsl_matrix * J = gsl_matrix_alloc (d->n, n_param);//matriz jacobiana
+    //gsl_matrix * J = gsl_matrix_alloc (d->n, n_param);//matriz jacobiana
     gsl_matrix * covar = gsl_matrix_alloc (n_param, n_param);//matriz covariante
     double * x_init = vector_double_alloc(n_param);
 
@@ -286,8 +287,9 @@ void pv_step4(int exists, double ** seeds, double * errors, int seeds_size, doub
     s = gsl_multifit_fdfsolver_alloc (T, (*d).n, n_param);
     gsl_multifit_fdfsolver_set (s, &pv, &x.vector);
     solver_iterator(&status, s, T);
-    gsl_multifit_fdfsolver_jac(s, J);
-    gsl_multifit_covar (J, 0.0, covar);
+    //gsl_multifit_fdfsolver_jac(s, J);
+    //gsl_multifit_covar (J, 0.0, covar);
+    gsl_multifit_covar (s->J, 0.0, covar);
     chi = gsl_blas_dnrm2(s->f);
     dof = pv.n - pv.p;
     c = GSL_MAX_DBL(1, pow(chi, 2.0) / sqrt(dof));
