@@ -24,7 +24,7 @@ int main(int argc, char ** argv)
     char buf_temp[buffsize], buf[buffsize], buf1[buffsize], path_out[buffsize], filename1[buffsize], path1[buffsize], inform1[buffsize], marfile[buffsize];
     char *getval = malloc(sizeof(char) * (250 + 1)), resultsf[buffsize], path_base[buffsize], base_filename[buffsize];
     static int del_gam, star_d, av_gam;
-    int a, b, i, k, n, x, y, z, count, anf_gam, ende_gam, anf_ome, ende_ome, del_ome, rv, exists;
+    int a, b, i, k, n, x, y, z, count, anf_gam, ende_gam, anf_ome, ende_ome, del_ome, rv, exists, npattern = 1;
     int BG_l, BG_r, end_d, del_d, numrings, posring_l[np], posring_r[np], ug_l[np], ug_r[np];
     int pixel_number, gamma, seeds_size, bg_size, intensity, miller[np], numphases, phase[np];
     int ** data = matrix_int_alloc(ngam, diffsize);
@@ -214,17 +214,9 @@ int main(int argc, char ** argv)
         //selecciono el archivo spr que voy a procesar
         strcpy(marfile, path1);
         strcat(marfile, filename1);
-        sprintf(buf, "%d", k);
-        if(k < 10)
-            sprintf(buf1, "000");
-        if(k >= 10 && k < 100)
-            sprintf(buf1, "00");
-        if(k >= 100)
-            sprintf(buf1, "0");
+        memset(buf1, 0, sizeof(buf1));
+        sprintf(buf1, "%04d.spr", k);
         strcat(marfile, buf1);
-        strcat(marfile, buf);
-        strcat(marfile, ".");
-        strcat(marfile, "spr");
 
         printf("\nReading data from ====>  %s\n", marfile);
         //abro el archivo spr del que voy a sacar las intensdades de los picos
@@ -295,9 +287,10 @@ int main(int argc, char ** argv)
                 //structure holding difractograms and fitting information
                 err_fit_data fit_errors = {fit_inten_err, fwhm_err, eta_err};
                 peak_shape_data shapes = {fwhm, eta};
-                peak_data difra = {numrings, bg_size, k, star_d, y + 1, del_gam, th, phase, miller, dostheta, av_pattern, bg_seed, fit_inten, &shapes, &fit_errors};
+                peak_data difra = {npattern, numrings, bg_size, k, star_d, y + 1, del_gam, th, phase, miller, dostheta, av_pattern, bg_seed, fit_inten, &shapes, &fit_errors};
                 //Int, fwhm & eta fitting
                 pv_fitting(filename1, exists, &sync_data, &difra, av_intensity, seeds);
+                npattern++;
                 exists = 1;
             }
             // if((y % del_gam) == 0) printf("Fin (%d %d)\n", k, y);

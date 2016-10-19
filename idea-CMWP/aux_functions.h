@@ -43,6 +43,7 @@ typedef struct peak_shape_data
 //datos del difractorgrama
 typedef struct peak_data
 {
+    int npattern;
     int numrings;
     int n_bg;
     int spr;
