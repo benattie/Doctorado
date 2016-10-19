@@ -199,18 +199,9 @@ int main(int argc, char ** argv)
         //selecciono el archivo spr que voy a procesar
         strcpy(marfile, path);
         strcat(marfile, filename);
-        sprintf(buf, "%d", k);
-        memset(buf1,0,sizeof(buf1));
-        if(k < 10)
-            sprintf(buf1, "0000");
-        if(k >= 10 && k < 100)
-            sprintf(buf1, "000");
-        if(k >= 100 && k < 1000)
-            sprintf(buf1, "00");
+        memset(buf1, 0, sizeof(buf1));
+        sprintf(buf1, "%04d.%s", k, inform);
         strcat(marfile, buf1);
-        strcat(marfile, buf);
-        strcat(marfile, ".");
-        strcat(marfile, inform);
 
         printf("\nReading data from <====  %s\n", marfile);
         //abro el archivo spr del que voy a sacar las intensdades de los picos

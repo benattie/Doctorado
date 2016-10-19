@@ -7,7 +7,7 @@ VL: 0.0104957
 WL: 0.0037801
 
 # Sample information
-Cilinder(c)-square(s): s
+Cilinder(c)/Rect.(r):  r
 Lenght@omega=0  (mm):  1.0
 Lenght@omega=90 (mm):  2.0
 Absorption (1/cm):     3.0

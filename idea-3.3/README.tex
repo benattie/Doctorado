@@ -14,7 +14,7 @@ B. data_info.ini
 In this file the main data must be specified, such as the path to the spr files, the number of files to be analyzed, the sample orientation repreented in each of the SPR files. The program doesn't perform a robust data reading, so the format of the text files must be respected. In the input folder there is an example for each of the input data files.
 
 C. fit_ini.dat
-This file contain the initial guess for the fitting procedure.
+This file contain the initial guess for the fitting procedure. It also allows the user to set the range in which the data will be fitted. The data range of the fitting is defined by the initial and final background points.
 
 D. IRF.dat
 Contains the coefficients for the instrumental resolution function. The software uses the Cagliotti formula for correct the measured broadening of the samples. It also contains information about the dimensions of the sample and the absortion coefficient for the thickness and volume correction.
@@ -33,7 +33,7 @@ NOTE: There is an optional paramater for idea.exe, which is the value of the thr
 
 ./idea.exe data_info.ini fit_ini.dat IRF.dat treshold
 
-Because of texture, some of the peaks may disappear from one diffraction pattern to the next, so the program first estimates the intensity of the peak by adding the intensity counts of a peak and subtracting the background. The result is the raw_int variable. The definition of the peak and the background points should be specified in the data_info.ini file for each peak (using bin number instead of the theta angle).
+Because of texture, some of the peaks may disappear from one diffraction pattern to the next, so the program first estimates the intensity of the peak by adding the intensity counts of a peak and subtracting the background. The result is the raw_int variable. The definition of the peak and the background points should be specified in the data_info.ini file for each peak (using bin number instead of the 2theta angle).
 
 If raw_int is less than threshold the peak is considered to have zero intensity and is not fitted. This number should also be specified in the data_info.ini file, but if the user set this value trough command line, the value of the threshold will be overridden in the program.
 
@@ -55,7 +55,7 @@ The software fits the whole pattern with a sum of pseudo-Voigt functions[2]:
 
 with G(x, 2\theta, FWHM) and L(x, 2\theta, FWHM) a Gaussian and a Lorentzian function, respectively. Al functions are normalized in a way the integral is 1. Therefore, the integral of pV is fit_int, has a full width at half maximum of FWHM and eta is the weight of the Lorentzian component of pV.
 
-The fitting function also takes into account the background of the measurements using a piece-wise linear approximation. Points of the pattern that are to the right of the last background point are disregarded from the fit, so you can use this as a way to select the range in which you want to fit the data.
+The fitting function also takes into account the background of the measurements using a piece-wise linear approximation. Points of the pattern that are to the left of the first background point or to the right of the last one are disregarded from the fit, so you can use this as a way to select the range in which you want to fit the data.
 
 Once the fitting is done the pair (FWHM, eta) is corrected for instrumental broadening. For this, the (FWHM, eta) values are used for obtaining the width of the Gaussian and Lorentzian function of the Voigt function[3]. This is done using the following expression:
 

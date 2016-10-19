@@ -491,16 +491,28 @@ void thickness_correction(double * H, double * eta, double twotheta, exp_data *s
     double * HL = vector_double_alloc(1);
     double degree = M_PI/180.;
     deconvolution(HG2, HL, *H, *eta);
-    wc = atan2(sync_data->sample.lw90, sync_data->sample.lw0) / degree;
     BS = sync_data->pixel * sync_data->pixel;
-    if(difra->omega < wc || difra->omega > 180. - wc)
-        t = sync_data->sample.lw0 / fabs(cos(difra->omega*degree) * cos(twotheta*degree));
 
-    if(difra->omega == wc || difra->omega == 180. - wc)
-        t = sqrt(pow(sync_data->sample.lw0, 2) + pow(sync_data->sample.lw90, 2)) / cos(twotheta*degree);
+    if(strcmp(sync_data->sample.shape, "r") != 0){
+        wc = atan2(sync_data->sample.lw90, sync_data->sample.lw0) / degree;
+        if(difra->omega < wc || difra->omega > 180. - wc)
+            t = sync_data->sample.lw0 / fabs(cos(difra->omega*degree) * cos(twotheta*degree));
 
-    if(difra->omega > wc && difra->omega < 180. - wc)
-        t = sync_data->sample.lw90 / fabs(sin(difra->omega*degree) * cos(twotheta*degree));
+        if(difra->omega == wc || difra->omega == 180. - wc)
+            t = sqrt(pow(sync_data->sample.lw0, 2) + pow(sync_data->sample.lw90, 2)) / cos(twotheta*degree);
+
+        if(difra->omega > wc && difra->omega < 180. - wc)
+            t = sync_data->sample.lw90 / fabs(sin(difra->omega*degree) * cos(twotheta*degree));
+    }
+
+    if(strcmp(sync_data->sample.shape, "c") != 0){
+        t = sync_data->sample.lw0;
+    }else{
+        printf("WARNING: not valid option in the IRF file\n");
+        printf("The allowed sample shapes are circular (c) or rectangular (r)\n");
+        printf("Disabling intensity correction\n");
+        t = 0;
+    }
 
     x1 = atan(BS / sync_data->dist + t / sync_data->dist * tan(twotheta*degree) + tan(twotheta*degree)) - twotheta*degree;
     x2 = atan(BS / sync_data->dist + tan(twotheta*degree)) - twotheta*degree;
@@ -517,16 +529,28 @@ void thickness_correction(double * H, double * eta, double twotheta, exp_data *s
 double correction_factor(SAMPLE_INFO sample, double omega, double twotheta)
 {
     double fv, fa, wc, degree = M_PI / 180.;
-    wc = atan2(sample.lw90, sample.lw0) / degree;
-    fv = 1.0;
-    if(omega < wc || omega > 180. - wc)
-        fv = 1. / fabs(cos(omega*degree) * cos(twotheta*degree));
-    if(omega == wc || omega == 180 - wc)
-        fv = sqrt(pow(sample.lw0, 2) + pow(sample.lw90, 2)) / cos(twotheta*degree);
-    if(omega > wc && omega < 180. - wc)
-        fv = (sample.lw90 / sample.lw0) / fabs(sin(omega*degree) * cos(twotheta*degree));
+    if(strcmp(sample.shape, "r") != 0){
+        wc = atan2(sample.lw90, sample.lw0) / degree;
+        fv = 1.0;
+        if(omega < wc || omega > 180. - wc)
+            fv = 1. / fabs(cos(omega*degree) * cos(twotheta*degree));
+        if(omega == wc || omega == 180 - wc)
+            fv = sqrt(pow(sample.lw0, 2) + pow(sample.lw90, 2)) / (sample.lw0 * cos(twotheta*degree));
+        if(omega > wc && omega < 180. - wc)
+            fv = (sample.lw90 / sample.lw0) / fabs(sin(omega*degree) * cos(twotheta*degree));
 
-    fa = exp(-0.1 * sample.mu * sample.lw0 * (fv - 1.)); // el 0.1 tiene que ver con el cambio de unidades
+        fa = exp(-0.1 * sample.mu * sample.lw0 * (fv - 1.)); // el 0.1 tiene que ver con el cambio de unidades
+    }
+    if(strcmp(sample.shape, "c") != 0){
+        fv = 1.0;
+        fa = 1.0;
+    }else{
+        printf("WARNING: not valid option in the IRF file\n");
+        printf("The allowed sample shapes are circular (c) or rectangular (r)\n");
+        printf("Disabling intensity correctio\n");
+        fv = 1.0;
+        fa = 1.0;
+    }
 
     return fv * fa;
 }
