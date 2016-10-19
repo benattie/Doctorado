@@ -136,20 +136,20 @@ int main(int argc, char ** argv)
         rv = fscanf(fp, "%d", &ug_l[i]); //bin de bg a la izquierda del pico
         rv = fscanf(fp, "%d", &ug_r[i]); //bin de bg a la derecha del pico
     }// End of reading the parameter file for(i=0;i<numrings;i++)
+    // close parameter file
+    fclose(fp);
+
     if(getval == NULL) 
         printf("\nWARNING (fgets): There were problems while reading %s\n", argv[1]);
     if(rv == 0 || rv == EOF) 
         printf("\nWARNING (fscanf): there were problems reading param data in %s (%d)\n", argv[1], rv);
 
-    getval = fgets(buf_temp, 2, fp); //skip line
     //Reading of intrumental width files
     if((fp_IRF = fopen(argv[3], "r")) == NULL ){
         fprintf(stderr, "Error opening file %s\n", argv[3]); exit(1);
     }
     read_IRF(fp_IRF, &ins, &sample);
     fclose(fp_IRF);
-    if(getval == NULL) 
-        printf("\nWARNING (fgets): There were problems while reading %s\n", argv[3]);
 
     //Reading of initial parameters
     if((fp_fit = fopen(argv[2], "r")) == NULL ){
@@ -163,10 +163,10 @@ int main(int argc, char ** argv)
     seeds = matrix_double_alloc(2, seeds_size);
     bg_seed = matrix_double_alloc(2, bg_size);
     getval = fgets(buf, 250, fp_fit);//skip line
-    read_file(fp_fit, seeds, seeds_size, bg_seed, bg_size);
-    //print_seeds(seeds[0], seeds_size, bg_seed, bg_size);
     if(getval == NULL) 
         printf("\nWARNING (fgets): There were problems while reading %s\n", argv[2]);
+
+    read_file(fp_fit, seeds, seeds_size, bg_seed, bg_size);
     fclose(fp_fit);
 
     //imprime en pantalla los datos relevantes de cada pico 
@@ -388,7 +388,6 @@ int main(int argc, char ** argv)
     free_double_matrix(seeds, 2);
     free_double_matrix(bg_seed, 2);
  }//End of for(Z = 1; Z <= NrSample; Z++)
- fclose(fp);
  free_r3_tensor_double(sabo_inten, 40, 500);
  free_r3_tensor_double(fit_inten, 40, 500);
  free_r3_tensor_double(fit_inten_err, 40, 500);
