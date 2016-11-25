@@ -1,5 +1,5 @@
 #!/bin/bash
-# ./make_inst_file.exe lambda theta0 eta H
+# ./make_inst_file.exe lambda theta0 H eta
 
 ./make_inst_file.exe 0.014236 1.96 0.018074 0.124226
 ./make_inst_file.exe 0.014236 2.78 0.018561 0.229061

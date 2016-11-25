@@ -7,7 +7,7 @@ function clean_pf = poleFigure_cleanup(pf, varargin)
     clean_pf = pf;
     
     %% Manual cleanup
-    if high || low || neg2max
+    if high ~= 100 || low || neg2max
         for i=1:pf.numPF
             int = clean_pf.allI{i};
             if neg2max

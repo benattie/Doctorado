@@ -9,10 +9,13 @@
 
 #define Np 20
 #define Nbins 2500
+#define MSPR 1000
+#define MPTRN 400
+#define MSTR 1024
 
 int main(int argc, char ** argv)
 {
- char *getval = malloc(sizeof(char) * (1024 + 1));
+ char *getval = malloc(sizeof(char) * (MSTR + 1));
  int rv = 0;
  int Z, a, b, i, j, k, m, n, x, y, z, count, anf_gam, ende_gam, del_gam, anf_ome, ende_ome, del_ome;
  int BG_l, BG_r;
@@ -25,19 +28,19 @@ int main(int argc, char ** argv)
  double data1[Nbins], BG_m, intens[512][Np];
  double twotheta[Np], neu_ome, neu_gam, alpha, beta, th;
  double pixel, dist;
- double ***sabo_inten = r3_tensor_double_alloc(40, 500, Np);
- double ***fit_inten = r3_tensor_double_alloc(40, 500, Np), ***fit_inten_err = r3_tensor_double_alloc(40, 500, Np);
- double ***pos = r3_tensor_double_alloc(40, 500, Np), ***pos_err = r3_tensor_double_alloc(40, 500, Np);
- double ***fwhm = r3_tensor_double_alloc(40, 500, Np), ***fwhm_err = r3_tensor_double_alloc(40, 500, Np);
- double ***eta = r3_tensor_double_alloc(40, 500, Np), ***eta_err = r3_tensor_double_alloc(40, 500, Np);
- double ***fwhm_ins = r3_tensor_double_alloc(40, 500, Np), ***eta_ins = r3_tensor_double_alloc(40, 500, Np);
- double ***breadth = r3_tensor_double_alloc(40, 500, Np), ***breadth_ins = r3_tensor_double_alloc(40, 500, Np);
- double ***breadth_err = r3_tensor_double_alloc(40, 500, Np);
+ double ***sabo_inten = r3_tensor_double_alloc(MSPR, MPTRN, Np);
+ double ***fit_inten = r3_tensor_double_alloc(MSPR, MPTRN, Np), ***fit_inten_err = r3_tensor_double_alloc(MSPR, MPTRN, Np);
+ double ***pos = r3_tensor_double_alloc(MSPR, MPTRN, Np), ***pos_err = r3_tensor_double_alloc(MSPR, MPTRN, Np);
+ double ***fwhm = r3_tensor_double_alloc(MSPR, MPTRN, Np), ***fwhm_err = r3_tensor_double_alloc(MSPR, MPTRN, Np);
+ double ***eta = r3_tensor_double_alloc(MSPR, MPTRN, Np), ***eta_err = r3_tensor_double_alloc(MSPR, MPTRN, Np);
+ double ***fwhm_ins = r3_tensor_double_alloc(MSPR, MPTRN, Np), ***eta_ins = r3_tensor_double_alloc(MSPR, MPTRN, Np);
+ double ***breadth = r3_tensor_double_alloc(MSPR, MPTRN, Np), ***breadth_ins = r3_tensor_double_alloc(MSPR, MPTRN, Np);
+ double ***breadth_err = r3_tensor_double_alloc(MSPR, MPTRN, Np);
  double ** seeds, ** bg_seed;
- char buf_temp[1024], buf[1024], buf1[1024];
- char path_out[256], path [256], filename[256], inform[16], printfit[16], widthcorr[16];
- char alldatafile[256];
- char marfile[256];
+ char buf_temp[MSTR], buf[MSTR], buf1[MSTR];
+ char path_out[MSTR], path [MSTR], filename[MSTR], inform[16], printfit[16], widthcorr[16];
+ char alldatafile[MSTR];
+ char marfile[MSTR];
  FILE *fp, *fp1, *fp_IRF, *fp_fit, *fp_all;
  IRF ins;
  SAMPLE_INFO sample;
@@ -117,10 +120,10 @@ int main(int argc, char ** argv)
     rv = fscanf(fp, "%lf", &th); getval = fgets(buf_temp, 2, fp);
     // pregunto si imprimo los archivos con los ajustes
     getval = fgets(buf_temp, 22, fp);
-    rv = fscanf(fp, "%s", printfit); getval = fgets(buf_temp, 2, fp);
+    rv = fscanf(fp, "%1s", printfit); getval = fgets(buf_temp, 2, fp);
     // ask wether I should take into account the thickness of the sample
     getval = fgets(buf_temp, 22, fp);
-    rv = fscanf(fp, "%s", widthcorr); getval = fgets(buf_temp, 2, fp);
+    rv = fscanf(fp, "%1s", widthcorr); getval = fgets(buf_temp, 2, fp);
     //skip lines
     getval = fgets(buf_temp, 20, fp); getval = fgets(buf_temp, 20, fp);
     //numero de picos a analizar 
@@ -321,7 +324,7 @@ int main(int argc, char ** argv)
         fprintf(fp_all, "raw_int     fit_int     err         FWHM        err         eta         err         ");
         fprintf(fp_all, "FWHM_corr   err         eta_corr    err\n");
         
-        k = 0;// Pole figure number
+        k = 1;// Pole figure number
         n = star_d; // spr index
         // Angular transformation (gamma, omega)-->(alpha,beta)
         for(i = anf_ome; i <= ende_ome; i += del_ome){ //itero sobre \omega
@@ -357,7 +360,7 @@ int main(int argc, char ** argv)
                     }
                 }             
                 //salida del archivo con todos los datos
-                fprintf(fp_all, "%5d\t%8.4lf\t%8.4lf\t", k + 1, pos[n][j + del_gam][m], pos_err[n][j + del_gam][m]);
+                fprintf(fp_all, "%5d\t%8.4lf\t%8.4lf\t", k, pos[n][j + del_gam][m], pos_err[n][j + del_gam][m]);
                 fprintf(fp_all, "%8.2f\t%8.2f\t", (float)(i), (float)(j));
                 fprintf(fp_all, "%8.4lf\t%8.4lf\t%8.5lf\t", alpha, beta, sabo_inten[n][j + del_gam][m]);
                 fprintf(fp_all, "%8.5lf\t%8.5lf\t", fit_inten[n][j + del_gam][m], fit_inten_err[n][j + del_gam][m]);
@@ -379,20 +382,20 @@ int main(int argc, char ** argv)
     free_double_matrix(seeds, 2);
     free_double_matrix(bg_seed, 2);
  }//End of for(Z = 1; Z <= NrSample; Z++)
- free_r3_tensor_double(sabo_inten, 40, 500);
- free_r3_tensor_double(fit_inten, 40, 500);
- free_r3_tensor_double(fit_inten_err, 40, 500);
- free_r3_tensor_double(pos, 40, 500);
- free_r3_tensor_double(pos_err, 40, 500);
- free_r3_tensor_double(fwhm, 40, 500);
- free_r3_tensor_double(fwhm_ins, 40, 500);
- free_r3_tensor_double(fwhm_err, 40, 500);
- free_r3_tensor_double(eta, 40, 500);
- free_r3_tensor_double(eta_ins, 40, 500);
- free_r3_tensor_double(eta_err, 40, 500);
- free_r3_tensor_double(breadth, 40, 500);
- free_r3_tensor_double(breadth_ins, 40, 500);
- free_r3_tensor_double(breadth_err, 40, 500);
+ free_r3_tensor_double(sabo_inten, MSPR, MPTRN);
+ free_r3_tensor_double(fit_inten, MSPR, MPTRN);
+ free_r3_tensor_double(fit_inten_err, MSPR, MPTRN);
+ free_r3_tensor_double(pos, MSPR, MPTRN);
+ free_r3_tensor_double(pos_err, MSPR, MPTRN);
+ free_r3_tensor_double(fwhm, MSPR, MPTRN);
+ free_r3_tensor_double(fwhm_ins, MSPR, MPTRN);
+ free_r3_tensor_double(fwhm_err, MSPR, MPTRN);
+ free_r3_tensor_double(eta, MSPR, MPTRN);
+ free_r3_tensor_double(eta_ins, MSPR, MPTRN);
+ free_r3_tensor_double(eta_err, MSPR, MPTRN);
+ free_r3_tensor_double(breadth, MSPR, MPTRN);
+ free_r3_tensor_double(breadth_ins, MSPR, MPTRN);
+ free_r3_tensor_double(breadth_err, MSPR, MPTRN);
  printf("\nSólo un sujeto consciente de las fuerzas sociales que guían su práctica puede aspirar a controlar su destino\n");
  return 0;
 } //End of Main()
