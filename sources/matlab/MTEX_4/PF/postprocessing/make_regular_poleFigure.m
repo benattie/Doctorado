@@ -1,4 +1,4 @@
-function pf_reg = make_regular_poleFigure(pf, n_polar, n_azi, method)
+function pf_reg = make_regular_poleFigure(pf, method)
 %% Make pole figure in a regular grid from a pole figure in an irregular one
 % Uses the griddatan function to create a pole figure in a regular grid
 % from a pole figure that is in a irregular one.
@@ -13,7 +13,9 @@ function pf_reg = make_regular_poleFigure(pf, n_polar, n_azi, method)
 %% Output
 % pf_reg - pole figure in a regular grid
     % define regular grid
-    S2G = regularS2Grid('points',[n_azi, n_polar], 'antipodal');
+    
+    S2G = regularS2Grid('rho',linspace(0,2*pi,72),'theta',linspace(5*degree,90*degree,18), 'antipodal');
+%     S2G = regularS2Grid('points',[n_azi, n_polar], 'antipodal');
     S2G = reshape(S2G, length(S2G), 1);
     % get the coordinates of the point in the regular grid
     Xq = [S2G.x S2G.y S2G.z];
